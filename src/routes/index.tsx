@@ -73,6 +73,7 @@ function QuickEstimate() {
   const [showResult, setShowResult] = useState(false);
   const [loadingText, setLoadingText] = useState("");
   const [estimate, setEstimate] = useState({ cost: 0, range: "", confidence: 0 });
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const projectTypes = [
     { id: "roof", icon: Home, label: "Roof", color: "bg-blue-50 text-blue-600 border-blue-200" },
@@ -82,37 +83,42 @@ function QuickEstimate() {
   ];
 
   const loadingSteps = [
-    "Checking local labor rates...",
-    "Analyzing material costs...",
-    "Reviewing permit requirements...",
-    "Calculating your estimate...",
+    "Checking local pricing",
+    "Calculating labor costs",
+    "Applying regional adjustments",
+    "Estimating permits",
   ];
 
   const calculateEstimate = () => {
     if (!zipCode || !houseSize) return;
     setIsCalculating(true);
     setShowResult(false);
+    setCompletedSteps([]);
     
     let step = 0;
     const interval = setInterval(() => {
       if (step < loadingSteps.length) {
         setLoadingText(loadingSteps[step]);
+        setCompletedSteps(prev => [...prev, step]);
         step++;
       } else {
         clearInterval(interval);
-        const baseCost = projectType === "roof" ? 8 : projectType === "kitchen" ? 25 : projectType === "bathroom" ? 8 : 4;
-        const sizeMultiplier = parseInt(houseSize) / 2000;
-        const randomVariance = 0.9 + Math.random() * 0.2;
-        const cost = Math.round(baseCost * 1000 * sizeMultiplier * randomVariance);
-        setEstimate({
-          cost,
-          range: `$${Math.round(cost * 0.9).toLocaleString()} – $${Math.round(cost * 1.1).toLocaleString()}`,
-          confidence: Math.round(85 + Math.random() * 10),
-        });
-        setIsCalculating(false);
-        setShowResult(true);
+        setCompletedSteps(prev => [...prev, step]);
+        setTimeout(() => {
+          const baseCost = projectType === "roof" ? 8 : projectType === "kitchen" ? 25 : projectType === "bathroom" ? 8 : 4;
+          const sizeMultiplier = parseInt(houseSize) / 2000;
+          const randomVariance = 0.9 + Math.random() * 0.2;
+          const cost = Math.round(baseCost * 1000 * sizeMultiplier * randomVariance);
+          setEstimate({
+            cost,
+            range: `$${Math.round(cost * 0.9).toLocaleString()} – $${Math.round(cost * 1.1).toLocaleString()}`,
+            confidence: Math.round(85 + Math.random() * 10),
+          });
+          setIsCalculating(false);
+          setShowResult(true);
+        }, 300);
       }
-    }, 600);
+    }, 700);
   };
 
   return (
@@ -180,20 +186,47 @@ function QuickEstimate() {
 
             {/* CTA */}
             <div className="mt-8 sticky bottom-4 md:static">
-              <button 
-                onClick={calculateEstimate}
-                disabled={!zipCode || !houseSize || isCalculating}
-                className="w-full rounded-xl bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isCalculating ? loadingText : "Get My Free Estimate"}
-              </button>
-              <div className="mt-3 flex items-center justify-center gap-3 text-[10px] text-muted-foreground">
-                <span>No signup</span>
-                <span>•</span>
-                <span>Free</span>
-                <span>•</span>
-                <span>30 seconds</span>
-              </div>
+              {isCalculating ? (
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+                    <span className="text-sm font-medium text-ink">Calculating your estimate...</span>
+                  </div>
+                  <div className="space-y-3">
+                    {loadingSteps.map((step, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                          completedSteps.includes(i) 
+                            ? 'bg-accent text-accent-foreground' 
+                            : 'border border-border'
+                        }`}>
+                          {completedSteps.includes(i) && <Check className="h-3 w-3" />}
+                        </div>
+                        <span className={`text-xs transition-colors ${
+                          completedSteps.includes(i) ? 'text-ink' : 'text-muted-foreground'
+                        }`}>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <button 
+                    onClick={calculateEstimate}
+                    disabled={!zipCode || !houseSize}
+                    className="w-full rounded-xl bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Get My Free Estimate
+                  </button>
+                  <div className="mt-3 flex items-center justify-center gap-3 text-[10px] text-muted-foreground">
+                    <span>No signup</span>
+                    <span>•</span>
+                    <span>Free</span>
+                    <span>•</span>
+                    <span>30 seconds</span>
+                  </div>
+                </>
+              )}
             </div>
           </>
         ) : (
@@ -302,17 +335,39 @@ function QuickEstimate() {
 function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   
-  const allProjects = [
-    "Roof Replacement", "Kitchen Remodel", "Bathroom Remodel", 
-    "HVAC Replacement", "Window Replacement", "Solar Installation",
-    "Deck Construction", "Garage Door", "Plumbing", "Electrical",
-    "Flooring", "Painting", "Landscaping", "Fencing", "Insulation"
+  const projectData = [
+    { name: "Roof Replacement", avgCost: "$16,650", duration: "3-5 Days", popularity: 95, synonyms: ["new roof", "roofing", "re-roof", "roof repair"], img: projRoof },
+    { name: "Kitchen Remodel", avgCost: "$50,000", duration: "4-8 Weeks", popularity: 90, synonyms: ["kitchen renovation", "kitchen upgrade", "new kitchen"], img: projKitchen },
+    { name: "Bathroom Remodel", avgCost: "$19,000", duration: "2-4 Weeks", popularity: 85, synonyms: ["bath renovation", "bathroom upgrade", "new bathroom"], img: projBathroom },
+    { name: "HVAC Replacement", avgCost: "$8,250", duration: "1-2 Days", popularity: 80, synonyms: ["heating", "cooling", "air conditioning", "furnace", "AC"], img: projHvac },
+    { name: "Window Replacement", avgCost: "$12,000", duration: "1-2 Days", popularity: 70, synonyms: ["new windows", "window install", "double pane"], img: projRoof },
+    { name: "Solar Installation", avgCost: "$25,000", duration: "2-3 Days", popularity: 65, synonyms: ["solar panels", "photovoltaic", "PV"], img: projRoof },
+    { name: "Deck Construction", avgCost: "$8,000", duration: "3-5 Days", popularity: 60, synonyms: ["patio", "deck build", "outdoor deck"], img: projRoof },
+    { name: "Garage Door", avgCost: "$2,500", duration: "1 Day", popularity: 55, synonyms: ["garage install", "new garage"], img: projRoof },
+    { name: "Flooring", avgCost: "$5,000", duration: "2-3 Days", popularity: 50, synonyms: ["hardwood", "laminate", "tile floor", "vinyl"], img: projRoof },
+    { name: "Painting", avgCost: "$3,500", duration: "2-4 Days", popularity: 45, synonyms: ["house painting", "interior paint", "exterior paint"], img: projRoof },
   ];
-  
+
+  const popularProjects = projectData.filter(p => p.popularity >= 80).slice(0, 4);
+
+  const fuzzyMatch = (query: string, project: typeof projectData[0]) => {
+    const q = query.toLowerCase();
+    const nameMatch = project.name.toLowerCase().includes(q);
+    const synonymMatch = project.synonyms.some(s => s.toLowerCase().includes(q));
+    return nameMatch || synonymMatch;
+  };
+
   const filteredProjects = searchQuery.length > 0 
-    ? allProjects.filter(p => p.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 6)
+    ? projectData.filter(p => fuzzyMatch(searchQuery, p)).sort((a, b) => b.popularity - a.popularity).slice(0, 6)
     : [];
+
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    return text.replace(regex, '<mark class="bg-accent/20 text-ink rounded px-0.5">$1</mark>');
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -367,9 +422,9 @@ function Landing() {
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
-                        setShowSuggestions(e.target.value.length > 0);
+                        setShowSuggestions(true);
                       }}
-                      onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+                      onFocus={() => setShowSuggestions(true)}
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                       placeholder="What project are you planning?"
                       className="w-full bg-transparent text-base sm:text-lg outline-none placeholder:text-muted-foreground/60 min-w-0"
@@ -382,25 +437,66 @@ function Landing() {
                 </div>
               </div>
               
-              {showSuggestions && filteredProjects.length > 0 && (
+              {showSuggestions && (
                 <div className="absolute top-full left-0 right-0 mt-3 rounded-2xl bg-card border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-2">
-                    <div className="px-3 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Suggested Projects</div>
-                    {filteredProjects.map((project) => (
-                      <button
-                        key={project}
-                        className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-accent/5 rounded-xl transition-colors group/item"
-                        onMouseDown={() => {
-                          setSearchQuery(project);
-                          setShowSuggestions(false);
-                        }}
-                      >
-                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted group-hover/item:bg-accent/10 transition-colors">
-                          <Search className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                  <div className="p-3">
+                    {searchQuery.length === 0 ? (
+                      /* Popular Projects - No Query */
+                      <>
+                        <div className="px-2 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Popular Projects</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {popularProjects.map((project) => (
+                            <button
+                              key={project.name}
+                              className="flex items-center gap-3 p-3 text-left hover:bg-accent/5 rounded-xl transition-all group/item hover:shadow-md"
+                              onMouseDown={() => {
+                                setSelectedProject(project.name);
+                                setSearchQuery(project.name);
+                                setShowSuggestions(false);
+                              }}
+                            >
+                              <img src={project.img} alt={project.name} className="w-12 h-12 rounded-lg object-cover" />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-ink truncate group-hover/item:text-accent transition-colors">{project.name}</div>
+                                <div className="text-[10px] text-muted-foreground">{project.avgCost} • {project.duration}</div>
+                              </div>
+                            </button>
+                          ))}
                         </div>
-                        <span className="text-sm text-ink font-medium">{project}</span>
-                      </button>
-                    ))}
+                      </>
+                    ) : filteredProjects.length > 0 ? (
+                      /* Search Results */
+                      <>
+                        <div className="px-2 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Projects Matching "{searchQuery}"</div>
+                        <div className="space-y-1">
+                          {filteredProjects.map((project) => (
+                            <button
+                              key={project.name}
+                              className="w-full flex items-center gap-3 p-3 text-left hover:bg-accent/5 rounded-xl transition-all group/item hover:shadow-md"
+                              onMouseDown={() => {
+                                setSelectedProject(project.name);
+                                setSearchQuery(project.name);
+                                setShowSuggestions(false);
+                              }}
+                            >
+                              <img src={project.img} alt={project.name} className="w-12 h-12 rounded-lg object-cover" />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-ink truncate" dangerouslySetInnerHTML={{ __html: highlightMatch(project.name, searchQuery) }} />
+                                <div className="text-[10px] text-muted-foreground">{project.avgCost} • {project.duration}</div>
+                              </div>
+                              <span className="text-[10px] text-accent font-medium">Estimate →</span>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      /* No Results */
+                      <div className="py-8 text-center">
+                        <Search className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                        <div className="text-sm text-muted-foreground">No projects found for "{searchQuery}"</div>
+                        <div className="text-[10px] text-muted-foreground mt-1">Try "roof", "kitchen", or "HVAC"</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
