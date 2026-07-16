@@ -178,7 +178,7 @@ function Landing() {
                 { icon: Shield, k: "Regional Pricing Data", v: "Accurate local costs" },
               ].map((s) => (
                 <div key={s.v} className="flex items-start gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-accent-foreground">
+                  <span className="grid h-9 w-9 place-items-center rounded-lg text-primary">
                     <s.icon className="h-4 w-4" />
                   </span>
                   <div>
@@ -344,7 +344,7 @@ function Landing() {
           <div className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-2 relative">
             {steps.map((s, i) => (
               <div key={s.title} className="relative text-center px-2">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl bg-accent text-primary">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl text-primary">
                   <s.icon className="h-6 w-6" />
                 </div>
                 <h3 className="mt-4 font-display text-base font-bold text-ink">{s.title}</h3>
@@ -482,7 +482,7 @@ function Landing() {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {trust.map((t) => (
               <div key={t.title} className="flex gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-accent text-primary">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-primary">
                   <t.icon className="h-5 w-5" />
                 </span>
                 <div>
