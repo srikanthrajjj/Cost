@@ -69,7 +69,7 @@ const comparisons = [
 function Logo() {
   return (
     <a href="#" className="flex items-center gap-2">
-      <img src="/logo.svg" alt="Logo" className="h-16 w-16" />
+      <img src="/logo.svg" alt="Logo" style={{ height: "380px", width: "auto" }} />
     </a>
   );
 }
