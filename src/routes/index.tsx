@@ -68,11 +68,8 @@ const comparisons = [
 
 function Logo() {
   return (
-    <a href="#" className="flex items-center gap-2 font-display font-bold text-lg text-ink">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-        <Home className="h-4 w-4" />
-      </span>
-      BuildIntel
+    <a href="#" className="flex items-center gap-2">
+      <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
     </a>
   );
 }
