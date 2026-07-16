@@ -524,28 +524,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* TRUST BAR */}
-      <section className="mt-8 bg-ink text-white">
-        <div className="container-x py-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="text-sm font-semibold">Trusted by homeowners nationwide</div>
-              <div className="flex items-center gap-1 text-xs text-white/70">
-                {[1,2,3,4,5].map((i) => <Star key={i} color="white" className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />)}
-                <span className="ml-1">4.8/5 from 12,400+ reviews</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-white/80 font-display font-semibold">
-            <span>Google</span>
-            <span className="inline-flex items-center gap-1"><Star color="white" className="h-4 w-4" /> Trustpilot</span>
-            <span>facebook</span>
-            <span>BBB</span>
-            <span>CR Consumer Reports</span>
-          </div>
-        </div>
-      </section>
-
       {/* NEWSLETTER */}
       <section className="container-x py-12">
         <div className="rounded-2xl border border-border bg-card p-6 md:p-8 grid md:grid-cols-[auto_1fr_auto] gap-8 items-center">
@@ -602,15 +580,15 @@ function Landing() {
               { q: "How do I check if a contractor is licensed?", a: "Verify licenses through your state's contractor licensing board website. Check for valid insurance, bonding, and any complaints or violations. Ask for proof of credentials before signing any contracts." },
               { q: "What should be included in a contractor quote?", a: "A complete quote should include materials, labor costs, timeline, payment schedule, warranty information, permit responsibilities, cleanup details, and scope of work specifications." },
             ].map((faq, i) => (
-              <details key={i} className="group rounded-xl border border-border bg-card overflow-hidden">
-                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/50 transition">
+              <div key={i} className="group rounded-xl border border-border bg-card overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/50 transition">
                   <span className="font-display text-sm font-semibold text-ink pr-4">{faq.q}</span>
-                  <span className="shrink-0 ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-accent text-accent-foreground text-xs group-open:rotate-45 transition-transform">+</span>
-                </summary>
-                <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                  <span className="shrink-0 ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-accent text-accent-foreground text-xs group-hover:rotate-45 transition-transform">+</span>
+                </div>
+                <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed max-h-0 group-hover:max-h-40 overflow-hidden transition-all duration-300">
                   {faq.a}
                 </div>
-              </details>
+              </div>
             ))}
           </div>
         </div>
