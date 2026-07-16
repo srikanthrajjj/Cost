@@ -426,9 +426,10 @@ function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="container-x pt-10 md:pt-16 pb-16 bg-white">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          <div>
+      <section className="pt-10 md:pt-16 pb-16 bg-white overflow-hidden">
+        <div className="container-x">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
               <Check color="white" className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
             </span>
@@ -545,119 +546,13 @@ function Landing() {
               ))}
             </div>
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
-              {[
-                { icon: MapPin, k: "Covers all 50 States", v: "Nationwide pricing data" },
-                { icon: TrendingUp, k: "Updated Monthly", v: "Latest market trends" },
-                { icon: Shield, k: "Regional Pricing Data", v: "Accurate local costs" },
-              ].map((s) => (
-                <div key={s.v} className="flex items-start gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg text-primary">
-                    <s.icon className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <div className="text-sm font-semibold text-ink">{s.k}</div>
-                    <div className="text-xs text-muted-foreground">{s.v}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Hero visual */}
-          <div className="relative hidden lg:block">
-            <div className="relative overflow-hidden rounded-2xl">
-              <img src="/home.png" alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[616px] object-cover" />
-              
-              {/* Hotspot markers */}
-              <div className="absolute top-[15%] left-[50%] group cursor-pointer">
-                <div className="relative">
-                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
-                  <div className="w-3 h-3 rounded-full bg-accent relative" />
-                </div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  Roof
-                </div>
-              </div>
-              
-              <div className="absolute top-[45%] left-[25%] group cursor-pointer">
-                <div className="relative">
-                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
-                  <div className="w-3 h-3 rounded-full bg-accent relative" />
-                </div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  Windows
-                </div>
-              </div>
-              
-              <div className="absolute bottom-[25%] left-[20%] group cursor-pointer">
-                <div className="relative">
-                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
-                  <div className="w-3 h-3 rounded-full bg-accent relative" />
-                </div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  HVAC
-                </div>
-              </div>
-              
-              <div className="absolute top-[20%] right-[20%] group cursor-pointer">
-                <div className="relative">
-                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
-                  <div className="w-3 h-3 rounded-full bg-accent relative" />
-                </div>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  Solar
-                </div>
-              </div>
-            </div>
-
-            {/* Cost card */}
-            <div className="hidden sm:block absolute -top-4 right-4 md:right-6 w-64 rounded-xl bg-card p-4 shadow-xl border border-border">
-              <div className="text-xs text-muted-foreground">Estimated Project Cost</div>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="font-display text-3xl font-bold text-ink">$23,450</span>
-                <span className="text-xs text-muted-foreground">+/- 8%</span>
-              </div>
-              <div className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-success">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" /> High Confidence
-              </div>
-              <div className="mt-1 text-[10px] text-muted-foreground">Based on 1,200+ recent projects</div>
-              <div className="mt-1 text-[10px] text-primary font-medium">Updated this month</div>
-              <div className="mt-2 h-14 -mx-1">
-                <ResponsiveContainer>
-                  <AreaChart data={trend}>
-                    <defs>
-                      <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="oklch(0.68 0.17 155)" stopOpacity={0.4} />
-                        <stop offset="100%" stopColor="oklch(0.68 0.17 155)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <Area type="monotone" dataKey="v" stroke="oklch(0.68 0.17 155)" strokeWidth={2} fill="url(#g1)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Data-driven cards */}
-            <div className="hidden md:block absolute top-32 left-4 md:left-0 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
-              <div className="text-xs text-muted-foreground">Avg. Cost in Your Area</div>
-              <div className="mt-1 font-display text-xl font-bold text-ink">$21,800</div>
-              <div className="mt-1 flex items-center gap-1 text-xs text-success">
-                <TrendingUp className="h-3 w-3" /> 12% lower than national avg
-              </div>
-              <div className="mt-2 text-[10px] text-muted-foreground">Source: Local contractor data</div>
-            </div>
-
-            {/* ROI card */}
-            <div className="hidden sm:block absolute -bottom-4 right-6 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
-              <div className="text-xs text-muted-foreground">ROI for This Project</div>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="font-display text-2xl font-bold text-ink">71%</span>
-                <span className="text-xs text-success font-medium">High Return</span>
-              </div>
-              <div className="mt-1 text-[10px] text-muted-foreground">Based on 1,200+ recent projects</div>
-            </div>
+          <div className="hidden lg:block absolute right-0 top-0 h-full w-[55vw]">
+            <img src="/home.png" alt="Modern home with lit windows at dusk" className="w-full h-full object-cover" />
           </div>
+        </div>
         </div>
       </section>
 
