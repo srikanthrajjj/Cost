@@ -426,7 +426,7 @@ function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="container-x pt-10 md:pt-16 pb-16">
+      <section className="container-x pt-10 md:pt-16 pb-16 bg-white">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
@@ -570,7 +570,7 @@ function Landing() {
 
           {/* Hero visual */}
           <div className="relative hidden lg:block">
-            <div className="relative overflow-hidden rounded-2xl border border-border">
+            <div className="relative overflow-hidden rounded-2xl">
               <img src="/home.png" alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[460px] object-cover" />
               
               {/* Hotspot markers */}
