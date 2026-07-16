@@ -105,15 +105,15 @@ function Landing() {
               <Check color="white" className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
             </span>
             <h1 className="mt-5 font-display text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
-              Plan your next home project with confidence.
+              Know what your home project should really cost.
             </h1>
             <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-lg">
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
             </p>
 
-            <div className="mt-7 flex items-stretch gap-2 rounded-xl border border-border bg-card p-2 shadow-sm max-w-xl">
+            <div className="mt-7 flex items-stretch gap-2 rounded-xl border border-border bg-card p-2 shadow-sm max-w-xl h-16">
               <div className="flex flex-1 items-center gap-2 px-3">
-                <Search color="white" className="h-4 w-4 text-muted-foreground" />
+                <Search color="white" className="h-5 w-5 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search any project (e.g. roof replacement, kitchen remodel)"
