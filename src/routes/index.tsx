@@ -196,6 +196,47 @@ function Landing() {
           <div className="relative">
             <div className="relative overflow-hidden rounded-2xl border border-border shadow-lg">
               <img src={heroHome} alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[460px] object-cover" />
+              
+              {/* Hotspot markers */}
+              <div className="absolute top-[15%] left-[50%] group cursor-pointer">
+                <div className="relative">
+                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
+                  <div className="w-3 h-3 rounded-full bg-accent relative" />
+                </div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Roof
+                </div>
+              </div>
+              
+              <div className="absolute top-[45%] left-[25%] group cursor-pointer">
+                <div className="relative">
+                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
+                  <div className="w-3 h-3 rounded-full bg-accent relative" />
+                </div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Windows
+                </div>
+              </div>
+              
+              <div className="absolute bottom-[25%] left-[20%] group cursor-pointer">
+                <div className="relative">
+                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
+                  <div className="w-3 h-3 rounded-full bg-accent relative" />
+                </div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  HVAC
+                </div>
+              </div>
+              
+              <div className="absolute top-[20%] right-[20%] group cursor-pointer">
+                <div className="relative">
+                  <div className="w-3 h-3 rounded-full bg-accent/80 animate-ping absolute" />
+                  <div className="w-3 h-3 rounded-full bg-accent relative" />
+                </div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-[10px] font-medium text-ink shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Solar
+                </div>
+              </div>
             </div>
 
             {/* Cost card */}
@@ -209,6 +250,7 @@ function Landing() {
                 <span className="h-1.5 w-1.5 rounded-full bg-success" /> High Confidence
               </div>
               <div className="mt-1 text-[10px] text-muted-foreground">Based on 1,200+ recent projects</div>
+              <div className="mt-1 text-[10px] text-primary font-medium">Updated this month</div>
               <div className="mt-2 h-14 -mx-1">
                 <ResponsiveContainer>
                   <AreaChart data={trend}>
