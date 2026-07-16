@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Search, Home, ChefHat, Bath,
   Calculator, GitCompare, Shield, MapPin, Sparkles, Lock,
@@ -72,6 +73,20 @@ function Logo() {
 }
 
 function Landing() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  const allProjects = [
+    "Roof Replacement", "Kitchen Remodel", "Bathroom Remodel", 
+    "HVAC Replacement", "Window Replacement", "Solar Installation",
+    "Deck Construction", "Garage Door", "Plumbing", "Electrical",
+    "Flooring", "Painting", "Landscaping", "Fencing", "Insulation"
+  ];
+  
+  const filteredProjects = searchQuery.length > 0 
+    ? allProjects.filter(p => p.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 6)
+    : [];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
@@ -111,20 +126,45 @@ function Landing() {
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
             </p>
 
-            <div className="mt-7 relative rounded-xl bg-card shadow-lg shadow-primary/20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background max-w-xl h-16 animate-pulse-glow">
-              <div className="flex items-stretch gap-2 h-full">
+            <div className="mt-7 relative max-w-xl">
+              <div className="flex items-stretch gap-2 rounded-xl bg-card shadow-lg shadow-primary/20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background h-16">
                 <div className="flex flex-1 items-center gap-2 px-4">
                   <Search color="white" className="h-5 w-5 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Search any project (e.g. roof replacement, kitchen remodel)"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(e.target.value.length > 0);
+                    }}
+                    onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    placeholder="What project are you planning?"
                     className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/80"
                   />
                 </div>
-                <button className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                <button className="rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90">
                   Search
                 </button>
               </div>
+              
+              {showSuggestions && filteredProjects.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 rounded-xl bg-card border border-border shadow-lg z-50 overflow-hidden">
+                  {filteredProjects.map((project) => (
+                    <button
+                      key={project}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted transition-colors"
+                      onMouseDown={() => {
+                        setSearchQuery(project);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <Search className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-ink">{project}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <span className="text-muted-foreground">Popular:</span>
@@ -168,6 +208,7 @@ function Landing() {
               <div className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-success">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" /> High Confidence
               </div>
+              <div className="mt-1 text-[10px] text-muted-foreground">Based on 1,200+ recent projects</div>
               <div className="mt-2 h-14 -mx-1">
                 <ResponsiveContainer>
                   <AreaChart data={trend}>
@@ -183,30 +224,24 @@ function Landing() {
               </div>
             </div>
 
-            {/* Timeline card */}
-            <div className="absolute top-32 left-4 md:left-0 w-44 rounded-xl bg-card p-4 shadow-xl border border-border">
-              <div className="text-xs text-muted-foreground">Project Timeline</div>
-              <div className="mt-1 font-display text-xl font-bold text-ink">3 – 5 Weeks</div>
-              <div className="mt-1 text-xs text-muted-foreground">Start to Finish</div>
+            {/* Data-driven cards */}
+            <div className="absolute top-32 left-4 md:left-0 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
+              <div className="text-xs text-muted-foreground">Avg. Cost in Your Area</div>
+              <div className="mt-1 font-display text-xl font-bold text-ink">$21,800</div>
+              <div className="mt-1 flex items-center gap-1 text-xs text-success">
+                <TrendingUp className="h-3 w-3" /> 12% lower than national avg
+              </div>
+              <div className="mt-2 text-[10px] text-muted-foreground">Source: Local contractor data</div>
             </div>
 
             {/* ROI card */}
-            <div className="absolute -bottom-4 right-6 w-48 rounded-xl bg-card p-3 shadow-xl border border-border flex items-center gap-3">
-              <div className="relative h-14 w-14">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={[{v:71},{v:29}]} dataKey="v" innerRadius={18} outerRadius={26} startAngle={90} endAngle={-270}>
-                      <Cell fill="oklch(0.68 0.17 155)" />
-                      <Cell fill="oklch(0.92 0.008 255)" />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+            <div className="absolute -bottom-4 right-6 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
+              <div className="text-xs text-muted-foreground">ROI for This Project</div>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="font-display text-2xl font-bold text-ink">71%</span>
+                <span className="text-xs text-success font-medium">High Return</span>
               </div>
-              <div>
-                <div className="text-xs text-muted-foreground">ROI Potential</div>
-                <div className="font-display text-lg font-bold text-ink">71%</div>
-                <div className="text-[10px] font-medium text-success">● High</div>
-              </div>
+              <div className="mt-1 text-[10px] text-muted-foreground">Based on 1,200+ recent projects</div>
             </div>
           </div>
         </div>
