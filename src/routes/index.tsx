@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Search, Home, ChefHat, Bath, Wind, AppWindow, Sun,
-  Calculator, GitCompare, Shield, MapPin, Sparkles, Lock,
-  ArrowRight, ArrowUpRight, Star, Check, TrendingUp,
-  Facebook, Instagram, Youtube, Linkedin,
-} from "lucide-react";
+  SearchIcon, HomeIcon, ChefHatIcon, BathIcon, WindIcon, AppWindowIcon, SunIcon,
+  CalculatorIcon, GitCompareIcon, ShieldIcon, MapPinIcon, SparklesIcon, LockIcon,
+  ArrowRightIcon, ArrowUpRightIcon, StarIcon, CheckIcon, TrendingUpIcon,
+  FacebookIcon, InstagramIcon, YoutubeIcon, LinkedinIcon,
+} from "@animateicons/react/lucide";
 import { Area, AreaChart, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -40,24 +40,24 @@ const breakdown = [
   { name: "Other", value: 1990, color: "oklch(0.6 0.2 305)" },
 ];
 const projects = [
-  { img: projRoof, icon: Home, name: "Roof Replacement", price: "$8,600 – $24,700", time: "3 – 5 Days" },
-  { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", price: "$25,000 – $75,000", time: "4 – 8 Weeks" },
-  { img: projBathroom, icon: Bath, name: "Bathroom Remodel", price: "$8,000 – $30,000", time: "2 – 4 Weeks" },
-  { img: projHvac, icon: Wind, name: "HVAC Replacement", price: "$4,500 – $12,000", time: "1 – 2 Days" },
-  { img: projWindows, icon: AppWindow, name: "Window Replacement", price: "$5,800 – $18,000", time: "1 – 2 Days" },
-  { img: projSolar, icon: Sun, name: "Solar Installation", price: "$15,000 – $35,000", time: "2 – 4 Days" },
+  { img: projRoof, icon: HomeIcon, name: "Roof Replacement", price: "$8,600 – $24,700", time: "3 – 5 Days" },
+  { img: projKitchen, icon: ChefHatIcon, name: "Kitchen Remodel", price: "$25,000 – $75,000", time: "4 – 8 Weeks" },
+  { img: projBathroom, icon: BathIcon, name: "Bathroom Remodel", price: "$8,000 – $30,000", time: "2 – 4 Weeks" },
+  { img: projHvac, icon: WindIcon, name: "HVAC Replacement", price: "$4,500 – $12,000", time: "1 – 2 Days" },
+  { img: projWindows, icon: AppWindowIcon, name: "Window Replacement", price: "$5,800 – $18,000", time: "1 – 2 Days" },
+  { img: projSolar, icon: SunIcon, name: "Solar Installation", price: "$15,000 – $35,000", time: "2 – 4 Days" },
 ];
 const steps = [
-  { icon: Search, title: "Choose Your Project", desc: "Select from 100+ home improvement projects" },
-  { icon: Calculator, title: "Estimate Your Cost", desc: "Get accurate, location-based estimates in seconds" },
-  { icon: GitCompare, title: "Compare Your Options", desc: "Materials, styles, and contractors side by side" },
-  { icon: Check, title: "Plan With Confidence", desc: "Make the best decision for your home and budget" },
+  { icon: SearchIcon, title: "Choose Your Project", desc: "Select from 100+ home improvement projects" },
+  { icon: CalculatorIcon, title: "Estimate Your Cost", desc: "Get accurate, location-based estimates in seconds" },
+  { icon: GitCompareIcon, title: "Compare Your Options", desc: "Materials, styles, and contractors side by side" },
+  { icon: CheckIcon, title: "Plan With Confidence", desc: "Make the best decision for your home and budget" },
 ];
 const trust = [
-  { icon: MapPin, title: "Accurate & Local Data", desc: "Real pricing from thousands of projects in your area." },
-  { icon: Sparkles, title: "Unbiased Recommendations", desc: "We don't sell. We help you make the best decision for your home." },
-  { icon: TrendingUp, title: "Expert-Backed Insights", desc: "Guidance from industry professionals and building experts." },
-  { icon: Lock, title: "Privacy First", desc: "Your data is secure and never shared with contractors." },
+  { icon: MapPinIcon, title: "Accurate & Local Data", desc: "Real pricing from thousands of projects in your area." },
+  { icon: SparklesIcon, title: "Unbiased Recommendations", desc: "We don't sell. We help you make the best decision for your home." },
+  { icon: TrendingUpIcon, title: "Expert-Backed Insights", desc: "Guidance from industry professionals and building experts." },
+  { icon: LockIcon, title: "Privacy First", desc: "Your data is secure and never shared with contractors." },
 ];
 const comparisons = [
   { img: cmpRoof, title: "Asphalt vs Metal Roofing", desc: "Compare durability, cost, and ROI" },
@@ -90,7 +90,7 @@ function Landing() {
           </div>
           <div className="flex items-center gap-4">
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
-              <Search className="h-4 w-4" />
+              <SearchIcon color="white" className="h-4 w-4" />
             </button>
             <a href="#" className="hidden sm:inline text-sm font-medium hover:text-primary">Log in</a>
             <a href="#" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-sm hover:bg-accent/90 transition">
@@ -105,7 +105,7 @@ function Landing() {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
-              <Check className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
+              <CheckIcon color="white" className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
             </span>
             <h1 className="mt-5 font-display text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
               Plan your next home project with confidence.
@@ -116,7 +116,7 @@ function Landing() {
 
             <div className="mt-7 flex items-stretch gap-2 rounded-xl border border-border bg-card p-2 shadow-sm max-w-xl">
               <div className="flex flex-1 items-center gap-2 px-3">
-                <Search className="h-4 w-4 text-muted-foreground" />
+                <SearchIcon color="white" className="h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search any project (e.g. roof replacement, kitchen remodel)"
@@ -136,9 +136,9 @@ function Landing() {
 
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
               {[
-                { icon: Calculator, k: "100+", v: "Interactive Calculators" },
-                { icon: TrendingUp, k: "Updated Weekly", v: "Real-time pricing data" },
-                { icon: Shield, k: "Trusted by", v: "1M+ Homeowners" },
+                { icon: CalculatorIcon, k: "100+", v: "Interactive Calculators" },
+                { icon: TrendingUpIcon, k: "Updated Weekly", v: "Real-time pricing data" },
+                { icon: ShieldIcon, k: "Trusted by", v: "1M+ Homeowners" },
               ].map((s) => (
                 <div key={s.v} className="flex items-start gap-3">
                   <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-accent-foreground">
@@ -218,7 +218,7 @@ function Landing() {
         <div className="flex items-end justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">Explore Popular Projects</h2>
           <a href="#" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
-            View all projects <ArrowRight className="h-3.5 w-3.5" />
+            View all projects <ArrowRightIcon color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -235,7 +235,7 @@ function Landing() {
                 <div className="mt-1 text-xs text-muted-foreground">{p.price}</div>
                 <div className="text-xs text-muted-foreground">{p.time}</div>
                 <a href="#" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                  Calculate Estimate <ArrowRight className="h-3 w-3" />
+                  Calculate Estimate <ArrowRightIcon color="white" className="h-3 w-3" />
                 </a>
               </div>
             </article>
@@ -256,7 +256,7 @@ function Landing() {
                 <h3 className="mt-4 font-display text-base font-bold text-ink">{s.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
                 {i < steps.length - 1 && (
-                  <ArrowRight className="hidden md:block absolute top-4 -right-2 h-5 w-5 text-muted-foreground/50" />
+                  <ArrowRightIcon color="white" className="hidden md:block absolute top-4 -right-2 h-5 w-5 text-muted-foreground/50" />
                 )}
               </div>
             ))}
@@ -334,7 +334,7 @@ function Landing() {
               <div className="mt-2 text-sm font-semibold text-ink">Project Timeline</div>
               <div className="text-xs text-muted-foreground">3 – 5 Days</div>
               <div className="mt-5 flex items-start gap-2 rounded-lg bg-accent px-3 py-2 text-xs">
-                <Shield className="h-4 w-4 text-primary mt-0.5" />
+                <ShieldIcon color="white" className="h-4 w-4 text-primary mt-0.5" />
                 <div>
                   <div className="font-semibold text-ink">High Confidence Estimate</div>
                   <div className="text-muted-foreground">Based on 37 local projects completed in the last 30 days</div>
@@ -370,7 +370,7 @@ function Landing() {
         <div className="flex items-end justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">Popular Comparisons</h2>
           <a href="#" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
-            View all comparisons <ArrowRight className="h-3.5 w-3.5" />
+            View all comparisons <ArrowRightIcon color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -386,7 +386,7 @@ function Landing() {
                 <h3 className="font-display text-base font-bold text-ink">{c.title}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{c.desc}</p>
                 <a href="#" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                  Compare Now <ArrowRight className="h-3 w-3" />
+                  Compare Now <ArrowRightIcon color="white" className="h-3 w-3" />
                 </a>
               </div>
             </article>
@@ -401,14 +401,14 @@ function Landing() {
             <div>
               <div className="text-sm font-semibold">Trusted by homeowners nationwide</div>
               <div className="flex items-center gap-1 text-xs text-white/70">
-                {[1,2,3,4,5].map((i) => <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />)}
+                {[1,2,3,4,5].map((i) => <StarIcon key={i} color="white" className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />)}
                 <span className="ml-1">4.8/5 from 12,400+ reviews</span>
               </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-white/80 font-display font-semibold">
             <span>Google</span>
-            <span className="inline-flex items-center gap-1"><Star className="h-4 w-4" /> Trustpilot</span>
+            <span className="inline-flex items-center gap-1"><StarIcon color="white" className="h-4 w-4" /> Trustpilot</span>
             <span>facebook</span>
             <span>BBB</span>
             <span>CR Consumer Reports</span>
@@ -478,7 +478,7 @@ function Field({ label, value }: { label: string; value: string }) {
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <div className="mt-1 flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5 text-sm">
         <span className="text-ink">{value}</span>
-        <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" />
+        <ArrowUpRightIcon color="white" className="h-3.5 w-3.5 text-muted-foreground" />
       </div>
     </label>
   );
