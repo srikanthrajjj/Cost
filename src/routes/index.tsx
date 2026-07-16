@@ -268,6 +268,39 @@ function QuickEstimate() {
               ))}
             </div>
 
+            {/* Roofing Materials Breakdown */}
+            {projectType === "roof" && (
+              <div className="mt-6 rounded-xl border border-border p-5 bg-background">
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-3">Materials Required</div>
+                <div className="text-xs text-ink mb-3">
+                  To have 10% buffer would require <span className="font-semibold">{Math.ceil(parseInt(houseSize) / 100 * 1.1 / 100)} roof squares</span>.
+                </div>
+                <div className="text-xs font-medium text-ink mb-2">By United States standard, your roof will need:</div>
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                    <span><span className="font-medium text-ink">{Math.ceil(parseInt(houseSize) * 0.11)} bundles</span> of composition shingles (each bundle covers ~33 ft²)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                    <span><span className="font-medium text-ink">{Math.ceil(parseInt(houseSize) * 0.037)} rolls</span> of roll roofing (36 in × 36 ft each)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                    <span><span className="font-medium text-ink">{Math.ceil(parseInt(houseSize) * 0.01)} rolls</span> of #15 felt (36 in × 144 ft each)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                    <span><span className="font-medium text-ink">{Math.ceil(parseInt(houseSize) * 0.018)} rolls</span> of #30 felt (36 in × 72 ft each)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">Roofing ceramic tiles do not have a standard size. Consult contractors to determine the amount needed.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Recommendation Card */}
             <div className="mt-6 rounded-xl border border-border p-5 bg-background">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">Recommended Material</div>
