@@ -351,50 +351,72 @@ function Landing() {
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
             </p>
 
-            <div className="mt-7 relative w-full max-w-xl">
-              <div className="flex items-stretch gap-2 rounded-xl bg-card shadow-lg shadow-primary/20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background h-14 sm:h-16">
-                <div className="flex flex-1 items-center gap-2 px-3 sm:px-4">
-                  <Search color="white" className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground shrink-0" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSuggestions(e.target.value.length > 0);
-                    }}
-                    onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    placeholder="What project are you planning?"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/80 min-w-0"
-                  />
+            <div className="mt-7 relative w-full max-w-2xl">
+              <div className="relative group">
+                {/* Animated gradient border */}
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary via-accent to-primary opacity-30 group-hover:opacity-50 blur-sm transition-opacity duration-500" />
+                
+                {/* Search container */}
+                <div className="relative flex items-center gap-2 rounded-2xl bg-card border border-border/50 shadow-xl h-16 sm:h-[72px] px-2">
+                  <div className="flex flex-1 items-center gap-3 pl-4">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10">
+                      <Search className="h-5 w-5 text-accent" />
+                    </div>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setShowSuggestions(e.target.value.length > 0);
+                      }}
+                      onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      placeholder="What project are you planning?"
+                      className="w-full bg-transparent text-base sm:text-lg outline-none placeholder:text-muted-foreground/60 min-w-0"
+                    />
+                  </div>
+                  <button className="flex items-center gap-2 rounded-xl bg-accent px-5 sm:px-8 py-3 sm:py-3.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 shadow-lg shadow-accent/20">
+                    <Search className="h-4 w-4" />
+                    <span className="hidden sm:inline">Search</span>
+                  </button>
                 </div>
-                <button className="rounded-lg bg-accent px-4 sm:px-6 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 shrink-0">
-                  Search
-                </button>
               </div>
               
               {showSuggestions && filteredProjects.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 rounded-xl bg-card border border-border shadow-lg z-50 overflow-hidden">
-                  {filteredProjects.map((project) => (
-                    <button
-                      key={project}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted transition-colors"
-                      onMouseDown={() => {
-                        setSearchQuery(project);
-                        setShowSuggestions(false);
-                      }}
-                    >
-                      <Search className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-ink">{project}</span>
-                    </button>
-                  ))}
+                <div className="absolute top-full left-0 right-0 mt-3 rounded-2xl bg-card border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-2">
+                    <div className="px-3 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Suggested Projects</div>
+                    {filteredProjects.map((project) => (
+                      <button
+                        key={project}
+                        className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-accent/5 rounded-xl transition-colors group/item"
+                        onMouseDown={() => {
+                          setSearchQuery(project);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted group-hover/item:bg-accent/10 transition-colors">
+                          <Search className="h-4 w-4 text-muted-foreground group-hover/item:text-accent transition-colors" />
+                        </div>
+                        <span className="text-sm text-ink font-medium">{project}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              <span className="text-muted-foreground">Popular:</span>
+            
+            {/* Popular searches */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Popular:</span>
               {["Roof Replacement","Kitchen Remodel","Bathroom Remodel","HVAC","Solar"].map((p) => (
-                <a key={p} href="#" className="text-primary font-medium hover:underline">{p}</a>
+                <button 
+                  key={p} 
+                  onClick={() => setSearchQuery(p)}
+                  className="px-3 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-muted/50 transition-all"
+                >
+                  {p}
+                </button>
               ))}
             </div>
 
