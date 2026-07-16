@@ -577,7 +577,7 @@ function Landing() {
                     {' '}{p.difficulty}
                   </span>
                 </div>
-                <div className="mt-3 inline-flex items-center gap-1 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
+                <div className="mt-3 w-full flex items-center justify-center gap-1 rounded-md border border-primary px-3 py-2 text-xs font-semibold text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
                   Get Estimate
                 </div>
               </div>
