@@ -111,9 +111,9 @@ function Landing() {
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
             </p>
 
-            <div className="mt-7 relative rounded-xl p-[2px] bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-gradient max-w-xl h-16">
-              <div className="flex items-stretch gap-2 rounded-[10px] bg-card h-full">
-                <div className="flex flex-1 items-center gap-2 px-3">
+            <div className="mt-7 relative rounded-xl bg-card shadow-lg shadow-primary/20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background max-w-xl h-16 animate-pulse-glow">
+              <div className="flex items-stretch gap-2 h-full">
+                <div className="flex flex-1 items-center gap-2 px-4">
                   <Search color="white" className="h-5 w-5 text-muted-foreground" />
                   <input
                     type="text"

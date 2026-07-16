@@ -123,3 +123,12 @@
 .animate-gradient {
   animation: gradient 3s ease infinite;
 }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px 2px oklch(0.25 0.08 250 / 0.3); }
+  50% { box-shadow: 0 0 25px 5px oklch(0.25 0.08 250 / 0.5); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
