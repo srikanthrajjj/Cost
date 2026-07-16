@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Search, Home, ChefHat, Bath, Sun,
+  Search, Home, ChefHat, Bath,
   Calculator, GitCompare, Shield, MapPin, Sparkles, Lock,
   ArrowRight, ArrowUpRight, Star, Check, TrendingUp,
   Facebook, Instagram, Youtube, Linkedin,
-  Fan, AppWindow,
+  Fan,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
@@ -12,8 +12,6 @@ import projRoof from "@/assets/proj-roof.jpg";
 import projKitchen from "@/assets/proj-kitchen.jpg";
 import projBathroom from "@/assets/proj-bathroom.jpg";
 import projHvac from "@/assets/proj-hvac.jpg";
-import projWindows from "@/assets/proj-windows.jpg";
-import projSolar from "@/assets/proj-solar.jpg";
 import cmpRoof from "@/assets/cmp-roof.jpg";
 import cmpCounter from "@/assets/cmp-counter.jpg";
 import cmpHvac from "@/assets/cmp-hvac.jpg";
@@ -45,8 +43,6 @@ const projects = [
   { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", price: "$25,000 – $75,000", time: "4 – 8 Weeks" },
   { img: projBathroom, icon: Bath, name: "Bathroom Remodel", price: "$8,000 – $30,000", time: "2 – 4 Weeks" },
   { img: projHvac, icon: Fan, name: "HVAC Replacement", price: "$4,500 – $12,000", time: "1 – 2 Days" },
-  { img: projWindows, icon: AppWindow, name: "Window Replacement", price: "$5,800 – $18,000", time: "1 – 2 Days" },
-  { img: projSolar, icon: Sun, name: "Solar Installation", price: "$15,000 – $35,000", time: "2 – 4 Days" },
 ];
 const steps = [
   { icon: Search, title: "Choose Your Project", desc: "Select from 100+ home improvement projects" },
@@ -217,12 +213,12 @@ function Landing() {
       {/* POPULAR PROJECTS */}
       <section className="container-x py-10">
         <div className="flex items-end justify-between mb-6">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">Explore Popular Projects</h2>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">What project are you planning?</h2>
           <a href="#" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
             View all projects <ArrowRight color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {projects.map((p) => (
             <article key={p.name} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition">
               <div className="relative aspect-[4/3] overflow-hidden">
