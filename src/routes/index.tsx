@@ -468,6 +468,42 @@ function Landing() {
         </div>
       </section>
 
+      {/* FEATURED GUIDES */}
+      <section className="container-x py-10">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">Latest Homeowner Guides</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Expert insights to help you plan smarter</p>
+          </div>
+          <a href="#" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
+            View all guides <ArrowRight color="white" className="h-3.5 w-3.5" />
+          </a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            { img: projRoof, title: "How Much Does Roof Replacement Cost?", tag: "Roofing", read: "8 min read" },
+            { img: cmpRoof, title: "Roof Replacement Cost by State", tag: "Roofing", read: "12 min read" },
+            { img: cmpCounter, title: "Metal vs Asphalt Roof", tag: "Comparison", read: "6 min read" },
+            { img: projKitchen, title: "Kitchen Remodel Cost by ZIP Code", tag: "Kitchen", read: "10 min read" },
+            { img: projBathroom, title: "Bathroom Remodel ROI", tag: "Bathroom", read: "5 min read" },
+            { img: projHvac, title: "Should You Replace or Repair Your HVAC?", tag: "HVAC", read: "7 min read" },
+          ].map((g) => (
+            <a key={g.title} href="#" className="group block rounded-xl overflow-hidden border border-border bg-card hover:shadow-lg transition">
+              <div className="relative aspect-[16/10] overflow-hidden">
+                <img src={g.img} alt={g.title} loading="lazy" className="h-full w-full object-cover group-hover:scale-105 transition duration-500" />
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-card/90 text-[10px] font-semibold text-ink">
+                  {g.tag}
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-display text-sm font-bold text-ink group-hover:text-primary transition line-clamp-2">{g.title}</h3>
+                <div className="mt-2 text-[10px] text-muted-foreground">{g.read}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/* WHY TRUST */}
       <section className="container-x py-10">
         <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
