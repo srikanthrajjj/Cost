@@ -175,9 +175,9 @@ function Landing() {
 
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
               {[
-                { icon: Calculator, k: "100+", v: "Interactive Calculators" },
-                { icon: TrendingUp, k: "Updated Weekly", v: "Real-time pricing data" },
-                { icon: Shield, k: "Trusted by", v: "1M+ Homeowners" },
+                { icon: MapPin, k: "Covers all 50 States", v: "Nationwide pricing data" },
+                { icon: TrendingUp, k: "Updated Monthly", v: "Latest market trends" },
+                { icon: Shield, k: "Regional Pricing Data", v: "Accurate local costs" },
               ].map((s) => (
                 <div key={s.v} className="flex items-start gap-3">
                   <span className="grid h-9 w-9 place-items-center rounded-lg bg-accent text-accent-foreground">
