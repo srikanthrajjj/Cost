@@ -569,6 +569,53 @@ function Landing() {
         </div>
       </section>
 
+      {/* FAQ SECTION */}
+      <section className="container-x py-10">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">Frequently Asked Questions</h2>
+          <p className="text-center text-sm text-muted-foreground mt-2">Everything you need to know about home improvement costs</p>
+          
+          <div className="mt-8 space-y-3">
+            {[
+              { q: "How much does roof replacement cost?", a: "The average roof replacement costs between $8,600 and $24,700, with most homeowners spending around $16,650. Costs vary based on roof size, materials, location, and labor rates in your area." },
+              { q: "How long does roof replacement take?", a: "A typical roof replacement takes 3 to 5 days from start to finish. However, larger projects or complex roof designs may take up to 2 weeks. Weather conditions can also affect the timeline." },
+              { q: "Does insurance cover roof replacement?", a: "Homeowner's insurance typically covers roof damage from covered perils like storms, hail, or fire. It usually doesn't cover damage from age, wear and tear, or lack of maintenance. Check your policy for specific coverage details." },
+              { q: "How much is labor for roofing?", a: "Roofing labor costs typically range from $4,000 to $10,000, depending on your location, roof complexity, and contractor rates. Labor usually accounts for 40-60% of the total roof replacement cost." },
+              { q: "Do I need permits for roof replacement?", a: "Most jurisdictions require permits for roof replacement. Your contractor typically handles the permitting process. Permit costs vary by location but usually range from $100 to $500." },
+              { q: "How many quotes should I get?", a: "We recommend getting at least 3 quotes from different contractors. This gives you a good sense of fair pricing in your area and helps you compare materials, warranties, and timelines." },
+              { q: "Can I finance my roof?", a: "Yes, many roofing companies offer financing options. You can also consider home equity loans, personal loans, or credit cards. Some roofing manufacturers also offer financing programs with promotional rates." },
+              { q: "What is the cheapest roofing material?", a: "Asphalt shingles are the most affordable roofing material, costing $3.50 to $5.50 per square foot installed. They're durable, easy to install, and come in various colors and styles." },
+              { q: "How long does a roof last?", a: "Asphalt shingle roofs last 20-30 years, metal roofs 40-70 years, tile roofs 50+ years, and slate roofs up to 100 years. Lifespan depends on material quality, installation, and maintenance." },
+              { q: "When should I replace my roof?", a: "Consider replacing your roof when it's 20+ years old, has visible damage, multiple leaks, missing shingles, or after severe storm damage. Regular inspections help identify issues early." },
+              { q: "What's the difference between repair and replacement?", a: "Roof repair fixes specific damaged areas and costs $300-$1,500. Replacement removes the entire roof and starts fresh. If damage covers more than 30% of the roof or it's near end-of-life, replacement is usually more cost-effective." },
+              { q: "How do I choose a roofing contractor?", a: "Look for licensed, insured contractors with strong reviews. Verify their credentials, check references, get detailed written estimates, and ensure they offer warranties on both materials and workmanship." },
+              { q: "What factors affect roof replacement cost?", a: "Key factors include roof size and slope, material choice, local labor rates, roof complexity, number of layers to remove, structural repairs needed, and your geographic location." },
+              { q: "How accurate are online cost estimates?", a: "Online estimates provide a good ballpark figure based on average costs. For precise pricing, get on-site inspections from licensed contractors who can assess your specific situation and requirements." },
+              { q: "Should I repair or replace my HVAC system?", a: "Consider replacement if your HVAC is 10-15+ years old, requires frequent repairs, uses R-22 refrigerant, or has rising energy bills. Repairs make sense for newer systems with minor issues." },
+              { q: "How much does a kitchen remodel cost?", a: "Kitchen remodels range from $25,000 for minor updates to $75,000+ for major renovations. The average mid-range remodel costs around $50,000, with ROI typically around 72%." },
+              { q: "How long does a kitchen remodel take?", a: "Minor kitchen updates take 2-4 weeks. Full remodels typically take 4-8 weeks. Custom cabinetry or structural changes can extend the timeline to 10-12 weeks." },
+              { q: "Do bathroom remodels add value to homes?", a: "Yes, bathroom remodels offer excellent ROI, typically 60-70%. Minor bathroom updates have the best return on investment. The average bathroom remodel recoups about 65% of its cost at resale." },
+              { q: "How much does a bathroom remodel cost?", a: "Bathroom remodels range from $8,000 for basic updates to $30,000+ for luxury renovations. A mid-range remodel averaging $19,000 offers the best balance of cost and ROI." },
+              { q: "What permits are needed for home renovation?", a: "Permits are typically required for structural changes, electrical work, plumbing modifications, HVAC installation, and window/door replacements. Minor cosmetic work usually doesn't require permits." },
+              { q: "How can I reduce renovation costs?", a: "Get multiple quotes, choose mid-range materials, do demolition yourself, keep the existing layout, schedule during off-season, and prioritize high-impact, low-cost improvements." },
+              { q: "What is the best return on investment for home improvements?", a: "Top ROI projects include garage door replacement (94%), manufactured stone veneer (91%), minor kitchen remodel (72%), and deck addition (65%). Focus on curb appeal and kitchen/bathroom updates." },
+              { q: "How do I check if a contractor is licensed?", a: "Verify licenses through your state's contractor licensing board website. Check for valid insurance, bonding, and any complaints or violations. Ask for proof of credentials before signing any contracts." },
+              { q: "What should be included in a contractor quote?", a: "A complete quote should include materials, labor costs, timeline, payment schedule, warranty information, permit responsibilities, cleanup details, and scope of work specifications." },
+            ].map((faq, i) => (
+              <details key={i} className="group rounded-xl border border-border bg-card overflow-hidden">
+                <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/50 transition">
+                  <span className="font-display text-sm font-semibold text-ink pr-4">{faq.q}</span>
+                  <span className="shrink-0 ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-accent text-accent-foreground text-xs group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="border-t border-border bg-surface">
         <div className="container-x py-12 grid grid-cols-2 md:grid-cols-6 gap-8 text-sm">
