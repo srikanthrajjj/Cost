@@ -337,6 +337,35 @@ function Landing() {
         </div>
       </section>
 
+      {/* WHY COSTRENO */}
+      <section className="container-x py-10">
+        <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
+          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">Why CostReno</h2>
+          <p className="text-center text-sm text-muted-foreground mt-2 max-w-xl mx-auto">Four simple steps from curiosity to confidence</p>
+          
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+            {/* Connector line */}
+            <div className="hidden md:block absolute top-7 left-[12%] right-[12%] h-0.5 bg-border" />
+            
+            {[
+              { step: "01", icon: Calculator, title: "Estimate Cost", desc: "Get instant, location-based estimates for your project" },
+              { step: "02", icon: GitCompare, title: "Compare Materials", desc: "Side-by-side comparisons of brands, quality, and pricing" },
+              { step: "03", icon: Shield, title: "Review Contractor Quote", desc: "Verify if your contractor's quote is fair and competitive" },
+              { step: "04", icon: Check, title: "Make Confident Decision", desc: "Move forward knowing you've made the smartest choice" },
+            ].map((s) => (
+              <div key={s.step} className="relative text-center px-4">
+                <div className="relative z-10 mx-auto grid h-14 w-14 place-items-center rounded-xl bg-accent text-accent-foreground">
+                  <s.icon className="h-6 w-6" />
+                </div>
+                <div className="mt-1 text-[10px] font-bold text-accent">{s.step}</div>
+                <h3 className="mt-3 font-display text-sm font-bold text-ink">{s.title}</h3>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section className="container-x py-10">
         <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
