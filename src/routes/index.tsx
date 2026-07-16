@@ -134,7 +134,7 @@ function QuickEstimate() {
             {/* Project Type Selector */}
             <div>
               <label className="text-xs font-medium text-ink mb-2 block">Project Type</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {projectTypes.map((p) => (
                   <button
                     key={p.id}
@@ -564,7 +564,7 @@ function Landing() {
             View all projects <ArrowRight color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {projects.map((p) => (
             <a key={p.name} href="#" className="group block rounded-xl overflow-hidden border border-border bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="relative aspect-[4/3] overflow-hidden">
@@ -610,7 +610,7 @@ function Landing() {
       <section className="container-x py-10">
         <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
           <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">How CostReno Works</h2>
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-2 relative">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-2 relative">
             {steps.map((s, i) => (
               <div key={s.title} className="relative text-center px-2">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl text-primary">
@@ -657,7 +657,7 @@ function Landing() {
             View all guides <ArrowRight color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {[
             { img: projRoof, title: "How Much Does Roof Replacement Cost?", tag: "Roofing", read: "8 min read" },
             { img: cmpRoof, title: "Roof Replacement Cost by State", tag: "Roofing", read: "12 min read" },
@@ -686,7 +686,7 @@ function Landing() {
       <section className="container-x py-10">
         <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
           <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">Why Homeowners Trust CostReno</h2>
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {trust.map((t) => (
               <div key={t.title} className="flex gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-primary">
@@ -710,7 +710,7 @@ function Landing() {
             View all comparisons <ArrowRight color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
           {comparisons.map((c) => (
             <article key={c.title} className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition">
               <div className="relative aspect-[4/3] overflow-hidden">
@@ -804,7 +804,7 @@ function Landing() {
       {/* FOOTER */}
       <footer className="border-t border-border bg-surface">
         <div className="container-x py-12">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-8 text-sm">
             <div className="col-span-2 md:col-span-1">
               <Logo />
               <p className="mt-3 text-xs text-muted-foreground max-w-xs">
