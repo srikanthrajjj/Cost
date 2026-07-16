@@ -92,14 +92,12 @@ function Landing() {
       {/* NAV */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="container-x flex h-16 items-center justify-between">
-          <div className="flex items-center gap-10">
-            <Logo />
-            <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
-              {["Projects","Compare","Guides","Resources"].map((l) => (
-                <a key={l} href="#" className="hover:text-foreground transition-colors">{l}</a>
-              ))}
-            </nav>
-          </div>
+          <Logo />
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-muted-foreground absolute left-1/2 -translate-x-1/2">
+            {["Projects","Compare","Guides","Resources"].map((l) => (
+              <a key={l} href="#" className="hover:text-foreground transition-colors">{l}</a>
+            ))}
+          </nav>
           <div className="flex items-center gap-4">
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
               <Search color="white" className="h-4 w-4" />
@@ -114,22 +112,22 @@ function Landing() {
 
       {/* HERO */}
       <section className="container-x pt-10 md:pt-16 pb-16">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
               <Check color="white" className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
             </span>
-            <h1 className="mt-5 font-display text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
+            <h1 className="mt-5 font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
               Know what your home project should really cost.
             </h1>
             <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-lg">
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
             </p>
 
-            <div className="mt-7 relative max-w-xl">
-              <div className="flex items-stretch gap-2 rounded-xl bg-card shadow-lg shadow-primary/20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background h-16">
-                <div className="flex flex-1 items-center gap-2 px-4">
-                  <Search color="white" className="h-5 w-5 text-muted-foreground" />
+            <div className="mt-7 relative w-full max-w-xl">
+              <div className="flex items-stretch gap-2 rounded-xl bg-card shadow-lg shadow-primary/20 ring-2 ring-primary/30 ring-offset-2 ring-offset-background h-14 sm:h-16">
+                <div className="flex flex-1 items-center gap-2 px-3 sm:px-4">
+                  <Search color="white" className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -140,10 +138,10 @@ function Landing() {
                     onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     placeholder="What project are you planning?"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/80"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/80 min-w-0"
                   />
                 </div>
-                <button className="rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90">
+                <button className="rounded-lg bg-accent px-4 sm:px-6 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 shrink-0">
                   Search
                 </button>
               </div>
@@ -240,7 +238,7 @@ function Landing() {
             </div>
 
             {/* Cost card */}
-            <div className="absolute -top-4 right-4 md:right-6 w-64 rounded-xl bg-card p-4 shadow-xl border border-border">
+            <div className="hidden sm:block absolute -top-4 right-4 md:right-6 w-64 rounded-xl bg-card p-4 shadow-xl border border-border">
               <div className="text-xs text-muted-foreground">Estimated Project Cost</div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-display text-3xl font-bold text-ink">$23,450</span>
@@ -267,7 +265,7 @@ function Landing() {
             </div>
 
             {/* Data-driven cards */}
-            <div className="absolute top-32 left-4 md:left-0 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
+            <div className="hidden md:block absolute top-32 left-4 md:left-0 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
               <div className="text-xs text-muted-foreground">Avg. Cost in Your Area</div>
               <div className="mt-1 font-display text-xl font-bold text-ink">$21,800</div>
               <div className="mt-1 flex items-center gap-1 text-xs text-success">
@@ -277,7 +275,7 @@ function Landing() {
             </div>
 
             {/* ROI card */}
-            <div className="absolute -bottom-4 right-6 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
+            <div className="hidden sm:block absolute -bottom-4 right-6 w-52 rounded-xl bg-card p-4 shadow-xl border border-border">
               <div className="text-xs text-muted-foreground">ROI for This Project</div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-display text-2xl font-bold text-ink">71%</span>
