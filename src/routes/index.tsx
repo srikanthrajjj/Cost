@@ -618,25 +618,62 @@ function Landing() {
 
       {/* FOOTER */}
       <footer className="border-t border-border bg-surface">
-        <div className="container-x py-12 grid grid-cols-2 md:grid-cols-6 gap-8 text-sm">
-          <div className="col-span-2">
-            <Logo />
-            <p className="mt-3 text-xs text-muted-foreground max-w-xs">
-              The most trusted home improvement intelligence platform. Know your data. Expert insights. Smarter decisions.
-            </p>
-            <div className="mt-4 flex gap-3 text-muted-foreground">
-              {[Facebook, Instagram, Youtube, Linkedin].map((I, i) => (
-                <a key={i} href="#" className="grid h-8 w-8 place-items-center rounded-full border border-border hover:text-primary hover:border-primary">
-                  <I className="h-4 w-4" />
-                </a>
-              ))}
+        <div className="container-x py-12">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-sm">
+            <div className="col-span-2 md:col-span-1">
+              <Logo />
+              <p className="mt-3 text-xs text-muted-foreground max-w-xs">
+                The most trusted home improvement intelligence platform. Know your data. Expert insights. Smarter decisions.
+              </p>
+              <div className="mt-4 flex gap-3 text-muted-foreground">
+                {[Facebook, Instagram, Youtube, Linkedin].map((I, i) => (
+                  <a key={i} href="#" className="grid h-8 w-8 place-items-center rounded-full border border-border hover:text-primary hover:border-primary">
+                    <I className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-display text-sm font-bold text-ink">Projects</h4>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                {["Roof","Kitchen","Bathroom","HVAC","Windows","Flooring","Foundation","Solar"].map((item) => (
+                  <li key={item}><a href="#" className="hover:text-foreground transition">{item}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display text-sm font-bold text-ink">Calculators</h4>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                {["Roof Calculator","Kitchen Calculator","Bathroom Calculator","HVAC Calculator"].map((item) => (
+                  <li key={item}><a href="#" className="hover:text-foreground transition">{item}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display text-sm font-bold text-ink">Compare</h4>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                {["Roof Materials","Countertops","Windows"].map((item) => (
+                  <li key={item}><a href="#" className="hover:text-foreground transition">{item}</a></li>
+                ))}
+              </ul>
+              <h4 className="font-display text-sm font-bold text-ink mt-6">Guides</h4>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition">Blog</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display text-sm font-bold text-ink">Resources</h4>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                <li><a href="#" className="hover:text-foreground transition">Coverage</a></li>
+              </ul>
+              <h4 className="font-display text-sm font-bold text-ink mt-6">Coverage</h4>
+              <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+                {["States","Cities","ZIP Codes"].map((item) => (
+                  <li key={item}><a href="#" className="hover:text-foreground transition">{item}</a></li>
+                ))}
+              </ul>
             </div>
           </div>
-          <FooterCol title="Projects" items={["Roofing","Kitchen","Bathroom","HVAC","Windows","View All Projects"]} />
-          <FooterCol title="Calculators" items={["Cost Estimator","ROI Calculator","Material Calculator","Loan Calculator","View All Calculators"]} />
-          <FooterCol title="Resources" items={["Guides","Cost Breakdown","Glossary","Project Checklists","FAQs"]} />
-          <FooterCol title="Company" items={["About Us","Our Methodology","Careers","Contact Us","Press"]} />
-          <FooterCol title="Legal" items={["Privacy Policy","Terms of Service","Disclaimer","Accessibility"]} />
         </div>
         <div className="border-t border-border">
           <div className="container-x py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
