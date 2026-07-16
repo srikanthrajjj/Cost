@@ -111,18 +111,20 @@ function Landing() {
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
             </p>
 
-            <div className="mt-7 flex items-stretch gap-2 rounded-xl border border-border bg-card p-2 shadow-sm max-w-xl h-16">
-              <div className="flex flex-1 items-center gap-2 px-3">
-                <Search color="white" className="h-5 w-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search any project (e.g. roof replacement, kitchen remodel)"
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/80"
-                />
+            <div className="mt-7 relative rounded-xl p-[2px] bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-gradient max-w-xl h-16">
+              <div className="flex items-stretch gap-2 rounded-[10px] bg-card h-full">
+                <div className="flex flex-1 items-center gap-2 px-3">
+                  <Search color="white" className="h-5 w-5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search any project (e.g. roof replacement, kitchen remodel)"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/80"
+                  />
+                </div>
+                <button className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                  Search
+                </button>
               </div>
-              <button className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
-                Search
-              </button>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <span className="text-muted-foreground">Popular:</span>
