@@ -549,7 +549,7 @@ function Landing() {
           </div>
 
           {/* Hero visual */}
-          <div className="hidden lg:block absolute right-0 top-0 h-full w-[55vw]">
+          <div className="hidden lg:block absolute right-0 top-0 h-full w-[44vw]">
             <img src="/home.png" alt="Modern home with lit windows at dusk" className="w-full h-full object-cover" />
           </div>
         </div>
