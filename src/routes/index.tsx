@@ -549,8 +549,8 @@ function Landing() {
           </div>
 
           {/* Hero visual */}
-          <div className="hidden lg:flex items-center justify-end absolute right-0 top-0 h-full w-[50vw]">
-            <img src="/home.png" alt="Modern home with lit windows at dusk" className="max-w-full max-h-full object-contain" />
+          <div className="hidden lg:flex items-center justify-center">
+            <img src="/home.png" alt="Modern home with lit windows at dusk" className="w-full max-h-[600px] object-contain" />
           </div>
         </div>
         </div>
