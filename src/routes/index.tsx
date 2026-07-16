@@ -435,10 +435,6 @@ function Landing() {
             <h1 className="mt-5 font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
               Know what your home project should really cost.
             </h1>
-            <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-lg">
-              Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.
-            </p>
-
             <div className="mt-7 relative w-full max-w-2xl">
               <div className="relative group">
                 {/* Animated gradient border */}
@@ -571,7 +567,7 @@ function Landing() {
           {/* Hero visual */}
           <div className="relative hidden lg:block">
             <div className="relative overflow-hidden rounded-2xl">
-              <img src="/home.png" alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[460px] object-cover" />
+              <img src="/home.png" alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[616px] object-cover" />
               
               {/* Hotspot markers */}
               <div className="absolute top-[15%] left-[50%] group cursor-pointer">
