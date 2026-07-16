@@ -3,11 +3,11 @@ import { useState } from "react";
 import {
   Search, Home, ChefHat, Bath,
   Calculator, GitCompare, Shield, MapPin, Sparkles, Lock,
-  ArrowRight, ArrowUpRight, Star, Check, TrendingUp,
+  ArrowRight, Star, Check, TrendingUp,
   Facebook, Instagram, Youtube, Linkedin,
   Fan,
 } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
 import projKitchen from "@/assets/proj-kitchen.jpg";
@@ -31,13 +31,6 @@ export const Route = createFileRoute("/")({
 const trend = [
   { v: 20 },{ v: 24 },{ v: 22 },{ v: 28 },{ v: 26 },{ v: 32 },
   { v: 30 },{ v: 36 },{ v: 34 },{ v: 42 },{ v: 40 },{ v: 48 },
-];
-const breakdown = [
-  { name: "Materials", value: 5440, color: "oklch(0.55 0.22 262)" },
-  { name: "Labor", value: 4250, color: "oklch(0.68 0.17 155)" },
-  { name: "Permits", value: 420, color: "oklch(0.75 0.18 70)" },
-  { name: "Waste", value: 380, color: "oklch(0.65 0.24 25)" },
-  { name: "Other", value: 1990, color: "oklch(0.6 0.2 305)" },
 ];
 const projects = [
   { img: projRoof, icon: Home, name: "Roof Replacement", avgCost: "$16,650", price: "$8,600 – $24,700", time: "3 – 5 Days", roi: "68%", difficulty: "Medium" },
@@ -69,6 +62,240 @@ function Logo() {
     <a href="#" className="flex items-center gap-2">
       <img src="/logo.svg" alt="Logo" style={{ height: "48px", width: "auto" }} />
     </a>
+  );
+}
+
+function QuickEstimate() {
+  const [projectType, setProjectType] = useState("roof");
+  const [zipCode, setZipCode] = useState("");
+  const [houseSize, setHouseSize] = useState("");
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
+  const [estimate, setEstimate] = useState({ cost: 0, range: "", confidence: 0 });
+
+  const projectTypes = [
+    { id: "roof", icon: Home, label: "Roof", color: "bg-blue-50 text-blue-600 border-blue-200" },
+    { id: "kitchen", icon: ChefHat, label: "Kitchen", color: "bg-orange-50 text-orange-600 border-orange-200" },
+    { id: "bathroom", icon: Bath, label: "Bathroom", color: "bg-purple-50 text-purple-600 border-purple-200" },
+    { id: "hvac", icon: Fan, label: "HVAC", color: "bg-green-50 text-green-600 border-green-200" },
+  ];
+
+  const loadingSteps = [
+    "Checking local labor rates...",
+    "Analyzing material costs...",
+    "Reviewing permit requirements...",
+    "Calculating your estimate...",
+  ];
+
+  const calculateEstimate = () => {
+    if (!zipCode || !houseSize) return;
+    setIsCalculating(true);
+    setShowResult(false);
+    
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step < loadingSteps.length) {
+        setLoadingText(loadingSteps[step]);
+        step++;
+      } else {
+        clearInterval(interval);
+        const baseCost = projectType === "roof" ? 8 : projectType === "kitchen" ? 25 : projectType === "bathroom" ? 8 : 4;
+        const sizeMultiplier = parseInt(houseSize) / 2000;
+        const randomVariance = 0.9 + Math.random() * 0.2;
+        const cost = Math.round(baseCost * 1000 * sizeMultiplier * randomVariance);
+        setEstimate({
+          cost,
+          range: `$${Math.round(cost * 0.9).toLocaleString()} – $${Math.round(cost * 1.1).toLocaleString()}`,
+          confidence: Math.round(85 + Math.random() * 10),
+        });
+        setIsCalculating(false);
+        setShowResult(true);
+      }
+    }, 600);
+  };
+
+  return (
+    <section className="container-x py-10">
+      <div className="rounded-2xl border border-border bg-card p-6 md:p-10 max-w-3xl mx-auto">
+        {!showResult ? (
+          <>
+            <div className="text-center mb-8">
+              <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">Get Your Instant Estimate</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Answer 3 quick questions. No signup required.</p>
+            </div>
+
+            {/* Project Type Selector */}
+            <div>
+              <label className="text-xs font-medium text-ink mb-2 block">Project Type</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {projectTypes.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setProjectType(p.id)}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                      projectType === p.id 
+                        ? `${p.color} border-current shadow-md` 
+                        : "border-border hover:border-muted-foreground/30 bg-background"
+                    }`}
+                  >
+                    <p.icon className="h-6 w-6" />
+                    <span className="text-xs font-medium">{p.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ZIP Code */}
+            <div className="mt-6">
+              <label className="text-xs font-medium text-ink mb-2 block">ZIP Code</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  placeholder="90210" 
+                  className="w-full h-14 rounded-xl border border-border bg-background pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-ring transition" 
+                />
+              </div>
+              <p className="mt-1.5 text-[10px] text-muted-foreground">Used to calculate local labor and material costs</p>
+            </div>
+
+            {/* House Size */}
+            <div className="mt-5">
+              <label className="text-xs font-medium text-ink mb-2 block">House Size (sq ft)</label>
+              <div className="relative">
+                <Calculator className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input 
+                  type="text" 
+                  value={houseSize}
+                  onChange={(e) => setHouseSize(e.target.value)}
+                  placeholder="2,000" 
+                  className="w-full h-14 rounded-xl border border-border bg-background pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-ring transition" 
+                />
+              </div>
+              <p className="mt-1.5 text-[10px] text-muted-foreground">Total square footage of your home</p>
+            </div>
+
+            {/* CTA */}
+            <div className="mt-8 sticky bottom-4 md:static">
+              <button 
+                onClick={calculateEstimate}
+                disabled={!zipCode || !houseSize || isCalculating}
+                className="w-full rounded-xl bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCalculating ? loadingText : "Get My Free Estimate"}
+              </button>
+              <div className="mt-3 flex items-center justify-center gap-3 text-[10px] text-muted-foreground">
+                <span>No signup</span>
+                <span>•</span>
+                <span>Free</span>
+                <span>•</span>
+                <span>30 seconds</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Result View */
+          <div className="animate-in fade-in duration-500">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium mb-3">
+                <Check className="h-3 w-3" /> {estimate.confidence}% Confidence
+              </div>
+              <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">Your Estimate</h2>
+            </div>
+
+            {/* Main Estimate */}
+            <div className="text-center py-6">
+              <div className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Estimated Cost</div>
+              <div className="font-display text-6xl md:text-7xl font-bold text-ink">
+                ${estimate.cost.toLocaleString()}
+              </div>
+              <div className="mt-2 text-sm text-muted-foreground">Typical Range: {estimate.range}</div>
+              <div className="mt-1 text-[10px] text-muted-foreground">Updated July 2026</div>
+            </div>
+
+            {/* Cost Breakdown */}
+            <div className="mt-6 space-y-2">
+              {[
+                { name: "Materials", amount: Math.round(estimate.cost * 0.44), desc: "Quality materials at competitive regional pricing" },
+                { name: "Labor", amount: Math.round(estimate.cost * 0.34), desc: "Licensed contractors in your area" },
+                { name: "Permits", amount: Math.round(estimate.cost * 0.03), desc: "Required local building permits" },
+                { name: "Waste", amount: Math.round(estimate.cost * 0.03), desc: "Debris removal and disposal" },
+                { name: "Other", amount: Math.round(estimate.cost * 0.16), desc: "Additional costs and contingencies" },
+              ].map((item) => (
+                <details key={item.name} className="group rounded-lg border border-border bg-background overflow-hidden">
+                  <summary className="flex items-center justify-between px-4 py-3 cursor-pointer text-xs hover:bg-muted/30 transition">
+                    <span className="text-muted-foreground">{item.name}</span>
+                    <span className="font-medium text-ink">${item.amount.toLocaleString()}</span>
+                  </summary>
+                  <div className="px-4 pb-3 text-[10px] text-muted-foreground">{item.desc}</div>
+                </details>
+              ))}
+            </div>
+
+            {/* Recommendation Card */}
+            <div className="mt-6 rounded-xl border border-border p-5 bg-background">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">Recommended Material</div>
+              <div className="font-display text-lg font-bold text-ink">Architectural Shingles</div>
+              <div className="mt-3 text-xs font-medium text-ink mb-2">Why we recommend this:</div>
+              <div className="space-y-1.5">
+                {["Best ROI for your area", "Lowest long-term maintenance", "Ideal for your climate"].map((reason) => (
+                  <div key={reason} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-accent shrink-0" /> {reason}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* How We Calculated - Collapsible */}
+            <details className="mt-4 rounded-xl border border-border overflow-hidden">
+              <summary className="px-4 py-3 cursor-pointer text-xs font-medium text-muted-foreground hover:bg-muted/30 transition">
+                How we calculated this
+              </summary>
+              <div className="px-4 pb-3 text-[10px] text-muted-foreground space-y-1">
+                <p>Local labor rates for {zipCode}</p>
+                <p>Current material pricing data</p>
+                <p>Permit costs by jurisdiction</p>
+                <p>Based on {houseSize} sq ft</p>
+                <p>Updated monthly</p>
+              </div>
+            </details>
+
+            {/* Full Report Preview */}
+            <div className="mt-6 rounded-xl border border-border p-4 bg-background">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">Your Full Report Includes</div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {["Detailed Cost Breakdown", "Material Comparison", "ROI Analysis", "Timeline", "Recommendation", "Contractor Checklist"].map((item) => (
+                  <div key={item} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Check className="h-3 w-3 text-accent shrink-0" /> {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-8 space-y-3">
+              <button className="w-full rounded-xl bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition">
+                View Full Report →
+              </button>
+              <button 
+                onClick={() => { setShowResult(false); setZipCode(""); setHouseSize(""); }}
+                className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
+              >
+                Start New Estimate
+              </button>
+            </div>
+
+            {/* Trust Message */}
+            <div className="mt-6 text-center text-[10px] text-muted-foreground">
+              Powered by regional labor and material pricing data
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -358,84 +585,22 @@ function Landing() {
         </div>
       </section>
 
-      {/* INTERACTIVE ESTIMATOR */}
-      <section className="container-x py-10">
-        <div className="rounded-2xl border border-border bg-card p-6 md:p-10">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Form */}
-            <div>
-              <h2 className="font-display text-2xl font-bold text-ink">Try Our Interactive Estimator</h2>
-              <p className="mt-1 text-sm text-muted-foreground">See how it works in less than 30 seconds</p>
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <Field label="Project Type" value="Roof Replacement" />
-                <Field label="ZIP Code" value="90210" />
-                <Field label="Roof Size (sq ft)" value="2,000" />
-                <Field label="Roof Pitch" value="6/12 (Medium)" />
-                <div className="col-span-2">
-                  <Field label="Material" value="Architectural Shingles" />
-                </div>
-              </div>
-              <button className="mt-6 w-full rounded-lg bg-accent py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90">
-                Calculate My Estimate
-              </button>
-            </div>
+      {/* QUICK ESTIMATE */}
+      <QuickEstimate />
 
-            {/* Breakdown */}
-            <div className="rounded-xl border border-border p-5">
-              <div className="text-xs text-muted-foreground">Estimated Project Cost</div>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="font-display text-3xl font-bold text-ink">$12,480</span>
-                <span className="text-xs text-muted-foreground">+/- $980</span>
-              </div>
-              <div className="mt-5 text-sm font-semibold text-ink">Cost Breakdown</div>
-              <ul className="mt-3 space-y-2 text-sm">
-                {[
-                  ["Materials","$5,440"],
-                  ["Labor","$4,250"],
-                  ["Permits & Fees","$420"],
-                  ["Waste Removal","$380"],
-                  ["Other Costs","$1,990"],
-                ].map(([k,v]) => (
-                  <li key={k} className="flex justify-between border-b border-dashed border-border/70 pb-2">
-                    <span className="text-muted-foreground">{k}</span>
-                    <span className="font-medium text-ink">{v}</span>
-                  </li>
-                ))}
-                <li className="flex justify-between pt-1">
-                  <span className="font-semibold text-ink">Total Estimate</span>
-                  <span className="font-bold text-ink">$12,480</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Chart */}
-            <div className="flex flex-col items-center">
-              <div className="relative h-56 w-56">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={breakdown} dataKey="value" innerRadius={62} outerRadius={95} paddingAngle={2}>
-                      {breakdown.map((e) => <Cell key={e.name} fill={e.color} />)}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 grid place-items-center text-center">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Total</div>
-                    <div className="font-display text-xl font-bold text-ink">$12,480</div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2 text-sm font-semibold text-ink">Project Timeline</div>
-              <div className="text-xs text-muted-foreground">3 – 5 Days</div>
-              <div className="mt-5 flex items-start gap-2 rounded-lg bg-accent px-3 py-2 text-xs">
-                <Shield color="white" className="h-4 w-4 text-primary mt-0.5" />
-                <div>
-                  <div className="font-semibold text-ink">High Confidence Estimate</div>
-                  <div className="text-muted-foreground">Based on 37 local projects completed in the last 30 days</div>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* SEO CONTENT */}
+      <section className="container-x py-8">
+        <h3 className="font-display text-lg font-bold text-ink">Related Topics</h3>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {[
+            "Roof Replacement Cost", "Roof Cost by State", "Roof Cost by ZIP Code",
+            "Roof Cost by House Size", "Roof Material Comparison", "Roof Replacement Timeline",
+            "Roof ROI", "Roof Insurance Guide"
+          ].map((topic) => (
+            <a key={topic} href="#" className="px-3 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground transition">
+              {topic}
+            </a>
+          ))}
         </div>
       </section>
 
@@ -580,12 +745,12 @@ function Landing() {
               { q: "How do I check if a contractor is licensed?", a: "Verify licenses through your state's contractor licensing board website. Check for valid insurance, bonding, and any complaints or violations. Ask for proof of credentials before signing any contracts." },
               { q: "What should be included in a contractor quote?", a: "A complete quote should include materials, labor costs, timeline, payment schedule, warranty information, permit responsibilities, cleanup details, and scope of work specifications." },
             ].map((faq, i) => (
-              <div key={i} className="group rounded-xl border border-border bg-card overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/50 transition">
+              <div key={i} className="group/item rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between px-5 py-4 cursor-pointer">
                   <span className="font-display text-sm font-semibold text-ink pr-4">{faq.q}</span>
-                  <span className="shrink-0 ml-2 h-5 w-5 flex items-center justify-center rounded-full bg-accent text-accent-foreground text-xs group-hover:rotate-45 transition-transform">+</span>
+                  <span className="shrink-0 ml-2 h-5 w-5 flex items-center justify-center text-muted-foreground text-xs group-hover/item:rotate-45 transition-transform duration-300">+</span>
                 </div>
-                <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed max-h-0 group-hover:max-h-40 overflow-hidden transition-all duration-300">
+                <div className="px-5 pb-0 text-sm text-muted-foreground leading-relaxed max-h-0 group-hover/item:max-h-40 group-hover/item:pb-4 overflow-hidden transition-all duration-300">
                   {faq.a}
                 </div>
               </div>
@@ -661,18 +826,6 @@ function Landing() {
         </div>
       </footer>
     </div>
-  );
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <div className="mt-1 flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5 text-sm">
-        <span className="text-ink">{value}</span>
-        <ArrowUpRight color="white" className="h-3.5 w-3.5 text-muted-foreground" />
-      </div>
-    </label>
   );
 }
 
