@@ -191,7 +191,7 @@ function Landing() {
           </div>
 
           {/* Hero visual */}
-          <div className="relative">
+          <div className="relative hidden lg:block">
             <div className="relative overflow-hidden rounded-2xl border border-border shadow-lg">
               <img src={heroHome} alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[460px] object-cover" />
               
