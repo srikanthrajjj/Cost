@@ -40,10 +40,10 @@ const breakdown = [
   { name: "Other", value: 1990, color: "oklch(0.6 0.2 305)" },
 ];
 const projects = [
-  { img: projRoof, icon: Home, name: "Roof Replacement", price: "$8,600 – $24,700", time: "3 – 5 Days" },
-  { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", price: "$25,000 – $75,000", time: "4 – 8 Weeks" },
-  { img: projBathroom, icon: Bath, name: "Bathroom Remodel", price: "$8,000 – $30,000", time: "2 – 4 Weeks" },
-  { img: projHvac, icon: Fan, name: "HVAC Replacement", price: "$4,500 – $12,000", time: "1 – 2 Days" },
+  { img: projRoof, icon: Home, name: "Roof Replacement", avgCost: "$16,650", price: "$8,600 – $24,700", time: "3 – 5 Days", roi: "68%", difficulty: "Medium" },
+  { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", avgCost: "$50,000", price: "$25,000 – $75,000", time: "4 – 8 Weeks", roi: "72%", difficulty: "Hard" },
+  { img: projBathroom, icon: Bath, name: "Bathroom Remodel", avgCost: "$19,000", price: "$8,000 – $30,000", time: "2 – 4 Weeks", roi: "65%", difficulty: "Medium" },
+  { img: projHvac, icon: Fan, name: "HVAC Replacement", avgCost: "$8,250", price: "$4,500 – $12,000", time: "1 – 2 Days", roi: "58%", difficulty: "Easy" },
 ];
 const steps = [
   { icon: Search, title: "Choose Your Project", desc: "Select from 100+ home improvement projects" },
@@ -297,22 +297,42 @@ function Landing() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {projects.map((p) => (
-            <article key={p.name} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition">
+            <a key={p.name} href="#" className="group block rounded-xl overflow-hidden border border-border bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="relative aspect-[4/3] overflow-hidden">
-                <img src={p.img} alt={p.name} loading="lazy" width={1024} height={1024} className="h-full w-full object-cover group-hover:scale-105 transition duration-500" />
+                <img src={p.img} alt={p.name} loading="lazy" width={1024} height={1024} className="h-full w-full object-cover group-hover:scale-110 transition duration-700" />
+                <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
+                  {p.time}
+                </span>
                 <span className="absolute bottom-2 left-2 grid h-8 w-8 place-items-center rounded-lg bg-card/95 text-primary shadow">
                   <p.icon className="h-4 w-4" />
                 </span>
               </div>
-              <div className="p-3">
+              <div className="p-4">
                 <h3 className="text-sm font-semibold text-ink truncate">{p.name}</h3>
-                <div className="mt-1 text-xs text-muted-foreground">{p.price}</div>
-                <div className="text-xs text-muted-foreground">{p.time}</div>
-                <a href="#" className="mt-3 inline-flex items-center gap-1 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition">
-                  Calculate Estimate
-                </a>
+                <div className="mt-2 flex items-baseline gap-1">
+                  <span className="font-display text-lg font-bold text-ink">{p.avgCost}</span>
+                  <span className="text-[10px] text-muted-foreground">avg.</span>
+                </div>
+                <div className="mt-1 text-[10px] text-muted-foreground">{p.price}</div>
+                <div className="mt-3 flex items-center gap-3 text-[10px]">
+                  <span className="inline-flex items-center gap-1 text-success font-medium">
+                    <TrendingUp className="h-3 w-3" /> ROI {p.roi}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 font-medium ${
+                    p.difficulty === 'Easy' ? 'text-success' : 
+                    p.difficulty === 'Medium' ? 'text-yellow-600' : 'text-destructive'
+                  }`}>
+                    {p.difficulty === 'Easy' && '●'}
+                    {p.difficulty === 'Medium' && '●●'}
+                    {p.difficulty === 'Hard' && '●●●'}
+                    {' '}{p.difficulty}
+                  </span>
+                </div>
+                <div className="mt-3 inline-flex items-center gap-1 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
+                  Get Estimate
+                </div>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </section>
