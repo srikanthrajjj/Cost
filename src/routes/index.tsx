@@ -95,7 +95,7 @@ function Landing() {
           <div className="flex items-center gap-10">
             <Logo />
             <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
-              {["Projects","Calculators","Compare","Guides","ROI Center","Resources"].map((l) => (
+              {["Projects","Compare","Guides","Resources"].map((l) => (
                 <a key={l} href="#" className="hover:text-foreground transition-colors">{l}</a>
               ))}
             </nav>
