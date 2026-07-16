@@ -570,7 +570,7 @@ function Landing() {
 
           {/* Hero visual */}
           <div className="relative hidden lg:block">
-            <div className="relative overflow-hidden rounded-2xl border border-border shadow-lg">
+            <div className="relative overflow-hidden rounded-2xl border border-border">
               <img src="/home.png" alt="Modern home with lit windows at dusk" width={1024} height={1024} className="w-full h-[460px] object-cover" />
               
               {/* Hotspot markers */}
