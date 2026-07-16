@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BuildIntel — Plan your next home project with confidence" },
+      { title: "CostReno — Accurate Cost, Smarter Renovations" },
       { name: "description", content: "Accurate home improvement estimates, expert guidance, and data-driven insights. 100+ interactive calculators updated weekly." },
-      { name: "author", content: "BuildIntel" },
-      { property: "og:title", content: "BuildIntel — Real home improvement costs" },
+      { name: "author", content: "CostReno" },
+      { property: "og:title", content: "CostReno — Real home improvement costs" },
       { property: "og:description", content: "Plan any home improvement project with confidence. 100+ calculators, local pricing data, trusted by 1M+ homeowners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@BuildIntel" },
+      { name: "twitter:site", content: "@CostReno" },
     ],
     links: [
       {

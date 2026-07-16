@@ -246,7 +246,7 @@ function Landing() {
       {/* HOW IT WORKS */}
       <section className="container-x py-10">
         <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
-          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">How BuildIntel Works</h2>
+          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">How CostReno Works</h2>
           <div className="mt-10 grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-2 relative">
             {steps.map((s, i) => (
               <div key={s.title} className="relative text-center px-2">
@@ -348,7 +348,7 @@ function Landing() {
       {/* WHY TRUST */}
       <section className="container-x py-10">
         <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
-          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">Why Homeowners Trust BuildIntel</h2>
+          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">Why Homeowners Trust CostReno</h2>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {trust.map((t) => (
               <div key={t.title} className="flex gap-3">
@@ -463,7 +463,7 @@ function Landing() {
         </div>
         <div className="border-t border-border">
           <div className="container-x py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-            <div>© 2025 BuildIntel. All rights reserved.</div>
+            <div>© 2025 CostReno. All rights reserved.</div>
             <div className="inline-flex items-center gap-1">Made with <span className="text-red-500">♥</span> for homeowners</div>
           </div>
         </div>
