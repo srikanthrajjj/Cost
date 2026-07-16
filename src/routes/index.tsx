@@ -426,8 +426,8 @@ function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="pt-10 md:pt-16 pb-16 bg-white overflow-hidden">
-        <div className="container-x">
+      <section className="relative pt-10 md:pt-16 pb-16 bg-white overflow-hidden">
+        <div className="container-x relative">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
@@ -547,12 +547,12 @@ function Landing() {
             </div>
 
           </div>
-
-          {/* Hero visual */}
-          <div className="hidden lg:flex items-center justify-center">
-            <img src="/home.png" alt="Modern home with lit windows at dusk" className="w-full max-h-[849px] object-contain" />
-          </div>
         </div>
+        </div>
+
+        {/* Hero visual - breaks out of grid */}
+        <div className="hidden lg:block absolute right-0 top-0 h-full w-[55%]">
+          <img src="/home.png" alt="Modern home with lit windows at dusk" className="w-full h-full object-contain" />
         </div>
       </section>
 
