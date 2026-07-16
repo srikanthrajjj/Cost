@@ -93,7 +93,7 @@ function Landing() {
               <Search className="h-4 w-4" />
             </button>
             <a href="#" className="hidden sm:inline text-sm font-medium hover:text-primary">Log in</a>
-            <a href="#" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition">
+            <a href="#" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-sm hover:bg-accent/90 transition">
               Start Planning
             </a>
           </div>
@@ -281,7 +281,7 @@ function Landing() {
                   <Field label="Material" value="Architectural Shingles" />
                 </div>
               </div>
-              <button className="mt-6 w-full rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+              <button className="mt-6 w-full rounded-lg bg-accent py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90">
                 Calculate My Estimate
               </button>
             </div>
@@ -425,7 +425,7 @@ function Landing() {
             <p className="mt-1 text-sm text-muted-foreground">Get expert tips, cost trends, and project checklists straight to your inbox.</p>
             <form className="mt-4 flex gap-2 max-w-md">
               <input type="email" placeholder="Enter your email" className="flex-1 rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring" />
-              <button className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">Subscribe Free</button>
+              <button className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90">Subscribe Free</button>
             </form>
           </div>
           <div className="flex md:flex-col gap-6 md:gap-4 text-center md:text-left md:border-l md:border-border md:pl-8">
