@@ -231,8 +231,8 @@ function Landing() {
                 <h3 className="text-sm font-semibold text-ink truncate">{p.name}</h3>
                 <div className="mt-1 text-xs text-muted-foreground">{p.price}</div>
                 <div className="text-xs text-muted-foreground">{p.time}</div>
-                <a href="#" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                  Calculate Estimate <ArrowRight color="white" className="h-3 w-3" />
+                <a href="#" className="mt-3 inline-flex items-center gap-1 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary hover:text-primary-foreground transition">
+                  Calculate Estimate
                 </a>
               </div>
             </article>
