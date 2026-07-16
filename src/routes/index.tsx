@@ -111,7 +111,7 @@ function Landing() {
               <Check className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
             </span>
             <h1 className="mt-5 font-display text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
-              Know the real cost before you spend.
+              Plan your next home project with confidence.
             </h1>
             <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-lg">
               Accurate estimates, expert guidance, and data-driven insights to help you plan any home improvement project with confidence.

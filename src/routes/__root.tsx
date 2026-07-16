@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BuildIntel — Know the real cost before you spend" },
+      { title: "BuildIntel — Plan your next home project with confidence" },
       { name: "description", content: "Accurate home improvement estimates, expert guidance, and data-driven insights. 100+ interactive calculators updated weekly." },
       { name: "author", content: "BuildIntel" },
       { property: "og:title", content: "BuildIntel — Real home improvement costs" },
