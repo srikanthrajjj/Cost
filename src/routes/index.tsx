@@ -872,7 +872,7 @@ function Landing() {
         <div className="max-w-[1440px] mx-auto">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="font-display text-[56px] md:text-[64px] font-bold text-ink leading-[1.08] mb-4">
+              <h2 className="font-display text-[28px] md:text-[32px] font-bold text-ink leading-[1.08] mb-4">
                 What project are you planning?
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
@@ -925,7 +925,7 @@ function Landing() {
                       </div>
 
                       <div className="pt-3 border-t border-border/30">
-                        <div className="w-full rounded-md border border-primary px-4 py-2.5 text-xs font-semibold text-primary text-center group-hover:bg-accent group-hover:text-white group-hover:border-accent transition-colors cursor-pointer">
+                        <div className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent text-center hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer">
                           Get Estimate
                         </div>
                       </div>
