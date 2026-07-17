@@ -9,6 +9,10 @@ import {
   Send, X, Bot, MessageCircle,
   Maximize2, Minimize2, ThumbsUp, ThumbsDown,
 } from "lucide-react";
+import { calculateEstimate } from "@/lib/estimator-engine";
+import { getActiveSteps } from "@/lib/estimator-steps";
+import type { EstimatorAnswers } from "@/lib/estimator-engine";
+import type { Question } from "@/lib/estimator-steps";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -371,13 +375,181 @@ function QuickEstimate() {
   );
 }
 
+// ─── Inline Chat Estimator Widget ─────────────────────────────────────────────
+const PROJECT_ICONS_CHAT: Record<string, string> = {
+  roof: "🏠", kitchen: "🍳", bathroom: "🚿", hvac: "❄️",
+  windows: "🪟", flooring: "🪵", painting: "🖌️", solar: "☀️",
+  deck: "🌿", plumbing: "🔧", electrical: "⚡",
+};
+
+function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }) {
+  const [answers, setAnswers] = useState<EstimatorAnswers>({});
+  const [stepIdx, setStepIdx] = useState(0);
+  const [questionIdx, setQuestionIdx] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const steps = getActiveSteps(answers);
+  const currentStep = steps[stepIdx];
+  const questions = currentStep?.questions ?? [];
+  const currentQuestion: Question | undefined = questions[questionIdx];
+  const estimate = calculateEstimate(answers);
+  const hasEstimate = estimate.mid > 0;
+
+  const setAnswer = (key: keyof EstimatorAnswers, value: unknown) =>
+    setAnswers(prev => ({ ...prev, [key]: value }));
+
+  const advance = () => {
+    let nextQ = questionIdx + 1;
+    while (nextQ < questions.length) {
+      if (!questions[nextQ].showIf || questions[nextQ].showIf!(answers)) break;
+      nextQ++;
+    }
+    if (nextQ < questions.length) { setQuestionIdx(nextQ); return; }
+    let nextS = stepIdx + 1;
+    const newSteps = getActiveSteps({ ...answers });
+    while (nextS < newSteps.length) {
+      if (!newSteps[nextS].showIf || newSteps[nextS].showIf!(answers)) break;
+      nextS++;
+    }
+    if (nextS < newSteps.length) { setStepIdx(nextS); setQuestionIdx(0); }
+    else { setFinished(true); }
+  };
+
+  const handleSelect = (key: keyof EstimatorAnswers, value: unknown) => {
+    setAnswer(key, value);
+    setTimeout(advance, 200);
+  };
+
+  useEffect(() => {
+    if (finished && hasEstimate) {
+      const breakdown = estimate.breakdown.map(b => `${b.label}: $${b.amount.toLocaleString()}`).join(" · ");
+      const summary = `Here's your estimate summary:\n\n**Estimated Cost: $${estimate.mid.toLocaleString()}**\nRange: $${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}\nConfidence: ${estimate.confidence}%\nTimeline: ${estimate.timeline}\nPermit required: ${estimate.permitRequired ? "Yes" : "No"}\nInsurance eligible: ${estimate.insuranceEligible ? "Possibly — check your policy" : "Not typically"}\n\n${breakdown}\n\nWant me to help you analyze a contractor quote, check insurance coverage, or compare materials?`;
+      onComplete(summary);
+    }
+  }, [finished]);
+
+  const totalSteps = steps.length;
+  const progress = Math.round(((stepIdx + (questionIdx + 1) / Math.max(questions.length, 1)) / totalSteps) * 100);
+
+  if (finished) return null;
+  if (!currentQuestion) return null;
+
+  return (
+    <div className="rounded-2xl border border-accent/20 bg-white overflow-hidden w-full max-w-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-[#082A4B]">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-accent" />
+          <span className="text-xs font-bold text-white tracking-wide">COST ESTIMATOR</span>
+        </div>
+        {hasEstimate && (
+          <span className="text-xs font-bold text-accent">${estimate.mid.toLocaleString()}</span>
+        )}
+      </div>
+      {/* Progress */}
+      <div className="h-1 bg-muted">
+        <div className="h-full bg-accent transition-all duration-500" style={{ width: `${progress}%` }} />
+      </div>
+      {/* Question */}
+      <div className="px-4 py-4 space-y-3">
+        <div className="text-[10px] font-bold text-accent uppercase tracking-wider">{currentStep?.title}</div>
+        <div className="text-sm font-bold text-ink leading-snug">{currentQuestion.title}</div>
+        {/* Choices */}
+        {(currentQuestion.type === "cards" || currentQuestion.type === "select-grid") && (
+          <div className="grid grid-cols-2 gap-2">
+            {currentQuestion.choices!.map((c) => {
+              const isSelected = answers[currentQuestion.id] === c.value;
+              return (
+                <button key={c.value} onClick={() => handleSelect(currentQuestion.id, c.value)}
+                  className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all duration-150 text-xs
+                    ${isSelected ? "border-accent bg-accent/8 text-accent" : "border-border bg-muted/20 hover:border-accent/40 hover:bg-accent/4 text-ink"}`}>
+                  {c.icon && <span className="text-base leading-none shrink-0">{c.icon}</span>}
+                  <div className="min-w-0">
+                    <div className="font-semibold truncate">{c.label}</div>
+                    {c.desc && currentQuestion.type === "cards" && (
+                      <div className="text-[10px] text-muted-foreground">{c.desc.replace("Avg", "From")}</div>
+                    )}
+                  </div>
+                  {isSelected && <Check className="h-3 w-3 ml-auto shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {currentQuestion.type === "toggle" && (
+          <div className="flex gap-2">
+            {[{ v: true, label: "Yes" }, { v: false, label: "No" }].map(({ v, label }) => (
+              <button key={label} onClick={() => handleSelect(currentQuestion.id, v)}
+                className={`flex-1 h-10 rounded-xl border-2 text-sm font-semibold transition-all
+                  ${answers[currentQuestion.id] === v ? "border-accent bg-accent/8 text-accent" : "border-border bg-muted/20 text-ink hover:border-accent/40"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+        {(currentQuestion.type === "number" || currentQuestion.type === "text") && (
+          <div className="flex gap-2">
+            <input type={currentQuestion.type === "number" ? "number" : "text"}
+              placeholder={currentQuestion.placeholder}
+              onChange={(e) => setAnswer(currentQuestion.id, currentQuestion.type === "number" ? parseFloat(e.target.value) : e.target.value)}
+              className="flex-1 h-10 rounded-xl border-2 border-border bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-accent transition"
+            />
+            <button onClick={advance}
+              className="px-4 h-10 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent/90 transition">
+              Next
+            </button>
+          </div>
+        )}
+        {currentQuestion.type === "budget" && (
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <input type="number" placeholder="Your budget"
+                onChange={(e) => setAnswer(currentQuestion.id, parseFloat(e.target.value))}
+                className="flex-1 h-10 rounded-xl border-2 border-border bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-accent transition"
+              />
+              <button onClick={advance} className="px-4 h-10 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent/90 transition">Next</button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {[10000, 25000, 50000, 100000].map(p => (
+                <button key={p} onClick={() => { setAnswer(currentQuestion.id, p); setTimeout(advance, 200); }}
+                  className="px-2.5 py-1 rounded-full border border-border text-[11px] font-semibold text-muted-foreground hover:border-accent hover:text-accent transition">
+                  ${(p/1000).toFixed(0)}k
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Skip + live estimate */}
+        <div className="flex items-center justify-between pt-1">
+          {currentQuestion.optional && (
+            <button onClick={advance} className="text-[11px] text-muted-foreground hover:text-ink transition underline underline-offset-2">
+              Skip
+            </button>
+          )}
+          {hasEstimate && (
+            <div className="ml-auto text-[11px] text-muted-foreground">
+              Est. <span className="font-bold text-accent">${estimate.mid.toLocaleString()}</span>
+              <span className="ml-1 opacity-60">({estimate.confidence}% conf.)</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const [chatMessages, setChatMessages] = useState<{
+    role: "user" | "ai" | "widget";
+    text: string;
+    widgetType?: "estimator";
+    widgetDone?: boolean;
+  }[]>([]);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [userLocation, setUserLocation] = useState<string | null>(null);
@@ -387,9 +559,151 @@ function Landing() {
 
   const SK_API_KEY = import.meta.env.VITE_SK_API_KEY || "";
 
+  // ─── Platform context the AI knows about ───────────────────────────────────
+  const PLATFORM_CONTEXT = `
+CostReno Platform Tools & Sections:
+- Cost Estimator: enter project type, ZIP, square footage → instant cost breakdown
+- AI Quote Analyzer: upload or paste a contractor quote → detect overcharges, red flags
+- Material Comparator: compare 2+ materials side-by-side (cost, durability, ROI, maintenance)
+- Insurance Coverage Guide: explain what homeowners insurance covers for renovations
+- Project Guides & Advice: 100+ step-by-step guides for every home project
+- Renovation Plan Generator: create a phased, budgeted renovation roadmap
+- Contractor Checklist: vetting questions and red-flag warnings before hiring
+- ROI Calculator: estimate resale value increase per project
+
+Projects covered: Roof Replacement ($8,600–$24,700), Kitchen Remodel ($25,000–$75,000),
+Bathroom Remodel ($8,000–$30,000), HVAC Replacement ($4,500–$12,000),
+Window Replacement ($6,000–$21,000), Solar Panels ($15,000–$35,000),
+Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500–$4,500), Painting ($2,000–$6,000).
+`;
+
+  // ─── Action cards the AI can suggest ───────────────────────────────────────
+  type ActionCard = {
+    icon: string;
+    label: string;
+    desc: string;
+    action: string; // identifier for what happens on click
+  };
+
+  // Parse [ACTION:label:desc:action] tags from AI response
+  const parseActions = (text: string): { clean: string; actions: ActionCard[] } => {
+    const actions: ActionCard[] = [];
+    const icons: Record<string, string> = {
+      estimate: "🧮", quote: "📋", material: "⚖️", insurance: "🛡️",
+      guide: "📖", plan: "🗺️", contractor: "🔍", roi: "📈", chat: "💬",
+    };
+    const clean = text.replace(/\[ACTION:([^:]+):([^:]+):([^\]]+)\]/g, (_, label, desc, action) => {
+      actions.push({ icon: icons[action] || "→", label, desc, action });
+      return "";
+    });
+    return { clean: clean.trim(), actions };
+  };
+
+  // ─── Markdown renderer ──────────────────────────────────────────────────────
+  const renderMarkdown = (text: string) => {
+    const lines = text.split("\n");
+    const elements: React.ReactNode[] = [];
+    let i = 0;
+
+    const renderInline = (raw: string): React.ReactNode => {
+      const parts = raw.split(/(\*\*[^*]+\*\*)/g);
+      return parts.map((part, idx) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={idx} className="font-semibold text-ink">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={idx}>{part}</span>;
+      });
+    };
+
+    while (i < lines.length) {
+      const line = lines[i].trim();
+      if (!line) { i++; continue; }
+
+      if (line.startsWith("- ") || line.startsWith("• ")) {
+        const listItems: React.ReactNode[] = [];
+        while (i < lines.length && (lines[i].trim().startsWith("- ") || lines[i].trim().startsWith("• "))) {
+          const content = lines[i].trim().replace(/^[-•]\s/, "");
+          listItems.push(
+            <li key={i} className="flex items-start gap-2 text-sm text-ink/80 leading-relaxed">
+              <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+              <span>{renderInline(content)}</span>
+            </li>
+          );
+          i++;
+        }
+        elements.push(<ul key={`ul-${i}`} className="space-y-1.5 my-2">{listItems}</ul>);
+        continue;
+      }
+
+      if (/^\d+\.\s/.test(line)) {
+        const listItems: React.ReactNode[] = [];
+        let num = 1;
+        while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+          const content = lines[i].trim().replace(/^\d+\.\s/, "");
+          listItems.push(
+            <li key={i} className="flex items-start gap-2.5 text-sm text-ink/80 leading-relaxed">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5">{num}</span>
+              <span>{renderInline(content)}</span>
+            </li>
+          );
+          i++; num++;
+        }
+        elements.push(<ol key={`ol-${i}`} className="space-y-1.5 my-2">{listItems}</ol>);
+        continue;
+      }
+
+      if (/\$[\d,]+/.test(line)) {
+        elements.push(
+          <div key={i} className="my-2 px-3 py-2.5 rounded-xl bg-accent/8 border border-accent/20 text-sm text-ink leading-relaxed">
+            {renderInline(line)}
+          </div>
+        );
+        i++; continue;
+      }
+
+      elements.push(<p key={i} className="text-sm text-ink/80 leading-relaxed">{renderInline(line)}</p>);
+      i++;
+    }
+
+    return <div className="space-y-1">{elements}</div>;
+  };
+
+  // ─── Render a full AI message (text + action cards) ─────────────────────────
+  const renderAIMessage = (rawText: string, onAction: (a: ActionCard) => void) => {
+    const { clean, actions } = parseActions(rawText);
+    return (
+      <div className="space-y-3">
+        {renderMarkdown(clean)}
+        {actions.length > 0 && (
+          <div className="flex flex-col gap-2 pt-1">
+            {actions.map((a, idx) => (
+              <button
+                key={idx}
+                onClick={() => onAction(a)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 hover:border-accent/60 transition text-left group"
+              >
+                <span className="text-lg leading-none">{a.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-ink group-hover:text-accent transition">{a.label}</div>
+                  <div className="text-[11px] text-muted-foreground">{a.desc}</div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-accent shrink-0 opacity-0 group-hover:opacity-100 transition" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ─── Scrollable ref ──────────────────────────────────────────────────────────
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
+  // ─── AI API call ─────────────────────────────────────────────────────────────
   const getAIResponse = async (messages: { role: "user" | "ai"; text: string }[]): Promise<string> => {
     if (!SK_API_KEY) {
-      return "API key not configured. Please set VITE_SK_API_KEY in your environment variables.";
+      return "API key not configured. Please set VITE_SK_API_KEY in your environment.";
     }
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -401,31 +715,115 @@ function Landing() {
           "X-Title": "CostReno AI",
         },
         body: JSON.stringify({
-          model: "openai/gpt-4o-mini",
+          model: "deepseek/deepseek-chat",
           messages: [
             {
               role: "system",
-              content: "You are CostReno AI, a helpful home renovation cost estimator. Provide accurate, concise answers about renovation costs, materials, timelines, and contractor recommendations. Keep responses under 150 words. Always provide dollar amounts and typical ranges when discussing costs.",
+              content: `You are CostReno AI — the intelligent renovation copilot embedded in the CostReno platform. You are NOT a generic chatbot. You are the navigation layer for an entire home renovation platform.
+
+${PLATFORM_CONTEXT}
+
+YOUR ROLE:
+You help homeowners at every stage — from "I have no idea where to start" to "I need to vet a contractor quote." You guide them to the right tool, guide, or action on the platform.
+
+CAPABILITIES YOU CAN INVOKE:
+When your answer naturally leads to a platform tool, append one or more ACTION tags at the END of your response (never in the middle). Format exactly:
+[ACTION:Button Label:Short description:action_key]
+
+Action keys: estimate, quote, material, insurance, guide, plan, contractor, roi
+
+EXAMPLES:
+- User has water damage → answer + [ACTION:Run Bathroom Estimator:Get an instant cost range:estimate][ACTION:Read Water Damage Guide:Step-by-step repair guide:guide][ACTION:Check Insurance Coverage:See what your policy may cover:insurance]
+- User wants to compare materials → answer + [ACTION:Compare Materials Side-by-Side:Pick 2 materials to compare:material]
+- User got a contractor quote → answer + [ACTION:Analyze My Quote:Detect overcharges and red flags:quote]
+- User wants a renovation plan → answer + [ACTION:Build My Renovation Plan:Create a phased roadmap:plan]
+- User asks "how much does X cost?" or "estimate my project" → ALWAYS add [ACTION:Run Cost Estimator:Get your personalized estimate in 2 min:estimate]
+
+FORMATTING RULES:
+- Use **bold** for key terms and dollar amounts
+- Use bullet points for lists (- item)
+- Use numbered steps for sequences (1. step)
+- Keep answers under 180 words
+- Tone: warm, direct, like a knowledgeable friend
+- Do NOT use markdown headers (##)
+- Always include cost ranges with $ when relevant
+- Location context: ${userLocation ? `User is in ${userLocation}` : "Location unknown"}`,
             },
             ...messages.map((m) => ({
-              role: m.role as "user" | "assistant",
+              role: (m.role === "ai" ? "assistant" : "user") as "user" | "assistant",
               content: m.text,
             })),
           ],
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
       const data = await response.json();
-      return data.choices?.[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try asking your question again.";
+      return data.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
     } catch (error) {
       console.error("AI API error:", error);
-      return "Sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a moment.";
+      return "I'm having trouble connecting right now. Please try again in a moment.";
     }
   };
+
+  // ─── Handle action card clicks ───────────────────────────────────────────────
+  const handleAction = async (action: ActionCard) => {
+    if (action.action === "estimate") {
+      // Inject inline estimator widget instead of a text prompt
+      setChatMessages(prev => [
+        ...prev,
+        { role: "user", text: "I'd like to run the cost estimator." },
+        { role: "widget", text: "", widgetType: "estimator", widgetDone: false },
+      ]);
+      setTimeout(scrollToBottom, 50);
+      return;
+    }
+    const prompts: Record<string, string> = {
+      quote: "I have a contractor quote I'd like you to analyze.",
+      material: "Help me compare materials for my project.",
+      insurance: "Explain what homeowners insurance typically covers for renovation damage.",
+      guide: "Show me a step-by-step guide for my project.",
+      plan: "Help me create a renovation plan and budget roadmap.",
+      contractor: "Give me a contractor vetting checklist and questions to ask.",
+      roi: "Calculate the ROI and resale value impact for my renovation.",
+    };
+    const prompt = prompts[action.action] || `Tell me more about: ${action.label}`;
+    const newMessages = [...chatMessages, { role: "user" as const, text: prompt }];
+    setChatMessages(newMessages);
+    setIsAiTyping(true);
+    setTimeout(scrollToBottom, 50);
+    const aiResponse = await getAIResponse(newMessages);
+    setChatMessages(prev => [...prev, { role: "ai", text: aiResponse }]);
+    setIsAiTyping(false);
+    setTimeout(scrollToBottom, 50);
+  };
+
+  // ─── Handle estimator widget completion ────────────────────────────────────
+  const handleEstimatorComplete = async (summary: string) => {
+    // Mark widget as done, then post AI follow-up
+    setChatMessages(prev => prev.map(m =>
+      m.role === "widget" && m.widgetType === "estimator" && !m.widgetDone
+        ? { ...m, widgetDone: true }
+        : m
+    ));
+    const historyMessages = chatMessages
+      .filter(m => m.role !== "widget")
+      .map(m => ({ role: m.role as "user" | "ai", text: m.text }));
+    const withSummary = [...historyMessages, { role: "ai" as const, text: summary }];
+    setChatMessages(prev => [...prev, { role: "ai", text: summary }]);
+    setIsAiTyping(true);
+    setTimeout(scrollToBottom, 50);
+    // Ask AI to provide smart next-step guidance based on the estimate
+    const followUpMessages = [...withSummary, {
+      role: "user" as const,
+      text: "Based on this estimate, what should I do next? Give me 2-3 smart recommendations."
+    }];
+    const followUp = await getAIResponse(followUpMessages);
+    setChatMessages(prev => [...prev, { role: "ai", text: followUp }]);
+    setIsAiTyping(false);
+    setTimeout(scrollToBottom, 50);
+  };
+
 
   const searchTerms = [
     "kitchen remodels",
@@ -593,6 +991,23 @@ function Landing() {
                     }}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter") {
+                        const query = searchQuery.trim();
+                        setChatOpen(true);
+                        setShowSuggestions(false);
+                        if (query) {
+                          const newMessages = [{ role: "user" as const, text: query }];
+                          setChatMessages(newMessages);
+                          setChatInput("");
+                          setSearchQuery("");
+                          setIsAiTyping(true);
+                          const aiResponse = await getAIResponse(newMessages);
+                          setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
+                          setIsAiTyping(false);
+                        }
+                      }
+                    }}
                     className="w-full bg-transparent text-base outline-none text-ink"
                   />
                   {searchQuery.length === 0 && (
@@ -604,13 +1019,19 @@ function Landing() {
                   )}
                 </div>
                 <button
-                  onClick={() => {
-                    if (searchQuery.trim()) {
-                      setChatMessages([{ role: "user", text: searchQuery }]);
+                  onClick={async () => {
+                    const query = searchQuery.trim();
+                    setChatOpen(true);
+                    if (query) {
+                      const newMessages = [{ role: "user" as const, text: query }];
+                      setChatMessages(newMessages);
                       setChatInput("");
                       setSearchQuery("");
+                      setIsAiTyping(true);
+                      const aiResponse = await getAIResponse(newMessages);
+                      setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
+                      setIsAiTyping(false);
                     }
-                    setChatOpen(true);
                   }}
                   className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-white hover:bg-accent/90 transition shrink-0"
                 >
@@ -738,27 +1159,65 @@ function Landing() {
             <div className={`flex-1 overflow-y-auto py-5 space-y-5 ${isFullScreen ? "px-5" : "px-5"}`}>
               <div className={`mx-auto space-y-5 ${isFullScreen ? "max-w-xl" : ""}`}>
               {chatMessages.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                  <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-5">
-                    <MessageCircle className="h-8 w-8 text-accent" />
+                <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                  <div className="w-16 h-16 rounded-2xl bg-[#082A4B] flex items-center justify-center mb-5 shadow-lg">
+                    <Sparkles className="h-8 w-8 text-accent" />
                   </div>
-                  <p className="text-base font-semibold text-ink">How can I help you today?</p>
-                  <p className="text-sm text-muted-foreground mt-1.5 max-w-xs">Ask about costs, materials, timelines, or contractors for any home project</p>
-                  <div className="flex flex-wrap gap-2 mt-6 justify-center max-w-md">
-                    {["What does a kitchen remodel cost?", "Best roofing materials?", "How long does HVAC take?"].map((q) => (
+                  <p className="text-base font-bold text-ink">Your renovation copilot is ready</p>
+                  <p className="text-sm text-muted-foreground mt-1.5 max-w-xs leading-relaxed">
+                    Ask anything — I'll answer, estimate costs, compare materials, and guide you to the right tool.
+                  </p>
+
+                  {/* Capability pills */}
+                  <div className="flex flex-wrap gap-2 mt-5 justify-center max-w-sm">
+                    {[
+                      { emoji: "🧮", label: "Estimate costs" },
+                      { emoji: "📋", label: "Analyze a quote" },
+                      { emoji: "⚖️", label: "Compare materials" },
+                      { emoji: "🛡️", label: "Insurance coverage" },
+                      { emoji: "🗺️", label: "Build a plan" },
+                      { emoji: "📖", label: "Project guides" },
+                    ].map((pill) => (
+                      <span key={pill.label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 text-xs text-muted-foreground font-medium border border-border/50">
+                        {pill.emoji} {pill.label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Starter questions */}
+                  <div className="mt-6 w-full max-w-sm space-y-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium text-left px-1">Try asking</p>
+                    {[
+                      "I have water damage in my bathroom — what should I do?",
+                      "Is my contractor quote of $18,000 for a roof fair?",
+                      "What's the best material for a wet bathroom floor?",
+                      "Help me plan a full home renovation under $50,000",
+                    ].map((q) => (
                       <button
                         key={q}
                         onClick={async () => {
+                          const isEstimateQ = /how much|cost|estimate|price/i.test(q);
+                          if (isEstimateQ) {
+                            setChatMessages([
+                              { role: "user", text: q },
+                              { role: "widget", text: "", widgetType: "estimator", widgetDone: false },
+                            ]);
+                            setTimeout(scrollToBottom, 50);
+                            return;
+                          }
                           const newMessages = [{ role: "user" as const, text: q }];
                           setChatMessages(newMessages);
                           setIsAiTyping(true);
+                          setTimeout(scrollToBottom, 50);
                           const aiResponse = await getAIResponse(newMessages);
-                          setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
+                          setChatMessages(prev => [...prev, { role: "ai", text: aiResponse }]);
                           setIsAiTyping(false);
+                          setTimeout(scrollToBottom, 50);
                         }}
-                        className="px-4 py-2 rounded-full border border-border text-sm text-muted-foreground hover:text-foreground hover:border-accent/50 hover:bg-accent/5 transition"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background hover:border-accent/40 hover:bg-accent/5 transition text-left group"
                       >
-                        {q}
+                        <span className="text-sm text-ink/70 group-hover:text-ink transition leading-snug">{q}</span>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-accent shrink-0 transition" />
                       </button>
                     ))}
                   </div>
@@ -771,13 +1230,28 @@ function Landing() {
                     <div className="max-w-[75%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm bg-accent text-white">
                       {msg.text}
                     </div>
+                  ) : msg.role === "widget" && msg.widgetType === "estimator" ? (
+                    <div className="flex items-start gap-2.5 w-full max-w-[90%]">
+                      <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 mt-0.5">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        {!msg.widgetDone ? (
+                          <ChatEstimator onComplete={handleEstimatorComplete} />
+                        ) : (
+                          <div className="px-3 py-2 rounded-xl bg-accent/8 border border-accent/20 text-xs text-accent font-semibold flex items-center gap-2">
+                            <Check className="h-3.5 w-3.5" /> Estimate completed — see results below
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ) : (
-                    <div className="flex items-start gap-2.5 max-w-[80%]">
+                    <div className="flex items-start gap-2.5 max-w-[85%]">
                       <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 mt-0.5">
                         <Bot className="h-4 w-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm text-ink leading-relaxed">{msg.text}</div>
+                        <div className="text-sm text-ink leading-relaxed">{renderAIMessage(msg.text, handleAction)}</div>
                         <div className="flex items-center gap-3 mt-2">
                           <button className="text-muted-foreground/40 hover:text-accent transition">
                             <ThumbsUp className="h-3.5 w-3.5" />
@@ -804,6 +1278,7 @@ function Landing() {
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
               </div>
             </div>
 
@@ -820,12 +1295,14 @@ function Landing() {
                       setChatMessages(newMessages);
                       setIsAiTyping(true);
                       setChatInput("");
+                      setTimeout(scrollToBottom, 50);
                       const aiResponse = await getAIResponse(newMessages);
                       setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
                       setIsAiTyping(false);
+                      setTimeout(scrollToBottom, 50);
                     }
                   }}
-                  placeholder="Ask anything about your project..."
+                  placeholder="Ask me anything — costs, materials, insurance, plans..."
                   className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground/60"
                 />
                 <button
@@ -835,9 +1312,11 @@ function Landing() {
                       setChatMessages(newMessages);
                       setIsAiTyping(true);
                       setChatInput("");
+                      setTimeout(scrollToBottom, 50);
                       const aiResponse = await getAIResponse(newMessages);
                       setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
                       setIsAiTyping(false);
+                      setTimeout(scrollToBottom, 50);
                     }
                   }}
                   className="w-9 h-9 rounded-lg bg-foreground flex items-center justify-center text-background hover:bg-foreground/90 transition shrink-0"
@@ -967,7 +1446,7 @@ function Landing() {
 
                       <div className="pt-3 border-t border-border/30">
                         <div className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent text-center hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer">
-                          Get Estimate
+                          <a href="/estimate">Get Estimate</a>
                         </div>
                       </div>
                     </div>
@@ -989,6 +1468,210 @@ function Landing() {
                 </a>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SMART TOOLS */}
+      <section className="container-x py-24">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 mb-5">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span className="text-xs font-bold text-accent tracking-widest uppercase">Smart Tools</span>
+          </div>
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-ink leading-tight max-w-3xl mx-auto">
+            Everything you need to renovate with confidence
+          </h2>
+          <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            Powerful tools and AI-driven insights to help you plan, compare, and save on every project.
+          </p>
+        </div>
+
+        {/* Tool Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+          {/* Cost Estimator */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="3" width="20" height="22" rx="3" />
+                <rect x="7" y="6" width="14" height="5" rx="1.5" className="group-hover:fill-accent/20 transition-all duration-300" />
+                <line x1="8"  y1="22" x2="8"  y2="19" strokeWidth="2.5" className="group-hover:stroke-accent transition-colors duration-300" />
+                <line x1="12" y1="22" x2="12" y2="17" strokeWidth="2.5" className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:60ms]" />
+                <line x1="16" y1="22" x2="16" y2="20" strokeWidth="2.5" className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:120ms]" />
+                <line x1="20" y1="22" x2="20" y2="15" strokeWidth="2.5" className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:180ms]" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Cost Estimator</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Get accurate, local cost estimates for your project in minutes.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="/estimate" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">
+                Get Estimate <ArrowRight className="h-4 w-4" />
+              </a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">Learn More</a>
+            </div>
+          </div>
+
+          {/* Quote Review */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" />
+                <circle cx="13" cy="16" r="4" className="group-hover:stroke-accent transition-colors duration-300" />
+                <line x1="16" y1="19" x2="19.5" y2="22.5" strokeWidth="2.2" className="group-hover:stroke-accent transition-colors duration-300" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Quote Review</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Upload any contractor quote and get AI-powered analysis, spot overpricing, and missing items.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">Review a Quote <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">See How It Works</a>
+            </div>
+          </div>
+
+          {/* Insurance Checker */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 3L5 7v7c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V7L14 3z" />
+                <path d="M10 14l3 3 5-5" strokeWidth="2" className="group-hover:stroke-accent transition-all duration-500 [stroke-dasharray:14] [stroke-dashoffset:14] group-hover:[stroke-dashoffset:0]" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Insurance Checker</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Find out what's covered and maximize your insurance benefits.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">Check Coverage <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">Learn More</a>
+            </div>
+          </div>
+
+          {/* Material Compare */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 3L3 9l11 6 11-6-11-6z" />
+                <path d="M3 14l11 6 11-6" className="group-hover:translate-y-0.5 transition-transform duration-300" />
+                <path d="M3 19l11 6 11-6" className="group-hover:translate-y-0.5 transition-transform duration-500 [transition-delay:100ms]" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Material Compare</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Compare materials side-by-side on cost, durability, lifespan, and more.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">Compare Materials <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">View Comparisons</a>
+            </div>
+          </div>
+
+          {/* Budget Planner */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="14" cy="14" r="10" />
+                <path d="M14 14L14 4" strokeWidth="2" className="group-hover:stroke-accent transition-colors duration-200" />
+                <path d="M14 14 A10 10 0 0 1 22.7 19" strokeWidth="2.5" className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:100ms]" />
+                <circle cx="14" cy="14" r="2.5" className="fill-white group-hover:fill-accent/30 transition-all duration-200" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Budget Planner</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Plan your budget, explore options, and stay on track from start to finish.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">Plan Your Budget <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">Learn More</a>
+            </div>
+          </div>
+
+          {/* ROI Calculator */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3,22 9,16 14,19 21,9 25,5" className="group-hover:stroke-accent transition-colors duration-300" />
+                <polyline points="21,5 25,5 25,9" strokeWidth="2" className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:150ms]" />
+                <line x1="3" y1="25" x2="25" y2="25" className="opacity-25" />
+                <line x1="3" y1="4" x2="3" y2="25" className="opacity-25" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">ROI Calculator</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">See the return on investment and increase your home's value.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">Calculate ROI <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">Learn More</a>
+            </div>
+          </div>
+
+          {/* Project Timeline */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="5" width="22" height="20" rx="3" />
+                <line x1="3" y1="11" x2="25" y2="11" />
+                <line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" />
+                <line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" />
+                <circle cx="9"  cy="17" r="1.5" className="group-hover:fill-accent transition-all duration-200" />
+                <circle cx="14" cy="17" r="1.5" className="group-hover:fill-accent transition-all duration-300 [transition-delay:80ms]" />
+                <circle cx="19" cy="17" r="1.5" className="group-hover:fill-accent transition-all duration-300 [transition-delay:160ms]" />
+                <circle cx="9"  cy="22" r="1.5" className="group-hover:fill-accent transition-all duration-300 [transition-delay:240ms]" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Project Timeline</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Get a clear step-by-step timeline for your project from start to finish.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">View Timeline <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">Sample Timeline</a>
+            </div>
+          </div>
+
+          {/* Permit Guide */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-7 h-7 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" />
+                <line x1="10" y1="14"   x2="18" y2="14"   className="group-hover:stroke-accent transition-colors duration-200" />
+                <line x1="10" y1="17.5" x2="18" y2="17.5" className="group-hover:stroke-accent transition-colors duration-200 [transition-delay:60ms]" />
+                <line x1="10" y1="21"   x2="14" y2="21"   className="group-hover:stroke-accent transition-colors duration-200 [transition-delay:120ms]" />
+                <circle cx="20.5" cy="21.5" r="4" className="fill-white group-hover:fill-accent/10 transition-all duration-300" />
+                <path d="M18.5 21.5l1.5 1.5 2.5-2.5" strokeWidth="1.5" className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:150ms]" />
+              </svg>
+            </div>
+            <h3 className="font-display text-base font-bold text-ink mb-1.5">Permit Guide</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed flex-1">Find out which permits you need and estimated costs in your area.</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <a href="#" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors">Check Permits <ArrowRight className="h-4 w-4" /></a>
+              <a href="#" className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors">Guide & Requirements</a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom CTA banner */}
+        <div className="mt-8 rounded-2xl border border-border/60 bg-gradient-to-r from-muted/50 to-accent/5 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <Sparkles className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-ink">Not sure where to start?</div>
+              <div className="text-xs text-muted-foreground max-w-sm">Let CostReno AI guide you step-by-step based on your home and goals — get personalized recommendations in seconds.</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setChatOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition whitespace-nowrap shadow-sm shadow-accent/20"
+            >
+              <Sparkles className="h-4 w-4" /> Ask CostReno AI <ArrowRight className="h-4 w-4" />
+            </button>
+            <a href="#" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-white text-sm font-semibold text-ink hover:border-accent/40 transition whitespace-nowrap">
+              Explore All Projects <ArrowRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
