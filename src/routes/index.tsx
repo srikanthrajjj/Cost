@@ -5,7 +5,7 @@ import {
   Calculator, GitCompare, Shield, MapPin, Sparkles, Lock,
   ArrowRight, Star, Check, TrendingUp,
   Facebook, Instagram, Youtube, Linkedin,
-  Fan,
+  Fan, Sun, Square,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
@@ -13,6 +13,8 @@ import projRoof from "@/assets/proj-roof.jpg";
 import projKitchen from "@/assets/proj-kitchen.jpg";
 import projBathroom from "@/assets/proj-bathroom.jpg";
 import projHvac from "@/assets/proj-hvac.jpg";
+import projWindows from "@/assets/proj-windows.jpg";
+import projSolar from "@/assets/proj-solar.jpg";
 import cmpRoof from "@/assets/cmp-roof.jpg";
 import cmpCounter from "@/assets/cmp-counter.jpg";
 import cmpHvac from "@/assets/cmp-hvac.jpg";
@@ -37,6 +39,8 @@ const projects = [
   { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", avgCost: "$50,000", price: "$25,000 – $75,000", time: "4 – 8 Weeks", roi: "72%", difficulty: "Hard" },
   { img: projBathroom, icon: Bath, name: "Bathroom Remodel", avgCost: "$19,000", price: "$8,000 – $30,000", time: "2 – 4 Weeks", roi: "65%", difficulty: "Medium" },
   { img: projHvac, icon: Fan, name: "HVAC Replacement", avgCost: "$8,250", price: "$4,500 – $12,000", time: "1 – 2 Days", roi: "58%", difficulty: "Easy" },
+  { img: projWindows, icon: Square, name: "Window Replacement", avgCost: "$12,500", price: "$6,000 – $21,000", time: "1 – 3 Days", roi: "72%", difficulty: "Medium" },
+  { img: projSolar, icon: Sun, name: "Solar Panel Installation", avgCost: "$25,000", price: "$15,000 – $35,000", time: "2 – 3 Days", roi: "80%", difficulty: "Hard" },
 ];
 const steps = [
   { icon: Search, title: "Choose Your Project", desc: "Select from 100+ home improvement projects" },
@@ -564,7 +568,7 @@ function Landing() {
             View all projects <ArrowRight color="white" className="h-3.5 w-3.5" />
           </a>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
           {projects.map((p) => (
             <a key={p.name} href="#" className="group block rounded-xl overflow-hidden border border-border bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="relative aspect-[4/3] overflow-hidden">
