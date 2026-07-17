@@ -1,0 +1,277 @@
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export type ProjectType =
+  | "roof" | "kitchen" | "bathroom" | "hvac" | "windows"
+  | "flooring" | "painting" | "solar" | "deck" | "plumbing" | "electrical";
+
+export interface EstimatorAnswers {
+  // Step 1 — Project
+  projectType?: ProjectType;
+
+  // Step 2 — Location
+  zipCode?: string;
+  city?: string;
+  state?: string;
+
+  // Step 3 — Property
+  propertyType?: "single-family" | "condo" | "townhouse" | "multi-family";
+  yearBuilt?: number;
+  squareFootage?: number;
+  stories?: number;
+
+  // Step 4 — Project Details (dynamic per project)
+  // Roof
+  roofAction?: "repair" | "replace";
+  roofMaterial?: "asphalt" | "metal" | "tile" | "wood" | "slate";
+  roofSize?: number;
+  roofCondition?: "good" | "fair" | "poor";
+  addGutters?: boolean;
+  addSkylights?: boolean;
+
+  // Kitchen
+  kitchenScope?: "full" | "partial";
+  kitchenCabinets?: "stock" | "semi-custom" | "custom";
+  kitchenCountertops?: "laminate" | "quartz" | "granite" | "marble";
+  kitchenFlooring?: "tile" | "hardwood" | "vinyl" | "none";
+  kitchenAppliances?: boolean;
+
+  // Bathroom
+  bathroomScope?: "full" | "partial";
+  bathroomFixtures?: "standard" | "mid-range" | "luxury";
+  bathroomTile?: boolean;
+  bathroomCount?: number;
+
+  // HVAC
+  hvacAction?: "repair" | "replace";
+  hvacType?: "central-air" | "heat-pump" | "furnace" | "mini-split";
+  hvacSize?: "small" | "medium" | "large";
+
+  // Windows
+  windowCount?: number;
+  windowMaterial?: "vinyl" | "wood" | "fiberglass" | "aluminum";
+  windowType?: "single" | "double" | "triple";
+
+  // Flooring
+  flooringMaterial?: "hardwood" | "laminate" | "tile" | "vinyl" | "carpet";
+  flooringArea?: number;
+
+  // Painting
+  paintingScope?: "interior" | "exterior" | "both";
+  paintingRooms?: number;
+
+  // Solar
+  solarPanelCount?: number;
+  solarBattery?: boolean;
+
+  // Deck
+  deckSize?: number;
+  deckMaterial?: "wood" | "composite" | "pvc";
+
+  // Plumbing
+  plumbingType?: "repair" | "repiping" | "fixture";
+
+  // Electrical
+  electricalType?: "panel-upgrade" | "rewiring" | "outlets";
+
+  // Step 5 — Condition
+  currentCondition?: "excellent" | "good" | "fair" | "poor";
+  hasDamage?: boolean;
+  damageType?: "storm" | "water" | "fire" | "structural" | "none";
+
+  // Step 6 — Budget & Timeline
+  desiredBudget?: number;
+  startTimeline?: "asap" | "1-3months" | "3-6months" | "6-12months" | "planning";
+
+  // Step 7 — Insurance
+  causeOfProject?: "storm" | "fire" | "water-damage" | "wear-tear" | "remodeling" | "other";
+}
+
+export interface LiveEstimate {
+  low: number;
+  mid: number;
+  high: number;
+  confidence: number; // 0-100
+  timeline: string;
+  permitRequired: boolean;
+  insuranceEligible: boolean;
+  breakdown: { label: string; amount: number; pct: number }[];
+}
+
+// ─── Regional cost multipliers by state (ZIP prefix → multiplier) ─────────────
+const STATE_MULTIPLIERS: Record<string, number> = {
+  CA: 1.45, NY: 1.40, MA: 1.35, WA: 1.30, CO: 1.20,
+  TX: 1.05, FL: 1.05, GA: 1.00, OH: 0.95, MI: 0.95,
+  IN: 0.90, KY: 0.88, MS: 0.85, AR: 0.85, WV: 0.85,
+};
+
+// ─── Base costs per project (national average mid-point) ─────────────────────
+const BASE_COSTS: Record<ProjectType, { low: number; mid: number; high: number }> = {
+  roof:       { low: 8600,  mid: 16650, high: 24700 },
+  kitchen:    { low: 25000, mid: 50000, high: 75000 },
+  bathroom:   { low: 8000,  mid: 19000, high: 30000 },
+  hvac:       { low: 4500,  mid: 8250,  high: 12000 },
+  windows:    { low: 6000,  mid: 12500, high: 21000 },
+  flooring:   { low: 3000,  mid: 7500,  high: 14000 },
+  painting:   { low: 2000,  mid: 4500,  high: 8000  },
+  solar:      { low: 15000, mid: 25000, high: 35000 },
+  deck:       { low: 6000,  mid: 13000, high: 22000 },
+  plumbing:   { low: 1500,  mid: 6000,  high: 15000 },
+  electrical: { low: 2000,  mid: 8000,  high: 18000 },
+};
+
+const TIMELINES: Record<ProjectType, string> = {
+  roof: "3–5 days", kitchen: "4–8 weeks", bathroom: "2–4 weeks",
+  hvac: "1–2 days", windows: "1–3 days", flooring: "2–4 days",
+  painting: "3–7 days", solar: "2–3 days", deck: "3–7 days",
+  plumbing: "1–5 days", electrical: "1–5 days",
+};
+
+const PERMIT_REQUIRED: Record<ProjectType, boolean> = {
+  roof: true, kitchen: true, bathroom: true, hvac: true,
+  windows: false, flooring: false, painting: false,
+  solar: true, deck: true, plumbing: true, electrical: true,
+};
+
+export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
+  const project = answers.projectType;
+  if (!project) {
+    return { low: 0, mid: 0, high: 0, confidence: 5, timeline: "—", permitRequired: false, insuranceEligible: false, breakdown: [] };
+  }
+
+  let { low, mid, high } = { ...BASE_COSTS[project] };
+  let confidence = 20;
+
+  // ── Location multiplier
+  const regionMult = answers.state ? (STATE_MULTIPLIERS[answers.state] ?? 1.0) : 1.0;
+  if (answers.zipCode || answers.city) confidence += 10;
+
+  // ── Square footage scaling
+  const sqft = answers.squareFootage ?? 2000;
+  const sizeFactor = sqft / 2000;
+
+  if (project === "roof") {
+    const roofSizeFactor = answers.roofSize ? answers.roofSize / 2000 : sizeFactor;
+    low  = Math.round(low  * roofSizeFactor * regionMult);
+    mid  = Math.round(mid  * roofSizeFactor * regionMult);
+    high = Math.round(high * roofSizeFactor * regionMult);
+    if (answers.roofAction === "repair")  { low *= 0.25; mid *= 0.3; high *= 0.35; }
+    if (answers.roofMaterial === "metal") { low *= 1.4;  mid *= 1.5; high *= 1.6;  }
+    if (answers.roofMaterial === "tile")  { low *= 1.3;  mid *= 1.4; high *= 1.5;  }
+    if (answers.roofMaterial === "slate") { low *= 2.0;  mid *= 2.2; high *= 2.5;  }
+    if (answers.addGutters)    { low += 1200; mid += 1800; high += 2500; }
+    if (answers.addSkylights)  { low += 800;  mid += 1500; high += 2500; }
+    if (answers.roofAction) confidence += 15;
+    if (answers.roofMaterial) confidence += 15;
+  } else if (project === "kitchen") {
+    low  = Math.round(low  * regionMult);
+    mid  = Math.round(mid  * regionMult);
+    high = Math.round(high * regionMult);
+    if (answers.kitchenScope === "partial") { low *= 0.4; mid *= 0.5; high *= 0.55; }
+    if (answers.kitchenCabinets === "semi-custom") { mid += 5000; high += 8000; }
+    if (answers.kitchenCabinets === "custom")      { low += 5000; mid += 15000; high += 25000; }
+    if (answers.kitchenCountertops === "quartz")   { mid += 2000; high += 4000; }
+    if (answers.kitchenCountertops === "marble")   { mid += 4000; high += 8000; }
+    if (answers.kitchenAppliances) { low += 3000; mid += 6000; high += 12000; }
+    if (answers.kitchenScope) confidence += 15;
+    if (answers.kitchenCabinets) confidence += 10;
+  } else if (project === "bathroom") {
+    const count = answers.bathroomCount ?? 1;
+    low  = Math.round(low  * count * regionMult);
+    mid  = Math.round(mid  * count * regionMult);
+    high = Math.round(high * count * regionMult);
+    if (answers.bathroomScope === "partial") { low *= 0.4; mid *= 0.45; high *= 0.5; }
+    if (answers.bathroomFixtures === "mid-range") { mid += 2000; high += 4000; }
+    if (answers.bathroomFixtures === "luxury")    { low += 3000; mid += 8000; high += 15000; }
+    if (answers.bathroomScope) confidence += 15;
+    if (answers.bathroomFixtures) confidence += 10;
+  } else if (project === "hvac") {
+    low  = Math.round(low  * regionMult);
+    mid  = Math.round(mid  * regionMult);
+    high = Math.round(high * regionMult);
+    if (answers.hvacAction === "repair") { low = 300; mid = 800; high = 2500; }
+    if (answers.hvacType === "heat-pump") { mid += 1500; high += 3000; }
+    if (answers.hvacType === "mini-split") { low -= 1000; mid -= 500; }
+    if (answers.hvacAction) confidence += 20;
+    if (answers.hvacType) confidence += 15;
+  } else if (project === "windows") {
+    const count = answers.windowCount ?? 10;
+    low  = Math.round((low  / 10) * count * regionMult);
+    mid  = Math.round((mid  / 10) * count * regionMult);
+    high = Math.round((high / 10) * count * regionMult);
+    if (answers.windowType === "double") { mid *= 1.2; high *= 1.2; }
+    if (answers.windowType === "triple") { mid *= 1.4; high *= 1.5; }
+    if (answers.windowMaterial === "wood") { mid += count * 200; high += count * 400; }
+    if (answers.windowCount) confidence += 20;
+  } else if (project === "flooring") {
+    const area = answers.flooringArea ?? sqft * 0.6;
+    const perSqft = answers.flooringMaterial === "hardwood" ? 12
+      : answers.flooringMaterial === "tile" ? 10
+      : answers.flooringMaterial === "carpet" ? 4
+      : answers.flooringMaterial === "laminate" ? 6 : 5;
+    low  = Math.round(area * (perSqft * 0.7) * regionMult);
+    mid  = Math.round(area * perSqft * regionMult);
+    high = Math.round(area * (perSqft * 1.4) * regionMult);
+    if (answers.flooringMaterial) confidence += 25;
+    if (answers.flooringArea) confidence += 15;
+  } else if (project === "solar") {
+    const panels = answers.solarPanelCount ?? 20;
+    low  = Math.round((low  / 20) * panels * regionMult);
+    mid  = Math.round((mid  / 20) * panels * regionMult);
+    high = Math.round((high / 20) * panels * regionMult);
+    if (answers.solarBattery) { low += 8000; mid += 12000; high += 15000; }
+    if (answers.solarPanelCount) confidence += 20;
+  } else {
+    low  = Math.round(low  * (sizeFactor * 0.8) * regionMult);
+    mid  = Math.round(mid  * (sizeFactor * 0.9) * regionMult);
+    high = Math.round(high * sizeFactor * regionMult);
+  }
+
+  // ── Condition adjustments
+  if (answers.currentCondition === "poor")      { low *= 1.15; mid *= 1.2;  high *= 1.3;  confidence += 5; }
+  if (answers.currentCondition === "excellent")  {              mid *= 0.9;  high *= 0.9;  confidence += 5; }
+  if (answers.currentCondition)  confidence += 5;
+
+  // ── Property details confidence
+  if (answers.squareFootage) confidence += 10;
+  if (answers.yearBuilt)     confidence += 5;
+  if (answers.propertyType)  confidence += 5;
+
+  // ── Budget constraint
+  if (answers.desiredBudget) {
+    if (answers.desiredBudget < mid) high = Math.min(high, answers.desiredBudget * 1.1);
+    confidence += 5;
+  }
+
+  // ── Timeline
+  if (answers.startTimeline) confidence += 5;
+
+  // ── Insurance eligibility
+  const insuranceCauses = ["storm", "fire", "water-damage"];
+  const insuranceEligible = insuranceCauses.includes(answers.causeOfProject ?? "") ||
+    ["storm", "water", "fire"].includes(answers.damageType ?? "");
+  if (answers.causeOfProject) confidence += 5;
+
+  // Clamp
+  low  = Math.max(500, Math.round(low));
+  mid  = Math.max(low, Math.round(mid));
+  high = Math.max(mid, Math.round(high));
+  confidence = Math.min(95, Math.round(confidence));
+
+  // ── Breakdown
+  const breakdown = [
+    { label: "Materials",  pct: 44, amount: Math.round(mid * 0.44) },
+    { label: "Labor",      pct: 34, amount: Math.round(mid * 0.34) },
+    { label: "Permits",    pct: 4,  amount: Math.round(mid * 0.04) },
+    { label: "Disposal",   pct: 3,  amount: Math.round(mid * 0.03) },
+    { label: "Contingency",pct: 15, amount: Math.round(mid * 0.15) },
+  ];
+
+  return {
+    low, mid, high,
+    confidence,
+    timeline: TIMELINES[project],
+    permitRequired: PERMIT_REQUIRED[project],
+    insuranceEligible,
+    breakdown,
+  };
+}
