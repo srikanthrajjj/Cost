@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Search, Home, ChefHat, Bath,
   Calculator, GitCompare, Shield, MapPin, Sparkles, Lock,
   ArrowRight, Star, Check, TrendingUp,
   Facebook, Instagram, Youtube, Linkedin,
   Fan, Sun, Square,
+  Send, X, Bot, MessageCircle,
+  Maximize2, Minimize2, ThumbsUp, ThumbsDown,
 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
@@ -64,7 +66,7 @@ const comparisons = [
 function Logo() {
   return (
     <a href="#" className="flex items-center gap-2">
-      <img src="/logo.svg" alt="CostReno" style={{ height: "48px", width: "auto" }} />
+      <img src="/logo.svg" alt="CostReno" style={{ height: "41px", width: "auto" }} />
     </a>
   );
 }
@@ -373,6 +375,88 @@ function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isAiTyping, setIsAiTyping] = useState(false);
+  const [userLocation, setUserLocation] = useState<string | null>(null);
+  const [locationDetected, setLocationDetected] = useState(false);
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [manualCity, setManualCity] = useState("");
+
+  const searchTerms = [
+    "kitchen remodels",
+    "roof replacement",
+    "bathroom renovations",
+    "HVAC costs",
+    "window replacement",
+    "solar panels",
+    "flooring options",
+    "deck construction",
+  ];
+  const [termIdx, setTermIdx] = useState(0);
+  const [displayTerm, setDisplayTerm] = useState("");
+  const phaseRef = useRef<"typing" | "pause" | "erasing">("typing");
+  const charIdxRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (searchQuery.length > 0) return;
+    const full = searchTerms[termIdx];
+
+    const tick = () => {
+      if (phaseRef.current === "typing") {
+        charIdxRef.current++;
+        setDisplayTerm(full.slice(0, charIdxRef.current));
+        if (charIdxRef.current === full.length) {
+          phaseRef.current = "pause";
+          timerRef.current = setTimeout(tick, 2000);
+          return;
+        }
+        timerRef.current = setTimeout(tick, 55);
+      } else if (phaseRef.current === "pause") {
+        phaseRef.current = "erasing";
+        timerRef.current = setTimeout(tick, 55);
+      } else {
+        charIdxRef.current--;
+        setDisplayTerm(full.slice(0, charIdxRef.current));
+        if (charIdxRef.current === 0) {
+          phaseRef.current = "typing";
+          setTermIdx((prev) => (prev + 1) % searchTerms.length);
+          timerRef.current = setTimeout(tick, 400);
+          return;
+        }
+        timerRef.current = setTimeout(tick, 35);
+      }
+    };
+
+    timerRef.current = setTimeout(tick, 400);
+    return () => clearTimeout(timerRef.current);
+  }, [searchQuery, termIdx]);
+
+  useEffect(() => {
+    const savedCity = localStorage.getItem("costreno_city");
+    if (savedCity) {
+      setUserLocation(savedCity);
+      setLocationDetected(true);
+      return;
+    }
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.city) {
+          setUserLocation(data.city);
+          setLocationDetected(true);
+          localStorage.setItem("costreno_city", data.city);
+        } else {
+          setShowLocationPrompt(true);
+        }
+      })
+      .catch(() => {
+        setShowLocationPrompt(true);
+      });
+  }, []);
   
   const projectData = [
     { name: "Roof Replacement", avgCost: "$16,650", duration: "3-5 Days", popularity: 95, synonyms: ["new roof", "roofing", "re-roof", "roof repair"], img: projRoof },
@@ -412,70 +496,91 @@ function Landing() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="container-x flex h-16 items-center justify-between">
           <Logo />
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-muted-foreground absolute left-1/2 -translate-x-1/2">
-            {["Projects","Compare","Guides","Resources"].map((l) => (
-              <a key={l} href="#" className="hover:text-foreground transition-colors">{l}</a>
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
+            {["Projects","Cost Estimator","AI Quote Analyzer","Insurance Help","Guides & Advice","Tools"].map((l) => (
+              <a key={l} href="#" className="hover:text-foreground transition-colors whitespace-nowrap">{l}</a>
             ))}
           </nav>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
               <Search color="white" className="h-4 w-4" />
             </button>
-            <a href="#" className="hidden sm:inline text-sm font-medium hover:text-primary">Log in</a>
-            <a href="#" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-sm hover:bg-accent/90 transition">
-              Start Planning
+            <button
+              onClick={() => setShowLocationPrompt(true)}
+              className="hidden md:flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition"
+            >
+              <MapPin className="h-4 w-4" />
+              <span>{userLocation || "Set Location"}</span>
+            </button>
+            <a href="#" className="hidden sm:inline text-sm font-bold text-foreground hover:text-primary transition">Sign In</a>
+            <a href="#" className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition">
+              Sign Up
             </a>
           </div>
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative pt-10 md:pt-16 pb-16 bg-white overflow-hidden">
-        <div className="container-x relative">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
-              <Check color="white" className="h-3.5 w-3.5" /> Trusted by homeowners across the U.S.
-            </span>
-            <h1 className="mt-5 font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.02]">
-              Know what your home project should really cost.
+      {/* HERO — NerdWallet-inspired */}
+      <section className="relative min-h-[520px] md:min-h-[600px] overflow-hidden">
+        {/* Full-width background image */}
+        <img src="/them.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+
+        <div className="container-x relative z-10 flex flex-col justify-center min-h-[520px] md:min-h-[600px] py-16">
+          <div className="max-w-2xl">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.08]">
+              Smart renovation decisions start with{" "}
+              <span className="text-accent">CostReno</span>
             </h1>
-            <div className="mt-7 relative w-full max-w-2xl">
-              <div className="relative group">
-                {/* Animated gradient border */}
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary via-accent to-primary opacity-30 group-hover:opacity-50 blur-sm transition-opacity duration-500" />
-                
-                {/* Search container */}
-                <div className="relative flex items-center gap-2 rounded-2xl bg-card border border-border/50 shadow-xl h-16 sm:h-[72px] px-2">
-                  <div className="flex flex-1 items-center gap-3 pl-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10">
-                      <Search className="h-5 w-5 text-accent" />
-                    </div>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setShowSuggestions(true);
-                      }}
-                      onFocus={() => setShowSuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                      placeholder="What project are you planning?"
-                      className="w-full bg-transparent text-base sm:text-lg outline-none placeholder:text-muted-foreground/60 min-w-0"
-                    />
-                  </div>
-                  <button className="flex items-center gap-2 rounded-xl bg-accent px-5 sm:px-8 py-3 sm:py-3.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 shadow-lg shadow-accent/20">
-                    <Search className="h-4 w-4" />
-                    <span className="hidden sm:inline">Search</span>
-                  </button>
+            <p className="mt-5 text-lg md:text-xl text-white/80 max-w-xl leading-relaxed">
+              Navigate every home project move with guidance that you can trust.
+            </p>
+          </div>
+
+          {/* AI Chat Input */}
+          <div className="mt-10 max-w-2xl w-full">
+            <div className="relative rounded-2xl bg-white shadow-2xl overflow-hidden">
+              <div className="flex items-center gap-3 px-5 py-4">
+                <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="relative flex-1 min-w-0">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full bg-transparent text-base outline-none text-ink"
+                  />
+                  {searchQuery.length === 0 && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-base text-muted-foreground/60 whitespace-nowrap">
+                      Ask me about{" "}
+                      <span className="font-bold text-ink">{displayTerm}</span>
+                      <span className="animate-pulse">|</span>
+                    </span>
+                  )}
                 </div>
+                <button
+                  onClick={() => {
+                    if (searchQuery.trim()) {
+                      setChatMessages([{ role: "user", text: searchQuery }]);
+                      setChatInput("");
+                      setSearchQuery("");
+                    }
+                    setChatOpen(true);
+                  }}
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-white hover:bg-accent/90 transition shrink-0"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
               </div>
-              
+
+              {/* Suggestions dropdown */}
               {showSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-3 rounded-2xl bg-card border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl bg-card border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="p-3">
                     {searchQuery.length === 0 ? (
-                      /* Popular Projects - No Query */
                       <>
                         <div className="px-2 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Popular Projects</div>
                         <div className="grid grid-cols-2 gap-2">
@@ -499,7 +604,6 @@ function Landing() {
                         </div>
                       </>
                     ) : filteredProjects.length > 0 ? (
-                      /* Search Results */
                       <>
                         <div className="px-2 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Projects Matching "{searchQuery}"</div>
                         <div className="space-y-1">
@@ -524,7 +628,6 @@ function Landing() {
                         </div>
                       </>
                     ) : (
-                      /* No Results */
                       <div className="py-8 text-center">
                         <Search className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
                         <div className="text-sm text-muted-foreground">No projects found for "{searchQuery}"</div>
@@ -534,31 +637,235 @@ function Landing() {
                   </div>
                 </div>
               )}
-            </div>
-            
-            {/* Popular searches */}
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">Popular:</span>
-              {["Roof Replacement","Kitchen Remodel","Bathroom Remodel","HVAC","Solar"].map((p) => (
-                <button 
-                  key={p} 
-                  onClick={() => setSearchQuery(p)}
-                  className="px-3 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-muted/50 transition-all"
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
 
+              {/* AI Badge bar */}
+              <div className="flex items-center gap-2 px-5 py-2.5 bg-accent/10 border-t border-border/30">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 rounded bg-accent flex items-center justify-center">
+                    <Sparkles className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-xs font-bold text-ink tracking-wide">COST<span className="text-accent">RENO</span> AI</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        </div>
-
-        {/* Hero visual - breaks out of grid */}
-        <div className="hidden lg:block absolute right-0 top-0 h-full w-[55%]">
-          <img src="/home.png" alt="Modern home with lit windows at dusk" className="w-full h-full object-contain" />
-        </div>
       </section>
+
+      {/* Chat Interface Modal */}
+      {chatOpen && (
+        <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center ${isFullScreen ? "!items-stretch !justify-stretch" : ""}`}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setChatOpen(false)} />
+
+          {/* Chat Panel */}
+          <div className={`relative flex flex-col bg-white shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden ${
+            isFullScreen
+              ? "w-full h-full sm:w-full sm:h-full"
+              : "w-full sm:w-[720px] sm:mx-4 h-[90vh] sm:h-[85vh] sm:rounded-2xl rounded-t-2xl"
+          }`}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 bg-[#082A4B]">
+              <div className="flex items-center gap-2.5">
+                <span className="font-display text-lg font-extrabold text-white tracking-wide">
+                  COST<span className="text-accent">RENO</span>
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-accent text-white text-[9px] font-bold tracking-wider">AI</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsFullScreen(!isFullScreen)}
+                  className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition"
+                >
+                  {isFullScreen ? (
+                    <Minimize2 className="h-4 w-4 text-white/80" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4 text-white/80" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setChatOpen(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition"
+                >
+                  <X className="h-4 w-4 text-white/80" />
+                </button>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className={`flex-1 overflow-y-auto py-5 space-y-5 ${isFullScreen ? "px-5" : "px-5"}`}>
+              <div className={`mx-auto space-y-5 ${isFullScreen ? "max-w-xl" : ""}`}>
+              {chatMessages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                  <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-5">
+                    <MessageCircle className="h-8 w-8 text-accent" />
+                  </div>
+                  <p className="text-base font-semibold text-ink">How can I help you today?</p>
+                  <p className="text-sm text-muted-foreground mt-1.5 max-w-xs">Ask about costs, materials, timelines, or contractors for any home project</p>
+                  <div className="flex flex-wrap gap-2 mt-6 justify-center max-w-md">
+                    {["What does a kitchen remodel cost?", "Best roofing materials?", "How long does HVAC take?"].map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => {
+                          setChatMessages([{ role: "user", text: q }]);
+                          setIsAiTyping(true);
+                          setChatInput("");
+                          setTimeout(() => {
+                            setIsAiTyping(false);
+                            setChatMessages((prev) => [...prev, { role: "ai", text: "That's a great question! Let me look into that for you. Kitchen remodel costs vary widely based on scope, materials, and your location. I can help you estimate based on your specific needs." }]);
+                          }, 2000);
+                        }}
+                        className="px-4 py-2 rounded-full border border-border text-sm text-muted-foreground hover:text-foreground hover:border-accent/50 hover:bg-accent/5 transition"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                  {msg.role === "user" ? (
+                    <div className="max-w-[75%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm bg-accent text-white">
+                      {msg.text}
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2.5 max-w-[80%]">
+                      <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 mt-0.5">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm text-ink leading-relaxed">{msg.text}</div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <button className="text-muted-foreground/40 hover:text-accent transition">
+                            <ThumbsUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button className="text-muted-foreground/40 hover:text-destructive transition">
+                            <ThumbsDown className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {isAiTyping && (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-muted">
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
+                  </div>
+                </div>
+              )}
+              </div>
+            </div>
+
+            {/* Input */}
+            <div className={`border-t border-border/50 ${isFullScreen ? "px-5 py-4 max-w-xl mx-auto w-full" : "px-4 pb-4 pt-2"}`}>
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-background p-2 focus-within:ring-2 focus-within:ring-accent/30 transition">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && chatInput.trim()) {
+                      setChatMessages((prev) => [...prev, { role: "user", text: chatInput }]);
+                      setIsAiTyping(true);
+                      setChatInput("");
+                      setTimeout(() => {
+                        setIsAiTyping(false);
+                        setChatMessages((prev) => [...prev, { role: "ai", text: "Thanks for your question! I'm analyzing your request and will provide detailed cost estimates and recommendations shortly." }]);
+                      }, 2000);
+                    }
+                  }}
+                  placeholder="Ask anything about your project..."
+                  className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground/60"
+                />
+                <button
+                  onClick={() => {
+                    if (chatInput.trim()) {
+                      setChatMessages((prev) => [...prev, { role: "user", text: chatInput }]);
+                      setIsAiTyping(true);
+                      setChatInput("");
+                      setTimeout(() => {
+                        setIsAiTyping(false);
+                        setChatMessages((prev) => [...prev, { role: "ai", text: "Thanks for your question! I'm analyzing your request and will provide detailed cost estimates and recommendations shortly." }]);
+                      }, 2000);
+                    }
+                  }}
+                  className="w-9 h-9 rounded-lg bg-foreground flex items-center justify-center text-background hover:bg-foreground/90 transition shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+              <p className="text-center text-[10px] text-muted-foreground/50 mt-2">
+                CostReno AI may produce inaccurate information. Verify important details.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Location Prompt Modal */}
+      {showLocationPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLocationPrompt(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                <MapPin className="h-7 w-7 text-accent" />
+              </div>
+              <h2 className="font-display text-xl font-bold text-ink text-center">Set Your Location</h2>
+              <p className="text-sm text-muted-foreground text-center mt-2 leading-relaxed">
+                Your location helps us provide <span className="font-semibold text-ink">accurate, local cost estimates</span> for your home projects. Construction costs vary significantly by region due to labor rates, material availability, and local regulations.
+              </p>
+              <div className="mt-5 space-y-3">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={manualCity}
+                    onChange={(e) => setManualCity(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && manualCity.trim()) {
+                        setUserLocation(manualCity.trim());
+                        setShowLocationPrompt(false);
+                        localStorage.setItem("costreno_city", manualCity.trim());
+                      }
+                    }}
+                    placeholder="Enter your city (e.g. Austin, TX)"
+                    className="w-full h-11 rounded-xl border border-border bg-background pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    if (manualCity.trim()) {
+                      setUserLocation(manualCity.trim());
+                      setShowLocationPrompt(false);
+                      localStorage.setItem("costreno_city", manualCity.trim());
+                    }
+                  }}
+                  className="w-full h-11 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition"
+                >
+                  Save Location
+                </button>
+                <button
+                  onClick={() => setShowLocationPrompt(false)}
+                  className="w-full h-11 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* POPULAR PROJECTS */}
       <section className="container-x py-10">
