@@ -868,52 +868,87 @@ function Landing() {
       )}
 
       {/* POPULAR PROJECTS */}
-      <section className="container-x py-10">
-        <div className="flex items-end justify-between mb-6">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">What project are you planning?</h2>
-          <a href="#" className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1">
-            View all projects <ArrowRight color="white" className="h-3.5 w-3.5" />
-          </a>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          {projects.map((p) => (
-            <a key={p.name} href="#" className="group block rounded-xl overflow-hidden border border-border bg-card hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <img src={p.img} alt={p.name} loading="lazy" width={1024} height={1024} className="h-full w-full object-cover group-hover:scale-110 transition duration-700" />
-                <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
-                  {p.time}
-                </span>
-                <span className="absolute bottom-2 left-2 grid h-8 w-8 place-items-center rounded-lg bg-card/95 text-primary shadow">
-                  <p.icon className="h-4 w-4" />
-                </span>
-              </div>
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-ink truncate">{p.name}</h3>
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="font-display text-lg font-bold text-ink">{p.avgCost}</span>
-                  <span className="text-[10px] text-muted-foreground">avg.</span>
-                </div>
-                <div className="mt-1 text-[10px] text-muted-foreground">{p.price}</div>
-                <div className="mt-3 flex items-center gap-3 text-[10px]">
-                  <span className="inline-flex items-center gap-1 text-success font-medium">
-                    <TrendingUp className="h-3 w-3" /> ROI {p.roi}
-                  </span>
-                  <span className={`inline-flex items-center gap-1 font-medium ${
-                    p.difficulty === 'Easy' ? 'text-success' : 
-                    p.difficulty === 'Medium' ? 'text-yellow-600' : 'text-destructive'
-                  }`}>
-                    {p.difficulty === 'Easy' && '●'}
-                    {p.difficulty === 'Medium' && '●●'}
-                    {p.difficulty === 'Hard' && '●●●'}
-                    {' '}{p.difficulty}
-                  </span>
-                </div>
-                <div className="mt-3 w-full flex items-center justify-center gap-1 rounded-md border border-primary px-3 py-2 text-xs font-semibold text-primary group-hover:bg-primary group-hover:text-primary-foreground transition">
-                  Get Estimate
-                </div>
-              </div>
+      <section className="container-x bg-white py-20 overflow-hidden">
+        <div className="max-w-[1440px] mx-auto">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <h2 className="font-display text-[56px] md:text-[64px] font-bold text-ink leading-[1.08] mb-4">
+                What project are you planning?
+              </h2>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                Explore renovation projects, compare local costs, and get expert guidance before you start.
+              </p>
+            </div>
+            <a href="#" className="hidden md:inline-flex items-center gap-1.5 px-5 py-2.5 rounded-md border border-border text-sm font-semibold text-primary hover:bg-primary/5 transition">
+              View all projects <ArrowRight className="h-3.5 w-3.5" />
             </a>
-          ))}
+          </div>
+
+          <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 overflow-x-auto pb-6 hide-scrollbar">
+              {projects.map((p) => (
+                <a
+                  key={p.name}
+                  href="#"
+                  className="group relative min-w-[280px] md:min-w-auto flex flex-col rounded-[18px] border border-[#E7EAF0] bg-white overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover:border-accent/30"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-t-[18px]">
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
+                      {p.time}
+                    </span>
+                  </div>
+
+                  <div className="relative flex-1 p-5">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <h3 className="text-[15px] font-semibold text-ink line-clamp-2 pr-2">
+                        {p.name}
+                      </h3>
+                      <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+                        <p.icon className="h-5 w-5 text-primary" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <div className="font-display text-[20px] font-bold text-ink">
+                          {p.avgCost}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          Typical: {p.price}
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-border/30">
+                        <div className="w-full rounded-md border border-primary px-4 py-2.5 text-xs font-semibold text-primary text-center group-hover:bg-accent group-hover:text-white group-hover:border-accent transition-colors cursor-pointer">
+                          Get Estimate
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-1/2 right-3 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex flex-col gap-1.5">
+                      <button className="w-7 h-7 rounded-full bg-muted/50 hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors flex items-center justify-center">
+                        <div className="text-[9px] font-medium">Quotes</div>
+                      </button>
+                      <button className="w-7 h-7 rounded-full bg-muted/50 hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors flex items-center justify-center">
+                        <div className="text-[9px] font-medium">AI</div>
+                      </button>
+                      <button className="w-7 h-7 rounded-full bg-muted/50 hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors flex items-center justify-center">
+                        <div className="text-[9px] font-medium">Info</div>
+                      </button>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
