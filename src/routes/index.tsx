@@ -385,6 +385,48 @@ function Landing() {
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [manualCity, setManualCity] = useState("");
 
+  const SK_API_KEY = import.meta.env.VITE_SK_API_KEY || "";
+
+  const getAIResponse = async (messages: { role: "user" | "ai"; text: string }[]): Promise<string> => {
+    if (!SK_API_KEY) {
+      return "API key not configured. Please set VITE_SK_API_KEY in your environment variables.";
+    }
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${SK_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://costreno.com",
+          "X-Title": "CostReno AI",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are CostReno AI, a helpful home renovation cost estimator. Provide accurate, concise answers about renovation costs, materials, timelines, and contractor recommendations. Keep responses under 150 words. Always provide dollar amounts and typical ranges when discussing costs.",
+            },
+            ...messages.map((m) => ({
+              role: m.role as "user" | "assistant",
+              content: m.text,
+            })),
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || "I apologize, but I couldn't generate a response. Please try asking your question again.";
+    } catch (error) {
+      console.error("AI API error:", error);
+      return "Sorry, I'm having trouble connecting to my knowledge base right now. Please try again in a moment.";
+    }
+  };
+
   const searchTerms = [
     "kitchen remodels",
     "roof replacement",
@@ -706,14 +748,13 @@ function Landing() {
                     {["What does a kitchen remodel cost?", "Best roofing materials?", "How long does HVAC take?"].map((q) => (
                       <button
                         key={q}
-                        onClick={() => {
-                          setChatMessages([{ role: "user", text: q }]);
+                        onClick={async () => {
+                          const newMessages = [{ role: "user" as const, text: q }];
+                          setChatMessages(newMessages);
                           setIsAiTyping(true);
-                          setChatInput("");
-                          setTimeout(() => {
-                            setIsAiTyping(false);
-                            setChatMessages((prev) => [...prev, { role: "ai", text: "That's a great question! Let me look into that for you. Kitchen remodel costs vary widely based on scope, materials, and your location. I can help you estimate based on your specific needs." }]);
-                          }, 2000);
+                          const aiResponse = await getAIResponse(newMessages);
+                          setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
+                          setIsAiTyping(false);
                         }}
                         className="px-4 py-2 rounded-full border border-border text-sm text-muted-foreground hover:text-foreground hover:border-accent/50 hover:bg-accent/5 transition"
                       >
@@ -773,30 +814,30 @@ function Landing() {
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => {
+                  onKeyDown={async (e) => {
                     if (e.key === "Enter" && chatInput.trim()) {
-                      setChatMessages((prev) => [...prev, { role: "user", text: chatInput }]);
+                      const newMessages = [...chatMessages, { role: "user" as const, text: chatInput }];
+                      setChatMessages(newMessages);
                       setIsAiTyping(true);
                       setChatInput("");
-                      setTimeout(() => {
-                        setIsAiTyping(false);
-                        setChatMessages((prev) => [...prev, { role: "ai", text: "Thanks for your question! I'm analyzing your request and will provide detailed cost estimates and recommendations shortly." }]);
-                      }, 2000);
+                      const aiResponse = await getAIResponse(newMessages);
+                      setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
+                      setIsAiTyping(false);
                     }
                   }}
                   placeholder="Ask anything about your project..."
                   className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground/60"
                 />
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (chatInput.trim()) {
-                      setChatMessages((prev) => [...prev, { role: "user", text: chatInput }]);
+                      const newMessages = [...chatMessages, { role: "user" as const, text: chatInput }];
+                      setChatMessages(newMessages);
                       setIsAiTyping(true);
                       setChatInput("");
-                      setTimeout(() => {
-                        setIsAiTyping(false);
-                        setChatMessages((prev) => [...prev, { role: "ai", text: "Thanks for your question! I'm analyzing your request and will provide detailed cost estimates and recommendations shortly." }]);
-                      }, 2000);
+                      const aiResponse = await getAIResponse(newMessages);
+                      setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
+                      setIsAiTyping(false);
                     }
                   }}
                   className="w-9 h-9 rounded-lg bg-foreground flex items-center justify-center text-background hover:bg-foreground/90 transition shrink-0"
