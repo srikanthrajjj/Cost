@@ -10,6 +10,12 @@ import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import type { EstimatorAnswers, LiveEstimate } from "@/lib/estimator-engine";
 import type { StepDef, Question } from "@/lib/estimator-steps";
+import projRoof from "@/assets/proj-roof.jpg";
+import projKitchen from "@/assets/proj-kitchen.jpg";
+import projBathroom from "@/assets/proj-bathroom.jpg";
+import projHvac from "@/assets/proj-hvac.jpg";
+import projWindows from "@/assets/proj-windows.jpg";
+import projSolar from "@/assets/proj-solar.jpg";
 
 export const Route = createFileRoute("/estimate")({
   head: () => ({ meta: [{ title: "Cost Estimator — CostReno" }] }),
@@ -33,6 +39,31 @@ const PROJECT_ICONS: Record<string, string> = {
   deck:       "/Balcony.svg",
   plumbing:   "/Plumbing.svg",
   electrical: "/Electrical Outlet.svg",
+};
+
+// ─── Project image map ────────────────────────────────────────────────────────
+const PROJECT_IMAGES: Record<string, string> = {
+  roof:       projRoof,
+  kitchen:    projKitchen,
+  bathroom:   projBathroom,
+  hvac:       projHvac,
+  windows:    projWindows,
+  solar:      projSolar,
+};
+
+// ─── Project name map ─────────────────────────────────────────────────────────
+const PROJECT_NAMES: Record<string, string> = {
+  roof: "Roof Replacement",
+  kitchen: "Kitchen Remodel",
+  bathroom: "Bathroom Remodel",
+  hvac: "HVAC System",
+  windows: "Windows",
+  flooring: "Flooring",
+  painting: "Painting",
+  solar: "Solar Panels",
+  deck: "Deck / Patio",
+  plumbing: "Plumbing",
+  electrical: "Electrical",
 };
 
 // ─── Step label map ───────────────────────────────────────────────────────────
@@ -688,37 +719,37 @@ function EstimatorPage() {
 
               {/* Selected Project Display (when on step 2+) */}
               {stepIdx > 0 && answers.projectType && (
-                <div className="mb-8 p-4 rounded-xl bg-accent/8 border border-accent/20 flex items-center gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent/20">
-                      <Check className="h-5 w-5 text-accent" />
+                <div className="mb-8 group rounded-2xl overflow-hidden border-2 border-accent/20 bg-gradient-to-r from-accent/5 to-transparent hover:border-accent/40 transition-all duration-300">
+                  <div className="flex flex-col sm:flex-row items-stretch">
+                    {/* Project Image */}
+                    <div className="relative w-full sm:w-48 h-40 sm:h-auto overflow-hidden shrink-0">
+                      <img
+                        src={PROJECT_IMAGES[answers.projectType] || projRoof}
+                        alt={PROJECT_NAMES[answers.projectType]}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+                    </div>
+
+                    {/* Project Info */}
+                    <div className="flex-1 p-5 sm:p-6 flex flex-col justify-center">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-accent">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                        <span className="text-xs font-bold text-accent uppercase tracking-widest">Project Selected</span>
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-bold text-ink mb-4">
+                        {PROJECT_NAMES[answers.projectType] || answers.projectType}
+                      </h3>
+                      <button
+                        onClick={() => setStepIdx(0)}
+                        className="w-fit text-sm font-semibold text-accent hover:text-accent/80 transition px-4 py-2 hover:bg-accent/10 rounded-lg"
+                      >
+                        ← Change Project
+                      </button>
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-accent uppercase tracking-wide">Project Selected</div>
-                    <div className="text-sm font-semibold text-ink mt-0.5">{(() => {
-                      const projectNames: Record<string, string> = {
-                        roof: "Roof Replacement",
-                        kitchen: "Kitchen Remodel",
-                        bathroom: "Bathroom Remodel",
-                        hvac: "HVAC System",
-                        windows: "Windows",
-                        flooring: "Flooring",
-                        painting: "Painting",
-                        solar: "Solar Panels",
-                        deck: "Deck / Patio",
-                        plumbing: "Plumbing",
-                        electrical: "Electrical",
-                      };
-                      return projectNames[answers.projectType] || answers.projectType;
-                    })()}</div>
-                  </div>
-                  <button
-                    onClick={() => setStepIdx(0)}
-                    className="text-xs font-semibold text-accent hover:text-accent/80 transition px-3 py-2 hover:bg-accent/10 rounded-lg shrink-0"
-                  >
-                    Change
-                  </button>
                 </div>
               )}
 
