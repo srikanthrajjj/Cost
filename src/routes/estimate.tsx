@@ -686,6 +686,42 @@ function EstimatorPage() {
             <div className="flex-1 min-w-0">
               <StepStepper steps={steps} currentIdx={stepIdx} />
 
+              {/* Selected Project Display (when on step 2+) */}
+              {stepIdx > 0 && answers.projectType && (
+                <div className="mb-8 p-4 rounded-xl bg-accent/8 border border-accent/20 flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent/20">
+                      <Check className="h-5 w-5 text-accent" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-accent uppercase tracking-wide">Project Selected</div>
+                    <div className="text-sm font-semibold text-ink mt-0.5">{(() => {
+                      const projectNames: Record<string, string> = {
+                        roof: "Roof Replacement",
+                        kitchen: "Kitchen Remodel",
+                        bathroom: "Bathroom Remodel",
+                        hvac: "HVAC System",
+                        windows: "Windows",
+                        flooring: "Flooring",
+                        painting: "Painting",
+                        solar: "Solar Panels",
+                        deck: "Deck / Patio",
+                        plumbing: "Plumbing",
+                        electrical: "Electrical",
+                      };
+                      return projectNames[answers.projectType] || answers.projectType;
+                    })()}</div>
+                  </div>
+                  <button
+                    onClick={() => setStepIdx(0)}
+                    className="text-xs font-semibold text-accent hover:text-accent/80 transition px-3 py-2 hover:bg-accent/10 rounded-lg shrink-0"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+
               {currentQuestion && (
                 <div key={`${stepIdx}-${questionIdx}`} className="animate-in fade-in slide-in-from-bottom-4 duration-350">
                   {/* Question header */}
