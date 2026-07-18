@@ -1251,49 +1251,61 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     setTimeout(scrollToBottom, 50);
 
     if (hasAttachments && fileToProcess) {
-      // Step 1: Extract text from the file
+      // Step 1: Extract text from the file (shows ThinkingIndicator)
       setIsAiTyping(true);
       let extractedText = "";
       try {
         const extractedContent = await extractTextFromFile(fileToProcess);
         extractedText = extractedContent.text;
       } catch {
-        // Can't read file — just chat normally
-        const aiResponse = await getAIResponse(newMessages);
-        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + "\n\n(Note: Could not read the attached file.)" }]);
+        setChatMessages((prev) => [...prev, { role: "ai", text: "😅 I couldn't read that file. Try uploading a text-based PDF or paste the content directly." }]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
         return;
       }
 
       if (extractedText.length < 20) {
-        // Too little text — likely scanned/image PDF
-        const aiResponse = await getAIResponse(newMessages);
-        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + "\n\n⚠️ The file appears to be scanned or image-based. For quote analysis, try a text-based PDF or paste the content directly." }]);
+        setChatMessages((prev) => [...prev, { role: "ai", text: "📄 That file seems to be scanned or image-based — I can't read the text from it.\n\nTry a text-based PDF, or copy-paste the quote content directly into chat." }]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
         return;
       }
 
-      // Step 2: Decide — is this a contractor quote or just a random document?
-      const textLower = extractedText.toLowerCase();
-      const quoteSignals = ["estimate", "quote", "proposal", "contractor", "labor", "material", "total", "scope", "warranty", "permit", "invoice", "bid", "price", "cost", "install", "replacement", "repair", "sq ft", "linear ft", "per unit"];
-      const matchCount = quoteSignals.filter((s) => textLower.includes(s)).length;
-      const isLikelyQuote = matchCount >= 4; // needs at least 4 signals to be considered a quote
+      // Step 2: Check if it's a renovation/contractor quote
+      const textLower = extractedText.substring(0, 3000).toLowerCase();
+      const quoteSignals = ["estimate", "quote", "proposal", "contractor", "labor", "material", "total", "scope", "warranty", "permit", "invoice", "bid", "install", "replacement", "repair", "sq ft", "linear ft", "roofing", "plumbing", "hvac", "kitchen", "bathroom", "shingle", "drywall", "flooring", "demolition", "tear off", "flashing"];
+      const rejectSignals = ["tax", "salary", "income", "deduction", "employer", "hra", "allowance", "tds", "pan", "aadhaar", "passport", "visa", "resume", "education", "gpa", "university", "semester", "recipe", "ingredients", "calories", "prescription", "medication", "diagnosis"];
 
-      if (isLikelyQuote) {
-        // It's a quote → run full analysis pipeline
+      const quoteScore = quoteSignals.filter((s) => textLower.includes(s)).length;
+      const rejectScore = rejectSignals.filter((s) => textLower.includes(s)).length;
+
+      if (rejectScore >= 3 || (quoteScore < 3 && rejectScore >= 1)) {
+        // Clearly NOT a renovation quote — show friendly rejection
+        const funnyMessages = [
+          "🏠 Whoa there! That doesn't look like a contractor quote.\n\nI'm CostReno AI — I specialize in **renovation quotes, home improvement estimates, and contractor proposals**.\n\nUpload a roofing quote, kitchen remodel estimate, or any contractor bid and I'll analyze it for missing items, red flags, and overcharges!\n\n💡 *Pro tip: If you have a contractor quote in email, save it as PDF and upload it here.*",
+          "😄 Nice try! But that's not quite my area of expertise.\n\nI'm built to analyze **contractor quotes and renovation estimates** — not tax docs, resumes, or recipes!\n\nGot a quote from a roofer, plumber, or kitchen contractor? Upload that and I'll tell you what's missing, what's overpriced, and what questions to ask.\n\n💡 *Try uploading: roofing estimate, bathroom remodel quote, HVAC proposal, etc.*",
+          "🔨 Hmm, that document doesn't seem related to home renovation.\n\nI'm your **renovation quote analyzer** — I read contractor bids and find:\n- ❌ Missing scope items\n- 🚩 Red flags and overcharges\n- ❓ Questions you should ask\n\nUpload a **contractor quote or estimate** and let me work my magic!\n\n💡 *Supported: roofing, kitchen, bathroom, HVAC, windows, solar, flooring, deck, plumbing, electrical quotes.*",
+        ];
+        const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        setChatMessages((prev) => [...prev, { role: "ai", text: randomMsg }]);
+        setIsAiTyping(false);
+        setTimeout(scrollToBottom, 50);
+        return;
+      }
+
+      if (quoteScore >= 4) {
+        // It's a contractor quote → run full analysis
         setIsAiTyping(false);
         await processQuoteAnalysis(newMessages, userText, fileToProcess);
       } else {
-        // Not a quote → just chat about the document
+        // Ambiguous — not clearly a quote, not clearly wrong. Chat about it but nudge toward quotes.
         const truncated = extractedText.substring(0, 2000);
         const enhancedUserText = `${userText}\n\nContent from ${fileToProcess.name}:\n${truncated}`;
         const aiResponse = await getAIResponse([
           ...filteredMessages,
           { role: "user" as const, text: enhancedUserText },
         ]);
-        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
+        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + "\n\n💡 *If this is a contractor quote, try saying \"analyze this quote\" for a full detailed analysis with our Quote Analyzer.*" }]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
       }
