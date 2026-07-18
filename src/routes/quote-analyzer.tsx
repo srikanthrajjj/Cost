@@ -29,6 +29,7 @@ import {
   Eye,
   Zap,
   Star,
+  Lock,
 } from "lucide-react";
 import { extractTextFromFile } from "@/lib/file-processor";
 import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
@@ -177,80 +178,286 @@ function QuoteAnalyzerPage() {
   // ─── IDLE STATE: Upload Interface ───────────────────────────────────────────
   if (state === "idle" || state === "error") {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container-x py-16 max-w-3xl mx-auto">
-          {/* Hero */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-xs font-bold mb-4">
-              <Zap className="h-3.5 w-3.5" /> AI-Powered Analysis
+      <div className="min-h-screen bg-[#f8faf9]">
+        {/* Header */}
+        <header className="border-b border-border/60 bg-white">
+          <div className="container-x flex h-14 items-center justify-between">
+            <a href="/" className="flex items-center gap-2">
+              <img src="/logo.svg" alt="CostReno" style={{ height: "32px" }} />
+            </a>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" />
+              <span className="font-medium">100% Private & Secure</span>
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-ink">
-              AI Quote Analyzer
-            </h1>
-            <p className="mt-3 text-muted-foreground max-w-lg mx-auto leading-relaxed">
-              Upload your contractor quote and get an instant, expert-level analysis. We'll identify missing items, red flags, and questions to ask — in seconds.
-            </p>
           </div>
+        </header>
 
-          {/* Upload card */}
-          <div
-            className="relative rounded-2xl border-2 border-dashed border-border hover:border-accent/50 bg-white p-10 text-center transition-all cursor-pointer group"
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={(e) => {
-              e.preventDefault();
-              const file = e.dataTransfer.files[0];
-              if (file) handleFileUpload(file);
-            }}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileUpload(file);
-                e.target.value = "";
-              }}
-            />
-            <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-5 group-hover:bg-accent/20 transition">
-              <Upload className="h-7 w-7 text-accent" />
+        {/* Hero Section */}
+        <section className="container-x py-14 md:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+            {/* Left: Copy */}
+            <div>
+              <h1 className="font-display text-4xl sm:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
+                Get an Expert Review of Your Contractor Quote{" "}
+                <span className="text-accent">in Under 30 Seconds</span>
+              </h1>
+              <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
+                Upload your quote and uncover what's <strong className="text-ink">included</strong>, what's <strong className="text-ink">missing</strong>, and what could <strong className="text-ink">cost you more</strong>.
+              </p>
             </div>
-            <p className="text-base font-semibold text-ink">Drop your quote here or click to upload</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Supports PDF, JPG, PNG • Max 15MB
-            </p>
-          </div>
 
-          {error && (
-            <div className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
+            {/* Right: Floating badges */}
+            <div className="relative hidden md:block h-[260px]">
+              <div className="absolute top-4 left-8 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-border">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-accent" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-ink">AI-Powered</p>
+                  <p className="text-[10px] text-muted-foreground">Analysis</p>
+                </div>
+              </div>
+              <div className="absolute top-20 right-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-border">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-ink">Instant</p>
+                  <p className="text-[10px] text-muted-foreground">Results</p>
+                </div>
+              </div>
+              <div className="absolute bottom-8 right-12 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-border">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-accent" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-ink">Expert</p>
+                  <p className="text-[10px] text-muted-foreground">Accuracy</p>
+                </div>
+              </div>
+              {/* Decorative quote card */}
+              <div className="absolute top-6 right-20 w-44 h-56 rounded-xl bg-white shadow-md border border-border p-4 rotate-3">
+                <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Contractor Quote</div>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className={`h-2 rounded bg-muted ${i === 1 ? "w-20" : i === 3 ? "w-16" : "w-24"}`} />
+                      <div className="text-[9px] font-medium text-accent">$</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Upload Section */}
+        <section className="container-x pb-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-5 items-start">
+              {/* Upload card */}
+              <div
+                className="rounded-2xl border-2 border-dashed border-border hover:border-accent/60 bg-white p-10 text-center transition-all cursor-pointer group shadow-sm"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleFileUpload(file);
+                }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+                <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition">
+                  <Upload className="h-6 w-6 text-accent" />
+                </div>
+                <p className="text-base font-bold text-ink">Upload Your Quote</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">Drag & drop your file here or</p>
+                <button className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#082A4B] text-white text-sm font-semibold hover:bg-[#082A4B]/90 transition">
+                  <FileText className="h-4 w-4" /> Choose File
+                </button>
+                <p className="mt-4 text-xs text-muted-foreground">PDF, JPG, PNG • Max 15MB</p>
+              </div>
+
+              {/* Security badge */}
+              <div className="rounded-xl border border-border bg-white p-5 shadow-sm md:w-52">
+                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
+                  <Shield className="h-5 w-5 text-accent" />
+                </div>
+                <p className="text-sm font-bold text-ink text-center">Your data is 100% secure</p>
+                <p className="text-xs text-muted-foreground text-center mt-1.5 leading-relaxed">
+                  We never share your files or information. Ever.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Error */}
+        {error && (
+          <div className="container-x pb-6">
+            <div className="max-w-4xl mx-auto flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
               <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold">Analysis failed</p>
                 <p className="mt-1 text-red-600">{error}</p>
               </div>
             </div>
-          )}
-
-          {/* Features */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12">
-            {[
-              { icon: Search, title: "Missing Scope Detection", desc: "Finds items your contractor didn't include" },
-              { icon: Shield, title: "Red Flag Detection", desc: "Identifies scam tactics and overcharges" },
-              { icon: MessageCircle, title: "Smart Questions", desc: "Generates questions to ask before signing" },
-            ].map((f) => (
-              <div key={f.title} className="p-5 rounded-xl border border-border bg-white text-center">
-                <div className="w-10 h-10 rounded-lg bg-[#082A4B]/5 flex items-center justify-center mx-auto mb-3">
-                  <f.icon className="h-5 w-5 text-[#082A4B]" />
-                </div>
-                <p className="text-sm font-semibold text-ink">{f.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">{f.desc}</p>
-              </div>
-            ))}
           </div>
-        </div>
+        )}
+
+        {/* Trust Bar */}
+        <section className="container-x py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-6 border-t border-b border-border">
+              {[
+                { icon: Zap, title: "Results in under 30 seconds", desc: "Save time. Make confident decisions." },
+                { icon: Lock, title: "Bank-level security", desc: "Your data is encrypted & protected." },
+                { icon: CheckCircle2, title: "No signup required", desc: "100% free to try." },
+              ].map((item) => (
+                <div key={item.title} className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <item.icon className="h-4 w-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-ink">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why CostReno is Superior - Comparison */}
+        <section className="container-x py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-2">Why CostReno is Superior</p>
+              <h2 className="font-display text-3xl font-extrabold text-ink">Smarter. Deeper. More Accurate.</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Built for homeowner decisions, not generic answers.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* CostReno column */}
+              <div className="rounded-2xl border-2 border-accent/30 bg-white p-6 relative">
+                <div className="flex items-center justify-between mb-5">
+                  <span className="font-display text-base font-extrabold text-ink">CostReno</span>
+                  <span className="px-2 py-0.5 rounded-full bg-accent text-white text-[9px] font-bold uppercase">Best</span>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { title: "Contractor quote intelligence", desc: "Trained on thousands of real quotes & industry data" },
+                    { title: "Scope & code-aware analysis", desc: "Understands building codes, best practices & local requirements" },
+                    { title: "Pricing insights", desc: "Identifies overpriced items and market comparisons" },
+                    { title: "Actionable recommendations", desc: "Gives you smart questions, negotiation points & next steps" },
+                    { title: "Built for homeowners", desc: "Explains everything in plain English with expert context" },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-bold text-ink">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 pt-4 border-t border-accent/20 text-center">
+                  <p className="text-xs font-bold text-accent">Purpose-built for quotes.</p>
+                  <p className="text-[10px] text-muted-foreground">Designed for better decisions.</p>
+                </div>
+              </div>
+
+              {/* ChatGPT column */}
+              <div className="rounded-2xl border border-border bg-white p-6">
+                <div className="mb-5">
+                  <span className="font-display text-base font-extrabold text-ink">ChatGPT & Other AI</span>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { title: "General knowledge only", desc: "Not trained specifically on contractor quotes" },
+                    { title: "Limited code understanding", desc: "May miss local code requirements and scope details" },
+                    { title: "No pricing context", desc: "Can't detect overpriced or unrealistic line items" },
+                    { title: "Generic suggestions", desc: "Responses are broad, not tailored to your quote" },
+                    { title: "Not built for this use case", desc: "Requires you to ask the right questions" },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-2.5">
+                      <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-bold text-ink">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 pt-4 border-t border-border text-center">
+                  <p className="text-xs text-muted-foreground">General AI. General answers.</p>
+                  <p className="text-[10px] text-muted-foreground">Not built for your biggest investment.</p>
+                </div>
+              </div>
+
+              {/* Manual column */}
+              <div className="rounded-2xl border border-border bg-white p-6">
+                <div className="mb-5">
+                  <span className="font-display text-base font-extrabold text-ink">Spreadsheets & Manual</span>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { title: "Time-consuming", desc: "Hours of manual line-by-line review" },
+                    { title: "Easy to miss important items", desc: "Human error leads to costly oversights" },
+                    { title: "No code or pricing validation", desc: "Hard to verify compliance or market pricing" },
+                    { title: "No expert guidance", desc: "No recommendations or negotiation leverage" },
+                    { title: "Outdated fast", desc: "Can't keep up with changes in codes & pricing" },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-2.5">
+                      <X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-bold text-ink">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 pt-4 border-t border-border text-center">
+                  <p className="text-xs text-red-500 font-medium">Outdated. Risky.</p>
+                  <p className="text-[10px] text-muted-foreground">Leaves money on the table.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Bottom CTA */}
+        <section className="container-x py-10">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 px-8 py-6 rounded-2xl bg-white border border-border shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                <Sparkles className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-ink">We analyze deeper, compare smarter, and find what others miss.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">So you can sign with confidence.</p>
+              </div>
+            </div>
+            <div className="text-center sm:text-right shrink-0">
+              <div className="flex items-center gap-0.5 justify-center sm:justify-end">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Rated 4.9/5 by homeowners</p>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
