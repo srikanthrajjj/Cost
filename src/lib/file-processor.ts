@@ -1,10 +1,15 @@
-import * as pdfjsLib from "pdfjs-dist";
+// pdfjs-dist is loaded dynamically to avoid SSR issues (DOMMatrix not available in Node.js)
+let pdfjsLib: typeof import("pdfjs-dist") | null = null;
 
-// Use the worker from the package itself to ensure version match
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).href;
+async function getPdfjs() {
+  if (pdfjsLib) return pdfjsLib;
+  pdfjsLib = await import("pdfjs-dist");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url,
+  ).href;
+  return pdfjsLib;
+}
 
 export interface ExtractedFileContent {
   text: string;
@@ -33,10 +38,11 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFileCont
 
 async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
   try {
+    const pdfjs = await getPdfjs();
     const arrayBuffer = await file.arrayBuffer();
     console.log("[FILE PROCESSOR] PDF arrayBuffer size:", arrayBuffer.byteLength);
 
-    const pdf = await pdfjsLib.getDocument({
+    const pdf = await pdfjs.getDocument({
       data: arrayBuffer,
       disableAutoFetch: true,
       disableStream: true,
