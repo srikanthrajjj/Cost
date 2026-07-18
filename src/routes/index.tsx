@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import {
   Search, Home, ChefHat, Bath,
@@ -377,6 +377,7 @@ function QuickEstimate() {
 
 // ─── Chat Estimator Component (uses SVG icons from estimator-steps.ts) ────────
 function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }) {
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState<EstimatorAnswers>({});
   const [stepIdx, setStepIdx] = useState(0);
   const [questionIdx, setQuestionIdx] = useState(0);
@@ -411,7 +412,17 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
 
   const handleSelect = (key: keyof EstimatorAnswers, value: unknown) => {
     setAnswer(key, value);
-    setTimeout(advance, 200);
+    // If project type is selected, redirect to /estimate with preselected project
+    if (key === 'projectType') {
+      const projectValue = value as string;
+      // Store the selected project in sessionStorage or navigate with state
+      sessionStorage.setItem('costreno_preselected_project', projectValue);
+      setTimeout(() => {
+        navigate({ to: '/estimate' });
+      }, 200);
+    } else {
+      setTimeout(advance, 200);
+    }
   };
 
   useEffect(() => {

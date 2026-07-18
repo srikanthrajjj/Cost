@@ -549,9 +549,26 @@ function FinalReport({ answers, estimate, onRestart }: { answers: EstimatorAnswe
 // ─── Main Page ────────────────────────────────────────────────────────────────
 function EstimatorPage() {
   const [answers, setAnswers] = useState<EstimatorAnswers>(() => {
-    try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : {}; } catch { return {}; }
+    try { 
+      // Check for preselected project from chat
+      const preselected = sessionStorage.getItem('costreno_preselected_project');
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const baseAnswers = stored ? JSON.parse(stored) : {};
+      if (preselected && !baseAnswers.projectType) {
+        return { ...baseAnswers, projectType: preselected as any };
+      }
+      return baseAnswers;
+    } catch { return {}; }
   });
-  const [stepIdx, setStepIdx] = useState(0);
+  const [stepIdx, setStepIdx] = useState(() => {
+    // If project was preselected from chat, start at step 1 (location), not step 0 (project)
+    const preselected = sessionStorage.getItem('costreno_preselected_project');
+    if (preselected) {
+      sessionStorage.removeItem('costreno_preselected_project'); // Clear it
+      return 1; // Start at Location step
+    }
+    return 0;
+  });
   const [questionIdx, setQuestionIdx] = useState(0);
   const [done, setDone] = useState(false);
   const [estimate, setEstimate] = useState<LiveEstimate>(() => calculateEstimate({}));
