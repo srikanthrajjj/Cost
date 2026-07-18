@@ -6,7 +6,7 @@ import {
   ArrowRight, Star, Check, TrendingUp,
   Facebook, Instagram, Youtube, Linkedin,
   Fan, Sun, Square,
-  Send, X, Bot, MessageCircle,
+  Send, X, Bot, MessageCircle, Paperclip, X as XIcon,
   Maximize2, Minimize2, ThumbsUp, ThumbsDown,
 } from "lucide-react";
 import { calculateEstimate } from "@/lib/estimator-engine";
@@ -455,22 +455,22 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
               const isSelected = answers[currentQuestion.id] === c.value;
               return (
                 <button key={c.value} onClick={() => handleSelect(currentQuestion.id, c.value)}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all duration-150 text-xs
-                    ${isSelected ? "border-accent bg-accent/8 text-accent" : "border-border bg-muted/20 hover:border-accent/40 hover:bg-accent/4 text-ink"}`}>
+                  className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all duration-150
+                    ${isSelected ? "border-accent bg-accent/10 text-accent shadow-md" : "border-border bg-white hover:border-accent/40 hover:shadow-sm text-ink"}`}>
                   {c.icon && (
                     c.icon.endsWith('.svg') ? (
-                      <img src={c.icon} alt={c.label} className="w-5 h-5 object-contain shrink-0" />
+                      <img src={c.icon} alt={c.label} className="w-8 h-8 object-contain shrink-0" />
                     ) : (
-                      <span className="text-base leading-none shrink-0">{c.icon}</span>
+                      <span className="text-2xl leading-none shrink-0">{c.icon}</span>
                     )
                   )}
-                  <div className="min-w-0">
-                    <div className="font-semibold truncate">{c.label}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm">{c.label}</div>
                     {c.desc && currentQuestion.type === "cards" && (
-                      <div className="text-[10px] text-muted-foreground">{c.desc.replace("Avg", "From")}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{c.desc.replace("Avg", "From")}</div>
                     )}
                   </div>
-                  {isSelected && <Check className="h-3 w-3 ml-auto shrink-0" />}
+                  {isSelected && <Check className="h-4 w-4 ml-2 shrink-0 text-accent" />}
                 </button>
               );
             })}
@@ -550,6 +550,8 @@ function Landing() {
     widgetType?: "estimator";
     widgetDone?: boolean;
   }[]>([]);
+  const [attachments, setAttachments] = useState<{ name: string; type: string; size: number }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [userLocation, setUserLocation] = useState<string | null>(null);
@@ -1284,17 +1286,57 @@ FORMATTING RULES:
 
             {/* Input */}
             <div className={`border-t border-border/50 ${isFullScreen ? "px-5 py-4 max-w-xl mx-auto w-full" : "px-4 pb-4 pt-2"}`}>
+              {/* Attachments preview */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {attachments.map((file, i) => (
+                    <div key={i} className="flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-lg px-2.5 py-1.5 text-xs">
+                      <Paperclip className="h-3 w-3 text-accent" />
+                      <span className="text-accent font-medium truncate max-w-[120px]">{file.name}</span>
+                      <button
+                        onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))}
+                        className="text-accent/60 hover:text-accent transition ml-1"
+                      >
+                        <XIcon className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center gap-2 rounded-xl border border-border bg-background p-2 focus-within:ring-2 focus-within:ring-accent/30 transition">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center transition shrink-0 text-muted-foreground hover:text-accent"
+                  title="Attach file (JPG, PNG, PDF)"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    const validFiles = files.filter(f => ['image/jpeg', 'image/png', 'application/pdf'].includes(f.type));
+                    const newAttachments = validFiles.map(f => ({ name: f.name, type: f.type, size: f.size }));
+                    setAttachments([...attachments, ...newAttachments]);
+                    e.target.value = '';
+                  }}
+                  className="hidden"
+                />
                 <input
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={async (e) => {
-                    if (e.key === "Enter" && chatInput.trim()) {
-                      const newMessages = [...chatMessages, { role: "user" as const, text: chatInput }];
+                    if (e.key === "Enter" && (chatInput.trim() || attachments.length > 0)) {
+                      const attachmentText = attachments.length > 0 ? `\n\n[Attachments: ${attachments.map(a => a.name).join(', ')}]` : '';
+                      const newMessages = [...chatMessages, { role: "user" as const, text: chatInput + attachmentText }];
                       setChatMessages(newMessages);
                       setIsAiTyping(true);
                       setChatInput("");
+                      setAttachments([]);
                       setTimeout(scrollToBottom, 50);
                       const aiResponse = await getAIResponse(newMessages);
                       setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
@@ -1307,11 +1349,13 @@ FORMATTING RULES:
                 />
                 <button
                   onClick={async () => {
-                    if (chatInput.trim()) {
-                      const newMessages = [...chatMessages, { role: "user" as const, text: chatInput }];
+                    if (chatInput.trim() || attachments.length > 0) {
+                      const attachmentText = attachments.length > 0 ? `\n\n[Attachments: ${attachments.map(a => a.name).join(', ')}]` : '';
+                      const newMessages = [...chatMessages, { role: "user" as const, text: chatInput + attachmentText }];
                       setChatMessages(newMessages);
                       setIsAiTyping(true);
                       setChatInput("");
+                      setAttachments([]);
                       setTimeout(scrollToBottom, 50);
                       const aiResponse = await getAIResponse(newMessages);
                       setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
@@ -1319,7 +1363,8 @@ FORMATTING RULES:
                       setTimeout(scrollToBottom, 50);
                     }
                   }}
-                  className="w-9 h-9 rounded-lg bg-foreground flex items-center justify-center text-background hover:bg-foreground/90 transition shrink-0"
+                  className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center text-white hover:bg-accent/90 transition shrink-0"
+                  disabled={!chatInput.trim() && attachments.length === 0}
                 >
                   <Send className="h-4 w-4" />
                 </button>
