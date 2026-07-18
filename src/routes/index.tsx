@@ -1250,32 +1250,55 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     setAttachments([]);
     setTimeout(scrollToBottom, 50);
 
-    // Smart routing: PDF always goes to quote analyzer, images go to chat with extraction, no attachment = normal chat
-    const isPdf = fileToProcess?.type === "application/pdf";
-    
-    if (hasAttachments && fileToProcess && isPdf) {
-      // PDF → always run full quote analysis
-      await processQuoteAnalysis(newMessages, userText, fileToProcess);
-    } else if (hasAttachments && fileToProcess) {
-      // Image → extract and chat
+    if (hasAttachments && fileToProcess) {
+      // Step 1: Extract text from the file
       setIsAiTyping(true);
+      let extractedText = "";
       try {
         const extractedContent = await extractTextFromFile(fileToProcess);
-        const extractedText = extractedContent.text.substring(0, 2000);
-        const enhancedUserText = `${userText}\n\nExtracted from ${fileToProcess.name}:\n${extractedText}`;
+        extractedText = extractedContent.text;
+      } catch {
+        // Can't read file — just chat normally
+        const aiResponse = await getAIResponse(newMessages);
+        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + "\n\n(Note: Could not read the attached file.)" }]);
+        setIsAiTyping(false);
+        setTimeout(scrollToBottom, 50);
+        return;
+      }
+
+      if (extractedText.length < 20) {
+        // Too little text — likely scanned/image PDF
+        const aiResponse = await getAIResponse(newMessages);
+        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + "\n\n⚠️ The file appears to be scanned or image-based. For quote analysis, try a text-based PDF or paste the content directly." }]);
+        setIsAiTyping(false);
+        setTimeout(scrollToBottom, 50);
+        return;
+      }
+
+      // Step 2: Decide — is this a contractor quote or just a random document?
+      const textLower = extractedText.toLowerCase();
+      const quoteSignals = ["estimate", "quote", "proposal", "contractor", "labor", "material", "total", "scope", "warranty", "permit", "invoice", "bid", "price", "cost", "install", "replacement", "repair", "sq ft", "linear ft", "per unit"];
+      const matchCount = quoteSignals.filter((s) => textLower.includes(s)).length;
+      const isLikelyQuote = matchCount >= 4; // needs at least 4 signals to be considered a quote
+
+      if (isLikelyQuote) {
+        // It's a quote → run full analysis pipeline
+        setIsAiTyping(false);
+        await processQuoteAnalysis(newMessages, userText, fileToProcess);
+      } else {
+        // Not a quote → just chat about the document
+        const truncated = extractedText.substring(0, 2000);
+        const enhancedUserText = `${userText}\n\nContent from ${fileToProcess.name}:\n${truncated}`;
         const aiResponse = await getAIResponse([
           ...filteredMessages,
           { role: "user" as const, text: enhancedUserText },
         ]);
         setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
-      } catch {
-        const aiResponse = await getAIResponse(newMessages);
-        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + `\n\n(Note: Could not extract text from attachment.)` }]);
+        setIsAiTyping(false);
+        setTimeout(scrollToBottom, 50);
       }
-      setIsAiTyping(false);
-      setTimeout(scrollToBottom, 50);
     } else {
-      // Normal chat
+      // Normal chat — no attachment
       setIsAiTyping(true);
       const aiResponse = await getAIResponse(newMessages);
       setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
