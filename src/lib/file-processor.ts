@@ -1,5 +1,5 @@
 // pdfjs-dist requires browser APIs (DOMMatrix) and cannot run during SSR.
-// We guard all usage behind typeof window checks and use dynamic import.
+// We load it entirely from CDN at runtime to prevent bundlers from including it.
 
 export interface ExtractedFileContent {
   text: string;
@@ -30,12 +30,31 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFileCont
   throw new Error(`Unsupported file type: ${fileType}`);
 }
 
+// Load pdfjs from CDN to completely avoid server-side bundling
+async function loadPdfjs(): Promise<any> {
+  // Check if already loaded
+  if ((window as any).__pdfjsLib) return (window as any).__pdfjsLib;
+
+  // Load the script from CDN
+  await new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
+    script.type = "module";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load PDF.js from CDN"));
+    document.head.appendChild(script);
+  });
+
+  // pdfjs loaded as ES module via import map won't attach to window, use dynamic import instead
+  const pdfjsLib = await import(/* @vite-ignore */ "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+  (window as any).__pdfjsLib = pdfjsLib;
+  return pdfjsLib;
+}
+
 async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
   try {
-    // Use Function constructor to prevent bundler from statically analyzing and bundling pdfjs-dist
-    const dynamicImport = new Function("specifier", "return import(specifier)");
-    const pdfjsLib = await dynamicImport("pdfjs-dist");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.1.200/build/pdf.worker.min.mjs";
+    const pdfjsLib = await loadPdfjs();
 
     const arrayBuffer = await file.arrayBuffer();
     console.log("[FILE PROCESSOR] PDF arrayBuffer size:", arrayBuffer.byteLength);
