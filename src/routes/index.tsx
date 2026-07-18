@@ -865,6 +865,36 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
   );
 }
 
+// ─── Thinking Indicator (Researching → Analyzing → Finalizing) ────────────────
+function ThinkingIndicator() {
+  const [stageIdx, setStageIdx] = useState(0);
+  const stages = [
+    { icon: "🔍", label: "Researching..." },
+    { icon: "⚡", label: "Analyzing..." },
+    { icon: "✨", label: "Finalizing..." },
+  ];
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setStageIdx(1), 2000);
+    const t2 = setTimeout(() => setStageIdx(2), 4500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-muted max-w-[200px]">
+      <div className="flex items-center gap-2">
+        <span className="text-sm">{stages[stageIdx].icon}</span>
+        <span className="text-sm text-ink font-medium animate-pulse">{stages[stageIdx].label}</span>
+      </div>
+      <div className="flex gap-1">
+        {stages.map((_, i) => (
+          <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= stageIdx ? "bg-accent" : "bg-border"}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Landing() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -2265,11 +2295,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0">
                         <Bot className="h-4 w-4 text-white" />
                       </div>
-                      <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-muted">
-                        <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
-                        <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
-                        <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
-                      </div>
+                      <ThinkingIndicator />
                     </div>
                   )
                 )}
