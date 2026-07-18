@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Build and Verify
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to Cloudflare Pages (or your host)
-        run: npm run deploy
-        env:
-          VITE_SK_API_KEY: ${{ secrets.VITE_SK_API_KEY }}
+      - name: Verify API key is injected
+        run: |
+          if grep -r "sk-or-v1" dist/ > /dev/null 2>&1; then
+            echo "✅ API key successfully injected into build"
+          else
+            echo "⚠️ Warning: API key may not be in build (check if it's needed at runtime)"
+          fi
