@@ -2,9 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ArrowLeft, ArrowRight, Check, ChevronRight, Download, FileText,
-  Shield, TrendingUp, Clock, Wrench, Sparkles, X, Home, ChefHat,
-  Bath, Zap, AppWindow, Layers, PaintBucket, Sun, Fence, Droplets,
-  PlugZap, AlertCircle, Info, MapPin, Building2, Calendar, DollarSign,
+  Shield, TrendingUp, Clock, Wrench, Sparkles, X,
+  AlertCircle, Info, MapPin, Building2, Calendar, DollarSign,
   CheckCircle2, HelpCircle,
 } from "lucide-react";
 import { calculateEstimate } from "@/lib/estimator-engine";
@@ -21,11 +20,19 @@ const STORAGE_KEY = "costreno_estimator_v2";
 const fmt = (n: number) => "$" + Math.round(n).toLocaleString();
 const fmtK = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`;
 
-// ─── Lucide icon map for project cards ───────────────────────────────────────
-const PROJECT_ICONS: Record<string, React.ElementType> = {
-  roof: Home, kitchen: ChefHat, bathroom: Bath, hvac: Zap,
-  windows: AppWindow, flooring: Layers, painting: PaintBucket,
-  solar: Sun, deck: Fence, plumbing: Droplets, electrical: PlugZap,
+// ─── SVG icon map for project cards ──────────────────────────────────────────
+const PROJECT_ICONS: Record<string, string> = {
+  roof:       "/House.svg",
+  kitchen:    "/Kitchen.svg",
+  bathroom:   "/Bathtub.svg",
+  hvac:       "/Air Conditioner.svg",
+  windows:    "/Window.svg",
+  flooring:   "/Floor Tiles.svg",
+  painting:   "/Paint Roller.svg",
+  solar:      "/Solar Panel.svg",
+  deck:       "/Balcony.svg",
+  plumbing:   "/Plumbing.svg",
+  electrical: "/Electrical Outlet.svg",
 };
 
 // ─── Step label map ───────────────────────────────────────────────────────────
@@ -101,35 +108,42 @@ function CardsQuestion({ q, value, onChange }: { q: Question; value: string | un
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
       {q.choices!.map((c) => {
-        const Icon = PROJECT_ICONS[c.value] ?? Sparkles;
+        const iconSrc = PROJECT_ICONS[c.value];
         const isSelected = value === c.value;
         const isFlashing = flash === c.value;
+        const amount = c.desc ? c.desc.replace("Avg ", "").replace("Avg", "") : "";
         return (
           <button key={c.value} onClick={() => handleClick(c.value)}
-            className={`group relative flex flex-col gap-3 p-5 rounded-2xl border-2 text-left transition-all duration-200
+            className={`group relative flex flex-col items-center text-center gap-2 px-3 pt-5 pb-4 rounded-2xl border-2 transition-all duration-200
               ${isSelected
                 ? "border-accent bg-accent/[0.06] shadow-lg shadow-accent/10"
-                : "border-border bg-white hover:border-accent/50 hover:shadow-md hover:-translate-y-0.5"
+                : "border-border bg-white hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5"
               } ${isFlashing ? "scale-95" : "scale-100"}`}
           >
-            {/* Icon */}
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200
-              ${isSelected ? "bg-accent text-white" : "bg-muted text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent"}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            {/* Price — primary focus */}
-            {c.desc && (
-              <div className={`text-base font-bold leading-none transition-colors ${isSelected ? "text-accent" : "text-ink"}`}>
-                {c.desc.replace("Avg", "From")}
-              </div>
-            )}
-            <div className={`text-sm font-semibold leading-tight transition-colors ${isSelected ? "text-ink" : "text-ink/80"}`}>
-              {c.label}
-            </div>
             {/* Selected checkmark */}
             {isSelected && (
-              <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-accent flex items-center justify-center animate-in zoom-in duration-150">
+              <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-accent flex items-center justify-center animate-in zoom-in duration-150">
                 <Check className="h-3 w-3 text-white" />
+              </span>
+            )}
+
+            {/* SVG Icon — large, centered */}
+            <div className="w-full flex items-center justify-center h-20 mb-1">
+              {iconSrc
+                ? <img src={iconSrc} alt={c.label} className="h-16 w-16 object-contain" />
+                : <Sparkles className="h-10 w-10 text-muted-foreground" />
+              }
+            </div>
+
+            {/* Project name */}
+            <span className={`text-sm font-semibold leading-tight ${isSelected ? "text-ink" : "text-ink/75"}`}>
+              {c.label}
+            </span>
+
+            {/* Amount */}
+            {amount && (
+              <span className={`text-sm font-bold leading-none ${isSelected ? "text-accent" : "text-ink/60"}`}>
+                {amount}
               </span>
             )}
           </button>

@@ -20,10 +20,11 @@ dist-ssr
 .wrangler/
 .dev.vars
 
-# Environment variables
+# Environment variables (NEVER commit .env with real keys)
 .env
 .env.local
 .env.*.local
+.env.production
 
 # Editor directories and files
 .vscode/*
