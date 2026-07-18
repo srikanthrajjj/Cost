@@ -41,7 +41,6 @@ import type { EstimatorAnswers, ProjectType } from "@/lib/estimator-engine";
 import type { Question } from "@/lib/estimator-steps";
 import { chatWithKnowledge, extractProjectTypeFromChat } from "@/lib/chat-with-knowledge";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
-import type { ExtractedFileContent } from "@/lib/file-processor";
 import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";

@@ -31,7 +31,6 @@ import {
   Star,
   Lock,
 } from "lucide-react";
-import type { ExtractedFileContent } from "@/lib/file-processor";
 import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { chatWithKnowledge } from "@/lib/chat-with-knowledge";

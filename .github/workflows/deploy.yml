@@ -19,3 +19,4 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           env: VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY }}
           production: true
+          vercel-args: --force
