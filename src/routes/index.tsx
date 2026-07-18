@@ -375,13 +375,7 @@ function QuickEstimate() {
   );
 }
 
-// ─── Inline Chat Estimator Widget ─────────────────────────────────────────────
-const PROJECT_ICONS_CHAT: Record<string, string> = {
-  roof: "🏠", kitchen: "🍳", bathroom: "🚿", hvac: "❄️",
-  windows: "🪟", flooring: "🪵", painting: "🖌️", solar: "☀️",
-  deck: "🌿", plumbing: "🔧", electrical: "⚡",
-};
-
+// ─── Chat Estimator Component (uses SVG icons from estimator-steps.ts) ────────
 function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }) {
   const [answers, setAnswers] = useState<EstimatorAnswers>({});
   const [stepIdx, setStepIdx] = useState(0);
@@ -463,7 +457,13 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
                 <button key={c.value} onClick={() => handleSelect(currentQuestion.id, c.value)}
                   className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all duration-150 text-xs
                     ${isSelected ? "border-accent bg-accent/8 text-accent" : "border-border bg-muted/20 hover:border-accent/40 hover:bg-accent/4 text-ink"}`}>
-                  {c.icon && <span className="text-base leading-none shrink-0">{c.icon}</span>}
+                  {c.icon && (
+                    c.icon.endsWith('.svg') ? (
+                      <img src={c.icon} alt={c.label} className="w-5 h-5 object-contain shrink-0" />
+                    ) : (
+                      <span className="text-base leading-none shrink-0">{c.icon}</span>
+                    )
+                  )}
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{c.label}</div>
                     {c.desc && currentQuestion.type === "cards" && (
