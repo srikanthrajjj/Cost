@@ -42,7 +42,8 @@ import type { Question } from "@/lib/estimator-steps";
 import { chatWithKnowledge, extractProjectTypeFromChat } from "@/lib/chat-with-knowledge";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import { extractTextFromFile, type ExtractedFileContent } from "@/lib/file-processor";
-import { analyzeQuoteFull, type QuoteAnalysisResult } from "@/lib/quote";
+import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
+import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -865,6 +866,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
 }
 
 function Landing() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
@@ -881,17 +883,27 @@ function Landing() {
   const [attachments, setAttachments] = useState<
     { name: string; type: string; size: number; file?: File }[]
   >([]);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [isProcessingQuote, setIsProcessingQuote] = useState(false);
   const [processingStep, setProcessingStep] = useState("");
+  const quoteAbortControllerRef = useRef<AbortController | null>(null);
   const [quoteDebugInfo, setQuoteDebugInfo] = useState<QuoteAnalysisResult | null>(null);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [userLocation, setUserLocation] = useState<string | null>(null);
   const [locationDetected, setLocationDetected] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [manualCity, setManualCity] = useState("");
+
+  // Abort any in-flight quote analysis if the component unmounts (e.g. user
+  // navigates away) so we don't keep retrying/updating state on a dead widget.
+  useEffect(() => {
+    return () => {
+      quoteAbortControllerRef.current?.abort();
+    };
+  }, []);
 
   const SK_API_KEY = import.meta.env.VITE_SK_API_KEY || "";
   const DEBUG_QUOTE_ANALYSIS = import.meta.env.DEV;
@@ -928,7 +940,10 @@ function Landing() {
       return true;
     }
     // If there's an attachment and text mentions quote/estimate/contractor/etc
-    if (hasAttachment && /quote|estimate|contractor|material|scope|roof|pricing|proposal|bid/i.test(text)) {
+    if (
+      hasAttachment &&
+      /quote|estimate|contractor|material|scope|roof|pricing|proposal|bid/i.test(text)
+    ) {
       return true;
     }
     // If there's any attachment with words like "analyze", "review", "check", etc
@@ -1138,13 +1153,38 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     }
   };
 
-  const PROGRESS_MESSAGES = [
-    "📄 Reading quote...",
-    "🔍 Extracting materials and scope...",
-    "🏠 Comparing against roofing knowledge...",
-    "⚠ Detecting missing items and red flags...",
-    "📝 Preparing homeowner report...",
+  const STAGE_MESSAGES: Record<QuotePipelineStage | "reading", string> = {
+    reading: "Reading your document...",
+    extracting: "Extracting materials and line items...",
+    matching: "Cross-referencing with our knowledge base...",
+    analyzing: "Identifying gaps and verifying scope...",
+    reporting: "Writing your personalized report...",
+  };
+
+  // Rotating tips shown during quote analysis to keep user engaged
+  const ANALYSIS_TIPS = [
+    "💡 Tip: Always get 3 quotes minimum before committing to a contractor.",
+    "💡 Did you know? 40% of roofing quotes omit critical items like drip edge or ice shield.",
+    "💡 Tip: A good contractor warranty should be 5-10 years on workmanship.",
+    "💡 Pro tip: Ask if permit costs are included — they often aren't.",
+    "💡 Insight: Material quality accounts for 44% of your total project cost.",
+    "💡 Tip: Check contractor licensing at your state's licensing board website.",
+    "💡 Did you know? Insurance may cover storm damage — document everything with photos.",
+    "💡 Tip: \"Cost-plus\" contracts can spiral. Always prefer fixed-price quotes.",
   ];
+
+  const [analysisTipIdx, setAnalysisTipIdx] = useState(0);
+
+  // Rotate tips every 5 seconds during processing
+  useEffect(() => {
+    if (!isProcessingQuote) return;
+    const interval = setInterval(() => {
+      setAnalysisTipIdx((prev) => (prev + 1) % ANALYSIS_TIPS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isProcessingQuote]);
+
+  const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
 
   const handleSendMessage = async () => {
     if (!SK_API_KEY) {
@@ -1169,7 +1209,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
     console.log("[QUOTE DEBUG] handleSendMessage: chatInput =", chatInput);
     console.log("[QUOTE DEBUG] handleSendMessage: hasAttachments =", hasAttachments);
-    console.log("[QUOTE DEBUG] handleSendMessage: shouldUseQuoteAnalyzer =", shouldUseQuoteAnalyzer(chatInput, hasAttachments));
+    console.log(
+      "[QUOTE DEBUG] handleSendMessage: shouldUseQuoteAnalyzer =",
+      shouldUseQuoteAnalyzer(chatInput, hasAttachments),
+    );
 
     const filteredMessages = chatMessages.filter((m) => m.role !== "widget") as {
       role: "user" | "ai";
@@ -1194,7 +1237,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         const enhancedUserText = `${userText}\n\nExtracted from ${fileToProcess.name}:\n${extractedText}`;
 
         setIsAiTyping(true);
-        const aiResponse = await getAIResponse([...filteredMessages, { role: "user" as const, text: enhancedUserText }]);
+        const aiResponse = await getAIResponse([
+          ...filteredMessages,
+          { role: "user" as const, text: enhancedUserText },
+        ]);
         setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
@@ -1202,7 +1248,15 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         console.error("[QUOTE DEBUG] Attachment extraction error:", error);
         setIsAiTyping(true);
         const aiResponse = await getAIResponse(newMessages);
-        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + `\n\n(Note: Could not extract text from attachment. Please paste text manually.)` }]);
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            text:
+              aiResponse +
+              `\n\n(Note: Could not extract text from attachment. Please paste text manually.)`,
+          },
+        ]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
       }
@@ -1216,6 +1270,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     }
   };
 
+  const cancelQuoteAnalysis = () => {
+    quoteAbortControllerRef.current?.abort();
+  };
+
   const processQuoteAnalysis = async (
     messages: { role: "user" | "ai"; text: string }[],
     userText: string,
@@ -1227,16 +1285,27 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     console.log("[QUOTE DEBUG] File size:", file.size);
     console.log("[QUOTE DEBUG] User text:", userText);
 
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: `⚠️ "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Please upload a PDF under ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB.`,
+        },
+      ]);
+      return;
+    }
+
     setIsProcessingQuote(true);
     setQuoteDebugInfo(null);
     setShowDebugPanel(false);
+    setAnalysisTipIdx(0);
+
+    const abortController = new AbortController();
+    quoteAbortControllerRef.current = abortController;
 
     try {
-      for (let i = 0; i < PROGRESS_MESSAGES.length; i++) {
-        setProcessingStep(PROGRESS_MESSAGES[i]);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
+      setProcessingStep(STAGE_MESSAGES.reading);
       console.log("[QUOTE DEBUG] Step 6: Extracting text from file...");
       const extractedContent = await extractTextFromFile(file);
       const extractedText = extractedContent.text;
@@ -1256,35 +1325,92 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         return;
       }
 
+      if (abortController.signal.aborted) {
+        throw new OpenRouterError("cancelled", "Cancelled by user");
+      }
+
       const combinedText = `${userText}\n\nExtracted from ${file.name}:\n${extractedText}`;
 
-      setProcessingStep("🧠 Analyzing quote against roofing knowledge...");
-
       console.log("[QUOTE DEBUG] Step 9: Calling analyzeQuoteFull()...");
-      const analysis = await analyzeQuoteFull(combinedText, SK_API_KEY);
+      const analysis = await analyzeQuoteFull(combinedText, SK_API_KEY, {
+        signal: abortController.signal,
+        onStageChange: (stage) => setProcessingStep(STAGE_MESSAGES[stage]),
+        onRetry: ({ attempt, maxAttempts, reason }) => {
+          const reasonText =
+            reason === "rate_limit"
+              ? "AI is rate-limited"
+              : reason === "timeout"
+                ? "AI response timed out"
+                : "AI request failed";
+          setProcessingStep(`⏳ ${reasonText} — retrying (${attempt}/${maxAttempts})...`);
+        },
+      });
 
-      console.log("[QUOTE DEBUG] Step 10: Extractor result:", JSON.stringify(analysis.extraction, null, 2));
-      console.log("[QUOTE DEBUG] Step 11: Matched materials count:", analysis.matchedMaterials.length);
-      console.log("[QUOTE DEBUG] Step 11: Matched scope items count:", analysis.matchedScopeItems.length);
-      console.log("[QUOTE DEBUG] Step 12: Analysis result:", JSON.stringify(analysis.analysis, null, 2));
+      console.log(
+        "[QUOTE DEBUG] Step 10: Extractor result:",
+        JSON.stringify(analysis.extraction, null, 2),
+      );
+      console.log(
+        "[QUOTE DEBUG] Step 11: Matched materials count:",
+        analysis.matchedMaterials.length,
+      );
+      console.log(
+        "[QUOTE DEBUG] Step 11: Matched scope items count:",
+        analysis.matchedScopeItems.length,
+      );
+      console.log(
+        "[QUOTE DEBUG] Step 12: Analysis result:",
+        JSON.stringify(analysis.analysis, null, 2),
+      );
 
       setQuoteDebugInfo(analysis);
       setShowDebugPanel(DEBUG_QUOTE_ANALYSIS);
 
       console.log("[QUOTE DEBUG] Step 13: Report to display:", analysis.report);
 
-      setChatMessages((prev) => [...prev, { role: "ai", text: analysis.report }]);
+      // Store analysis in sessionStorage so /quote-analyzer can pick it up
+      try {
+        sessionStorage.setItem("costreno_quote_analysis", JSON.stringify(analysis));
+      } catch (e) {
+        console.warn("[QUOTE DEBUG] Could not store analysis in sessionStorage:", e);
+      }
+
+      // Validate extraction has actual data
+      const presentCount = analysis.analysis.presentItems.length;
+      const clarifyCount = analysis.analysis.needsClarification.length;
+      const missingCount = analysis.analysis.missingScope.length;
+      const score = analysis.analysis.summary.completenessScore;
+      const totalExtracted = analysis.extraction.materials.length + analysis.extraction.scopeItems.length;
+
+      if (totalExtracted === 0) {
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            text: "⚠️ I wasn't able to extract any line items from this PDF. This can happen with scanned documents or image-based PDFs.\n\n**Try:**\n- Uploading a text-based PDF\n- Copying and pasting the quote text directly into the chat\n- Taking a clearer photo if using an image",
+          },
+        ]);
+        return;
+      }
+
+      const summaryText = `✅ **Your quote has been analyzed.**\n\nCompleteness Score: **${score}%**\n\nWe found:\n- ✅ **${presentCount} Included Items**\n- ⚠️ **${clarifyCount} Items to Clarify**\n- ❌ **${missingCount} Missing Items**${analysis.analysis.redFlags.length > 0 ? `\n- 🚩 **${analysis.analysis.redFlags.length} Red Flags**` : "\n- 🟢 No red flags detected"}\n\n[ACTION:Open Interactive Review:Explore your full analysis with AI chat:quote-review]`;
+
+      setChatMessages((prev) => [...prev, { role: "ai", text: summaryText }]);
     } catch (error) {
       console.error("[QUOTE DEBUG] ERROR at step:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isCancelled = error instanceof OpenRouterError && error.code === "cancelled";
+      const errorMessage = isCancelled
+        ? "⏹️ Analysis cancelled. Feel free to try again whenever you're ready."
+        : `I couldn't finish analyzing this PDF. ${friendlyOpenRouterMessage(error)}`;
       setChatMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: `I couldn't extract text from this PDF. Error: ${errorMessage}`,
+          text: errorMessage,
         },
       ]);
     } finally {
+      quoteAbortControllerRef.current = null;
       setIsProcessingQuote(false);
       setProcessingStep("");
       setIsAiTyping(false);
@@ -1362,6 +1488,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         { role: "widget", text: "", widgetType: "estimator", widgetDone: false },
       ]);
       setTimeout(scrollToBottom, 50);
+      return;
+    }
+    if (action.action === "quote-review") {
+      // Navigate to the interactive quote analyzer page
+      navigate({ to: "/quote-analyzer" });
       return;
     }
     const prompts: Record<string, string> = {
@@ -1606,19 +1737,19 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           <Logo />
           <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
             {[
-              "Projects",
-              "Cost Estimator",
-              "AI Quote Analyzer",
-              "Insurance Help",
-              "Guides & Advice",
-              "Tools",
+              { label: "Projects", href: "#" },
+              { label: "Cost Estimator", href: "/estimate" },
+              { label: "AI Quote Analyzer", href: "/quote-analyzer" },
+              { label: "Insurance Help", href: "#" },
+              { label: "Guides & Advice", href: "#" },
+              { label: "Tools", href: "#" },
             ].map((l) => (
               <a
-                key={l}
-                href="#"
+                key={l.label}
+                href={l.href}
                 className="hover:text-foreground transition-colors whitespace-nowrap"
               >
-                {l}
+                {l.label}
               </a>
             ))}
           </nav>
@@ -1972,8 +2103,69 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                     className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
                   >
                     {msg.role === "user" ? (
-                      <div className="max-w-[75%] rounded-2xl rounded-br-md px-4 py-2.5 text-sm bg-accent text-white">
-                        {msg.text}
+                      <div className="max-w-[75%] flex flex-col items-end gap-1.5">
+                        {/* Parse and render attachment cards if present */}
+                        {(() => {
+                          const attachMatch = msg.text.match(/\[Attachments?: (.+?)\]$/);
+                          const textWithoutAttachment = attachMatch
+                            ? msg.text.replace(/\n?\n?\[Attachments?: .+?\]$/, "").trim()
+                            : msg.text;
+                          const attachmentNames = attachMatch
+                            ? attachMatch[1].split(", ").map((n) => n.trim())
+                            : [];
+
+                          return (
+                            <>
+                              {/* Attachment cards */}
+                              {attachmentNames.map((fileName, idx) => {
+                                const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+                                const isPdf = ext === "pdf";
+                                const isImage = ["jpg", "jpeg", "png", "gif", "webp"].includes(ext);
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center gap-2.5 bg-white border border-border rounded-xl px-3 py-2.5 shadow-sm"
+                                  >
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                                      isPdf ? "bg-red-50" : isImage ? "bg-blue-50" : "bg-muted"
+                                    }`}>
+                                      {isPdf ? (
+                                        <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                          <polyline points="14 2 14 8 20 8" />
+                                          <path d="M9 15h6" />
+                                          <path d="M9 11h6" />
+                                        </svg>
+                                      ) : isImage ? (
+                                        <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                          <circle cx="8.5" cy="8.5" r="1.5" />
+                                          <polyline points="21 15 16 10 5 21" />
+                                        </svg>
+                                      ) : (
+                                        <Paperclip className="h-5 w-5 text-muted-foreground" />
+                                      )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-semibold text-ink truncate max-w-[160px]">
+                                        {fileName}
+                                      </p>
+                                      <p className="text-[10px] text-muted-foreground">
+                                        {isPdf ? "PDF Document" : isImage ? "Image" : ext.toUpperCase() + " File"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              {/* Text message */}
+                              {textWithoutAttachment && (
+                                <div className="rounded-2xl rounded-br-md px-4 py-2.5 text-sm bg-accent text-white">
+                                  {textWithoutAttachment}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     ) : msg.role === "widget" && msg.widgetType === "estimator" ? (
                       <div className="flex items-start gap-2.5 w-full max-w-[90%]">
@@ -2022,8 +2214,49 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                     <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0">
                       <Bot className="h-4 w-4 text-white" />
                     </div>
-                    <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-muted">
-                      <span className="text-sm text-ink">{processingStep}</span>
+                    <div className="flex flex-col gap-3 px-4 py-4 rounded-2xl rounded-bl-md bg-muted/80 border border-border/50 max-w-[340px]">
+                      {/* Animated thinking dots + stage */}
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-accent animate-bounce [animation-delay:0ms]" />
+                          <span className="w-2 h-2 rounded-full bg-accent animate-bounce [animation-delay:150ms]" />
+                          <span className="w-2 h-2 rounded-full bg-accent animate-bounce [animation-delay:300ms]" />
+                        </div>
+                        <span className="text-sm font-medium text-ink">{processingStep}</span>
+                      </div>
+
+                      {/* Progress steps */}
+                      <div className="flex gap-1.5">
+                        {(["reading", "extracting", "matching", "analyzing", "reporting"] as const).map((stage, idx) => {
+                          const currentStageIdx = Object.keys(STAGE_MESSAGES).indexOf(
+                            Object.entries(STAGE_MESSAGES).find(([, v]) => v === processingStep)?.[0] ?? "reading"
+                          );
+                          const isComplete = idx < currentStageIdx;
+                          const isCurrent = idx === currentStageIdx;
+                          return (
+                            <div
+                              key={stage}
+                              className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
+                                isComplete ? "bg-accent" : isCurrent ? "bg-accent/50 animate-pulse" : "bg-border"
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+
+                      {/* Rotating tip */}
+                      <p className="text-[11px] text-muted-foreground leading-relaxed animate-in fade-in duration-500" key={analysisTipIdx}>
+                        {ANALYSIS_TIPS[analysisTipIdx]}
+                      </p>
+
+                      {/* Cancel */}
+                      <button
+                        onClick={cancelQuoteAnalysis}
+                        className="self-start text-[11px] text-muted-foreground/60 hover:text-destructive transition"
+                        title="Cancel analysis"
+                      >
+                        Cancel
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -2049,25 +2282,62 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               className={`border-t border-border/50 ${isFullScreen ? "px-5 py-4 max-w-xl mx-auto w-full" : "px-4 pb-4 pt-2"}`}
             >
               {/* Attachments preview */}
+              {attachmentError && (
+                <p className="text-[11px] text-destructive mb-2">{attachmentError}</p>
+              )}
               {attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {attachments.map((file, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-1.5 bg-accent/10 border border-accent/20 rounded-lg px-2.5 py-1.5 text-xs"
-                    >
-                      <Paperclip className="h-3 w-3 text-accent" />
-                      <span className="text-accent font-medium truncate max-w-[120px]">
-                        {file.name}
-                      </span>
-                      <button
-                        onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))}
-                        className="text-accent/60 hover:text-accent transition ml-1"
+                  {attachments.map((file, i) => {
+                    const isPdf = file.type === "application/pdf";
+                    const isImage = file.type.startsWith("image/");
+                    const fileSizeStr = file.size < 1024 * 1024
+                      ? `${(file.size / 1024).toFixed(0)} KB`
+                      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+                    return (
+                      <div
+                        key={i}
+                        className="relative flex items-center gap-3 bg-white border border-border rounded-xl px-3 py-2.5 shadow-sm max-w-[220px] group"
                       >
-                        <XIcon className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
+                        {/* File type icon */}
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                          isPdf ? "bg-red-50" : isImage ? "bg-blue-50" : "bg-muted"
+                        }`}>
+                          {isPdf ? (
+                            <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14 2 14 8 20 8" />
+                              <path d="M10 12h4" />
+                              <path d="M10 16h4" />
+                            </svg>
+                          ) : isImage ? (
+                            <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                              <circle cx="8.5" cy="8.5" r="1.5" />
+                              <polyline points="21 15 16 10 5 21" />
+                            </svg>
+                          ) : (
+                            <Paperclip className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
+
+                        {/* File info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-ink truncate">{file.name}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {isPdf ? "PDF" : isImage ? "Image" : "File"} • {fileSizeStr}
+                          </p>
+                        </div>
+
+                        {/* Remove button */}
+                        <button
+                          onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-muted-foreground/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-destructive"
+                        >
+                          <XIcon className="h-3 w-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               <div className="flex items-center gap-2 rounded-xl border border-border bg-background p-2 focus-within:ring-2 focus-within:ring-accent/30 transition">
@@ -2089,8 +2359,22 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                     const validFiles = files.filter((f) =>
                       ["image/jpeg", "image/png", "application/pdf"].includes(f.type),
                     );
-                    console.log("[QUOTE DEBUG] File input: validFiles =", validFiles.map(f => ({ name: f.name, type: f.type, hasFile: !!f })));
-                    const newAttachments = validFiles.map((f) => ({
+                    const oversizedFiles = validFiles.filter((f) => f.size > MAX_FILE_SIZE_BYTES);
+                    const acceptedFiles = validFiles.filter((f) => f.size <= MAX_FILE_SIZE_BYTES);
+
+                    if (oversizedFiles.length > 0) {
+                      setAttachmentError(
+                        `${oversizedFiles.map((f) => f.name).join(", ")} exceeds the ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB limit and won't be attached.`,
+                      );
+                    } else {
+                      setAttachmentError(null);
+                    }
+
+                    console.log(
+                      "[QUOTE DEBUG] File input: validFiles =",
+                      acceptedFiles.map((f) => ({ name: f.name, type: f.type, hasFile: !!f })),
+                    );
+                    const newAttachments = acceptedFiles.map((f) => ({
                       name: f.name,
                       type: f.type,
                       size: f.size,
@@ -2106,21 +2390,26 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={async (e) => {
-                    if (e.key === "Enter" && (chatInput.trim() || attachments.length > 0)) {
+                    if (
+                      e.key === "Enter" &&
+                      (chatInput.trim() || attachments.length > 0) &&
+                      !isProcessingQuote
+                    ) {
                       await handleSendMessage();
                     }
                   }}
                   placeholder="Ask me anything — costs, materials, insurance, plans..."
                   className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground/60"
+                  disabled={isProcessingQuote}
                 />
                 <button
                   onClick={async () => {
-                    if (chatInput.trim() || attachments.length > 0) {
+                    if ((chatInput.trim() || attachments.length > 0) && !isProcessingQuote) {
                       await handleSendMessage();
                     }
                   }}
-                  className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center text-white hover:bg-accent/90 transition shrink-0"
-                  disabled={!chatInput.trim() && attachments.length === 0}
+                  className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center text-white hover:bg-accent/90 transition shrink-0 disabled:opacity-50"
+                  disabled={(!chatInput.trim() && attachments.length === 0) || isProcessingQuote}
                 >
                   <Send className="h-4 w-4" />
                 </button>

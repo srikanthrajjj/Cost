@@ -78,6 +78,11 @@ export interface QuoteAnalysis {
     unmatchedItems: number;
     completenessScore: number;
   };
+  /** ✅ Items confirmed present in the quote */
+  presentItems: { name: string; matchedAs: string; clarification?: string }[];
+  /** ⚠ Items present but needing further detail */
+  needsClarification: { name: string; matchedAs: string; question: string }[];
+  /** ❌ Items genuinely missing from the quote */
   missingScope: MissingItem[];
   missingMaterials: MissingItem[];
   commonOmissions: Finding[];

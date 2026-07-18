@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as IndexRouteImport } from './routes/index'
 
+const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
+  id: '/quote-analyzer',
+  path: '/quote-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EstimateRoute = EstimateRouteImport.update({
   id: '/estimate',
   path: '/estimate',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/estimate': typeof EstimateRoute
+  '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/estimate': typeof EstimateRoute
+  '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/estimate': typeof EstimateRoute
+  '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/estimate'
+  fullPaths: '/' | '/estimate' | '/quote-analyzer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/estimate'
-  id: '__root__' | '/' | '/estimate'
+  to: '/' | '/estimate' | '/quote-analyzer'
+  id: '__root__' | '/' | '/estimate' | '/quote-analyzer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EstimateRoute: typeof EstimateRoute
+  QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/quote-analyzer': {
+      id: '/quote-analyzer'
+      path: '/quote-analyzer'
+      fullPath: '/quote-analyzer'
+      preLoaderRoute: typeof QuoteAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/estimate': {
       id: '/estimate'
       path: '/estimate'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EstimateRoute: EstimateRoute,
+  QuoteAnalyzerRoute: QuoteAnalyzerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

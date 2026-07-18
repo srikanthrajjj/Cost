@@ -188,7 +188,7 @@ ${userMessage}`;
         "X-Title": "CostReno AI",
       },
       body: JSON.stringify({
-        model: "openrouter/free",
+        model: "deepseek/deepseek-chat",
         messages: [
           {
             role: "system",
@@ -261,7 +261,7 @@ ${knowledgePrompt}`;
         "X-Title": "CostReno AI",
       },
       body: JSON.stringify({
-        model: "openrouter/free",
+        model: "deepseek/deepseek-chat",
         messages: [
           {
             role: "system",
