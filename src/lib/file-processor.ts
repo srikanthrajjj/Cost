@@ -1,15 +1,5 @@
-// pdfjs-dist is loaded dynamically to avoid SSR issues (DOMMatrix not available in Node.js)
-let pdfjsLib: typeof import("pdfjs-dist") | null = null;
-
-async function getPdfjs() {
-  if (pdfjsLib) return pdfjsLib;
-  pdfjsLib = await import("pdfjs-dist");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url,
-  ).href;
-  return pdfjsLib;
-}
+// pdfjs-dist requires browser APIs (DOMMatrix) and cannot run during SSR.
+// We guard all usage behind typeof window checks and use dynamic import.
 
 export interface ExtractedFileContent {
   text: string;
@@ -17,6 +7,10 @@ export interface ExtractedFileContent {
 }
 
 export async function extractTextFromFile(file: File): Promise<ExtractedFileContent> {
+  if (typeof window === "undefined") {
+    throw new Error("File processing is only available in the browser");
+  }
+
   const fileType = file.type;
 
   console.log("[FILE PROCESSOR] Extracting text from file:", {
@@ -38,11 +32,15 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFileCont
 
 async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
   try {
-    const pdfjs = await getPdfjs();
+    // Use Function constructor to prevent bundler from statically analyzing and bundling pdfjs-dist
+    const dynamicImport = new Function("specifier", "return import(specifier)");
+    const pdfjsLib = await dynamicImport("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.1.200/build/pdf.worker.min.mjs";
+
     const arrayBuffer = await file.arrayBuffer();
     console.log("[FILE PROCESSOR] PDF arrayBuffer size:", arrayBuffer.byteLength);
 
-    const pdf = await pdfjs.getDocument({
+    const pdf = await pdfjsLib.getDocument({
       data: arrayBuffer,
       disableAutoFetch: true,
       disableStream: true,

@@ -31,7 +31,7 @@ import {
   Star,
   Lock,
 } from "lucide-react";
-import { extractTextFromFile } from "@/lib/file-processor";
+import type { ExtractedFileContent } from "@/lib/file-processor";
 import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { chatWithKnowledge } from "@/lib/chat-with-knowledge";
@@ -263,6 +263,7 @@ function QuoteAnalyzerPage() {
 
     try {
       setProcessingStage("reading");
+      const { extractTextFromFile } = await import("@/lib/file-processor");
       const extracted = await extractTextFromFile(file);
       if (extracted.text.length < 10) {
         setError("Could not extract text from this file. Try a different PDF or paste text directly.");
