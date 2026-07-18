@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
   ChevronRight,
   Download,
   FileText,
@@ -24,6 +25,8 @@ import {
 } from "lucide-react";
 import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
+import { submitEmailAndDownload } from "@/lib/download-utils";
+import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import type { EstimatorAnswers, LiveEstimate } from "@/lib/estimator-engine";
 import type { StepDef, Question } from "@/lib/estimator-steps";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -34,6 +37,9 @@ import projWindows from "@/assets/proj-windows.jpg";
 import projSolar from "@/assets/proj-solar.jpg";
 
 export const Route = createFileRoute("/estimate")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    project: (search.project as string) || undefined,
+  }),
   head: () => ({ meta: [{ title: "Cost Estimator — CostReno" }] }),
   component: EstimatorPage,
 });
@@ -194,6 +200,10 @@ function CardsQuestion({
   onChange: (v: string) => void;
 }) {
   const [flash, setFlash] = useState<string | null>(null);
+  const [notifyOpen, setNotifyOpen] = useState<string | null>(null);
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
+
   const handleClick = (v: string) => {
     setFlash(v);
     setTimeout(() => {
@@ -201,56 +211,160 @@ function CardsQuestion({
       onChange(v);
     }, 180);
   };
+
+  const handleNotifySubmit = async (projectValue: string) => {
+    if (!notifyEmail.trim()) return;
+    
+    try {
+      // TODO: Send email to backend for notification list
+      console.log(`Notifying ${notifyEmail} for project: ${projectValue}`);
+      setNotifySuccess(projectValue);
+      setNotifyEmail("");
+      setTimeout(() => setNotifySuccess(null), 2000);
+      setNotifyOpen(null);
+    } catch (error) {
+      console.error("Error subscribing to notifications:", error);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-      {q.choices!.map((c) => {
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      {q.choices!.map((c, idx) => {
         const iconSrc = PROJECT_ICONS[c.value];
         const isSelected = value === c.value;
         const isFlashing = flash === c.value;
         const amount = c.desc ? c.desc.replace("Avg ", "").replace("Avg", "") : "";
+        const isDisabled = idx >= 3; // Disable cards 4+ (indices 3 and above)
+        const isNotifyOpen = notifyOpen === c.value;
+        const isNotifySuccess = notifySuccess === c.value;
+
         return (
-          <button
-            key={c.value}
-            onClick={() => handleClick(c.value)}
-            className={`group relative flex flex-col items-center text-center gap-2 px-3 pt-5 pb-4 rounded-2xl border-2 transition-all duration-200
-              ${
-                isSelected
-                  ? "border-accent bg-accent/[0.06] shadow-lg shadow-accent/10"
-                  : "border-border bg-white hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5"
-              } ${isFlashing ? "scale-95" : "scale-100"}`}
-          >
-            {/* Selected checkmark */}
-            {isSelected && (
-              <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-accent flex items-center justify-center animate-in zoom-in duration-150">
-                <Check className="h-3 w-3 text-white" />
-              </span>
-            )}
-
-            {/* SVG Icon — large, centered */}
-            <div className="w-full flex items-center justify-center h-20 mb-1">
-              {iconSrc ? (
-                <img src={iconSrc} alt={c.label} className="h-16 w-16 object-contain" />
-              ) : (
-                <Sparkles className="h-10 w-10 text-muted-foreground" />
-              )}
-            </div>
-
-            {/* Project name */}
-            <span
-              className={`text-sm font-semibold leading-tight ${isSelected ? "text-ink" : "text-ink/75"}`}
-            >
-              {c.label}
-            </span>
-
-            {/* Amount */}
-            {amount && (
-              <span
-                className={`text-sm font-bold leading-none ${isSelected ? "text-accent" : "text-ink/60"}`}
+          <div key={c.value} className="relative">
+            {isDisabled ? (
+              <div
+                className={`relative flex flex-col items-center text-center gap-2 px-4 pt-6 pb-5 rounded-2xl border-2 border-border bg-white transition-all duration-200 h-full ${
+                  isNotifyOpen ? "ring-2 ring-accent/30" : ""
+                }`}
+                style={{ opacity: 0.75 }}
               >
-                {amount}
-              </span>
+                {/* Coming Soon Badge - absolute positioned */}
+                <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-bold text-accent uppercase tracking-wider">
+                  Soon
+                </span>
+
+                {/* SVG Icon */}
+                <div className="w-full flex items-center justify-center h-16">
+                  {iconSrc ? (
+                    <img src={iconSrc} alt={c.label} className="h-14 w-14 object-contain" />
+                  ) : (
+                    <Sparkles className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Project name */}
+                <span className="text-sm font-semibold leading-tight text-ink">
+                  {c.label}
+                </span>
+
+                {/* Amount */}
+                {amount && (
+                  <span className="text-xs font-bold leading-none text-muted-foreground">
+                    {amount}
+                  </span>
+                )}
+
+                {/* Notify Button or Success State */}
+                <div className="mt-auto pt-2 w-full">
+                  {isNotifySuccess ? (
+                    <div className="w-full py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-semibold flex items-center justify-center gap-1">
+                      <Check className="h-3.5 w-3.5" /> Thanks!
+                    </div>
+                  ) : isNotifyOpen ? (
+                    <div className="w-full flex flex-col gap-2">
+                      <input
+                        type="email"
+                        placeholder="your@email.com"
+                        value={notifyEmail}
+                        onChange={(e) => setNotifyEmail(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleNotifySubmit(c.value);
+                        }}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-white text-xs placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleNotifySubmit(c.value)}
+                          disabled={!notifyEmail.trim()}
+                          className="flex-1 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                          Notify
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNotifyOpen(null);
+                            setNotifyEmail("");
+                          }}
+                          className="flex-1 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold hover:bg-muted/30 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setNotifyOpen(c.value)}
+                      className="w-full py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:border-accent/40 hover:text-accent transition"
+                    >
+                      Notify Me
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => handleClick(c.value)}
+                className={`w-full h-full relative flex flex-col items-center text-center gap-2 px-4 pt-6 pb-5 rounded-2xl border-2 transition-all duration-200
+                  ${
+                    isSelected
+                      ? "border-accent bg-accent/[0.06] shadow-lg shadow-accent/10"
+                      : "border-border bg-white hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5"
+                  } ${isFlashing ? "scale-95" : "scale-100"}`}
+              >
+                {/* Selected checkmark */}
+                {isSelected && (
+                  <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-accent flex items-center justify-center animate-in zoom-in duration-150">
+                    <Check className="h-3 w-3 text-white" />
+                  </span>
+                )}
+
+                {/* SVG Icon */}
+                <div className="w-full flex items-center justify-center h-16">
+                  {iconSrc ? (
+                    <img src={iconSrc} alt={c.label} className="h-14 w-14 object-contain" />
+                  ) : (
+                    <Sparkles className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Project name */}
+                <span
+                  className={`text-sm font-semibold leading-tight ${isSelected ? "text-ink" : "text-ink/75"}`}
+                >
+                  {c.label}
+                </span>
+
+                {/* Amount */}
+                {amount && (
+                  <span
+                    className={`text-xs font-bold leading-none ${isSelected ? "text-accent" : "text-ink/60"}`}
+                  >
+                    {amount}
+                  </span>
+                )}
+              </button>
             )}
-          </button>
+          </div>
         );
       })}
     </div>
@@ -716,6 +830,48 @@ function FinalReport({
   estimate: LiveEstimate;
   onRestart: () => void;
 }) {
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadClick = () => {
+    setShowEmailModal(true);
+  };
+
+  const handleEmailSubmit = async (email: string) => {
+    setIsDownloading(true);
+    try {
+      const projectLabel: Record<string, string> = {
+        roof: "Roof Replacement",
+        kitchen: "Kitchen Remodel",
+        bathroom: "Bathroom Remodel",
+        hvac: "HVAC Replacement",
+        windows: "Window Replacement",
+        flooring: "Flooring",
+        painting: "Painting",
+        solar: "Solar Installation",
+        deck: "Deck / Patio",
+        plumbing: "Plumbing",
+        electrical: "Electrical",
+      };
+
+      await submitEmailAndDownload({
+        filename: `estimate-${answers.projectType}-${new Date().getTime()}.html`,
+        email,
+        reportType: "estimate",
+        data: {
+          projectType: projectLabel[answers.projectType ?? ""] ?? "Your Project",
+          estimate: fmt(estimate.mid),
+          confidence: estimate.confidence,
+          timestamp: new Date().toLocaleString(),
+        },
+      });
+    } catch (error) {
+      console.error("Download failed:", error);
+      throw error;
+    } finally {
+      setIsDownloading(false);
+    }
+  };
   const projectLabel: Record<string, string> = {
     roof: "Roof Replacement",
     kitchen: "Kitchen Remodel",
@@ -838,6 +994,7 @@ function FinalReport({
           {nextSteps.map((s) => (
             <button
               key={s.label}
+              onClick={s.label === "Download PDF Report" ? handleDownloadClick : undefined}
               className="group flex items-center gap-3 p-4 rounded-xl border border-border hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
             >
               <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:text-white transition-all">
@@ -869,16 +1026,25 @@ function FinalReport({
           Back to CostReno
         </a>
       </div>
+
+      <EmailDownloadModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailSubmit}
+        reportName="Estimate Report"
+        isLoading={isDownloading}
+      />
     </div>
   );
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 function EstimatorPage() {
+  const { project: urlProject } = Route.useSearch();
   const [answers, setAnswers] = useState<EstimatorAnswers>(() => {
     try {
-      // Check for preselected project from chat
-      const preselected = sessionStorage.getItem("costreno_preselected_project");
+      // Check for project from URL param first, then sessionStorage, then localStorage
+      const preselected = urlProject || sessionStorage.getItem("costreno_preselected_project");
       const stored = localStorage.getItem(STORAGE_KEY);
       const baseAnswers = stored ? JSON.parse(stored) : {};
       if (preselected && !baseAnswers.projectType) {
@@ -890,8 +1056,8 @@ function EstimatorPage() {
     }
   });
   const [stepIdx, setStepIdx] = useState(() => {
-    // If project was preselected from chat, start at step 1 (location), not step 0 (project)
-    const preselected = sessionStorage.getItem("costreno_preselected_project");
+    // If project was preselected from URL or chat, start at step 1 (location)
+    const preselected = urlProject || sessionStorage.getItem("costreno_preselected_project");
     if (preselected) {
       sessionStorage.removeItem("costreno_preselected_project"); // Clear it
       return 1; // Start at Location step
@@ -1006,15 +1172,64 @@ function EstimatorPage() {
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-border/60">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
-          <a href="/" className="shrink-0">
-            <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
-          </a>
-          {!done && (
-            <div className="flex-1 hidden sm:flex items-center gap-3">
-              <div className="flex-1 max-w-sm h-1.5 rounded-full bg-muted overflow-hidden">
+      {/* Header - Same as landing page */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <a href="/" className="shrink-0">
+              <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
+            </a>
+          </div>
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
+            <a href="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</a>
+            <a href="/estimate" className="text-accent hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
+            <a href="/quote-analyzer" className="hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
+            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
+            <div className="relative group">
+              <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
+                Renovation Guides
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
+                  {["Roofing", "Kitchen", "Bathroom", "HVAC", "Windows", "Flooring", "Solar", "Foundation"].map((item) => (
+                    <a key={item} href="#" className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">
+                      {item}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a
+              href="#"
+              className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
+            >
+              Start Free
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+        {/* Progress bar + Start over */}
+        {!done && (
+          <div className="mb-8">
+            <div className="flex items-center justify-end gap-3 mb-4">
+              <span className="hidden sm:inline text-xs text-muted-foreground">
+                Progress auto-saved
+              </span>
+              <button
+                onClick={restart}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-ink transition"
+              >
+                <X className="h-3.5 w-3.5" /> Start over
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full rounded-full bg-accent transition-all duration-500"
                   style={{ width: `${overallProgress}%` }}
@@ -1024,32 +1239,9 @@ function EstimatorPage() {
                 ~{minsLeft} min left
               </span>
             </div>
-          )}
-          <div className="flex items-center gap-3 ml-auto">
-            {!done && (
-              <span className="hidden sm:inline text-xs text-muted-foreground">
-                Progress auto-saved
-              </span>
-            )}
-            <button
-              onClick={restart}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-ink transition"
-            >
-              <X className="h-3.5 w-3.5" /> Start over
-            </button>
-          </div>
-        </div>
-        {!done && (
-          <div className="sm:hidden h-1 bg-muted">
-            <div
-              className="h-full bg-accent transition-all duration-500"
-              style={{ width: `${overallProgress}%` }}
-            />
           </div>
         )}
-      </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
         {done ? (
           <FinalReport answers={answers} estimate={estimate} onRestart={restart} />
         ) : (

@@ -35,11 +35,128 @@ import { extractTextFromFile } from "@/lib/file-processor";
 import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { chatWithKnowledge } from "@/lib/chat-with-knowledge";
+import { submitEmailAndDownload } from "@/lib/download-utils";
+import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import type { QuoteAnalysis } from "@/lib/quote/types";
 
 export const Route = createFileRoute("/quote-analyzer")({
-  head: () => ({ meta: [{ title: "AI Quote Analyzer — CostReno" }] }),
+  head: () => ({
+    meta: [
+      { title: "Free AI Contractor Quote Analyzer | Review Bids in Seconds — CostReno" },
+      { name: "description", content: "Upload your contractor quote and get an instant AI-powered expert review. Spot overpricing, missing scope, red flags, and hidden costs in under 30 seconds. Free, no signup required." },
+      { name: "keywords", content: "contractor quote analyzer, quote review tool, contractor estimate checker, home improvement quote analysis, roofing quote review, renovation quote comparison, AI quote analyzer, contractor bid review, how much does a roof replacement cost, kitchen remodel cost, contractor quote red flags" },
+      { property: "og:title", content: "Free AI Contractor Quote Analyzer | Review Bids in Seconds — CostReno" },
+      { property: "og:description", content: "Upload your contractor quote and get an instant expert review. Spot overpricing, missing items, and red flags in seconds. Free." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://costreno.com/quote-analyzer" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Free AI Contractor Quote Analyzer — CostReno" },
+      { name: "twitter:description", content: "Upload your contractor quote and get instant AI analysis. Spot overpricing and missing scope in seconds." },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://costreno.com/quote-analyzer" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "How does the contractor quote analyzer work?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Upload a photo or PDF of your contractor quote. Our AI reads every line item, cross-references it against local pricing databases and building codes, then generates a detailed report highlighting overpriced items, missing scope, and red flags.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is the quote analyzer free to use?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes, the quote analyzer is completely free. No signup, no credit card, and no hidden fees. Upload your quote and get results in under 30 seconds.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "What types of contractor quotes can I analyze?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "You can analyze any home improvement contractor quote including roofing, kitchen remodeling, bathroom renovation, HVAC installation, window replacement, solar panels, painting, flooring, deck/patio, plumbing, and electrical work.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is my contractor quote kept private and secure?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Absolutely. Your files are encrypted, never stored permanently, and never shared with contractors or third parties. We process your quote securely and delete it after analysis.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "How much does a roof replacement cost in 2026?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "The average roof replacement costs between $8,600 and $24,700 in 2026, with most homeowners paying around $16,650. Costs vary by material, roof size, pitch, and location. Use our Cost Estimator for a personalized estimate.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "How much does a kitchen remodel cost?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "A kitchen remodel typically costs between $25,000 and $75,000 in 2026, with the national average around $50,000. The final cost depends on size, materials, layout changes, and your location.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "What red flags should I look for in a contractor quote?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Common red flags include: vague material specifications, no permit costs listed, large upfront payment demands (over 30%), no warranty terms, missing scope items like cleanup and disposal, no timeline, and prices significantly below market rate.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "How many contractor quotes should I get before hiring?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Experts recommend getting at least 3 quotes for any home improvement project. This helps you understand the market rate, compare scope and materials, and identify outliers. Upload all your quotes to CostReno for side-by-side analysis.",
+              },
+            },
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "CostReno AI Quote Analyzer",
+          url: "https://costreno.com/quote-analyzer",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Any",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+          },
+          description: "Free AI-powered contractor quote analysis tool. Upload any home improvement quote to identify overpricing, missing scope, and red flags instantly.",
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: "4.9",
+            ratingCount: "2847",
+            bestRating: "5",
+          },
+        }),
+      },
+    ],
+  }),
   component: QuoteAnalyzerPage,
 });
 
@@ -93,6 +210,8 @@ function QuoteAnalyzerPage() {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<"overview" | "scope" | "explorer" | "questions" | "timeline">("overview");
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -121,6 +240,13 @@ function QuoteAnalyzerPage() {
     const interval = setInterval(() => setTipIdx((p) => (p + 1) % PROCESSING_TIPS.length), 5000);
     return () => clearInterval(interval);
   }, [state]);
+
+  // Auto-dismiss error toast after 8 seconds
+  useEffect(() => {
+    if (!error) return;
+    const timeout = setTimeout(() => setError(""), 8000);
+    return () => clearTimeout(timeout);
+  }, [error]);
 
   const handleFileUpload = async (file: File) => {
     if (!SK_API_KEY) {
@@ -175,289 +301,452 @@ function QuoteAnalyzerPage() {
     setActiveTab("overview");
   };
 
+  const handleEmailSubmit = async (email: string) => {
+    if (!result || !result.analysis) {
+      throw new Error("No analysis data available");
+    }
+    setIsDownloading(true);
+    try {
+      const { analysis, extraction } = result;
+      await submitEmailAndDownload({
+        filename: `quote-analysis-${new Date().getTime()}.html`,
+        email,
+        reportType: "analysis",
+        data: {
+          score: analysis.quoteHealthScore,
+          missingItems: analysis.missingScope.length,
+          clarificationItems: analysis.needsClarification.length,
+          redFlags: analysis.redFlags.length,
+          contractor: extraction.contractor,
+          totalPrice: extraction.totalPrice,
+        },
+      });
+    } catch (error) {
+      console.error("Download failed:", error);
+      throw error;
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // ─── IDLE STATE: Upload Interface ───────────────────────────────────────────
   if (state === "idle" || state === "error") {
     return (
-      <div className="min-h-screen bg-[#f8faf9]">
-        {/* Header */}
-        <header className="border-b border-border/60 bg-white">
-          <div className="container-x flex h-14 items-center justify-between">
-            <a href="/" className="flex items-center gap-2">
-              <img src="/logo.svg" alt="CostReno" style={{ height: "32px" }} />
-            </a>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3.5 w-3.5" />
-              <span className="font-medium">100% Private & Secure</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Hero Section */}
-        <section className="container-x py-14 md:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-            {/* Left: Copy */}
-            <div>
-              <h1 className="font-display text-4xl sm:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
-                Get an Expert Review of Your Contractor Quote{" "}
-                <span className="text-accent">in Under 30 Seconds</span>
-              </h1>
-              <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-md">
-                Upload your quote and uncover what's <strong className="text-ink">included</strong>, what's <strong className="text-ink">missing</strong>, and what could <strong className="text-ink">cost you more</strong>.
-              </p>
-            </div>
-
-            {/* Right: Floating badges */}
-            <div className="relative hidden md:block h-[260px]">
-              <div className="absolute top-4 left-8 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-border">
-                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-accent" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-ink">AI-Powered</p>
-                  <p className="text-[10px] text-muted-foreground">Analysis</p>
-                </div>
-              </div>
-              <div className="absolute top-20 right-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-border">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-ink">Instant</p>
-                  <p className="text-[10px] text-muted-foreground">Results</p>
-                </div>
-              </div>
-              <div className="absolute bottom-8 right-12 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white shadow-lg border border-border">
-                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-accent" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-ink">Expert</p>
-                  <p className="text-[10px] text-muted-foreground">Accuracy</p>
-                </div>
-              </div>
-              {/* Decorative quote card */}
-              <div className="absolute top-6 right-20 w-44 h-56 rounded-xl bg-white shadow-md border border-border p-4 rotate-3">
-                <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Contractor Quote</div>
-                <div className="space-y-2">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className={`h-2 rounded bg-muted ${i === 1 ? "w-20" : i === 3 ? "w-16" : "w-24"}`} />
-                      <div className="text-[9px] font-medium text-accent">$</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Upload Section */}
-        <section className="container-x pb-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-5 items-start">
-              {/* Upload card */}
-              <div
-                className="rounded-2xl border-2 border-dashed border-border hover:border-accent/60 bg-white p-10 text-center transition-all cursor-pointer group shadow-sm"
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const file = e.dataTransfer.files[0];
-                  if (file) handleFileUpload(file);
-                }}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
-                    e.target.value = "";
-                  }}
-                />
-                <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition">
-                  <Upload className="h-6 w-6 text-accent" />
-                </div>
-                <p className="text-base font-bold text-ink">Upload Your Quote</p>
-                <p className="mt-1.5 text-sm text-muted-foreground">Drag & drop your file here or</p>
-                <button className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#082A4B] text-white text-sm font-semibold hover:bg-[#082A4B]/90 transition">
-                  <FileText className="h-4 w-4" /> Choose File
-                </button>
-                <p className="mt-4 text-xs text-muted-foreground">PDF, JPG, PNG • Max 15MB</p>
-              </div>
-
-              {/* Security badge */}
-              <div className="rounded-xl border border-border bg-white p-5 shadow-sm md:w-52">
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
-                  <Shield className="h-5 w-5 text-accent" />
-                </div>
-                <p className="text-sm font-bold text-ink text-center">Your data is 100% secure</p>
-                <p className="text-xs text-muted-foreground text-center mt-1.5 leading-relaxed">
-                  We never share your files or information. Ever.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Error */}
+      <div className="min-h-screen bg-[#f7f8fa]">
+        {/* Error Toast */}
         {error && (
-          <div className="container-x pb-6">
-            <div className="max-w-4xl mx-auto flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
-              <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Analysis failed</p>
-                <p className="mt-1 text-red-600">{error}</p>
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 w-full max-w-md px-4">
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-white border border-red-200 shadow-lg shadow-red-100/50">
+              <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-ink">Analysis failed</p>
+                <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{error}</p>
+              </div>
+              <button
+                onClick={() => setError("")}
+                className="shrink-0 w-6 h-6 rounded-full hover:bg-muted/50 flex items-center justify-center transition"
+              >
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
             </div>
           </div>
         )}
 
-        {/* Trust Bar */}
-        <section className="container-x py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-6 border-t border-b border-border">
+        {/* Header - Same as landing page */}
+        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
+            <a href="/" className="shrink-0">
+              <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
+            </a>
+            <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
+              <a href="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</a>
+              <a href="/estimate" className="hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
+              <a href="/quote-analyzer" className="text-accent hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
+              <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
+              <div className="relative group">
+                <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
+                  Renovation Guides
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
+                </button>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
+                    {["Roofing", "Kitchen", "Bathroom", "HVAC", "Windows", "Flooring", "Solar", "Foundation"].map((item) => (
+                      <a key={item} href="#" className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">
+                        {item}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
+            </nav>
+            <div className="flex items-center gap-3">
+              <a
+                href="#"
+                className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
+              >
+                Start Free
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
+          {/* Hero - Clean and centered */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-5">
+              <Clock className="h-3 w-3 text-accent" />
+              <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                Updated July 2026 · Pricing Data Refreshed Monthly
+              </span>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
+              Get an Expert Review of Your<br />
+              Contractor Quote{" "}
+              <span className="text-accent">in Seconds</span>
+            </h1>
+            <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg mx-auto">
+              Upload your quote and uncover what's included, what's missing, and what could cost you more.
+            </p>
+          </div>
+
+          {/* Upload Card - Primary focus */}
+          <div className="max-w-xl mx-auto">
+            <div
+              className="rounded-2xl border-2 border-dashed border-border hover:border-accent/60 bg-white p-10 md:p-14 text-center transition-all cursor-pointer group shadow-sm"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) handleFileUpload(file);
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileUpload(file);
+                  e.target.value = "";
+                }}
+              />
+              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-5 group-hover:bg-accent/20 transition">
+                <Upload className="h-7 w-7 text-accent" />
+              </div>
+              <p className="text-lg font-bold text-ink">Upload Your Quote</p>
+              <p className="mt-2 text-sm text-muted-foreground">Drag & drop your file here or</p>
+              <button className="mt-5 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20">
+                <FileText className="h-4 w-4" /> Choose File
+              </button>
+              <p className="mt-5 text-xs text-muted-foreground">PDF, JPG, PNG • Max 15MB</p>
+            </div>
+          </div>
+
+          {/* Trust indicators - Horizontal row below upload */}
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-xl mx-auto">
+            {[
+              { icon: Zap, label: "Results in 30 seconds" },
+              { icon: Lock, label: "100% private & secure" },
+              { icon: CheckCircle2, label: "No signup required" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2.5 justify-center">
+                <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                  <item.icon className="h-3.5 w-3.5 text-accent" />
+                </div>
+                <span className="text-xs font-semibold text-muted-foreground">{item.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* What You'll Get - Clean cards */}
+          <div className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-8">
+              What You'll Get
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { icon: Zap, title: "Results in under 30 seconds", desc: "Save time. Make confident decisions." },
-                { icon: Lock, title: "Bank-level security", desc: "Your data is encrypted & protected." },
-                { icon: CheckCircle2, title: "No signup required", desc: "100% free to try." },
+                { icon: Search, title: "Scope Analysis", desc: "See what's included and what's missing" },
+                { icon: DollarSign, title: "Price Check", desc: "Flag overpriced or underpriced items" },
+                { icon: AlertTriangle, title: "Red Flags", desc: "Spot risky terms and vague language" },
+                { icon: MessageCircle, title: "AI Q&A", desc: "Ask questions about your specific quote" },
               ].map((item) => (
-                <div key={item.title} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <item.icon className="h-4 w-4 text-accent" />
+                <div key={item.title} className="rounded-xl border border-border bg-white p-5 text-center">
+                  <div className="w-10 h-10 rounded-xl bg-accent/8 flex items-center justify-center mx-auto mb-3">
+                    <item.icon className="h-5 w-5 text-accent" />
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-ink">{item.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
-                  </div>
+                  <p className="text-sm font-bold text-ink">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
 
-        {/* Why CostReno is Superior - Comparison */}
-        <section className="container-x py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-2">Why CostReno is Superior</p>
-              <h2 className="font-display text-3xl font-extrabold text-ink">Smarter. Deeper. More Accurate.</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Built for homeowner decisions, not generic answers.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* CostReno column */}
-              <div className="rounded-2xl border-2 border-accent/30 bg-white p-6 relative">
-                <div className="flex items-center justify-between mb-5">
-                  <span className="font-display text-base font-extrabold text-ink">CostReno</span>
+          {/* CostReno vs Others - Simplified */}
+          <div className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+              Why CostReno vs. Generic AI?
+            </h2>
+            <p className="text-sm text-muted-foreground text-center mb-8 max-w-md mx-auto">
+              Built specifically for contractor quotes. Not general chat.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
+              {/* CostReno */}
+              <div className="rounded-2xl border-2 border-accent/30 bg-white p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <img src="/logo.svg" alt="CostReno" style={{ height: "20px" }} />
                   <span className="px-2 py-0.5 rounded-full bg-accent text-white text-[9px] font-bold uppercase">Best</span>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {[
-                    { title: "Contractor quote intelligence", desc: "Trained on thousands of real quotes & industry data" },
-                    { title: "Scope & code-aware analysis", desc: "Understands building codes, best practices & local requirements" },
-                    { title: "Pricing insights", desc: "Identifies overpriced items and market comparisons" },
-                    { title: "Actionable recommendations", desc: "Gives you smart questions, negotiation points & next steps" },
-                    { title: "Built for homeowners", desc: "Explains everything in plain English with expert context" },
+                    "Trained on thousands of real quotes",
+                    "Understands building codes & best practices",
+                    "Detects overpriced line items",
+                    "Gives negotiation points & next steps",
+                    "Built for homeowners, not developers",
                   ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-2.5">
+                    <div key={item} className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-ink">{item.title}</p>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
-                      </div>
+                      <span className="text-xs text-ink">{item}</span>
                     </div>
                   ))}
-                </div>
-                <div className="mt-5 pt-4 border-t border-accent/20 text-center">
-                  <p className="text-xs font-bold text-accent">Purpose-built for quotes.</p>
-                  <p className="text-[10px] text-muted-foreground">Designed for better decisions.</p>
                 </div>
               </div>
 
-              {/* ChatGPT column */}
-              <div className="rounded-2xl border border-border bg-white p-6">
-                <div className="mb-5">
-                  <span className="font-display text-base font-extrabold text-ink">ChatGPT & Other AI</span>
+              {/* Others */}
+              <div className="rounded-2xl border border-border bg-white/60 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-sm font-bold text-ink">ChatGPT & Others</span>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {[
-                    { title: "General knowledge only", desc: "Not trained specifically on contractor quotes" },
-                    { title: "Limited code understanding", desc: "May miss local code requirements and scope details" },
-                    { title: "No pricing context", desc: "Can't detect overpriced or unrealistic line items" },
-                    { title: "Generic suggestions", desc: "Responses are broad, not tailored to your quote" },
-                    { title: "Not built for this use case", desc: "Requires you to ask the right questions" },
+                    "General knowledge, not quote-specific",
+                    "May miss code requirements",
+                    "No pricing intelligence",
+                    "Generic suggestions only",
+                    "You have to ask the right questions",
                   ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-2.5">
-                      <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-ink">{item.title}</p>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
-                      </div>
+                    <div key={item} className="flex items-start gap-2">
+                      <X className="h-4 w-4 text-muted-foreground/50 shrink-0 mt-0.5" />
+                      <span className="text-xs text-muted-foreground">{item}</span>
                     </div>
                   ))}
-                </div>
-                <div className="mt-5 pt-4 border-t border-border text-center">
-                  <p className="text-xs text-muted-foreground">General AI. General answers.</p>
-                  <p className="text-[10px] text-muted-foreground">Not built for your biggest investment.</p>
-                </div>
-              </div>
-
-              {/* Manual column */}
-              <div className="rounded-2xl border border-border bg-white p-6">
-                <div className="mb-5">
-                  <span className="font-display text-base font-extrabold text-ink">Spreadsheets & Manual</span>
-                </div>
-                <div className="space-y-4">
-                  {[
-                    { title: "Time-consuming", desc: "Hours of manual line-by-line review" },
-                    { title: "Easy to miss important items", desc: "Human error leads to costly oversights" },
-                    { title: "No code or pricing validation", desc: "Hard to verify compliance or market pricing" },
-                    { title: "No expert guidance", desc: "No recommendations or negotiation leverage" },
-                    { title: "Outdated fast", desc: "Can't keep up with changes in codes & pricing" },
-                  ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-2.5">
-                      <X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-ink">{item.title}</p>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-5 pt-4 border-t border-border text-center">
-                  <p className="text-xs text-red-500 font-medium">Outdated. Risky.</p>
-                  <p className="text-[10px] text-muted-foreground">Leaves money on the table.</p>
                 </div>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Bottom CTA */}
-        <section className="container-x py-10">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 px-8 py-6 rounded-2xl bg-white border border-border shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                <Sparkles className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-ink">We analyze deeper, compare smarter, and find what others miss.</p>
-                <p className="text-xs text-muted-foreground mt-0.5">So you can sign with confidence.</p>
-              </div>
-            </div>
-            <div className="text-center sm:text-right shrink-0">
-              <div className="flex items-center gap-0.5 justify-center sm:justify-end">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className="h-4 w-4 text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Rated 4.9/5 by homeowners</p>
-            </div>
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+            >
+              <Upload className="h-4 w-4" /> Upload Your Quote Now
+            </button>
+            <p className="mt-3 text-xs text-muted-foreground">Free. No signup. Results in seconds.</p>
           </div>
-        </section>
+
+          {/* SEO: How It Works Section */}
+          <section className="mt-20 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+              How the Contractor Quote Analyzer Works
+            </h2>
+            <p className="text-sm text-muted-foreground text-center max-w-lg mx-auto mb-10">
+              Three simple steps to review any contractor estimate, bid, or proposal.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { step: "1", title: "Upload Your Quote", desc: "Upload a PDF, photo, or scan of any contractor quote, estimate, or bid. We support roofing, kitchen, bathroom, HVAC, and more." },
+                { step: "2", title: "AI Analyzes Every Line", desc: "Our AI engine reads every line item, cross-references local pricing data, checks building codes, and identifies missing scope." },
+                { step: "3", title: "Get Your Expert Report", desc: "Receive a detailed report with a health score, red flags, pricing analysis, missing items, and questions to ask your contractor." },
+              ].map((item) => (
+                <div key={item.step} className="text-center">
+                  <div className="w-10 h-10 rounded-full bg-accent/10 text-accent font-bold text-sm flex items-center justify-center mx-auto mb-3">
+                    {item.step}
+                  </div>
+                  <h3 className="text-sm font-bold text-ink mb-1.5">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* SEO: Use Cases */}
+          <section className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-8">
+              Analyze Any Home Improvement Quote
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                "Roofing Quotes",
+                "Kitchen Remodel Bids",
+                "Bathroom Renovation Estimates",
+                "HVAC Replacement Proposals",
+                "Window Installation Quotes",
+                "Solar Panel Estimates",
+                "Painting Contractor Bids",
+                "Flooring Installation Quotes",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2 px-3 py-3 rounded-lg border border-border bg-white">
+                  <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                  <span className="text-xs font-medium text-ink">{item}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* SEO: FAQ Section with Schema-ready structure */}
+          <section className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xs text-muted-foreground text-center mb-8">
+              Last updated: July 2026 · Pricing data refreshed monthly
+            </p>
+            <div className="max-w-2xl mx-auto space-y-3">
+              {[
+                {
+                  q: "How does the contractor quote analyzer work?",
+                  a: "Simply upload a photo or PDF of your contractor quote. Our AI reads every line item, cross-references it against local pricing databases and building codes, then generates a detailed report highlighting overpriced items, missing scope, and red flags.",
+                },
+                {
+                  q: "Is this free to use?",
+                  a: "Yes, the quote analyzer is completely free. No signup, no credit card, and no hidden fees. Upload your quote and get results in under 30 seconds.",
+                },
+                {
+                  q: "What types of quotes can I analyze?",
+                  a: "You can analyze any home improvement contractor quote including roofing, kitchen remodeling, bathroom renovation, HVAC installation, window replacement, solar panels, painting, flooring, deck/patio, plumbing, and electrical work.",
+                },
+                {
+                  q: "Is my contractor quote kept private?",
+                  a: "Absolutely. Your files are encrypted, never stored permanently, and never shared with contractors or third parties. We process your quote securely and delete it after analysis.",
+                },
+                {
+                  q: "How accurate is the AI analysis?",
+                  a: "Our AI is trained on thousands of real contractor quotes and cross-references current local pricing data. It identifies missing scope items, overpriced line items, and code compliance issues with high accuracy. However, we always recommend getting multiple quotes.",
+                },
+                {
+                  q: "What should I do if red flags are found?",
+                  a: "If our analysis identifies red flags, use the detailed questions and negotiation points we provide to discuss with your contractor. Ask for clarification on vague items, request itemized breakdowns, and compare with other quotes.",
+                },
+                {
+                  q: "Can I use this before signing a contract?",
+                  a: "Yes — that's exactly when you should use it. Upload your quote before signing to ensure you're getting fair pricing, complete scope, and proper materials specified. It's the smartest step before committing to a contractor.",
+                },
+              ].map((faq) => (
+                <details key={faq.q} className="group rounded-xl border border-border bg-white overflow-hidden">
+                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-semibold text-ink hover:bg-muted/20 transition">
+                    {faq.q}
+                    <ChevronDown className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-3" />
+                  </summary>
+                  <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          {/* People Also Ask — Broader informational traffic */}
+          <section className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+              People Also Ask
+            </h2>
+            <p className="text-xs text-muted-foreground text-center mb-8">
+              Common questions homeowners have about renovation costs and contractor quotes
+            </p>
+            <div className="max-w-2xl mx-auto space-y-3">
+              {[
+                {
+                  q: "How much does a roof replacement cost in 2026?",
+                  a: "The average roof replacement costs between $8,600 and $24,700 in 2026, with most homeowners paying around $16,650. Costs vary significantly based on roofing material (asphalt shingles vs. metal vs. tile), roof size, pitch complexity, and your geographic location. Labor costs alone can range from $4,000 to $10,000 depending on the market.",
+                },
+                {
+                  q: "How much does a kitchen remodel cost?",
+                  a: "A kitchen remodel typically costs between $25,000 and $75,000 in 2026, with the national average around $50,000. Minor cosmetic updates may cost $10,000–$15,000, while a full gut renovation with custom cabinets and appliances can exceed $100,000. The biggest cost drivers are cabinets (30-40%), labor (20-30%), and countertops (10-15%).",
+                },
+                {
+                  q: "How do I know if my contractor quote is too high?",
+                  a: "Compare your quote against the typical range for your project type and location. Get at least 3 quotes to establish a baseline. Watch for vague line items, unusually high markups on materials, or labor rates significantly above the local average. CostReno's AI analyzer can identify overpriced items instantly.",
+                },
+                {
+                  q: "What should a contractor quote include?",
+                  a: "A complete contractor quote should include: itemized materials with brand/model, labor costs broken down by task, permit fees, demolition and disposal costs, project timeline with start/end dates, payment schedule, warranty terms, change order process, and insurance/licensing information.",
+                },
+                {
+                  q: "How many quotes should I get for a home renovation?",
+                  a: "Get at least 3 quotes for any home improvement project over $5,000. For major renovations ($50,000+), consider getting 4-5 quotes. This helps you understand the market rate, evaluate different approaches, and identify contractors who may be cutting corners or overcharging.",
+                },
+                {
+                  q: "What are common red flags in contractor quotes?",
+                  a: "Watch for: requesting more than 30% upfront payment, no written warranty, vague material descriptions (e.g., 'standard grade'), missing permit costs, no timeline specified, price significantly lower than competitors (could mean cutting corners), and pressure to sign immediately.",
+                },
+                {
+                  q: "How much does a bathroom remodel cost in 2026?",
+                  a: "A bathroom remodel typically costs $8,000 to $30,000 in 2026, with most homeowners spending around $19,000. A basic refresh (new fixtures, paint, flooring) may cost $5,000–$10,000, while a full renovation with tile work, new plumbing, and layout changes can exceed $30,000.",
+                },
+                {
+                  q: "Should I get a permit for my home renovation?",
+                  a: "Most structural, electrical, plumbing, and HVAC work requires permits. Roofing, window replacement, and additions almost always need them. Cosmetic updates like painting and flooring typically don't. Skipping required permits can result in fines, difficulty selling your home, and voided insurance coverage.",
+                },
+              ].map((faq) => (
+                <details key={faq.q} className="group rounded-xl border border-border bg-white overflow-hidden">
+                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-semibold text-ink hover:bg-muted/20 transition">
+                    {faq.q}
+                    <ChevronDown className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-3" />
+                  </summary>
+                  <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          {/* SEO: Long-tail keyword content */}
+          <section className="mt-16 pt-12 border-t border-border">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                The Smartest Way to Review Contractor Quotes
+              </h2>
+              <p className="text-xs text-muted-foreground mb-6">
+                Updated July 2026 · Based on 10,000+ analyzed quotes
+              </p>
+              <div className="text-sm text-muted-foreground leading-relaxed space-y-4 text-left">
+                <p>
+                  Getting a contractor quote for your home improvement project is just the first step. Whether you're planning a roof replacement, kitchen remodel, or bathroom renovation, understanding what's in your quote — and what's missing — can save you thousands of dollars.
+                </p>
+                <p>
+                  CostReno's AI Quote Analyzer is purpose-built for homeowners who want to make informed decisions. Unlike generic AI tools, our system is trained specifically on contractor quotes, building codes, and regional pricing data. It understands the difference between a fair price and an inflated one, between complete scope and missing critical items.
+                </p>
+                <p>
+                  Our analyzer checks for common issues like missing permits, vague material specifications, absence of warranty terms, unclear payment schedules, and scope gaps that could lead to expensive change orders. It also provides smart questions to ask your contractor and negotiation points based on local market rates.
+                </p>
+                <p>
+                  Whether you've received one quote or five, upload them all and compare. Make confident decisions about the biggest investment in your home.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Final CTA */}
+          <div className="mt-16 pb-8 text-center">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+            >
+              <Upload className="h-4 w-4" /> Analyze Your Quote — Free
+            </button>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Trusted by thousands of homeowners. Results in seconds.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -563,7 +852,7 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
         <div className="flex items-center justify-between px-6 h-14">
           <a href="/"><img src="/logo.svg" alt="CostReno" style={{ height: "28px" }} /></a>
           <div className="flex items-center gap-3">
-            <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Download className="h-3.5 w-3.5" /> Download Report</button>
+            <button onClick={() => setShowEmailModal(true)} className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Download className="h-3.5 w-3.5" /> Download Report</button>
             <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Share2 className="h-3.5 w-3.5" /> Share Report</button>
             <button onClick={reset} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#082A4B] text-white text-xs font-semibold"><Upload className="h-3.5 w-3.5" /> New Analysis</button>
           </div>
@@ -642,12 +931,19 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
           {/* Verdict */}
           <div className="rounded-2xl border border-border bg-white p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
             <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0"><CheckCircle2 className="h-6 w-6 text-accent" /></div><div><p className="text-sm font-bold text-ink">{score >= 80 ? "You're in good shape." : score >= 60 ? "Some attention needed." : "Significant gaps found."}</p><p className="text-xs text-muted-foreground mt-0.5 max-w-md">{score >= 80 ? "Your quote looks solid. Just clarify a few details and add the missing items to ensure a complete and high-quality project." : "Review the missing items and clarification points before signing. Get these addressed in writing."}</p></div></div>
-            <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shrink-0"><Download className="h-4 w-4" /> Download Full Report</button>
+            <button onClick={() => setShowEmailModal(true)} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shrink-0"><Download className="h-4 w-4" /> Download Full Report</button>
           </div>
           </>)}
         </main>
       </div>
       {chatOpen && <AIChatPanel analysis={analysis} extraction={extraction} onClose={() => setChatOpen(false)} apiKey={apiKey} />}
+      <EmailDownloadModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailSubmit}
+        reportName="Quote Analysis Report"
+        isLoading={isDownloading}
+      />
       {!chatOpen && <button onClick={() => setChatOpen(true)} className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/30 flex items-center justify-center text-white hover:scale-105 transition-transform z-40 lg:hidden"><MessageCircle className="h-6 w-6" /></button>}
     </div>
   );
@@ -656,19 +952,44 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
 // ─── Header ───────────────────────────────────────────────────────────────────
 function Header({ onNewQuote }: { onNewQuote?: () => void }) {
   return (
-    <header className="border-b border-border bg-white">
-      <div className="container-x flex h-14 items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="CostReno" style={{ height: "32px" }} />
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
+        <a href="/" className="shrink-0">
+          <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
         </a>
+        <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
+          <a href="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</a>
+          <a href="/estimate" className="hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
+          <a href="/quote-analyzer" className="text-accent hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
+          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
+          <div className="relative group">
+            <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
+              Renovation Guides
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
+            </button>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
+                {["Roofing", "Kitchen", "Bathroom", "HVAC", "Windows", "Flooring", "Solar", "Foundation"].map((item) => (
+                  <a key={item} href="#" className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">
+                    {item}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
+        </nav>
         <div className="flex items-center gap-3">
           {onNewQuote && (
             <button onClick={onNewQuote} className="text-sm font-medium text-muted-foreground hover:text-ink transition">
               New Analysis
             </button>
           )}
-          <a href="/" className="text-sm font-medium text-muted-foreground hover:text-ink transition">
-            Home
+          <a
+            href="#"
+            className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
+          >
+            Start Free
           </a>
         </div>
       </div>

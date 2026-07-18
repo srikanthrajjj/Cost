@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
 import { Route as EstimateRouteImport } from './routes/estimate'
+import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
 
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
@@ -23,6 +24,11 @@ const EstimateRoute = EstimateRouteImport.update({
   path: '/estimate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectSlugRoute = ProjectSlugRouteImport.update({
+  id: '/$projectSlug',
+  path: '/$projectSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/estimate' | '/quote-analyzer'
+  fullPaths: '/' | '/$projectSlug' | '/estimate' | '/quote-analyzer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/estimate' | '/quote-analyzer'
-  id: '__root__' | '/' | '/estimate' | '/quote-analyzer'
+  to: '/' | '/$projectSlug' | '/estimate' | '/quote-analyzer'
+  id: '__root__' | '/' | '/$projectSlug' | '/estimate' | '/quote-analyzer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProjectSlugRoute: typeof ProjectSlugRoute
   EstimateRoute: typeof EstimateRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstimateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$projectSlug': {
+      id: '/$projectSlug'
+      path: '/$projectSlug'
+      fullPath: '/$projectSlug'
+      preLoaderRoute: typeof ProjectSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProjectSlugRoute: ProjectSlugRoute,
   EstimateRoute: EstimateRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
 }

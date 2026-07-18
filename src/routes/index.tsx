@@ -909,6 +909,9 @@ function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [notifyOpen, setNotifyOpen] = useState<string | null>(null);
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<
@@ -1785,22 +1788,25 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         <div className="container-x flex h-16 items-center justify-between">
           <Logo />
           <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
-            {[
-              { label: "Projects", href: "#" },
-              { label: "Cost Estimator", href: "/estimate" },
-              { label: "AI Quote Analyzer", href: "/quote-analyzer" },
-              { label: "Insurance Help", href: "#" },
-              { label: "Guides & Advice", href: "#" },
-              { label: "Tools", href: "#" },
-            ].map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                className="hover:text-foreground transition-colors whitespace-nowrap"
-              >
-                {l.label}
-              </a>
-            ))}
+            <a href="/estimate" className="hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
+            <a href="/quote-analyzer" className="hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
+            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
+            <div className="relative group">
+              <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
+                Renovation Guides
+                <ChevronDownIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
+                  {["Roofing", "Kitchen", "Bathroom", "HVAC", "Windows", "Flooring", "Solar", "Foundation"].map((item) => (
+                    <a key={item} href="#" className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">
+                      {item}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
           </nav>
           <div className="flex items-center gap-3">
             <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
@@ -1815,15 +1821,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </button>
             <a
               href="#"
-              className="hidden sm:inline text-sm font-bold text-foreground hover:text-primary transition"
-            >
-              Sign In
-            </a>
-            <a
-              href="#"
               className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
             >
-              Sign Up
+              Start Free
             </a>
           </div>
         </div>
@@ -2553,73 +2553,88 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
           <div className="relative">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 overflow-x-auto pb-6 hide-scrollbar">
-              {projects.map((p) => (
-                <a
-                  key={p.name}
-                  href="#"
-                  className="group relative min-w-[280px] md:min-w-auto flex flex-col rounded-[18px] border border-[#E7EAF0] bg-white overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover:border-accent/30"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-t-[18px]">
-                    <img
-                      src={p.img}
-                      alt={p.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
-                      {p.time}
-                    </span>
-                  </div>
-
-                  <div className="relative flex-1 p-5">
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <h3 className="text-[15px] font-semibold text-ink line-clamp-2 pr-2">
-                        {p.name}
-                      </h3>
-                      <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
-                        <p.icon className="h-5 w-5 text-primary" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <div className="font-display text-[20px] font-bold text-ink">
-                          {p.avgCost}
+              {projects.map((p, idx) => {
+                const isDisabled = idx >= 3; // Disable cards 4, 5, 6 (indices 3, 4, 5)
+                
+                return (
+                  <a
+                    key={p.name}
+                    href={isDisabled ? "#" : "#"}
+                    onClick={(e) => isDisabled && e.preventDefault()}
+                    className={`group relative min-w-[280px] md:min-w-auto flex flex-col rounded-[18px] border border-[#E7EAF0] bg-white overflow-hidden shadow-sm ${
+                      !isDisabled
+                        ? "hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover:border-accent/30 cursor-pointer"
+                        : "cursor-not-allowed"
+                    }`}
+                  >
+                    <div className="relative aspect-[16/10] overflow-hidden rounded-t-[18px]">
+                      <img
+                        src={p.img}
+                        alt={p.name}
+                        loading="lazy"
+                        className={`h-full w-full object-cover transition-transform duration-700 ${
+                          !isDisabled ? "group-hover:scale-110" : ""
+                        }`}
+                      />
+                      {isDisabled && (
+                        <div className="absolute inset-0 bg-black/15 flex items-center justify-center">
+                          <span className="px-3 py-1.5 rounded-full bg-white/95 text-[12px] font-bold text-primary shadow-lg">
+                            Coming Soon
+                          </span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          Typical: {p.price}
+                      )}
+                      {!isDisabled && (
+                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
+                          {p.time}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className={`relative flex-1 p-5 ${isDisabled ? "pointer-events-none opacity-60" : ""}`}>
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <h3 className="text-[15px] font-semibold text-ink line-clamp-2 pr-2">
+                          {p.name}
+                        </h3>
+                        <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+                          <p.icon className="h-5 w-5 text-primary" />
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-border/30">
-                        <button
-                          onClick={() => {
-                            sessionStorage.setItem("costreno_preselected_project", p.projectType);
-                            window.location.href = "/estimate";
-                          }}
-                          className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
-                        >
-                          Get Estimate
-                        </button>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="font-display text-[20px] font-bold text-ink">
+                            {p.avgCost}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            Typical: {p.price}
+                          </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-border/30">
+                          <button
+                            disabled={isDisabled}
+                            onClick={() => {
+                              if (!isDisabled) {
+                                sessionStorage.setItem("costreno_preselected_project", p.projectType);
+                                window.location.href = "/estimate";
+                              }
+                            }}
+                            className={`w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold ${
+                              isDisabled
+                                ? "bg-muted/50 border-muted text-muted-foreground cursor-not-allowed"
+                                : "text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
+                            }`}
+                          >
+                            {isDisabled ? "Coming Soon" : "Get Estimate"}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="absolute top-1/2 right-3 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex flex-col gap-1.5">
-                      <button className="w-7 h-7 rounded-full bg-muted/50 hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors flex items-center justify-center">
-                        <div className="text-[9px] font-medium">Quotes</div>
-                      </button>
-                      <button className="w-7 h-7 rounded-full bg-muted/50 hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors flex items-center justify-center">
-                        <div className="text-[9px] font-medium">AI</div>
-                      </button>
-                      <button className="w-7 h-7 rounded-full bg-muted/50 hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors flex items-center justify-center">
-                        <div className="text-[9px] font-medium">Info</div>
-                      </button>
-                    </div>
-                  </div>
-                </a>
-              ))}
+
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -2628,7 +2643,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       {/* SMART TOOLS */}
       <section className="container-x py-24">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 mb-5">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             <span className="text-xs font-bold text-accent tracking-widest uppercase">
@@ -2636,542 +2651,204 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </span>
           </div>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-ink leading-tight max-w-3xl mx-auto">
-            Everything you need to renovate with confidence
+            Estimate costs. Review quotes. That's all you need.
           </h2>
           <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Powerful tools and AI-driven insights to help you plan, compare, and save on every
-            project.
+            Start with what matters. Everything else will follow.
           </p>
         </div>
 
-        {/* Tool Cards Grid */}
+        {/* Unified Tools Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Cost Estimator */}
+          {/* Cost Estimator - Active */}
           <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+            <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-6 h-6 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="4" y="3" width="20" height="22" rx="3" />
-                <rect
-                  x="7"
-                  y="6"
-                  width="14"
-                  height="5"
-                  rx="1.5"
-                  className="group-hover:fill-accent/20 transition-all duration-300"
-                />
-                <line
-                  x1="8"
-                  y1="22"
-                  x2="8"
-                  y2="19"
-                  strokeWidth="2.5"
-                  className="group-hover:stroke-accent transition-colors duration-300"
-                />
-                <line
-                  x1="12"
-                  y1="22"
-                  x2="12"
-                  y2="17"
-                  strokeWidth="2.5"
-                  className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:60ms]"
-                />
-                <line
-                  x1="16"
-                  y1="22"
-                  x2="16"
-                  y2="20"
-                  strokeWidth="2.5"
-                  className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:120ms]"
-                />
-                <line
-                  x1="20"
-                  y1="22"
-                  x2="20"
-                  y2="15"
-                  strokeWidth="2.5"
-                  className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:180ms]"
-                />
+                <rect x="7" y="6" width="14" height="5" rx="1.5" />
+                <line x1="8" y1="22" x2="8" y2="19" strokeWidth="2.5" />
+                <line x1="12" y1="22" x2="12" y2="17" strokeWidth="2.5" />
+                <line x1="16" y1="22" x2="16" y2="20" strokeWidth="2.5" />
+                <line x1="20" y1="22" x2="20" y2="15" strokeWidth="2.5" />
               </svg>
             </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Cost Estimator</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+            <h3 className="font-display text-sm font-bold text-ink mb-1.5">Cost Estimator</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
               Get accurate, local cost estimates for your project in minutes.
             </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="/estimate"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Get Estimate <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                Learn More
-              </a>
-            </div>
-          </div>
-
-          {/* Quote Review */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 3h11l5 5v17H6V3z" />
-                <path d="M17 3v5h5" />
-                <circle
-                  cx="13"
-                  cy="16"
-                  r="4"
-                  className="group-hover:stroke-accent transition-colors duration-300"
-                />
-                <line
-                  x1="16"
-                  y1="19"
-                  x2="19.5"
-                  y2="22.5"
-                  strokeWidth="2.2"
-                  className="group-hover:stroke-accent transition-colors duration-300"
-                />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Quote Review</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              Upload any contractor quote and get AI-powered analysis, spot overpricing, and missing
-              items.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Review a Quote <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                See How It Works
-              </a>
-            </div>
-          </div>
-
-          {/* Insurance Checker */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14 3L5 7v7c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V7L14 3z" />
-                <path
-                  d="M10 14l3 3 5-5"
-                  strokeWidth="2"
-                  className="group-hover:stroke-accent transition-all duration-500 [stroke-dasharray:14] [stroke-dashoffset:14] group-hover:[stroke-dashoffset:0]"
-                />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Insurance Checker</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              Find out what's covered and maximize your insurance benefits.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Check Coverage <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                Learn More
-              </a>
-            </div>
-          </div>
-
-          {/* Material Compare */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14 3L3 9l11 6 11-6-11-6z" />
-                <path
-                  d="M3 14l11 6 11-6"
-                  className="group-hover:translate-y-0.5 transition-transform duration-300"
-                />
-                <path
-                  d="M3 19l11 6 11-6"
-                  className="group-hover:translate-y-0.5 transition-transform duration-500 [transition-delay:100ms]"
-                />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Material Compare</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              Compare materials side-by-side on cost, durability, lifespan, and more.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Compare Materials <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                View Comparisons
-              </a>
-            </div>
-          </div>
-
-          {/* Budget Planner */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="14" cy="14" r="10" />
-                <path
-                  d="M14 14L14 4"
-                  strokeWidth="2"
-                  className="group-hover:stroke-accent transition-colors duration-200"
-                />
-                <path
-                  d="M14 14 A10 10 0 0 1 22.7 19"
-                  strokeWidth="2.5"
-                  className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:100ms]"
-                />
-                <circle
-                  cx="14"
-                  cy="14"
-                  r="2.5"
-                  className="fill-white group-hover:fill-accent/30 transition-all duration-200"
-                />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Budget Planner</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              Plan your budget, explore options, and stay on track from start to finish.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Plan Your Budget <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                Learn More
-              </a>
-            </div>
-          </div>
-
-          {/* ROI Calculator */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline
-                  points="3,22 9,16 14,19 21,9 25,5"
-                  className="group-hover:stroke-accent transition-colors duration-300"
-                />
-                <polyline
-                  points="21,5 25,5 25,9"
-                  strokeWidth="2"
-                  className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:150ms]"
-                />
-                <line x1="3" y1="25" x2="25" y2="25" className="opacity-25" />
-                <line x1="3" y1="4" x2="3" y2="25" className="opacity-25" />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">ROI Calculator</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              See the return on investment and increase your home's value.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Calculate ROI <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                Learn More
-              </a>
-            </div>
-          </div>
-
-          {/* Project Timeline */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="5" width="22" height="20" rx="3" />
-                <line x1="3" y1="11" x2="25" y2="11" />
-                <line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" />
-                <line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" />
-                <circle
-                  cx="9"
-                  cy="17"
-                  r="1.5"
-                  className="group-hover:fill-accent transition-all duration-200"
-                />
-                <circle
-                  cx="14"
-                  cy="17"
-                  r="1.5"
-                  className="group-hover:fill-accent transition-all duration-300 [transition-delay:80ms]"
-                />
-                <circle
-                  cx="19"
-                  cy="17"
-                  r="1.5"
-                  className="group-hover:fill-accent transition-all duration-300 [transition-delay:160ms]"
-                />
-                <circle
-                  cx="9"
-                  cy="22"
-                  r="1.5"
-                  className="group-hover:fill-accent transition-all duration-300 [transition-delay:240ms]"
-                />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Project Timeline</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              Get a clear step-by-step timeline for your project from start to finish.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                View Timeline <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                Sample Timeline
-              </a>
-            </div>
-          </div>
-
-          {/* Permit Guide */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-14 h-14 rounded-2xl bg-accent/8 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-7 h-7 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 3h11l5 5v17H6V3z" />
-                <path d="M17 3v5h5" />
-                <line
-                  x1="10"
-                  y1="14"
-                  x2="18"
-                  y2="14"
-                  className="group-hover:stroke-accent transition-colors duration-200"
-                />
-                <line
-                  x1="10"
-                  y1="17.5"
-                  x2="18"
-                  y2="17.5"
-                  className="group-hover:stroke-accent transition-colors duration-200 [transition-delay:60ms]"
-                />
-                <line
-                  x1="10"
-                  y1="21"
-                  x2="14"
-                  y2="21"
-                  className="group-hover:stroke-accent transition-colors duration-200 [transition-delay:120ms]"
-                />
-                <circle
-                  cx="20.5"
-                  cy="21.5"
-                  r="4"
-                  className="fill-white group-hover:fill-accent/10 transition-all duration-300"
-                />
-                <path
-                  d="M18.5 21.5l1.5 1.5 2.5-2.5"
-                  strokeWidth="1.5"
-                  className="group-hover:stroke-accent transition-colors duration-300 [transition-delay:150ms]"
-                />
-              </svg>
-            </div>
-            <h3 className="font-display text-base font-bold text-ink mb-1.5">Permit Guide</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-              Find out which permits you need and estimated costs in your area.
-            </p>
-            <div className="mt-5 flex flex-col gap-2">
-              <a
-                href="#"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-              >
-                Check Permits <ArrowRight className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex items-center justify-center w-full py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-ink transition-colors"
-              >
-                Guide & Requirements
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom CTA banner */}
-        <div className="mt-8 rounded-2xl border border-border/60 bg-gradient-to-r from-muted/50 to-accent/5 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-              <Sparkles className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-ink">Not sure where to start?</div>
-              <div className="text-xs text-muted-foreground max-w-sm">
-                Let CostReno AI guide you step-by-step based on your home and goals — get
-                personalized recommendations in seconds.
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setChatOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition whitespace-nowrap shadow-sm shadow-accent/20"
-            >
-              <Sparkles className="h-4 w-4" /> Ask CostReno AI <ArrowRight className="h-4 w-4" />
-            </button>
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-white text-sm font-semibold text-ink hover:border-accent/40 transition whitespace-nowrap"
-            >
-              Explore All Projects <ArrowRight className="h-4 w-4" />
+            <a href="/estimate" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors">
+              Get Estimate <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
-        </div>
-      </section>
 
-      {/* HOW IT WORKS */}
-      <section className="container-x py-10">
-        <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
-          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">
-            How CostReno Works
-          </h2>
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-2 relative">
-            {steps.map((s, i) => (
-              <div key={s.title} className="relative text-center px-2">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-xl text-primary">
-                  <s.icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 font-display text-base font-bold text-ink">{s.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
-                {i < steps.length - 1 && (
-                  <ArrowRight
-                    color="white"
-                    className="hidden md:block absolute top-4 -right-2 h-5 w-5 text-muted-foreground/50"
-                  />
-                )}
-              </div>
-            ))}
+          {/* Quote Review - Active */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg className="w-6 h-6 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 3h11l5 5v17H6V3z" />
+                <path d="M17 3v5h5" />
+                <circle cx="13" cy="16" r="4" />
+                <line x1="16" y1="19" x2="19.5" y2="22.5" strokeWidth="2.2" />
+              </svg>
+            </div>
+            <h3 className="font-display text-sm font-bold text-ink mb-1.5">Quote Review</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
+              Upload a contractor quote and get AI-powered analysis instantly.
+            </p>
+            <a href="/quote-analyzer" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors">
+              Review a Quote <ArrowRight className="h-3.5 w-3.5" />
+            </a>
           </div>
-        </div>
-      </section>
 
-      {/* QUICK ESTIMATE */}
-      <QuickEstimate />
-
-      {/* SEO CONTENT */}
-      <section className="container-x py-8">
-        <h3 className="font-display text-lg font-bold text-ink">Related Topics</h3>
-        <div className="mt-4 flex flex-wrap gap-2">
+          {/* Coming Soon Tools */}
           {[
-            "Roof Replacement Cost",
-            "Roof Cost by State",
-            "Roof Cost by ZIP Code",
-            "Roof Cost by House Size",
-            "Roof Material Comparison",
-            "Roof Replacement Timeline",
-            "Roof ROI",
-            "Roof Insurance Guide",
-          ].map((topic) => (
-            <a
-              key={topic}
-              href="#"
-              className="px-3 py-1.5 rounded-full border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground transition"
-            >
-              {topic}
-            </a>
+            { id: "insurance", name: "Insurance Checker", desc: "Find out what's covered and maximize your insurance benefits.", icon: '<path d="M14 3L5 7v7c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V7L14 3z" /><path d="M10 14l3 3 5-5" strokeWidth="2" />' },
+            { id: "materials", name: "Material Compare", desc: "Compare materials side-by-side on cost, durability, and lifespan.", icon: '<path d="M14 3L3 9l11 6 11-6-11-6z" /><path d="M3 14l11 6 11-6" /><path d="M3 19l11 6 11-6" />' },
+            { id: "budget", name: "Budget Planner", desc: "Plan your budget and explore options from start to finish.", icon: '<circle cx="14" cy="14" r="10" /><path d="M14 14L14 4" strokeWidth="2" /><path d="M14 14 A10 10 0 0 1 22.7 19" strokeWidth="2.5" /><circle cx="14" cy="14" r="2.5" />' },
+            { id: "roi", name: "ROI Calculator", desc: "See the return on your investment and increase home value.", icon: '<polyline points="3,22 9,16 14,19 21,9 25,5" /><polyline points="21,5 25,5 25,9" strokeWidth="2" />' },
+            { id: "timeline", name: "Project Timeline", desc: "Get a clear step-by-step timeline from start to finish.", icon: '<rect x="3" y="5" width="22" height="20" rx="3" /><line x1="3" y1="11" x2="25" y2="11" /><line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" /><line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" /><circle cx="9" cy="17" r="1.5" /><circle cx="14" cy="17" r="1.5" /><circle cx="19" cy="17" r="1.5" />' },
+            { id: "permits", name: "Permit Guide", desc: "Know exactly which permits you need and how to get them.", icon: '<path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" /><line x1="10" y1="12" x2="18" y2="12" /><line x1="10" y1="16" x2="18" y2="16" /><line x1="10" y1="20" x2="15" y2="20" />' },
+          ].map((tool) => (
+            <div key={tool.id} className={`relative flex flex-col rounded-2xl border border-border bg-white p-6 overflow-hidden transition-all duration-200 ${notifyOpen === tool.id ? "ring-2 ring-accent/30" : ""}`} style={{ opacity: 0.75 }}>
+              <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-bold text-accent uppercase tracking-wider">Soon</span>
+              <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-muted-foreground" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: tool.icon }} />
+              </div>
+              <h3 className="font-display text-sm font-bold text-ink mb-1.5">{tool.name}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">{tool.desc}</p>
+              
+              {notifySuccess === tool.id ? (
+                <div className="w-full py-2 rounded-lg bg-accent/10 text-accent text-xs font-semibold flex items-center justify-center gap-1">
+                  <Check className="h-3.5 w-3.5" /> You'll be notified!
+                </div>
+              ) : notifyOpen === tool.id ? (
+                <div className="w-full flex flex-col gap-2">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={notifyEmail}
+                    onChange={(e) => setNotifyEmail(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && notifyEmail.trim()) {
+                        console.log(`Notify ${notifyEmail} for tool: ${tool.id}`);
+                        setNotifySuccess(tool.id);
+                        setNotifyEmail("");
+                        setNotifyOpen(null);
+                        setTimeout(() => setNotifySuccess(null), 3000);
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-white text-xs placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (notifyEmail.trim()) {
+                          console.log(`Notify ${notifyEmail} for tool: ${tool.id}`);
+                          setNotifySuccess(tool.id);
+                          setNotifyEmail("");
+                          setNotifyOpen(null);
+                          setTimeout(() => setNotifySuccess(null), 3000);
+                        }
+                      }}
+                      disabled={!notifyEmail.trim()}
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Notify Me
+                    </button>
+                    <button
+                      onClick={() => { setNotifyOpen(null); setNotifyEmail(""); }}
+                      className="flex-1 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold hover:bg-muted/30 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setNotifyOpen(tool.id)}
+                  className="w-full py-2 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:border-accent/40 hover:text-accent transition"
+                >
+                  Notify Me
+                </button>
+              )}
+            </div>
           ))}
+        </div>
+      </section>
+
+      {/* PLAN YOUR RENOVATION */}
+      <section className="container-x py-16">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+            Plan Your Home Renovation in 4 Simple Steps
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto">
+            Whether you're replacing a roof, remodeling a kitchen, or upgrading your HVAC system — CostReno helps you plan with confidence from start to finish.
+          </p>
+        </div>
+
+        {/* Steps - Horizontal on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          {[
+            {
+              num: "1",
+              title: "Select Your Project",
+              desc: "Choose from roofing, kitchen, bathroom, HVAC, flooring, windows, solar, and more home improvement projects.",
+            },
+            {
+              num: "2",
+              title: "Get a Local Cost Estimate",
+              desc: "Get accurate renovation cost estimates based on your ZIP code, property size, and current regional labor and material pricing.",
+            },
+            {
+              num: "3",
+              title: "Review Your Contractor Quote",
+              desc: "Upload your contractor bid and let AI find missing scope, overpriced line items, and red flags before you sign.",
+            },
+            {
+              num: "4",
+              title: "Make a Confident Decision",
+              desc: "Use expert recommendations, material comparisons, ROI analysis, and renovation guides to make the best choice for your home.",
+            },
+          ].map((step, i) => (
+            <div key={step.num} className="relative flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-white">
+              {/* Connector line (hidden on mobile) */}
+              {i < 3 && (
+                <div className="hidden lg:block absolute top-10 -right-3 w-6 border-t-2 border-dashed border-border z-10" />
+              )}
+              <div className="w-11 h-11 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center mb-4">
+                <span className="text-sm font-bold text-accent">{step.num}</span>
+              </div>
+              <h3 className="font-display text-base font-bold text-ink mb-2">{step.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Popular Projects */}
+        <div className="mt-12 text-center">
+          <h3 className="font-display text-lg font-bold text-ink mb-4">Popular Renovation Projects</h3>
+          <div className="flex flex-wrap justify-center gap-2">
+            {["Roof Replacement", "Kitchen Remodel", "Bathroom Remodel", "HVAC", "Windows", "Flooring", "Solar"].map((project) => (
+              <a
+                key={project}
+                href="/estimate"
+                className="px-4 py-2 rounded-full border border-border bg-white text-sm font-medium text-ink hover:border-accent/40 hover:text-accent transition"
+              >
+                {project}
+              </a>
+            ))}
+            <a
+              href="/estimate"
+              className="px-4 py-2 rounded-full border border-accent/30 bg-accent/5 text-sm font-semibold text-accent hover:bg-accent/10 transition inline-flex items-center gap-1"
+            >
+              View All <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -3259,25 +2936,87 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       </section>
 
-      {/* WHY TRUST */}
-      <section className="container-x py-10">
-        <div className="rounded-2xl border border-border bg-card p-8 md:p-12">
-          <h2 className="text-center font-display text-2xl md:text-3xl font-bold text-ink">
-            Why Homeowners Trust CostReno
+      {/* TRUST & REVIEWS */}
+      <section className="container-x py-16">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
+            Trusted by Homeowners Nationwide
           </h2>
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {trust.map((t) => (
-              <div key={t.title} className="flex gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-primary">
-                  <t.icon className="h-5 w-5" />
-                </span>
+          <p className="mt-3 text-sm text-muted-foreground max-w-lg mx-auto">
+            Join thousands of homeowners who saved money and made better renovation decisions with CostReno.
+          </p>
+        </div>
+
+        {/* Trust Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
+          {[
+            { value: "50K+", label: "Estimates Generated" },
+            { value: "4.9/5", label: "Average Rating" },
+            { value: "$2.3M", label: "Saved by Homeowners" },
+            { value: "100%", label: "Free & Private" },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center py-5 px-3 rounded-xl border border-border bg-white">
+              <div className="font-display text-2xl md:text-3xl font-bold text-ink">{stat.value}</div>
+              <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Reviews */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            {
+              name: "Sarah M.",
+              location: "Austin, TX",
+              project: "Roof Replacement",
+              text: "CostReno saved me $4,200 on my roof. The quote analyzer found 3 missing items my contractor didn't include. I went back and got them added at no extra charge.",
+              rating: 5,
+            },
+            {
+              name: "James R.",
+              location: "Denver, CO",
+              project: "Kitchen Remodel",
+              text: "I had no idea my kitchen quote was $8K over market rate until I used the estimator. Got a second quote and saved a fortune. This tool pays for itself instantly.",
+              rating: 5,
+            },
+            {
+              name: "Maria L.",
+              location: "Tampa, FL",
+              project: "HVAC System",
+              text: "The AI caught that my HVAC quote was missing the permit fee and ductwork inspection. Would have been a $1,500 surprise after signing. Incredible tool.",
+              rating: 5,
+            },
+            {
+              name: "David K.",
+              location: "Portland, OR",
+              project: "Bathroom Remodel",
+              text: "Simple, fast, and accurate. I compared 3 contractor bids using CostReno and felt confident picking the right one. No more guessing or overpaying.",
+              rating: 5,
+            },
+          ].map((review) => (
+            <div key={review.name} className="flex flex-col rounded-2xl border border-border bg-white p-5">
+              {/* Stars */}
+              <div className="flex items-center gap-0.5 mb-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} className={`h-3.5 w-3.5 ${i <= review.rating ? "text-amber-400 fill-amber-400" : "text-muted"}`} />
+                ))}
+              </div>
+              {/* Quote */}
+              <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
+                "{review.text}"
+              </p>
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-3 border-t border-border">
+                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-xs font-bold text-accent">
+                  {review.name.charAt(0)}
+                </div>
                 <div>
-                  <h3 className="font-display text-sm font-bold text-ink">{t.title}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{t.desc}</p>
+                  <div className="text-xs font-bold text-ink">{review.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{review.location} · {review.project}</div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 
