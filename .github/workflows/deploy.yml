@@ -1,9 +1,7 @@
-name: Build and Verify
+name: Build and Deploy to Vercel
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
 
 jobs:
@@ -13,26 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy to Vercel
+        uses: vercel/action@v6
         with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Create .env file with secrets
-        run: |
-          echo "VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY }}" > .env
-
-      - name: Build
-        run: npm run build
-
-      - name: Verify API key is injected
-        run: |
-          if grep -r "sk-or-v1" dist/ > /dev/null 2>&1; then
-            echo "✅ API key successfully injected into build"
-          else
-            echo "⚠️ Warning: API key may not be in build (check if it's needed at runtime)"
-          fi
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          env: VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY }}
+          production: true
