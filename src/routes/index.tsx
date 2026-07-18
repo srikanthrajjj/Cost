@@ -868,20 +868,28 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
 // ─── Thinking Indicator (Researching → Analyzing → Finalizing) ────────────────
 function ThinkingIndicator() {
   const [stageIdx, setStageIdx] = useState(0);
+  const [tipIdx, setTipIdx] = useState(() => Math.floor(Math.random() * 5));
   const stages = [
     { icon: "🔍", label: "Researching..." },
     { icon: "⚡", label: "Analyzing..." },
     { icon: "✨", label: "Finalizing..." },
   ];
+  const tips = [
+    "💡 CostReno AI uses verified industry data, not generic estimates.",
+    "💡 Always compare at least 3 contractor quotes before deciding.",
+    "💡 Ask if permit fees are included — they often aren't.",
+    "💡 Material quality accounts for 44% of your total project cost.",
+    "💡 Check contractor licensing at your state's licensing board.",
+  ];
 
   useEffect(() => {
-    const t1 = setTimeout(() => setStageIdx(1), 2000);
-    const t2 = setTimeout(() => setStageIdx(2), 4500);
+    const t1 = setTimeout(() => setStageIdx(1), 1800);
+    const t2 = setTimeout(() => setStageIdx(2), 3800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   return (
-    <div className="flex flex-col gap-1.5 px-4 py-3 rounded-2xl rounded-bl-md bg-muted max-w-[200px]">
+    <div className="flex flex-col gap-2 px-4 py-3 rounded-2xl rounded-bl-md bg-muted max-w-[260px]">
       <div className="flex items-center gap-2">
         <span className="text-sm">{stages[stageIdx].icon}</span>
         <span className="text-sm text-ink font-medium animate-pulse">{stages[stageIdx].label}</span>
@@ -891,6 +899,7 @@ function ThinkingIndicator() {
           <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= stageIdx ? "bg-accent" : "bg-border"}`} />
         ))}
       </div>
+      <p className="text-[10px] text-muted-foreground leading-relaxed">{tips[tipIdx]}</p>
     </div>
   );
 }
@@ -1224,25 +1233,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     const hasAttachments = attachments.length > 0;
     const fileToProcess = attachments[0]?.file;
 
-    console.log("[ATTACHMENT DEBUG] hasAttachments:", hasAttachments);
-    console.log("[ATTACHMENT DEBUG] attachments array:", attachments);
-    console.log("[ATTACHMENT DEBUG] fileToProcess:", fileToProcess);
-    console.log("[ATTACHMENT DEBUG] fileToProcess?.name:", fileToProcess?.name);
-    console.log("[ATTACHMENT DEBUG] fileToProcess?.type:", fileToProcess?.type);
-    console.log("[ATTACHMENT DEBUG] fileToProcess?.size:", fileToProcess?.size);
-
     const attachmentText =
       attachments.length > 0
         ? `\n\n[Attachments: ${attachments.map((a) => a.name).join(", ")}]`
         : "";
     const userText = chatInput.trim() + attachmentText;
-
-    console.log("[QUOTE DEBUG] handleSendMessage: chatInput =", chatInput);
-    console.log("[QUOTE DEBUG] handleSendMessage: hasAttachments =", hasAttachments);
-    console.log(
-      "[QUOTE DEBUG] handleSendMessage: shouldUseQuoteAnalyzer =",
-      shouldUseQuoteAnalyzer(chatInput, hasAttachments),
-    );
 
     const filteredMessages = chatMessages.filter((m) => m.role !== "widget") as {
       role: "user" | "ai";
@@ -1255,43 +1250,32 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     setAttachments([]);
     setTimeout(scrollToBottom, 50);
 
-    if (shouldUseQuoteAnalyzer(chatInput, hasAttachments) && fileToProcess) {
-      console.log("[QUOTE DEBUG] Taking quote analysis path");
+    // Smart routing: PDF always goes to quote analyzer, images go to chat with extraction, no attachment = normal chat
+    const isPdf = fileToProcess?.type === "application/pdf";
+    
+    if (hasAttachments && fileToProcess && isPdf) {
+      // PDF → always run full quote analysis
       await processQuoteAnalysis(newMessages, userText, fileToProcess);
     } else if (hasAttachments && fileToProcess) {
-      console.log("[QUOTE DEBUG] Taking normal chat with attachment path");
+      // Image → extract and chat
+      setIsAiTyping(true);
       try {
         const extractedContent = await extractTextFromFile(fileToProcess);
         const extractedText = extractedContent.text.substring(0, 2000);
-        console.log("[ATTACHMENT DEBUG] Extracted text length:", extractedText.length);
         const enhancedUserText = `${userText}\n\nExtracted from ${fileToProcess.name}:\n${extractedText}`;
-
-        setIsAiTyping(true);
         const aiResponse = await getAIResponse([
           ...filteredMessages,
           { role: "user" as const, text: enhancedUserText },
         ]);
         setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
-        setIsAiTyping(false);
-        setTimeout(scrollToBottom, 50);
-      } catch (error) {
-        console.error("[QUOTE DEBUG] Attachment extraction error:", error);
-        setIsAiTyping(true);
+      } catch {
         const aiResponse = await getAIResponse(newMessages);
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            role: "ai",
-            text:
-              aiResponse +
-              `\n\n(Note: Could not extract text from attachment. Please paste text manually.)`,
-          },
-        ]);
-        setIsAiTyping(false);
-        setTimeout(scrollToBottom, 50);
+        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + `\n\n(Note: Could not extract text from attachment.)` }]);
       }
+      setIsAiTyping(false);
+      setTimeout(scrollToBottom, 50);
     } else {
-      console.log("[QUOTE DEBUG] Taking normal chat path (no attachment)");
+      // Normal chat
       setIsAiTyping(true);
       const aiResponse = await getAIResponse(newMessages);
       setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
