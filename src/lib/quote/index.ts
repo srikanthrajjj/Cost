@@ -1,10 +1,11 @@
 import type { QuoteExtraction, MatchedMaterial, MatchedScopeItem, QuoteAnalysis } from "./types";
+import { extractQuote } from "./extractor";
+import { matchQuote } from "./matcher";
+import { analyzeQuote } from "./analyzer";
+import { generateReport } from "./report";
 
 export * from "./types";
-export { extractQuote } from "./extractor";
-export { matchQuote } from "./matcher";
-export { analyzeQuote } from "./analyzer";
-export { generateReport } from "./report";
+export { extractQuote, matchQuote, analyzeQuote, generateReport };
 
 export interface QuoteAnalysisResult {
   extraction: QuoteExtraction;
