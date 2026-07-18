@@ -3,18 +3,18 @@ import type { EstimatorAnswers, ProjectType } from "./estimator-engine";
 // ─── Step / Question types ────────────────────────────────────────────────────
 
 export type QuestionType =
-  | "cards"       // large icon cards
+  | "cards" // large icon cards
   | "select-grid" // smaller grid of choices
-  | "number"      // numeric input
-  | "text"        // text input
-  | "toggle"      // yes/no
-  | "slider"      // range slider
-  | "budget";     // budget input with preset chips
+  | "number" // numeric input
+  | "text" // text input
+  | "toggle" // yes/no
+  | "slider" // range slider
+  | "budget"; // budget input with preset chips
 
 export interface Choice {
   value: string;
   label: string;
-  icon?: string;       // emoji
+  icon?: string; // emoji
   desc?: string;
   image?: string;
 }
@@ -47,7 +47,6 @@ export interface StepDef {
 // ─── All steps ────────────────────────────────────────────────────────────────
 
 export const ALL_STEPS: StepDef[] = [
-
   // ── Step 1: Project type
   {
     id: "project",
@@ -59,17 +58,27 @@ export const ALL_STEPS: StepDef[] = [
         type: "cards",
         title: "What project are you planning?",
         choices: [
-          { value: "roof",       icon: "/House.svg", label: "Roof Replacement",   desc: "Avg $16,650" },
-          { value: "kitchen",    icon: "/Kitchen.svg", label: "Kitchen Remodel",     desc: "Avg $50,000" },
-          { value: "bathroom",   icon: "/Bathtub.svg", label: "Bathroom Remodel",    desc: "Avg $19,000" },
-          { value: "hvac",       icon: "/Air Conditioner.svg", label: "HVAC System",         desc: "Avg $8,250"  },
-          { value: "windows",    icon: "/Window.svg", label: "Windows",             desc: "Avg $12,500" },
-          { value: "flooring",   icon: "/Floor Tiles.svg", label: "Flooring",            desc: "Avg $7,500"  },
-          { value: "painting",   icon: "/Paint Roller.svg", label: "Painting",            desc: "Avg $4,500"  },
-          { value: "solar",      icon: "/Solar Panel.svg", label: "Solar Panels",        desc: "Avg $25,000" },
-          { value: "deck",       icon: "/Balcony.svg", label: "Deck / Patio",        desc: "Avg $13,000" },
-          { value: "plumbing",   icon: "/Plumbing.svg", label: "Plumbing",            desc: "Avg $6,000"  },
-          { value: "electrical", icon: "/Electrical Outlet.svg", label: "Electrical",          desc: "Avg $8,000"  },
+          { value: "roof", icon: "/House.svg", label: "Roof Replacement", desc: "Avg $16,650" },
+          { value: "kitchen", icon: "/Kitchen.svg", label: "Kitchen Remodel", desc: "Avg $50,000" },
+          {
+            value: "bathroom",
+            icon: "/Bathtub.svg",
+            label: "Bathroom Remodel",
+            desc: "Avg $19,000",
+          },
+          { value: "hvac", icon: "/Air Conditioner.svg", label: "HVAC System", desc: "Avg $8,250" },
+          { value: "windows", icon: "/Window.svg", label: "Windows", desc: "Avg $12,500" },
+          { value: "flooring", icon: "/Floor Tiles.svg", label: "Flooring", desc: "Avg $7,500" },
+          { value: "painting", icon: "/Paint Roller.svg", label: "Painting", desc: "Avg $4,500" },
+          { value: "solar", icon: "/Solar Panel.svg", label: "Solar Panels", desc: "Avg $25,000" },
+          { value: "deck", icon: "/Balcony.svg", label: "Deck / Patio", desc: "Avg $13,000" },
+          { value: "plumbing", icon: "/Plumbing.svg", label: "Plumbing", desc: "Avg $6,000" },
+          {
+            value: "electrical",
+            icon: "/Electrical Outlet.svg",
+            label: "Electrical",
+            desc: "Avg $8,000",
+          },
         ],
       },
     ],
@@ -102,9 +111,9 @@ export const ALL_STEPS: StepDef[] = [
         title: "Property type",
         choices: [
           { value: "single-family", icon: "🏡", label: "Single Family" },
-          { value: "condo",         icon: "🏢", label: "Condo" },
-          { value: "townhouse",     icon: "🏘️", label: "Townhouse" },
-          { value: "multi-family",  icon: "🏗️", label: "Multi-Family" },
+          { value: "condo", icon: "🏢", label: "Condo" },
+          { value: "townhouse", icon: "🏘️", label: "Townhouse" },
+          { value: "multi-family", icon: "🏗️", label: "Multi-Family" },
         ],
       },
       {
@@ -112,7 +121,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "number",
         title: "Home size (sq ft)",
         placeholder: "2,000",
-        min: 200, max: 15000, step: 100,
+        min: 200,
+        max: 15000,
+        step: 100,
         unit: "sq ft",
       },
       {
@@ -120,7 +131,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "number",
         title: "Year built",
         placeholder: "1985",
-        min: 1900, max: 2024, step: 1,
+        min: 1900,
+        max: 2024,
+        step: 1,
         optional: true,
       },
       {
@@ -129,8 +142,8 @@ export const ALL_STEPS: StepDef[] = [
         title: "Number of stories",
         optional: true,
         choices: [
-          { value: "1", label: "1 story",   icon: "1️⃣" },
-          { value: "2", label: "2 stories",  icon: "2️⃣" },
+          { value: "1", label: "1 story", icon: "1️⃣" },
+          { value: "2", label: "2 stories", icon: "2️⃣" },
           { value: "3", label: "3+ stories", icon: "🏗️" },
         ],
       },
@@ -149,8 +162,8 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Repair or full replacement?",
         choices: [
-          { value: "repair",   icon: "🔨", label: "Repair",      desc: "Fix specific areas" },
-          { value: "replace",  icon: "🏠", label: "Full Replace", desc: "Entire roof" },
+          { value: "repair", icon: "🔨", label: "Repair", desc: "Fix specific areas" },
+          { value: "replace", icon: "🏠", label: "Full Replace", desc: "Entire roof" },
         ],
       },
       {
@@ -159,10 +172,10 @@ export const ALL_STEPS: StepDef[] = [
         title: "Preferred roofing material",
         choices: [
           { value: "asphalt", icon: "⬛", label: "Asphalt Shingles", desc: "Most popular" },
-          { value: "metal",   icon: "🔩", label: "Metal",            desc: "Long-lasting" },
-          { value: "tile",    icon: "🟫", label: "Clay / Tile",      desc: "Mediterranean style" },
-          { value: "wood",    icon: "🪵", label: "Wood Shake",       desc: "Natural look" },
-          { value: "slate",   icon: "⬜", label: "Slate",            desc: "Premium" },
+          { value: "metal", icon: "🔩", label: "Metal", desc: "Long-lasting" },
+          { value: "tile", icon: "🟫", label: "Clay / Tile", desc: "Mediterranean style" },
+          { value: "wood", icon: "🪵", label: "Wood Shake", desc: "Natural look" },
+          { value: "slate", icon: "⬜", label: "Slate", desc: "Premium" },
         ],
       },
       {
@@ -171,7 +184,9 @@ export const ALL_STEPS: StepDef[] = [
         title: "Roof size (sq ft)",
         subtitle: "Leave blank to estimate from your home size",
         placeholder: "2,200",
-        min: 500, max: 10000, step: 50,
+        min: 500,
+        max: 10000,
+        step: 50,
         unit: "sq ft",
         optional: true,
       },
@@ -201,8 +216,8 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Scope of remodel",
         choices: [
-          { value: "full",    icon: "🍳", label: "Full Remodel",    desc: "Everything" },
-          { value: "partial", icon: "🔧", label: "Partial Update",  desc: "Select items only" },
+          { value: "full", icon: "🍳", label: "Full Remodel", desc: "Everything" },
+          { value: "partial", icon: "🔧", label: "Partial Update", desc: "Select items only" },
         ],
       },
       {
@@ -210,9 +225,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Cabinet style",
         choices: [
-          { value: "stock",        icon: "📦", label: "Stock",       desc: "Budget-friendly" },
-          { value: "semi-custom",  icon: "🪚", label: "Semi-Custom", desc: "Most popular" },
-          { value: "custom",       icon: "✨", label: "Custom",      desc: "Premium" },
+          { value: "stock", icon: "📦", label: "Stock", desc: "Budget-friendly" },
+          { value: "semi-custom", icon: "🪚", label: "Semi-Custom", desc: "Most popular" },
+          { value: "custom", icon: "✨", label: "Custom", desc: "Premium" },
         ],
       },
       {
@@ -220,10 +235,10 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Countertop material",
         choices: [
-          { value: "laminate", icon: "⬜", label: "Laminate",  desc: "Budget" },
-          { value: "quartz",   icon: "💎", label: "Quartz",    desc: "Popular" },
-          { value: "granite",  icon: "🪨", label: "Granite",   desc: "Classic" },
-          { value: "marble",   icon: "⚪", label: "Marble",    desc: "Luxury" },
+          { value: "laminate", icon: "⬜", label: "Laminate", desc: "Budget" },
+          { value: "quartz", icon: "💎", label: "Quartz", desc: "Popular" },
+          { value: "granite", icon: "🪨", label: "Granite", desc: "Classic" },
+          { value: "marble", icon: "⚪", label: "Marble", desc: "Luxury" },
         ],
       },
       {
@@ -245,8 +260,8 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Scope of remodel",
         choices: [
-          { value: "full",    icon: "🚿", label: "Full Remodel",  desc: "Gut and rebuild" },
-          { value: "partial", icon: "🔧", label: "Refresh",       desc: "Update fixtures" },
+          { value: "full", icon: "🚿", label: "Full Remodel", desc: "Gut and rebuild" },
+          { value: "partial", icon: "🔧", label: "Refresh", desc: "Update fixtures" },
         ],
       },
       {
@@ -254,8 +269,8 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "How many bathrooms?",
         choices: [
-          { value: "1", label: "1",  icon: "1️⃣" },
-          { value: "2", label: "2",  icon: "2️⃣" },
+          { value: "1", label: "1", icon: "1️⃣" },
+          { value: "2", label: "2", icon: "2️⃣" },
           { value: "3", label: "3+", icon: "3️⃣" },
         ],
       },
@@ -264,9 +279,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Fixture quality",
         choices: [
-          { value: "standard",  icon: "🔧", label: "Standard",  desc: "Functional & clean" },
+          { value: "standard", icon: "🔧", label: "Standard", desc: "Functional & clean" },
           { value: "mid-range", icon: "⭐", label: "Mid-Range", desc: "Popular choice" },
-          { value: "luxury",    icon: "💎", label: "Luxury",    desc: "Spa-quality" },
+          { value: "luxury", icon: "💎", label: "Luxury", desc: "Spa-quality" },
         ],
       },
     ],
@@ -283,7 +298,7 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Repair or replace?",
         choices: [
-          { value: "repair",  icon: "🔧", label: "Repair",  desc: "Fix existing system" },
+          { value: "repair", icon: "🔧", label: "Repair", desc: "Fix existing system" },
           { value: "replace", icon: "❄️", label: "Replace", desc: "Full new system" },
         ],
       },
@@ -292,10 +307,10 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "System type",
         choices: [
-          { value: "central-air", icon: "❄️", label: "Central Air",  desc: "Most common" },
-          { value: "heat-pump",   icon: "♻️", label: "Heat Pump",    desc: "Energy-efficient" },
-          { value: "furnace",     icon: "🔥", label: "Furnace",      desc: "Heating only" },
-          { value: "mini-split",  icon: "🌬️", label: "Mini-Split",   desc: "Ductless" },
+          { value: "central-air", icon: "❄️", label: "Central Air", desc: "Most common" },
+          { value: "heat-pump", icon: "♻️", label: "Heat Pump", desc: "Energy-efficient" },
+          { value: "furnace", icon: "🔥", label: "Furnace", desc: "Heating only" },
+          { value: "mini-split", icon: "🌬️", label: "Mini-Split", desc: "Ductless" },
         ],
       },
     ],
@@ -312,7 +327,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "number",
         title: "Number of windows",
         placeholder: "10",
-        min: 1, max: 60, step: 1,
+        min: 1,
+        max: 60,
+        step: 1,
         unit: "windows",
       },
       {
@@ -330,10 +347,10 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Frame material",
         choices: [
-          { value: "vinyl",     icon: "⬜", label: "Vinyl",     desc: "Low maintenance" },
-          { value: "fiberglass",icon: "🔲", label: "Fiberglass",desc: "Durable" },
-          { value: "wood",      icon: "🪵", label: "Wood",      desc: "Classic look" },
-          { value: "aluminum",  icon: "⚙️", label: "Aluminum",  desc: "Commercial style" },
+          { value: "vinyl", icon: "⬜", label: "Vinyl", desc: "Low maintenance" },
+          { value: "fiberglass", icon: "🔲", label: "Fiberglass", desc: "Durable" },
+          { value: "wood", icon: "🪵", label: "Wood", desc: "Classic look" },
+          { value: "aluminum", icon: "⚙️", label: "Aluminum", desc: "Commercial style" },
         ],
       },
     ],
@@ -350,11 +367,11 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Flooring material",
         choices: [
-          { value: "hardwood", icon: "🪵", label: "Hardwood",  desc: "$8–$14/sq ft" },
-          { value: "laminate", icon: "⬜", label: "Laminate",  desc: "$4–$8/sq ft" },
-          { value: "tile",     icon: "🔲", label: "Tile",      desc: "$7–$12/sq ft" },
-          { value: "vinyl",    icon: "⬛", label: "Vinyl/LVP", desc: "$3–$7/sq ft" },
-          { value: "carpet",   icon: "🟫", label: "Carpet",    desc: "$2–$6/sq ft" },
+          { value: "hardwood", icon: "🪵", label: "Hardwood", desc: "$8–$14/sq ft" },
+          { value: "laminate", icon: "⬜", label: "Laminate", desc: "$4–$8/sq ft" },
+          { value: "tile", icon: "🔲", label: "Tile", desc: "$7–$12/sq ft" },
+          { value: "vinyl", icon: "⬛", label: "Vinyl/LVP", desc: "$3–$7/sq ft" },
+          { value: "carpet", icon: "🟫", label: "Carpet", desc: "$2–$6/sq ft" },
         ],
       },
       {
@@ -362,7 +379,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "number",
         title: "Area to be floored (sq ft)",
         placeholder: "800",
-        min: 50, max: 8000, step: 50,
+        min: 50,
+        max: 8000,
+        step: 50,
         unit: "sq ft",
         optional: true,
       },
@@ -381,7 +400,9 @@ export const ALL_STEPS: StepDef[] = [
         title: "Estimated number of panels",
         subtitle: "A typical home needs 20–25 panels",
         placeholder: "20",
-        min: 5, max: 80, step: 1,
+        min: 5,
+        max: 80,
+        step: 1,
         unit: "panels",
         optional: true,
       },
@@ -405,9 +426,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Deck material",
         choices: [
-          { value: "wood",      icon: "🪵", label: "Pressure Treated Wood", desc: "Budget-friendly" },
-          { value: "composite", icon: "⬜", label: "Composite",             desc: "Low maintenance" },
-          { value: "pvc",       icon: "⬛", label: "PVC",                   desc: "Premium durability" },
+          { value: "wood", icon: "🪵", label: "Pressure Treated Wood", desc: "Budget-friendly" },
+          { value: "composite", icon: "⬜", label: "Composite", desc: "Low maintenance" },
+          { value: "pvc", icon: "⬛", label: "PVC", desc: "Premium durability" },
         ],
       },
       {
@@ -415,7 +436,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "number",
         title: "Deck size (sq ft)",
         placeholder: "300",
-        min: 50, max: 3000, step: 25,
+        min: 50,
+        max: 3000,
+        step: 25,
         unit: "sq ft",
       },
     ],
@@ -432,9 +455,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "What type of plumbing work?",
         choices: [
-          { value: "repair",   icon: "🔧", label: "Repairs",    desc: "Fix leaks/clogs" },
-          { value: "repiping", icon: "🔩", label: "Repiping",   desc: "Replace pipes" },
-          { value: "fixture",  icon: "🚰", label: "Fixtures",   desc: "New sinks, toilets" },
+          { value: "repair", icon: "🔧", label: "Repairs", desc: "Fix leaks/clogs" },
+          { value: "repiping", icon: "🔩", label: "Repiping", desc: "Replace pipes" },
+          { value: "fixture", icon: "🚰", label: "Fixtures", desc: "New sinks, toilets" },
         ],
       },
     ],
@@ -451,9 +474,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "What type of electrical work?",
         choices: [
-          { value: "panel-upgrade", icon: "⚡", label: "Panel Upgrade",  desc: "200-amp service" },
-          { value: "rewiring",      icon: "🔌", label: "Rewiring",       desc: "Replace wiring" },
-          { value: "outlets",       icon: "🔲", label: "Outlets/Lights", desc: "Add circuits" },
+          { value: "panel-upgrade", icon: "⚡", label: "Panel Upgrade", desc: "200-amp service" },
+          { value: "rewiring", icon: "🔌", label: "Rewiring", desc: "Replace wiring" },
+          { value: "outlets", icon: "🔲", label: "Outlets/Lights", desc: "Add circuits" },
         ],
       },
     ],
@@ -472,7 +495,7 @@ export const ALL_STEPS: StepDef[] = [
         choices: [
           { value: "interior", icon: "🏠", label: "Interior", desc: "Inside only" },
           { value: "exterior", icon: "🌤️", label: "Exterior", desc: "Outside only" },
-          { value: "both",     icon: "🎨", label: "Both",     desc: "Full project" },
+          { value: "both", icon: "🎨", label: "Both", desc: "Full project" },
         ],
       },
       {
@@ -480,7 +503,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "number",
         title: "Number of rooms",
         placeholder: "5",
-        min: 1, max: 30, step: 1,
+        min: 1,
+        max: 30,
+        step: 1,
         unit: "rooms",
         optional: true,
       },
@@ -499,9 +524,9 @@ export const ALL_STEPS: StepDef[] = [
         title: "Overall condition",
         choices: [
           { value: "excellent", icon: "✨", label: "Excellent", desc: "Like new" },
-          { value: "good",      icon: "👍", label: "Good",      desc: "Minor wear" },
-          { value: "fair",      icon: "⚠️", label: "Fair",      desc: "Noticeable issues" },
-          { value: "poor",      icon: "🔴", label: "Poor",      desc: "Major problems" },
+          { value: "good", icon: "👍", label: "Good", desc: "Minor wear" },
+          { value: "fair", icon: "⚠️", label: "Fair", desc: "Noticeable issues" },
+          { value: "poor", icon: "🔴", label: "Poor", desc: "Major problems" },
         ],
       },
       {
@@ -510,10 +535,10 @@ export const ALL_STEPS: StepDef[] = [
         title: "Any specific damage?",
         optional: true,
         choices: [
-          { value: "none",       icon: "✅", label: "No damage",        desc: "" },
-          { value: "storm",      icon: "⛈️", label: "Storm damage",     desc: "" },
-          { value: "water",      icon: "💧", label: "Water damage",     desc: "" },
-          { value: "fire",       icon: "🔥", label: "Fire damage",      desc: "" },
+          { value: "none", icon: "✅", label: "No damage", desc: "" },
+          { value: "storm", icon: "⛈️", label: "Storm damage", desc: "" },
+          { value: "water", icon: "💧", label: "Water damage", desc: "" },
+          { value: "fire", icon: "🔥", label: "Fire damage", desc: "" },
           { value: "structural", icon: "🏗️", label: "Structural issue", desc: "" },
         ],
       },
@@ -531,7 +556,9 @@ export const ALL_STEPS: StepDef[] = [
         type: "budget",
         title: "What's your target budget?",
         optional: true,
-        min: 1000, max: 200000, step: 500,
+        min: 1000,
+        max: 200000,
+        step: 500,
       },
       {
         id: "startTimeline",
@@ -539,11 +566,11 @@ export const ALL_STEPS: StepDef[] = [
         title: "When do you want to start?",
         optional: true,
         choices: [
-          { value: "asap",       icon: "🚀", label: "ASAP",          desc: "Within weeks" },
-          { value: "1-3months",  icon: "📅", label: "1–3 months",    desc: "" },
-          { value: "3-6months",  icon: "📆", label: "3–6 months",    desc: "" },
-          { value: "6-12months", icon: "🗓️", label: "6–12 months",   desc: "" },
-          { value: "planning",   icon: "💭", label: "Just planning",  desc: "No rush" },
+          { value: "asap", icon: "🚀", label: "ASAP", desc: "Within weeks" },
+          { value: "1-3months", icon: "📅", label: "1–3 months", desc: "" },
+          { value: "3-6months", icon: "📆", label: "3–6 months", desc: "" },
+          { value: "6-12months", icon: "🗓️", label: "6–12 months", desc: "" },
+          { value: "planning", icon: "💭", label: "Just planning", desc: "No rush" },
         ],
       },
     ],
@@ -560,12 +587,12 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "What caused this project?",
         choices: [
-          { value: "storm",        icon: "⛈️", label: "Storm Damage",     desc: "May be covered" },
-          { value: "fire",         icon: "🔥", label: "Fire Damage",      desc: "Likely covered" },
-          { value: "water-damage", icon: "💧", label: "Water Damage",     desc: "Often covered" },
-          { value: "wear-tear",    icon: "⏳", label: "Wear & Tear",      desc: "Not covered" },
-          { value: "remodeling",   icon: "🏗️", label: "Home Improvement", desc: "Not covered" },
-          { value: "other",        icon: "❓", label: "Other",            desc: "" },
+          { value: "storm", icon: "⛈️", label: "Storm Damage", desc: "May be covered" },
+          { value: "fire", icon: "🔥", label: "Fire Damage", desc: "Likely covered" },
+          { value: "water-damage", icon: "💧", label: "Water Damage", desc: "Often covered" },
+          { value: "wear-tear", icon: "⏳", label: "Wear & Tear", desc: "Not covered" },
+          { value: "remodeling", icon: "🏗️", label: "Home Improvement", desc: "Not covered" },
+          { value: "other", icon: "❓", label: "Other", desc: "" },
         ],
       },
     ],

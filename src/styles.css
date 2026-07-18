@@ -97,14 +97,24 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html { font-family: var(--font-sans); }
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-feature-settings: "cv02","cv03","cv04","cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
-  h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
 }
 
 @utility container-x {
@@ -115,9 +125,15 @@
 }
 
 @keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-gradient {
@@ -125,8 +141,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px 1px oklch(0.6 0.17 155 / 0.15); }
-  50% { box-shadow: 0 0 15px 3px oklch(0.6 0.17 155 / 0.25); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px 1px oklch(0.6 0.17 155 / 0.15);
+  }
+  50% {
+    box-shadow: 0 0 15px 3px oklch(0.6 0.17 155 / 0.25);
+  }
 }
 
 .animate-pulse-glow {

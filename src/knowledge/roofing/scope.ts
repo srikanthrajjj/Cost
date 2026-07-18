@@ -1,0 +1,209 @@
+import type { ScopeItem } from "@/types/knowledge";
+
+export const roofingScopeItems: ScopeItem[] = [
+  {
+    id: "drip_edge",
+    name: "Drip Edge",
+    category: "Edge Protection",
+    description:
+      "Metal flashing installed along roof eaves and rakes to direct water into gutters and protect fascia from rot",
+    required: true,
+    typicalUnit: "linear feet per roof perimeter",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["0.016-inch aluminum or galvanized steel", "Roofing nails", "Sealant"],
+    commonOmissions: ["Existing drip edge reused"],
+    relatedRedFlags: [
+      "No drip edge installed on eaves",
+      "Drip edge not extending into gutter",
+      "Drip edge missing at roof valleys",
+    ],
+    contractorQuestions: [
+      "Will all drip edge be replaced?",
+      "Is 0.016-inch aluminum or galvanized steel being used?",
+    ],
+  },
+  {
+    id: "valley_flashing",
+    name: "Valley Flashing",
+    category: "Water Management",
+    description:
+      "Multi-layer protection in roof valleys to channel water and prevent leaks at intersecting roof planes",
+    required: true,
+    typicalUnit: "linear feet in valleys",
+    commonContractorNames: ["Henry", "MasterStream", "Seal-It", "MasterShield"],
+    requiredMaterials: [
+      "10-lb felt underlayment",
+      "Maltese cross pattern of strip shingles",
+      "30-lb roofing nails",
+    ],
+    commonOmissions: ["Valleys not properly flashed"],
+    relatedRedFlags: [
+      "Water staining in attic during rain",
+      "Mold or mildew in valleys",
+      "Missing or damaged valley flashing",
+    ],
+    contractorQuestions: [
+      "Will valleys be fully flashed with proper underlayment and shingles?",
+      "Are both sides of valleys being treated?",
+    ],
+  },
+  {
+    id: "starter_strip",
+    name: "Starter Strip",
+    category: "Edge Protection",
+    description:
+      "Weather-resistant strip installed along roof eaves to seal the first row of shingles and prevent wind uplift",
+    required: true,
+    typicalUnit: "linear feet per roof perimeter",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["Starter strip asphalt shingles", "Roofing nails", "Sealant"],
+    commonOmissions: ["Missing starter strip"],
+    relatedRedFlags: [
+      "Wind damage during storms",
+      "Water penetration at eaves",
+      "Shingle blow-off from wind uplift",
+    ],
+    contractorQuestions: [
+      "Is a proper starter strip being installed?",
+      "Are starter strips compatible with chosen shingle type?",
+    ],
+  },
+  {
+    id: "ridge_vents",
+    name: "Ridge Vents",
+    category: "Ventilation",
+    description:
+      "Exhaust ventilation installed along roof ridges to expel hot, moist air from the attic space",
+    required: true,
+    typicalUnit: "linear feet per ridge line",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["Ridge vent material", "Roofing nails", "Sealant"],
+    commonOmissions: ["Insufficient ridge ventilation"],
+    relatedRedFlags: ["Attic moisture buildup", "Mold or mildew in attic", "Ice dam formation"],
+    contractorQuestions: [
+      "Is proper ridge ventilation being provided?",
+      "Are ridge vents rated for local climate conditions?",
+    ],
+  },
+  {
+    id: "soffit_vents",
+    name: "Soffit Vents",
+    category: "Ventilation",
+    description:
+      "Intake ventilation installed under roof eaves to allow fresh air to enter attic space and equalize pressure",
+    required: true,
+    typicalUnit: "net free area in square feet (1:150 ratio)",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["Soffit vent material", "Nail or staple fasteners"],
+    commonOmissions: ["No soffit ventilation installed"],
+    relatedRedFlags: [
+      "Attic moisture buildup",
+      "Heat accumulation in summer",
+      "Mold or mildew in attic",
+    ],
+    contractorQuestions: [
+      "Is adequate soffit ventilation being installed?",
+      "Will soffit vents allow proper air circulation?",
+    ],
+  },
+  {
+    id: "flashing_penetrations",
+    name: "Flashing at Penetrations",
+    category: "Water Management",
+    description:
+      "Specialized flashing around roof penetrations including vents, chimneys, skylights, and HVAC units",
+    required: true,
+    typicalUnit: "number of penetrations",
+    commonContractorNames: ["Henry", "MasterStream", "Seal-It", "MasterShield"],
+    requiredMaterials: ["Tar paper", "Flashing material", "Sealant", "Roofing nails"],
+    commonOmissions: ["Inadequate flashing around penetrations"],
+    relatedRedFlags: [
+      "Water stains around vents or chimneys",
+      "Leaking at skylights",
+      "Moisture damage near roof penetrations",
+    ],
+    contractorQuestions: [
+      "Are all roof penetrations properly flashed?",
+      "Is there a fourth layer of ice and water shield at all penetrations?",
+    ],
+  },
+  {
+    id: "ice_water_shield",
+    name: "Ice and Water Shield",
+    category: "Protection",
+    description:
+      "Self-adhesive, waterproof membrane applied to vulnerable areas of the roof to prevent water damage",
+    required: true,
+    typicalUnit: "square feet per vulnerable area",
+    commonContractorNames: ["Henry", "MasterStream", "Seal-It", "MasterShield"],
+    requiredMaterials: ["Ice and water shield membrane", "Torch or adhesive"],
+    commonOmissions: ["Insufficient ice and water shield"],
+    relatedRedFlags: ["Leaking in valleys", "Water damage at eaves", "Ice dams causing roof leaks"],
+    contractorQuestions: [
+      "Is ice and water shield being used in valleys and at least 36 inches up from eaves?",
+      "Are all underlayment laps sealed?",
+    ],
+  },
+  {
+    id: "tear_off_layers",
+    name: "Tear-off and Disposal",
+    category: "Demolition",
+    description:
+      "Remove existing roofing layers down to deck. Most codes allow max 2 layers. Multi-layer tear-off adds $1–$3 per sq ft.",
+    required: true,
+    typicalUnit: "roof squares (100 sq ft)",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["Dumpster rental", "Hauling services"],
+    commonOmissions: ["Multiple layers not properly removed"],
+    relatedRedFlags: [
+      "Roofer quotes price per-layer removal instead of total project price",
+      "Over-roofing (adding shingles over existing layers)",
+      "Hidden deck damage not discovered",
+    ],
+    contractorQuestions: [
+      "Will all existing layers be properly removed?",
+      "Is there a plan to inspect the roof deck after tear-off?",
+    ],
+  },
+  {
+    id: "deck_inspection",
+    name: "Deck Inspection and Repair",
+    category: "Preparation",
+    description:
+      "Inspect roof deck (sheathing) for rot, water damage, or soft spots. Replace damaged plywood/OSB as needed ($75–$150 per sheet)",
+    required: true,
+    typicalUnit: "roof sheets (4x8 ft)",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["Plywood or OSB sheets", "Roofing nails", "Sealant"],
+    commonOmissions: ["Deck issues not inspected"],
+    relatedRedFlags: [
+      "No structural assessment before renovation",
+      "Hidden rot or damage discovered during installation",
+      "Deferred deck repair costs",
+    ],
+    contractorQuestions: [
+      "Will you inspect the deck after tear-off?",
+      "What is the cost if deck replacement is needed?",
+    ],
+  },
+  {
+    id: "weather_protection",
+    name: "Weather Protection During Installation",
+    category: "Project Management",
+    description: "Methods to protect exposed deck from weather during installation period",
+    required: true,
+    typicalUnit: "installation days",
+    commonContractorNames: ["GAF", "Tamko", "CertainTeed", "Owens Corning"],
+    requiredMaterials: ["Tarps", "Burlap", "Sealant"],
+    commonOmissions: ["No weather protection"],
+    relatedRedFlags: [
+      "Damage to deck from weather exposure",
+      "Mold or mildew from moisture",
+      "Delays due to weather conditions",
+    ],
+    contractorQuestions: [
+      "What weather protection will be used?",
+      "Is there a weather delay contingency plan?",
+    ],
+  },
+];

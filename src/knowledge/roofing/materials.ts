@@ -1,0 +1,166 @@
+import type { Material } from "@/types/knowledge";
+
+export const roofingMaterials: Material[] = [
+  {
+    name: "Asphalt Shingles — Architectural (Dimensional)",
+    pros: [
+      "Best value for most homeowners",
+      "Better wind resistance (up to 130 mph)",
+      "Enhanced aesthetics with depth and shadow lines",
+      "Impact-resistant options available",
+      "Widely available and easy to repair",
+    ],
+    cons: [
+      "Shorter lifespan than premium materials",
+      "Can curl in extreme heat",
+      "Not the most eco-friendly option",
+    ],
+    cost: "$8,000 – $18,000",
+    durability: "18–30 years",
+    maintenance:
+      "Annual inspection, clean gutters twice yearly, trim overhanging branches, replace damaged shingles promptly",
+    roi: "68%",
+  },
+  {
+    name: "Metal Roof — Standing Seam",
+    pros: [
+      "Exceptional lifespan (40–70 years)",
+      "Excellent wind resistance (up to 140 mph)",
+      "Energy efficient — reflects solar heat (reduces cooling costs 10–25%)",
+      "Fire resistant (Class A)",
+      "Low maintenance",
+      "100% recyclable at end of life",
+      "Snow sheds easily",
+      "Compatible with solar panel mounting",
+    ],
+    cons: [
+      "Higher upfront cost (2–3x asphalt)",
+      "Can be noisy during rain/hail (mitigated by solid sheathing)",
+      "Requires specialized installer",
+      "May dent from large hail (cosmetic only)",
+      "Expansion/contraction requires specialized fasteners",
+    ],
+    cost: "$15,000 – $35,000",
+    durability: "40–70 years",
+    maintenance:
+      "Annual inspection of seams and fasteners, clear debris from valleys, re-tighten exposed fasteners if needed, check sealant every 10 years",
+    roi: "75%",
+  },
+  {
+    name: "Metal Roof — Corrugated / Exposed-Fastener",
+    pros: [
+      "Affordable metal option",
+      "Good wind resistance when properly installed",
+      "Lightweight",
+      "Quick installation",
+      "Recyclable",
+    ],
+    cons: [
+      "Exposed fasteners require periodic re-tightening and sealant replacement",
+      "Shorter lifespan than standing seam",
+      "Less aesthetic appeal for residential",
+      "Can leak if fasteners fail",
+    ],
+    cost: "$8,000 – $16,000",
+    durability: "25–40 years",
+    maintenance:
+      "Inspect and re-tighten exposed fasteners annually, reapply sealant to fasteners every 5–7 years, clear debris, check for rust spots",
+    roi: "65%",
+  },
+  {
+    name: "Concrete or Clay Tile",
+    pros: [
+      "Extremely durable (50–100 years)",
+      "Fire resistant (Class A)",
+      "Excellent wind resistance when properly installed",
+      "Superior aesthetics — premium look",
+      "Does not rot, corrode, or support mold",
+      "Energy efficient — thermal mass helps regulate temperature",
+      "Low maintenance",
+    ],
+    cons: [
+      "Very expensive",
+      "Extremely heavy — requires structural reinforcement ($2–$5 additional per sq ft)",
+      "Difficult and expensive to repair",
+      "Brittle — can crack from foot traffic or large hail",
+      "Requires specialized installer",
+    ],
+    cost: "$20,000 – $55,000",
+    durability: "50–100 years",
+    maintenance:
+      "Annual inspection of broken or displaced tiles, check underlayment every 20 years, clear debris from valleys, re-secure loose tiles, inspect flashing",
+    roi: "72%",
+  },
+  {
+    name: "Wood Shake (Cedar)",
+    pros: [
+      "Natural, premium aesthetics",
+      "Excellent insulator",
+      "Longer lifespan than asphalt when maintained",
+      "Environmentally sustainable (natural material)",
+      "Resists warping better than engineered wood",
+    ],
+    cons: [
+      "Highest maintenance requirement",
+      "Fire risk — requires chemical treatment (Class B or C rating)",
+      "Susceptible to mold, mildew, and rot in humid climates",
+      "Not allowed in some fire-prone jurisdictions",
+      "Expensive to install and maintain",
+      "Shorter lifespan in coastal/humid areas",
+    ],
+    cost: "$14,000 – $32,000",
+    durability: "20–40 years",
+    maintenance:
+      "Annual cleaning and treatment with preservative/mildewcide, trim back overhanging branches, remove debris promptly, re-treat every 3–5 years, replace damaged shakes",
+    roi: "60%",
+  },
+  {
+    name: "Slate",
+    pros: [
+      "Longest lifespan of any roofing material (75–200+ years)",
+      "Natural stone — premium, timeless aesthetics",
+      "Fire resistant (Class A)",
+      "Color runs through entire material (won't fade or peel)",
+      "Zero maintenance beyond occasional inspection",
+      "Does not support mold or mildew",
+      "Increases property value significantly",
+    ],
+    cons: [
+      "Most expensive option",
+      "Extremely heavy — requires full structural reinforcement ($10–$30 per sq ft added)",
+      "Requires highly specialized installer",
+      "Brittle — can crack from impact or foot traffic",
+      "Difficult and expensive to repair",
+      "Limited color palette (natural stone only)",
+    ],
+    cost: "$30,000 – $75,000+",
+    durability: "75–200+ years",
+    maintenance:
+      "Inspect every 2–3 years, replace broken or slipped slates promptly, check flashing and valleys, clear debris, ensure proper drainage",
+    roi: "78%",
+  },
+  {
+    name: "Synthetic/Composite (Rubber, Polymer, Engineered)",
+    pros: [
+      "Mimics slate or wood aesthetics at lower cost",
+      "Lightweight — no structural upgrade needed",
+      "Impact resistant (Class 4 hail rating)",
+      "Fire resistant (Class A)",
+      "Low maintenance",
+      "Made from recycled materials",
+      "Long warranty (50 years common)",
+    ],
+    cons: [
+      "Newer material — long-term performance beyond 30 years not fully proven",
+      "Higher cost than asphalt",
+      "Limited availability of installers",
+      "Can expand/contract more than traditional materials",
+      "Variety in quality between manufacturers",
+    ],
+    cost: "$12,000 – $30,000",
+    durability: "40–50 years",
+    maintenance:
+      "Annual inspection, clear debris, check seams and flashing, clean with mild detergent if algae stains appear",
+    roi: "70%",
+  },
+];
