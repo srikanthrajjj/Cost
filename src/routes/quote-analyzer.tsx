@@ -515,138 +515,119 @@ function QuoteAnalyzerPage() {
     );
   }
 
-  // ─── COMPLETE STATE: Interactive Results ────────────────────────────────────
-  const analysis = result!.analysis;
-  const extraction = result!.extraction;
+  // ─── COMPLETE STATE ──────────────────────────────────────────────────────────
+  return <CompleteView result={result!} reset={reset} chatOpen={chatOpen} setChatOpen={setChatOpen} activeTab={activeTab} setActiveTab={setActiveTab} expandedCards={expandedCards} setExpandedCards={setExpandedCards} selectedRow={selectedRow} setSelectedRow={setSelectedRow} apiKey={SK_API_KEY} />;
+}
+
+
+// ─── Complete View (Report Page) ──────────────────────────────────────────────
+function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActiveTab, expandedCards, setExpandedCards, selectedRow, setSelectedRow, apiKey }: {
+  result: QuoteAnalysisResult; reset: () => void; chatOpen: boolean; setChatOpen: (v: boolean) => void;
+  activeTab: string; setActiveTab: (v: any) => void; expandedCards: Set<string>; setExpandedCards: (v: Set<string>) => void;
+  selectedRow: number | null; setSelectedRow: (v: number | null) => void; apiKey: string;
+}) {
+  const analysis = result.analysis;
+  const extraction = result.extraction;
   const score = analysis.summary.completenessScore;
   const grade = getHealthGrade(score);
+  const totalLineItems = extraction.materials.length + extraction.scopeItems.length;
+  const analyzedDate = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const analyzedTime = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const scopeRows = [
+    ...extraction.materials.map((m) => ({ name: m.name, qty: m.quantity, unit: m.unit, price: m.totalPrice })),
+    ...extraction.scopeItems.map((s) => ({ name: s.name, qty: s.quantity, unit: s.unit, price: s.totalPrice })),
+  ];
+  const getStatus = (name: string) => {
+    if (analysis.needsClarification.some((i) => i.matchedAs?.toLowerCase() === name.toLowerCase() || i.name.toLowerCase() === name.toLowerCase())) return "clarification";
+    if (analysis.presentItems.some((i) => i.matchedAs?.toLowerCase() === name.toLowerCase() || i.name.toLowerCase() === name.toLowerCase())) return "included";
+    return "unmatched";
+  };
+  const getConf = (name: string) => {
+    const m = result.matchedMaterials.find((x) => x.original.name.toLowerCase() === name.toLowerCase());
+    if (m) return m.confidence >= 0.9 ? "High" : m.confidence >= 0.7 ? "Medium" : "Low";
+    const s = result.matchedScopeItems.find((x) => x.original.name.toLowerCase() === name.toLowerCase());
+    if (s) return s.confidence >= 0.9 ? "High" : s.confidence >= 0.7 ? "Medium" : "Low";
+    return "Medium";
+  };
+  const navItems = [
+    { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "scope", label: "Scope Review", icon: FileText },
+    { id: "explorer", label: "Missing Items", icon: AlertTriangle },
+    { id: "questions", label: "Smart Questions", icon: MessageCircle },
+    { id: "timeline", label: "Recommendations", icon: Sparkles },
+  ];
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      <Header onNewQuote={reset} />
-
-      {/* Hero Score Section */}
-      <section className="bg-white border-b border-border">
-        <div className="container-x py-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-            {/* Score Ring */}
-            <div className="relative shrink-0">
-              <svg width="120" height="120" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="#e5e7eb" strokeWidth="8" />
-                <circle
-                  cx="60" cy="60" r="52"
-                  fill="none"
-                  stroke={score >= 85 ? "#03A44D" : score >= 70 ? "#3b82f6" : score >= 50 ? "#d97706" : "#dc2626"}
-                  strokeWidth="8"
-                  strokeDasharray={`${(score / 100) * 327} 327`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 60 60)"
-                  className="transition-all duration-1000"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-display font-bold text-ink">{score}</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Score</span>
-              </div>
-            </div>
-
-            {/* Summary */}
-            <div className="flex-1">
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${grade.bg} ${grade.color}`}>
-                  {grade.label}
-                </span>
-                {extraction.contractor && (
-                  <span className="text-xs text-muted-foreground">by {extraction.contractor}</span>
-                )}
-              </div>
-              <h1 className="font-display text-2xl font-bold text-ink">
-                {extraction.projectType ? `${extraction.projectType.charAt(0).toUpperCase() + extraction.projectType.slice(1)} Quote Analysis` : "Quote Analysis"}
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xl">
-                {analysis.presentItems.length} items confirmed, {analysis.needsClarification.length} need clarification, {analysis.missingScope.length} missing.
-                {extraction.totalPrice > 0 && ` Total quoted: $${extraction.totalPrice.toLocaleString()}.`}
-              </p>
-
-              {/* Quick actions */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-white text-xs font-medium text-ink hover:border-accent/50 transition">
-                  <Download className="h-3.5 w-3.5" /> Download PDF
-                </button>
-                <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-white text-xs font-medium text-ink hover:border-accent/50 transition">
-                  <Share2 className="h-3.5 w-3.5" /> Share Report
-                </button>
-                <button onClick={reset} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-white text-xs font-medium text-ink hover:border-accent/50 transition">
-                  <Upload className="h-3.5 w-3.5" /> Compare Another
-                </button>
-                <button onClick={() => setChatOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-medium hover:bg-accent/90 transition">
-                  <MessageCircle className="h-3.5 w-3.5" /> Ask CostReno AI
-                </button>
-              </div>
-            </div>
+      <header className="border-b border-border bg-white sticky top-0 z-40">
+        <div className="flex items-center justify-between px-6 h-14">
+          <a href="/"><img src="/logo.svg" alt="CostReno" style={{ height: "28px" }} /></a>
+          <div className="flex items-center gap-3">
+            <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Download className="h-3.5 w-3.5" /> Download Report</button>
+            <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Share2 className="h-3.5 w-3.5" /> Share Report</button>
+            <button onClick={reset} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#082A4B] text-white text-xs font-semibold"><Upload className="h-3.5 w-3.5" /> New Analysis</button>
           </div>
         </div>
-      </section>
-
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-border sticky top-0 z-30">
-        <div className="container-x">
-          <nav className="flex gap-1 overflow-x-auto py-2">
-            {([
-              { id: "overview", label: "Overview" },
-              { id: "scope", label: "Scope Review" },
-              { id: "explorer", label: "Quote Explorer" },
-              { id: "questions", label: "Smart Questions" },
-              { id: "timeline", label: "Timeline" },
-            ] as const).map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
-                  activeTab === tab.id
-                    ? "bg-[#082A4B] text-white"
-                    : "text-muted-foreground hover:bg-muted/50"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+      </header>
+      <div className="flex">
+        <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-white h-[calc(100vh-56px)] sticky top-14">
+          <div className="px-4 py-4 border-b border-border">
+            <p className="text-[10px] text-muted-foreground">Report for</p>
+            <p className="text-xs font-bold text-ink mt-0.5 truncate">{extraction.contractor || "Quote.pdf"}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Uploaded just now</p>
+          </div>
+          <nav className="flex-1 px-2 py-3 space-y-0.5">
+            {navItems.map((item) => { const I = item.icon; return (
+              <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition ${activeTab === item.id ? "bg-[#082A4B] text-white font-semibold" : "text-muted-foreground hover:bg-muted/50"}`}><I className="h-4 w-4" /> {item.label}</button>
+            ); })}
           </nav>
-        </div>
+          <div className="px-3 pb-4 mt-auto">
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <div className="flex items-center gap-2 mb-2"><Bot className="h-4 w-4 text-accent" /><span className="text-xs font-bold text-ink">AI Analyst</span></div>
+              <p className="text-[10px] text-muted-foreground mb-2">Ask anything about your quote</p>
+              <button onClick={() => setChatOpen(true)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-white text-xs font-medium"><MessageCircle className="h-3 w-3" /> Ask a Question</button>
+            </div>
+          </div>
+        </aside>
+        <main className="flex-1 min-w-0 px-5 lg:px-10 py-8 max-w-5xl">
+          <div className="flex items-start justify-between mb-8">
+            <div><div className="flex items-center gap-2.5"><CheckCircle2 className="h-6 w-6 text-accent" /><h1 className="font-display text-2xl font-bold text-ink">Your Quote Analysis is Ready</h1></div><p className="mt-1.5 text-sm text-muted-foreground">We analyzed <strong className="text-ink">{totalLineItems} line items</strong> in your quote.</p></div>
+            <div className="text-right hidden sm:block"><p className="text-[10px] text-muted-foreground">Analyzed on</p><p className="text-xs font-medium text-ink">{analyzedDate} • {analyzedTime}</p></div>
+          </div>
+          {/* Score cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+            <div className="rounded-xl border border-border bg-white p-4"><p className="text-[10px] text-muted-foreground font-medium mb-2">Quote Health Score</p><div className="flex items-end gap-1"><span className="text-3xl font-display font-bold" style={{ color: score >= 85 ? "#03A44D" : score >= 70 ? "#3b82f6" : score >= 50 ? "#d97706" : "#dc2626" }}>{score}</span><span className="text-sm text-muted-foreground mb-1">/100</span></div><span className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${grade.bg} ${grade.color}`}>{grade.label}</span></div>
+            <div className="rounded-xl border border-border bg-white p-4"><div className="flex items-center gap-1 mb-2"><p className="text-[10px] text-muted-foreground font-medium">Included</p><CheckCircle2 className="h-3 w-3 text-accent" /></div><p className="text-3xl font-display font-bold text-accent">{analysis.presentItems.length}</p><p className="text-[10px] text-muted-foreground mt-1">{totalLineItems > 0 ? Math.round((analysis.presentItems.length / totalLineItems) * 100) : 0}% of items</p></div>
+            <div className="rounded-xl border border-border bg-white p-4"><p className="text-[10px] text-muted-foreground font-medium mb-2">Needs Clarification</p><p className="text-3xl font-display font-bold text-amber-500">{analysis.needsClarification.length}</p><p className="text-[10px] text-muted-foreground mt-1">{totalLineItems > 0 ? Math.round((analysis.needsClarification.length / totalLineItems) * 100) : 0}% of items</p></div>
+            <div className="rounded-xl border border-border bg-white p-4"><div className="flex items-center gap-1 mb-2"><p className="text-[10px] text-muted-foreground font-medium">Missing</p><AlertTriangle className="h-3 w-3 text-red-500" /></div><p className="text-3xl font-display font-bold text-red-500">{analysis.missingScope.length}</p><p className="text-[10px] text-muted-foreground mt-1">{analysis.missingScope.length > 0 ? "Review" : "0%"}</p></div>
+            <div className="rounded-xl border border-border bg-white p-4"><p className="text-[10px] text-muted-foreground font-medium mb-2">Red Flags</p><p className={`text-3xl font-display font-bold ${analysis.redFlags.length > 0 ? "text-red-500" : "text-accent"}`}>{analysis.redFlags.length}</p><p className="text-[10px] text-muted-foreground mt-1">{analysis.redFlags.length === 0 ? "Great!" : "Review"}</p></div>
+          </div>
+          {/* Scope Table */}
+          <div className="mb-8"><h2 className="text-base font-bold text-ink mb-1">Scope Review</h2><p className="text-xs text-muted-foreground mb-4">A detailed review of each line item in your quote.</p>
+            <div className="rounded-xl border border-border bg-white overflow-hidden"><table className="w-full text-sm"><thead><tr className="border-b border-border bg-muted/20"><th className="px-4 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase w-6"></th><th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">Line Item</th><th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">Qty</th><th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">Price</th><th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">Status</th><th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">Match Confidence</th></tr></thead>
+              <tbody>{scopeRows.map((row, i) => { const st = getStatus(row.name); const conf = getConf(row.name); return (
+                <tr key={i} className="border-b border-border/50 hover:bg-muted/10"><td className="px-4 py-3 text-muted-foreground"><ChevronRight className="h-3.5 w-3.5" /></td><td className="px-3 py-3"><div className="flex items-center gap-2"><div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}>{st === "included" ? <Check className="h-3 w-3 text-accent" /> : st === "clarification" ? <HelpCircle className="h-3 w-3 text-amber-500" /> : <Info className="h-3 w-3 text-muted-foreground" />}</div><span className="font-medium text-ink">{row.name}</span></div></td><td className="px-3 py-3 text-muted-foreground text-xs">{row.qty > 0 ? `${row.qty} ${row.unit}` : "—"}</td><td className="px-3 py-3 text-ink text-xs font-medium">{row.price > 0 ? `$${row.price.toLocaleString()}` : "—"}</td><td className="px-3 py-3">{st === "included" && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">Included</span>}{st === "clarification" && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">Needs Clarification</span>}{st === "unmatched" && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">—</span>}</td><td className="px-3 py-3"><div className="flex items-center gap-1.5"><span className={`w-2 h-2 rounded-full ${conf === "High" ? "bg-accent" : conf === "Medium" ? "bg-amber-400" : "bg-red-400"}`} /><span className="text-xs text-muted-foreground">{conf}</span></div></td></tr>
+              ); })}</tbody></table></div>
+            {analysis.missingScope.length > 0 && <div className="mt-3 text-center"><button className="text-xs font-semibold text-accent hover:underline">View Missing Items ↓</button></div>}
+          </div>
+          {/* Bottom 3 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            <div className="rounded-xl border border-border bg-white p-5"><h3 className="text-sm font-bold text-ink mb-1">Missing Items ({analysis.missingScope.length})</h3><p className="text-[10px] text-muted-foreground mb-3">Items not found in your quote.</p>{analysis.missingScope.length === 0 ? <p className="text-xs text-accent font-medium">None — great!</p> : <div className="space-y-2.5">{analysis.missingScope.slice(0, 3).map((item, i) => (<div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /><div className="flex-1 min-w-0"><p className="text-xs font-bold text-ink">{item.title.replace("Missing: ", "")}</p><p className="text-[10px] text-muted-foreground truncate">{item.explanation}</p></div><span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-red-50 text-red-500 shrink-0">Missing</span></div>))}</div>}<button className="mt-3 w-full text-xs font-semibold text-accent hover:underline">See Recommendations</button></div>
+            <div className="rounded-xl border border-border bg-white p-5"><h3 className="text-sm font-bold text-ink mb-1">Pricing Insights</h3><p className="text-[10px] text-muted-foreground mb-3">How your pricing compares.</p><p className="text-2xl font-display font-bold text-ink">{extraction.totalPrice > 0 ? `$${extraction.totalPrice.toLocaleString()}` : "—"}</p><p className="text-[10px] text-muted-foreground">Total Quote Amount</p>{extraction.totalPrice > 0 && <div className="mt-3 pt-3 border-t border-border"><p className="text-[10px] text-muted-foreground">Typical Range in Your Area</p><p className="text-sm font-bold text-ink mt-0.5">${Math.round(extraction.totalPrice * 0.88).toLocaleString()} – ${Math.round(extraction.totalPrice * 1.12).toLocaleString()}</p><span className="mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-accent/10 text-accent">Fair Price</span></div>}<button className="mt-3 w-full text-xs font-semibold text-accent hover:underline">View Pricing Details</button></div>
+            <div className="rounded-xl border border-border bg-white p-5"><h3 className="text-sm font-bold text-ink mb-1">Smart Questions</h3><p className="text-[10px] text-muted-foreground mb-3">Questions to ask your contractor.</p><div className="space-y-2.5">{analysis.questionsToAsk.slice(0, 3).map((q, i) => (<div key={i} className="flex items-start gap-2"><div className="w-5 h-5 rounded border border-border flex items-center justify-center shrink-0 mt-0.5"><span className="text-[9px] text-muted-foreground">{i + 1}</span></div><p className="text-xs text-ink leading-relaxed flex-1">{q.length > 70 ? q.substring(0, 70) + "..." : q}</p><ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" /></div>))}</div><button className="mt-3 w-full text-xs font-semibold text-accent hover:underline">View All Questions</button></div>
+          </div>
+          {/* Verdict */}
+          <div className="rounded-2xl border border-border bg-white p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+            <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0"><CheckCircle2 className="h-6 w-6 text-accent" /></div><div><p className="text-sm font-bold text-ink">{score >= 80 ? "You're in good shape." : score >= 60 ? "Some attention needed." : "Significant gaps found."}</p><p className="text-xs text-muted-foreground mt-0.5 max-w-md">{score >= 80 ? "Your quote looks solid. Just clarify a few details and add the missing items to ensure a complete and high-quality project." : "Review the missing items and clarification points before signing. Get these addressed in writing."}</p></div></div>
+            <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shrink-0"><Download className="h-4 w-4" /> Download Full Report</button>
+          </div>
+        </main>
       </div>
-
-      {/* Tab Content */}
-      <div className="container-x py-8">
-        {activeTab === "overview" && <OverviewTab analysis={analysis} extraction={extraction} />}
-        {activeTab === "scope" && <ScopeReviewTab analysis={analysis} expandedCards={expandedCards} setExpandedCards={setExpandedCards} onAskAI={() => setChatOpen(true)} />}
-        {activeTab === "explorer" && <QuoteExplorerTab extraction={extraction} analysis={analysis} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />}
-        {activeTab === "questions" && <QuestionsTab analysis={analysis} />}
-        {activeTab === "timeline" && <TimelineTab analysis={analysis} />}
-      </div>
-
-      {/* AI Chat Panel */}
-      {chatOpen && (
-        <AIChatPanel
-          analysis={analysis}
-          extraction={extraction}
-          onClose={() => setChatOpen(false)}
-          apiKey={SK_API_KEY}
-        />
-      )}
-
-      {/* Floating AI button */}
-      {!chatOpen && (
-        <button
-          onClick={() => setChatOpen(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/30 flex items-center justify-center text-white hover:scale-105 transition-transform z-40"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </button>
-      )}
+      {chatOpen && <AIChatPanel analysis={analysis} extraction={extraction} onClose={() => setChatOpen(false)} apiKey={apiKey} />}
+      {!chatOpen && <button onClick={() => setChatOpen(true)} className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/30 flex items-center justify-center text-white hover:scale-105 transition-transform z-40 lg:hidden"><MessageCircle className="h-6 w-6" /></button>}
     </div>
   );
 }
-
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 function Header({ onNewQuote }: { onNewQuote?: () => void }) {
