@@ -41,12 +41,12 @@ const trend = [
   { v: 30 },{ v: 36 },{ v: 34 },{ v: 42 },{ v: 40 },{ v: 48 },
 ];
 const projects = [
-  { img: projRoof, icon: Home, name: "Roof Replacement", avgCost: "$16,650", price: "$8,600 – $24,700", time: "3 – 5 Days", roi: "68%", difficulty: "Medium" },
-  { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", avgCost: "$50,000", price: "$25,000 – $75,000", time: "4 – 8 Weeks", roi: "72%", difficulty: "Hard" },
-  { img: projBathroom, icon: Bath, name: "Bathroom Remodel", avgCost: "$19,000", price: "$8,000 – $30,000", time: "2 – 4 Weeks", roi: "65%", difficulty: "Medium" },
-  { img: projHvac, icon: Fan, name: "HVAC Replacement", avgCost: "$8,250", price: "$4,500 – $12,000", time: "1 – 2 Days", roi: "58%", difficulty: "Easy" },
-  { img: projWindows, icon: Square, name: "Window Replacement", avgCost: "$12,500", price: "$6,000 – $21,000", time: "1 – 3 Days", roi: "72%", difficulty: "Medium" },
-  { img: projSolar, icon: Sun, name: "Solar Panel Installation", avgCost: "$25,000", price: "$15,000 – $35,000", time: "2 – 3 Days", roi: "80%", difficulty: "Hard" },
+  { img: projRoof, icon: Home, name: "Roof Replacement", avgCost: "$16,650", price: "$8,600 – $24,700", time: "3 – 5 Days", roi: "68%", difficulty: "Medium", projectType: "roof" as const },
+  { img: projKitchen, icon: ChefHat, name: "Kitchen Remodel", avgCost: "$50,000", price: "$25,000 – $75,000", time: "4 – 8 Weeks", roi: "72%", difficulty: "Hard", projectType: "kitchen" as const },
+  { img: projBathroom, icon: Bath, name: "Bathroom Remodel", avgCost: "$19,000", price: "$8,000 – $30,000", time: "2 – 4 Weeks", roi: "65%", difficulty: "Medium", projectType: "bathroom" as const },
+  { img: projHvac, icon: Fan, name: "HVAC Replacement", avgCost: "$8,250", price: "$4,500 – $12,000", time: "1 – 2 Days", roi: "58%", difficulty: "Easy", projectType: "hvac" as const },
+  { img: projWindows, icon: Square, name: "Window Replacement", avgCost: "$12,500", price: "$6,000 – $21,000", time: "1 – 3 Days", roi: "72%", difficulty: "Medium", projectType: "windows" as const },
+  { img: projSolar, icon: Sun, name: "Solar Panel Installation", avgCost: "$25,000", price: "$15,000 – $35,000", time: "2 – 3 Days", roi: "80%", difficulty: "Hard", projectType: "solar" as const },
 ];
 const steps = [
   { icon: Search, title: "Choose Your Project", desc: "Select from 100+ home improvement projects" },
@@ -1501,9 +1501,15 @@ FORMATTING RULES:
                       </div>
 
                       <div className="pt-3 border-t border-border/30">
-                        <div className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent text-center hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer">
-                          <a href="/estimate">Get Estimate</a>
-                        </div>
+                        <button
+                          onClick={() => {
+                            sessionStorage.setItem('costreno_preselected_project', p.projectType);
+                            window.location.href = '/estimate';
+                          }}
+                          className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
+                        >
+                          Get Estimate
+                        </button>
                       </div>
                     </div>
                   </div>
