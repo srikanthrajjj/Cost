@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
+import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel-cost'
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
   id: '/quote-analyzer',
   path: '/quote-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KitchenRemodelCostRoute = KitchenRemodelCostRouteImport.update({
+  id: '/kitchen-remodel-cost',
+  path: '/kitchen-remodel-cost',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstimateRoute = EstimateRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
+  '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
+  '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,38 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
+  '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$projectSlug' | '/estimate' | '/quote-analyzer'
+  fullPaths:
+    | '/'
+    | '/$projectSlug'
+    | '/estimate'
+    | '/kitchen-remodel-cost'
+    | '/quote-analyzer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$projectSlug' | '/estimate' | '/quote-analyzer'
-  id: '__root__' | '/' | '/$projectSlug' | '/estimate' | '/quote-analyzer'
+  to:
+    | '/'
+    | '/$projectSlug'
+    | '/estimate'
+    | '/kitchen-remodel-cost'
+    | '/quote-analyzer'
+  id:
+    | '__root__'
+    | '/'
+    | '/$projectSlug'
+    | '/estimate'
+    | '/kitchen-remodel-cost'
+    | '/quote-analyzer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
   EstimateRoute: typeof EstimateRoute
+  KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
 }
 
@@ -76,6 +102,13 @@ declare module '@tanstack/react-router' {
       path: '/quote-analyzer'
       fullPath: '/quote-analyzer'
       preLoaderRoute: typeof QuoteAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kitchen-remodel-cost': {
+      id: '/kitchen-remodel-cost'
+      path: '/kitchen-remodel-cost'
+      fullPath: '/kitchen-remodel-cost'
+      preLoaderRoute: typeof KitchenRemodelCostRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estimate': {
@@ -106,6 +139,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectSlugRoute: ProjectSlugRoute,
   EstimateRoute: EstimateRoute,
+  KitchenRemodelCostRoute: KitchenRemodelCostRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
 }
 export const routeTree = rootRouteImport
