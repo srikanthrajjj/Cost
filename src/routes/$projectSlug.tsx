@@ -11,7 +11,6 @@ export const Route = createFileRoute("/$projectSlug")({
       meta: [
         { title: project.seoTitle },
         { name: "description", content: project.seoDescription },
-        { name: "keywords", content: `${project.name} cost, ${project.name} cost 2026, how much does ${project.name.toLowerCase()} cost, ${project.name.toLowerCase()} estimate, ${project.name.toLowerCase()} price` },
         { property: "og:title", content: project.seoTitle },
         { property: "og:description", content: project.seoDescription },
         { property: "og:type", content: "article" },
@@ -20,33 +19,6 @@ export const Route = createFileRoute("/$projectSlug")({
       ],
       links: [
         { rel: "canonical", href: `https://costreno.com/${project.slug}` },
-      ],
-      scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: project.faqs.map((faq) => ({
-              "@type": "Question",
-              name: faq.q,
-              acceptedAnswer: { "@type": "Answer", text: faq.a },
-            })),
-          }),
-        },
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Service",
-            name: `${project.name} Cost Estimator`,
-            description: project.seoDescription,
-            provider: { "@type": "Organization", name: "CostReno", url: "https://costreno.com" },
-            areaServed: { "@type": "Country", name: "United States" },
-            priceRange: project.costRange,
-            aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "1247", bestRating: "5" },
-          }),
-        },
       ],
     };
   },
@@ -111,7 +83,37 @@ function ProjectLandingPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
-        {/* Breadcrumb */}
+        {/* Inline JSON-LD structured data */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: project.h1,
+          description: project.seoDescription,
+          author: { "@type": "Organization", name: "CostReno" },
+          publisher: { "@type": "Organization", name: "CostReno", logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" } },
+          datePublished: "2026-07-19",
+          dateModified: "2026-07-19",
+          mainEntityOfPage: `https://costreno.com/${project.slug}`,
+        }) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: project.faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.q,
+            acceptedAnswer: { "@type": "Answer", text: faq.a },
+          })),
+        }) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: `${project.name} Cost Estimator`,
+          description: project.seoDescription,
+          provider: { "@type": "Organization", name: "CostReno", url: "https://costreno.com" },
+          areaServed: { "@type": "Country", name: "United States" },
+          priceRange: project.costRange,
+          aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "1247", bestRating: "5" },
+        }) }} />
         <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-8">
           <a href="/" className="hover:text-ink transition">Home</a>
           <span>/</span>
@@ -135,7 +137,7 @@ function ProjectLandingPage() {
 
         {/* Hero Image */}
         <div className="rounded-2xl overflow-hidden mb-10 aspect-[21/9]">
-          <img src={project.image} alt={project.name} className="w-full h-full object-cover" loading="eager" />
+          <img src={project.image} alt={`${project.name} project in progress — typical residential home improvement work`} className="w-full h-full object-cover" loading="eager" />
         </div>
 
         {/* Cost Summary Card */}
@@ -188,6 +190,9 @@ function ProjectLandingPage() {
           <h2 className="font-display text-2xl font-bold text-ink mb-5">
             {project.name} Cost Breakdown
           </h2>
+          <p className="text-sm text-muted-foreground mb-5">
+            Understanding where your money goes helps you evaluate quotes and negotiate with contractors. Here's how a typical {project.name.toLowerCase()} budget breaks down:
+          </p>
           <div className="rounded-xl border border-border bg-white overflow-hidden">
             <table className="w-full">
               <thead>
@@ -205,6 +210,70 @@ function ProjectLandingPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="mt-4 p-4 rounded-lg bg-accent/5 border border-accent/20">
+            <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
+            <p className="text-sm text-muted-foreground">Any contractor quote that doesn't break costs down into at least these categories is a red flag. An itemized quote protects you from hidden charges and makes it possible to compare bids apples-to-apples.</p>
+          </div>
+        </section>
+
+        {/* How It Works / Process */}
+        <section className="mb-12">
+          <h2 className="font-display text-2xl font-bold text-ink mb-5">
+            How {project.name} Works: Step by Step
+          </h2>
+          <p className="text-sm text-muted-foreground mb-5">
+            Knowing the process helps you plan around disruptions, ask better questions, and catch problems early. Here's what to expect from start to finish:
+          </p>
+          <div className="space-y-4">
+            {[
+              { step: "1", title: "Initial Assessment", desc: `A licensed contractor inspects your property, takes measurements, and discusses your goals. They should provide a written, itemized estimate within 2-3 days — not a verbal ballpark on the spot.` },
+              { step: "2", title: "Material Selection & Permits", desc: `You choose materials based on budget, durability, and aesthetics. Your contractor handles permit applications. This stage takes 1-2 weeks depending on your municipality.` },
+              { step: "3", title: "Preparation & Demolition", desc: `The work area is protected and old materials are removed. This is when hidden issues (rot, water damage, structural problems) typically surface — expect a potential change order here.` },
+              { step: "4", title: "Installation", desc: `New materials are installed according to manufacturer specifications and local building codes. Quality contractors document their work with photos at each stage.` },
+              { step: "5", title: "Inspection & Walkthrough", desc: `A final inspection ensures everything meets code. You walk the completed project with your contractor against the original written scope before releasing final payment.` },
+            ].map((s) => (
+              <div key={s.step} className="flex gap-4 p-4 rounded-xl border border-border bg-white">
+                <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-accent">{s.step}</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-ink mb-1">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Red Flags */}
+        <section className="mb-12">
+          <h2 className="font-display text-2xl font-bold text-ink mb-5">
+            Red Flags in a {project.name} Quote
+          </h2>
+          <p className="text-sm text-muted-foreground mb-5">
+            These are the most common ways a contractor quote quietly costs you more than it should. If you spot any of these, ask questions before signing:
+          </p>
+          <div className="space-y-3">
+            {[
+              { flag: "No itemized breakdown", desc: "A single lump-sum number makes it impossible to compare quotes or know what you're paying for." },
+              { flag: "Large upfront deposit (50%+)", desc: "Reputable contractors ask for 10-30% down, not half the project cost before work begins." },
+              { flag: "No mention of permits", desc: "If the quote is silent on permits, ask who's responsible. It should be the contractor." },
+              { flag: "Pressure to sign today", desc: "Legitimate professionals don't need you to commit on the spot. Take time to compare." },
+              { flag: "Vague material specifications", desc: "\"Standard grade\" or \"builder quality\" means nothing. Demand specific brands and model numbers." },
+            ].map((item) => (
+              <div key={item.flag} className="flex items-start gap-3 p-4 rounded-xl border border-red-100 bg-red-50/50">
+                <span className="text-red-500 text-lg leading-none mt-0.5">⚠</span>
+                <div>
+                  <p className="text-sm font-bold text-ink">{item.flag}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 p-4 rounded-lg bg-accent/5 border border-accent/20">
+            <p className="text-xs font-semibold text-accent mb-1">Save Money Tip</p>
+            <p className="text-sm text-muted-foreground">Get at least 3 written quotes from licensed, insured contractors. Upload them to our <a href="/quote-analyzer" className="text-accent font-semibold underline">Quote Analyzer</a> to instantly flag missing scope, overpricing, and red flags.</p>
           </div>
         </section>
 
