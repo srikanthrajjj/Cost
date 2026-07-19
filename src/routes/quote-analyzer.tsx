@@ -640,8 +640,7 @@ function QuoteAnalyzerPage() {
                 },
               ].map((faq) => (
                 <details key={faq.q} className="group rounded-xl border border-border bg-white overflow-hidden">
-                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-semibold text-ink hover:bg-muted/20 transition">
-                    {faq.q}
+                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/20 transition"><h3 className="text-sm font-semibold text-ink">{faq.q}</h3>
                     <ChevronDown className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-3" />
                   </summary>
                   <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
@@ -696,8 +695,7 @@ function QuoteAnalyzerPage() {
                 },
               ].map((faq) => (
                 <details key={faq.q} className="group rounded-xl border border-border bg-white overflow-hidden">
-                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-semibold text-ink hover:bg-muted/20 transition">
-                    {faq.q}
+                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/20 transition"><h3 className="text-sm font-semibold text-ink">{faq.q}</h3>
                     <ChevronDown className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-3" />
                   </summary>
                   <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
@@ -1590,3 +1588,4 @@ function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
     </div>
   );
 }
+

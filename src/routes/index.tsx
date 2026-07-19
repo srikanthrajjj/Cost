@@ -3226,7 +3226,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 className="group/item rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between px-5 py-4 cursor-pointer">
-                  <span className="font-display text-sm font-semibold text-ink pr-4">{faq.q}</span>
+                  <h3 className="font-display text-sm font-semibold text-ink pr-4">{faq.q}</h3>
                   <span className="shrink-0 ml-2 h-5 w-5 flex items-center justify-center text-muted-foreground text-xs group-hover/item:rotate-45 transition-transform duration-300">
                     +
                   </span>
