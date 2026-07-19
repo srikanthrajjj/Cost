@@ -43,6 +43,7 @@ import { chatWithKnowledge, extractProjectTypeFromChat } from "@/lib/chat-with-k
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
+import { SiteNav } from "@/components/SiteNav";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -1793,46 +1794,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-        <div className="container-x flex h-16 items-center justify-between">
-          <Logo />
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
-            <a href="/estimate" className="hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
-            <a href="/quote-analyzer" className="hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
-            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
-            <div className="relative group">
-              <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
-                Renovation Guides
-                <ChevronDownIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
-              </button>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
-                  {[{name:"Roofing",href:"/guides/roof-replacement"},{name:"Kitchen",href:"/guides/kitchen-remodel"},{name:"Bathroom",href:"/guides/bathroom-remodel"},{name:"HVAC",href:"/guides/hvac-installation"},{name:"Windows",href:"/guides/window-replacement"},{name:"Flooring",href:"/guides/flooring"},{name:"Solar",href:"#"},{name:"Foundation",href:"#"}].map((item) => (<a key={item.name} href={item.href} className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">{item.name}</a>))}
-                </div>
-              </div>
-            </div>
-            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <button className="hidden sm:grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
-              <Search color="white" className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setShowLocationPrompt(true)}
-              className="hidden md:flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition"
-            >
-              <MapPin className="h-4 w-4" />
-              <span>{userLocation || "Set Location"}</span>
-            </button>
-            <a
-              href="#"
-              className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
-            >
-              Start Free
-            </a>
-          </div>
-        </div>
-      </header>
+      <SiteNav />
 
       {/* HERO — NerdWallet-inspired */}
       <section className="relative bg-white overflow-hidden">

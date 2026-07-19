@@ -36,6 +36,7 @@ import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrout
 import { chatWithKnowledge } from "@/lib/chat-with-knowledge";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import type { QuoteAnalysis } from "@/lib/quote/types";
@@ -355,40 +356,8 @@ function QuoteAnalyzerPage() {
           </div>
         )}
 
-        {/* Header - Same as landing page */}
-        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
-            <a href="/" className="shrink-0">
-              <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
-            </a>
-            <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
-              <a href="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</a>
-              <a href="/estimate" className="hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
-              <a href="/quote-analyzer" className="text-accent hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
-              <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
-              <div className="relative group">
-                <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
-                  Renovation Guides
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
-                </button>
-                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
-                    {[{name:"Roofing",href:"/guides/roof-replacement"},{name:"Kitchen",href:"/guides/kitchen-remodel"},{name:"Bathroom",href:"/guides/bathroom-remodel"},{name:"HVAC",href:"/guides/hvac-installation"},{name:"Windows",href:"/guides/window-replacement"},{name:"Flooring",href:"/guides/flooring"},{name:"Solar",href:"#"},{name:"Foundation",href:"#"}].map((item) => (<a key={item.name} href={item.href} className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">{item.name}</a>))}
-                  </div>
-                </div>
-              </div>
-              <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
-            </nav>
-            <div className="flex items-center gap-3">
-              <a
-                href="#"
-                className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
-              >
-                Start Free
-              </a>
-            </div>
-          </div>
-        </header>
+        {/* Header */}
+        <SiteNav active="quote" />
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
           {/* Hero - Clean and centered */}
@@ -826,9 +795,24 @@ function QuoteAnalyzerPage() {
             )}
           </div>
 
-          {/* Tip */}
-          <div className="mt-8 p-4 rounded-xl bg-white border border-border text-xs text-muted-foreground leading-relaxed" key={tipIdx}>
-            {PROCESSING_TIPS[tipIdx]}
+          {/* Tip - chat bubble from bottom right */}
+          <div className="fixed bottom-6 right-6 max-w-[280px] z-50">
+            <div className="flex items-end gap-2.5">
+              <div className="flex-1 relative">
+                <div className="p-4 rounded-2xl rounded-br-sm bg-white border border-accent/20 shadow-xl shadow-accent/5">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-amber-500 text-sm">💡</span>
+                    <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Did you know?</span>
+                  </div>
+                  <p className="text-xs text-ink leading-relaxed text-left animate-in fade-in duration-500" key={tipIdx}>{PROCESSING_TIPS[tipIdx].replace("💡 ", "").replace("💡 Tip: ", "")}</p>
+                </div>
+                {/* Bubble tail */}
+                <div className="absolute -bottom-1 right-3 w-3 h-3 bg-white border-r border-b border-accent/20 transform rotate-45" />
+              </div>
+              <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0 shadow-lg shadow-accent/30">
+                <MessageCircle className="h-4 w-4 text-white" />
+              </div>
+            </div>
           </div>
 
           <button
@@ -853,6 +837,37 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
   activeTab: string; setActiveTab: (v: any) => void; expandedCards: Set<string>; setExpandedCards: (v: Set<string>) => void;
   selectedRow: number | null; setSelectedRow: (v: number | null) => void; apiKey: string;
 }) {
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleEmailSubmit = async (email: string) => {
+    if (!result || !result.analysis) {
+      throw new Error("No analysis data available");
+    }
+    setIsDownloading(true);
+    try {
+      const { analysis, extraction } = result;
+      await submitEmailAndDownload({
+        filename: `quote-analysis-${new Date().getTime()}.html`,
+        email,
+        reportType: "analysis",
+        data: {
+          score: analysis.quoteHealthScore,
+          missingItems: analysis.missingScope.length,
+          clarificationItems: analysis.needsClarification.length,
+          redFlags: analysis.redFlags.length,
+          contractor: extraction.contractor,
+          totalPrice: extraction.totalPrice,
+        },
+      });
+    } catch (error) {
+      console.error("Download failed:", error);
+      throw error;
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const analysis = result.analysis;
   const extraction = result.extraction;
   const score = analysis.summary.completenessScore;
@@ -888,7 +903,14 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
     <div className="min-h-screen bg-[#f8f9fb]">
       <header className="border-b border-border bg-white sticky top-0 z-40">
         <div className="flex items-center justify-between px-6 h-14">
-          <a href="/"><img src="/logo.svg" alt="CostReno" style={{ height: "28px" }} /></a>
+          <div className="flex items-center gap-3">
+            <a href="/"><img src="/logo.svg" alt="CostReno" style={{ height: "28px" }} /></a>
+            <div className="hidden sm:flex items-center gap-2 ml-4 pl-4 border-l border-border">
+              <CheckCircle2 className="h-4 w-4 text-accent" />
+              <span className="text-sm font-bold text-ink">Quote Analysis Ready</span>
+              <span className="text-xs text-muted-foreground">· {totalLineItems} items · {analyzedDate}</span>
+            </div>
+          </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setShowEmailModal(true)} className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Download className="h-3.5 w-3.5" /> Download Report</button>
             <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"><Share2 className="h-3.5 w-3.5" /> Share Report</button>
@@ -909,18 +931,16 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
             ); })}
           </nav>
           <div className="px-3 pb-4 mt-auto">
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <div className="flex items-center gap-2 mb-2"><Bot className="h-4 w-4 text-accent" /><span className="text-xs font-bold text-ink">AI Analyst</span></div>
-              <p className="text-[10px] text-muted-foreground mb-2">Ask anything about your quote</p>
-              <button onClick={() => setChatOpen(true)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-white text-xs font-medium"><MessageCircle className="h-3 w-3" /> Ask a Question</button>
+            <div className="rounded-xl border-2 border-accent bg-gradient-to-b from-accent/5 to-accent/15 p-3">
+              <div className="flex items-center gap-2 mb-1.5"><Sparkles className="h-4 w-4 text-accent" /><span className="text-xs font-bold text-accent">CostReno AI</span></div>
+              <p className="text-[10px] text-muted-foreground mb-2.5">Get instant answers about your quote</p>
+              <button onClick={() => setChatOpen(true)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"><MessageCircle className="h-3.5 w-3.5" /> Ask AI</button>
             </div>
           </div>
         </aside>
-        <main className="flex-1 min-w-0 px-5 lg:px-10 py-8 max-w-5xl">
-          <div className="flex items-start justify-between mb-8">
-            <div><div className="flex items-center gap-2.5"><CheckCircle2 className="h-6 w-6 text-accent" /><h1 className="font-display text-2xl font-bold text-ink">Your Quote Analysis is Ready</h1></div><p className="mt-1.5 text-sm text-muted-foreground">We analyzed <strong className="text-ink">{totalLineItems} line items</strong> in your quote.</p></div>
-            <div className="text-right hidden sm:block"><p className="text-[10px] text-muted-foreground">Analyzed on</p><p className="text-xs font-medium text-ink">{analyzedDate} • {analyzedTime}</p></div>
-          </div>
+        <main className="flex-1 min-w-0 flex">
+          {/* Middle: Main content */}
+          <div className="flex-1 min-w-0 px-5 lg:px-8 py-8">
           {/* Score cards — always visible */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
             <div className="rounded-xl border border-border bg-white p-4"><p className="text-[10px] text-muted-foreground font-medium mb-2">Quote Health Score</p><div className="flex items-end gap-1"><span className="text-3xl font-display font-bold" style={{ color: score >= 85 ? "#03A44D" : score >= 70 ? "#3b82f6" : score >= 50 ? "#d97706" : "#dc2626" }}>{score}</span><span className="text-sm text-muted-foreground mb-1">/100</span></div><span className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${grade.bg} ${grade.color}`}>{grade.label}</span></div>
@@ -936,7 +956,7 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
               <tbody>{scopeRows.map((row, i) => { const st = getStatus(row.name); const conf = getConf(row.name); return (
                 <tr key={i} className="border-b border-border/50 hover:bg-muted/10"><td className="px-4 py-3 text-muted-foreground"><ChevronRight className="h-3.5 w-3.5" /></td><td className="px-3 py-3"><div className="flex items-center gap-2"><div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}>{st === "included" ? <Check className="h-3 w-3 text-accent" /> : st === "clarification" ? <HelpCircle className="h-3 w-3 text-amber-500" /> : <Info className="h-3 w-3 text-muted-foreground" />}</div><span className="font-medium text-ink">{row.name}</span></div></td><td className="px-3 py-3 text-muted-foreground text-xs">{row.qty > 0 ? `${row.qty} ${row.unit}` : "—"}</td><td className="px-3 py-3 text-ink text-xs font-medium">{row.price > 0 ? `$${row.price.toLocaleString()}` : "—"}</td><td className="px-3 py-3">{st === "included" && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">Included</span>}{st === "clarification" && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">Needs Clarification</span>}{st === "unmatched" && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">—</span>}</td><td className="px-3 py-3"><div className="flex items-center gap-1.5"><span className={`w-2 h-2 rounded-full ${conf === "High" ? "bg-accent" : conf === "Medium" ? "bg-amber-400" : "bg-red-400"}`} /><span className="text-xs text-muted-foreground">{conf}</span></div></td></tr>
               ); })}</tbody></table></div>
-            {analysis.missingScope.length > 0 && <div className="mt-3 text-center"><button onClick={() => setActiveTab("explorer")} className="text-xs font-semibold text-accent hover:underline">View Missing Items ↓</button></div>}
+            {analysis.missingScope.length > 0 && <div className="mt-3 text-center"></div>}
           </div>
           )}
           {/* ═══ TAB: Missing Items ═══ */}
@@ -959,19 +979,21 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
               {analysis.buildingCodes.length > 0 && <div className="mt-6"><h3 className="text-sm font-bold text-ink mb-3">Building Code Requirements</h3><div className="space-y-3">{analysis.buildingCodes.map((code, i) => (<div key={i} className="rounded-xl border border-border bg-white p-4"><p className="text-sm font-semibold text-ink">{code.title.replace("Building Code: ", "")}</p><p className="text-xs text-muted-foreground mt-1">{code.explanation}</p>{code.inspectionRequired && <span className="mt-2 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-600">Inspection Required</span>}</div>))}</div></div>}
             </div>
           )}
-          {/* Bottom 3 columns — only on overview */}
-          {activeTab === "overview" && (<>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-            <div className="rounded-xl border border-border bg-white p-5"><h3 className="text-sm font-bold text-ink mb-1">Missing Items ({analysis.missingScope.length})</h3><p className="text-[10px] text-muted-foreground mb-3">Items not found in your quote.</p>{analysis.missingScope.length === 0 ? <p className="text-xs text-accent font-medium">None — great!</p> : <div className="space-y-2.5">{analysis.missingScope.slice(0, 3).map((item, i) => (<div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /><div className="flex-1 min-w-0"><p className="text-xs font-bold text-ink">{item.title.replace("Missing: ", "")}</p><p className="text-[10px] text-muted-foreground truncate">{item.explanation}</p></div><span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-red-50 text-red-500 shrink-0">Missing</span></div>))}</div>}<button className="mt-3 w-full text-xs font-semibold text-accent hover:underline">See Recommendations</button></div>
-            <div className="rounded-xl border border-border bg-white p-5"><h3 className="text-sm font-bold text-ink mb-1">Pricing Insights</h3><p className="text-[10px] text-muted-foreground mb-3">How your pricing compares.</p><p className="text-2xl font-display font-bold text-ink">{extraction.totalPrice > 0 ? `$${extraction.totalPrice.toLocaleString()}` : "—"}</p><p className="text-[10px] text-muted-foreground">Total Quote Amount</p>{extraction.totalPrice > 0 && <div className="mt-3 pt-3 border-t border-border"><p className="text-[10px] text-muted-foreground">Typical Range in Your Area</p><p className="text-sm font-bold text-ink mt-0.5">${Math.round(extraction.totalPrice * 0.88).toLocaleString()} – ${Math.round(extraction.totalPrice * 1.12).toLocaleString()}</p><span className="mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-accent/10 text-accent">Fair Price</span></div>}<button className="mt-3 w-full text-xs font-semibold text-accent hover:underline">View Pricing Details</button></div>
-            <div className="rounded-xl border border-border bg-white p-5"><h3 className="text-sm font-bold text-ink mb-1">Smart Questions</h3><p className="text-[10px] text-muted-foreground mb-3">Questions to ask your contractor.</p><div className="space-y-2.5">{analysis.questionsToAsk.slice(0, 3).map((q, i) => (<div key={i} className="flex items-start gap-2"><div className="w-5 h-5 rounded border border-border flex items-center justify-center shrink-0 mt-0.5"><span className="text-[9px] text-muted-foreground">{i + 1}</span></div><p className="text-xs text-ink leading-relaxed flex-1">{q.length > 70 ? q.substring(0, 70) + "..." : q}</p><ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" /></div>))}</div><button className="mt-3 w-full text-xs font-semibold text-accent hover:underline">View All Questions</button></div>
           </div>
-          {/* Verdict */}
-          <div className="rounded-2xl border border-border bg-white p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
-            <div className="flex items-center gap-4"><div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0"><CheckCircle2 className="h-6 w-6 text-accent" /></div><div><p className="text-sm font-bold text-ink">{score >= 80 ? "You're in good shape." : score >= 60 ? "Some attention needed." : "Significant gaps found."}</p><p className="text-xs text-muted-foreground mt-0.5 max-w-md">{score >= 80 ? "Your quote looks solid. Just clarify a few details and add the missing items to ensure a complete and high-quality project." : "Review the missing items and clarification points before signing. Get these addressed in writing."}</p></div></div>
-            <button onClick={() => setShowEmailModal(true)} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shrink-0"><Download className="h-4 w-4" /> Download Full Report</button>
-          </div>
-          </>)}
+
+          {/* Right sidebar: Insights cards - always visible */}
+          <aside className="hidden xl:block w-[300px] shrink-0 border-l border-border bg-white p-4 h-[calc(100vh-56px)] sticky top-14 overflow-y-auto space-y-4">
+            <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("explorer")}><h3 className="text-sm font-bold text-ink mb-1">Missing Items ({analysis.missingScope.length})</h3><p className="text-[10px] text-muted-foreground mb-3">Items not found in your quote.</p>{analysis.missingScope.length === 0 ? <p className="text-xs text-accent font-medium">None — great!</p> : <div className="space-y-2">{analysis.missingScope.slice(0, 4).map((item, i) => (<div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /><div className="flex-1 min-w-0"><p className="text-xs font-bold text-ink">{item.title.replace("Missing: ", "")}</p><p className="text-[10px] text-muted-foreground truncate">{item.explanation}</p></div></div>))}</div>}<button className="mt-3 text-xs font-semibold text-accent hover:underline">View All →</button></div>
+            <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("overview")}><h3 className="text-sm font-bold text-ink mb-1">Pricing Insights</h3><p className="text-xl font-display font-bold text-ink">{extraction.totalPrice > 0 ? `$${extraction.totalPrice.toLocaleString()}` : "—"}</p><p className="text-[10px] text-muted-foreground">Total Quote Amount</p>{extraction.totalPrice > 0 && <div className="mt-2 pt-2 border-t border-border"><p className="text-[10px] text-muted-foreground">Typical Range</p><p className="text-xs font-bold text-ink">${Math.round(extraction.totalPrice * 0.88).toLocaleString()} – ${Math.round(extraction.totalPrice * 1.12).toLocaleString()}</p><span className="mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-accent/10 text-accent">Fair Price</span></div>}</div>
+            <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("questions")}><h3 className="text-sm font-bold text-ink mb-1">Smart Questions</h3><p className="text-[10px] text-muted-foreground mb-2">Ask your contractor:</p><div className="space-y-2">{analysis.questionsToAsk.slice(0, 3).map((q, i) => (<div key={i} className="flex items-start gap-2"><span className="text-[9px] text-muted-foreground mt-0.5 shrink-0">{i + 1}.</span><p className="text-[11px] text-ink leading-relaxed">{q.length > 80 ? q.substring(0, 80) + "..." : q}</p></div>))}</div><button className="mt-3 text-xs font-semibold text-accent hover:underline">View All →</button></div>
+            {/* AI Analyst - Hero selling point */}
+            <div className="rounded-xl border-2 border-accent/40 bg-gradient-to-b from-accent/5 to-accent/10 p-4">
+              <div className="flex items-center gap-2 mb-2"><Sparkles className="h-4 w-4 text-accent" /><span className="text-xs font-bold text-accent">AI Analyst</span></div>
+              <p className="text-xs font-semibold text-ink mb-1">Ask anything about your quote</p>
+              <p className="text-[10px] text-muted-foreground mb-3">Get negotiation scripts, cost comparisons, and red flag explanations instantly.</p>
+              <button onClick={() => setChatOpen(true)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"><MessageCircle className="h-3.5 w-3.5" /> Ask CostReno AI</button>
+            </div>
+          </aside>
         </main>
       </div>
       {chatOpen && <AIChatPanel analysis={analysis} extraction={extraction} onClose={() => setChatOpen(false)} apiKey={apiKey} />}
@@ -990,46 +1012,7 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 function Header({ onNewQuote }: { onNewQuote?: () => void }) {
-  return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
-        <a href="/" className="shrink-0">
-          <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
-        </a>
-        <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
-          <a href="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</a>
-          <a href="/estimate" className="hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
-          <a href="/quote-analyzer" className="text-accent hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
-          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
-          <div className="relative group">
-            <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
-              Renovation Guides
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
-            </button>
-            <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-              <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
-                {[{name:"Roofing",href:"/guides/roof-replacement"},{name:"Kitchen",href:"/guides/kitchen-remodel"},{name:"Bathroom",href:"/guides/bathroom-remodel"},{name:"HVAC",href:"/guides/hvac-installation"},{name:"Windows",href:"/guides/window-replacement"},{name:"Flooring",href:"/guides/flooring"},{name:"Solar",href:"#"},{name:"Foundation",href:"#"}].map((item) => (<a key={item.name} href={item.href} className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">{item.name}</a>))}
-              </div>
-            </div>
-          </div>
-          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
-        </nav>
-        <div className="flex items-center gap-3">
-          {onNewQuote && (
-            <button onClick={onNewQuote} className="text-sm font-medium text-muted-foreground hover:text-ink transition">
-              New Analysis
-            </button>
-          )}
-          <a
-            href="#"
-            className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
-          >
-            Start Free
-          </a>
-        </div>
-      </div>
-    </header>
-  );
+  return <SiteNav active="quote" />;
 }
 
 
@@ -1476,6 +1459,28 @@ function TimelineTab({ analysis }: { analysis: QuoteAnalysis }) {
 }
 
 
+// ─── Format AI Response ───────────────────────────────────────────────────────
+function formatAIResponse(text: string): string {
+  // Remove [ACTION:...] tags
+  let html = text.replace(/\[ACTION:[^\]]*\]/g, "");
+  // Convert ### headings
+  html = html.replace(/^### (.+)$/gm, '<p class="font-bold text-ink mt-2 mb-1">$1</p>');
+  // Convert **bold**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Convert bullet points (- item)
+  html = html.replace(/^- (.+)$/gm, '<li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0"></span><span>$1</span></li>');
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/((?:<li[^>]*>.*?<\/li>\s*)+)/g, '<ul class="space-y-1.5">$1</ul>');
+  // Convert 💡 Pro Tip lines
+  html = html.replace(/💡\s*(?:Pro Tip:?)?\s*(.+)/g, '<div class="mt-2 p-2 rounded-lg bg-accent/10 text-xs"><span class="text-accent font-bold">💡 Pro Tip:</span> $1</div>');
+  // Convert newlines to paragraphs (but not inside lists)
+  html = html.replace(/\n{2,}/g, '</p><p class="mt-2">');
+  html = html.replace(/\n/g, '<br/>');
+  // Clean up --- dividers
+  html = html.replace(/---/g, '<hr class="border-border my-2"/>');
+  return html;
+}
+
 // ─── AI Chat Panel ────────────────────────────────────────────────────────────
 function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
   analysis: QuoteAnalysis;
@@ -1526,15 +1531,15 @@ function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
       const chatMsgs: ChatMessage[] = newMessages.map((m, idx) => ({
         role: m.role === "ai" ? "assistant" as const : "user" as const,
         content: idx === 0 && newMessages.length === 1
-          ? `[Quote Analysis Context: ${contextSummary}]\n\nMy question: ${m.text}`
+          ? `[Quote Analysis Context: ${contextSummary}]\n\nIMPORTANT: Keep your response concise — 3-5 bullet points max. No long explanations. Be direct and actionable.\n\nMy question: ${m.text}`
           : m.text,
       }));
 
       // If this is not the first message, prepend context as first exchange
       if (newMessages.length > 1) {
         chatMsgs.unshift(
-          { role: "user", content: `I just analyzed a contractor quote. Here's the summary: ${contextSummary}` },
-          { role: "assistant", content: "I have your quote analysis context. Ask me anything about it." },
+          { role: "user", content: `I just analyzed a contractor quote. Here's the summary: ${contextSummary}. IMPORTANT: Keep all responses concise — 3-5 bullet points max, no walls of text.` },
+          { role: "assistant", content: "Got it. I'll keep responses short and actionable. Ask away." },
         );
       }
 
@@ -1550,43 +1555,51 @@ function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 bg-[#082A4B]">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-accent" />
-          <span className="text-sm font-bold text-white">CostReno AI</span>
-          <span className="px-1.5 py-0.5 rounded bg-accent/30 text-[9px] text-white font-bold">QUOTE CONTEXT</span>
-        </div>
-        <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center">
-          <X className="h-4 w-4 text-white" />
-        </button>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.length === 0 && (
-          <div className="text-center py-6">
-            <p className="text-sm text-muted-foreground mb-4">Ask follow-up questions about your quote analysis.</p>
-            <div className="space-y-2">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => sendMessage(s)}
-                  className="w-full text-left px-4 py-2.5 rounded-xl border border-border hover:border-accent/40 hover:bg-accent/5 text-sm text-ink transition"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] z-50 flex flex-col animate-in slide-in-from-right duration-300">
+      {/* Backdrop on mobile only */}
+      <div className="absolute inset-0 bg-black/40 sm:hidden" onClick={onClose} />
+      
+      <div className="relative ml-auto w-full sm:w-[420px] h-full bg-white shadow-2xl border-l border-border flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 bg-[#082A4B] shrink-0">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-accent" />
+            <span className="text-sm font-bold text-white">CostReno AI</span>
+            <span className="px-1.5 py-0.5 rounded bg-accent/30 text-[9px] text-white font-bold uppercase">Quote Context</span>
           </div>
-        )}
+          <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center transition">
+            <X className="h-4 w-4 text-white" />
+          </button>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+          {messages.length === 0 && (
+            <div className="flex flex-col py-4">
+              <h3 className="text-base font-bold text-ink mb-1">Ask about your quote</h3>
+              <p className="text-xs text-muted-foreground mb-4">Get concise answers about pricing, missing scope, and red flags.</p>
+              <div className="space-y-2">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => sendMessage(s)}
+                    className="w-full flex items-center gap-3 text-left px-4 py-2.5 rounded-xl border border-border hover:border-accent/40 hover:bg-accent/5 text-sm text-ink transition group"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5 text-accent shrink-0" />
+                    <span className="flex-1 text-xs">{s}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
+            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
               msg.role === "user" ? "bg-accent text-white rounded-br-md" : "bg-muted text-ink rounded-bl-md"
             }`}>
-              {msg.text}
+              {msg.role === "user" ? msg.text : (
+                <div className="space-y-2" dangerouslySetInnerHTML={{ __html: formatAIResponse(msg.text) }} />
+              )}
             </div>
           </div>
         ))}
@@ -1621,6 +1634,7 @@ function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
             <Send className="h-3.5 w-3.5" />
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

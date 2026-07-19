@@ -18,7 +18,7 @@ interface SiteNavProps {
 export function SiteNav({ active }: SiteNavProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
+      <div className="container-x flex h-16 items-center justify-between">
         <a href="/" className="shrink-0">
           <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
         </a>
