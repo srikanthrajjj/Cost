@@ -15,6 +15,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import projWindows from "@/assets/proj-windows.jpg";
 
 export const Route = createFileRoute("/guides/window-replacement")({
@@ -635,6 +636,7 @@ function WindowReplacementGuide() {
           </aside>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

@@ -36,6 +36,7 @@ import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrout
 import { chatWithKnowledge } from "@/lib/chat-with-knowledge";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import { SiteFooter } from "@/components/SiteFooter";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import type { QuoteAnalysis } from "@/lib/quote/types";
 
@@ -741,6 +742,7 @@ function QuoteAnalyzerPage() {
             </p>
           </div>
         </div>
+        <SiteFooter />
       </div>
     );
   }
@@ -939,6 +941,7 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
         isLoading={isDownloading}
       />
       {!chatOpen && <button onClick={() => setChatOpen(true)} className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/30 flex items-center justify-center text-white hover:scale-105 transition-transform z-40 lg:hidden"><MessageCircle className="h-6 w-6" /></button>}
+      <SiteFooter />
     </div>
   );
 }

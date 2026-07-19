@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check, ChevronDown, Star, MapPin, Clock, DollarSign, TrendingUp } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { PROJECT_CONFIGS, getProjectBySlug } from "@/lib/project-config";
 
 export const Route = createFileRoute("/$projectSlug")({
@@ -368,6 +369,7 @@ function ProjectLandingPage() {
           </a>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

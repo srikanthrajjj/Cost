@@ -15,6 +15,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import projRoof from "@/assets/proj-roof.jpg";
 
 export const Route = createFileRoute("/guides/roof-replacement")({
@@ -653,6 +654,7 @@ function RoofReplacementGuide() {
           </aside>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const flooringImage = "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=800&q=80";
 
@@ -637,6 +638,7 @@ function FlooringGuide() {
           </aside>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

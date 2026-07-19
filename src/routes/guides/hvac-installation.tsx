@@ -15,6 +15,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import projHvac from "@/assets/proj-hvac.jpg";
 
 export const Route = createFileRoute("/guides/hvac-installation")({
@@ -635,6 +636,7 @@ function HvacInstallationGuide() {
           </aside>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

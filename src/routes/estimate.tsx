@@ -28,6 +28,7 @@ import { getActiveSteps } from "@/lib/estimator-steps";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import type { EstimatorAnswers, LiveEstimate } from "@/lib/estimator-engine";
 import type { StepDef, Question } from "@/lib/estimator-steps";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -1331,6 +1332,7 @@ function EstimatorPage() {
           </div>
         )}
       </div>
+      <SiteFooter />
     </div>
   );
 }

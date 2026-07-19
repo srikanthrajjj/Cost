@@ -15,6 +15,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import projKitchen from "@/assets/proj-kitchen.jpg";
 
 export const Route = createFileRoute("/guides/kitchen-remodel")({
@@ -631,6 +632,7 @@ function KitchenRemodelGuide() {
           </aside>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }
