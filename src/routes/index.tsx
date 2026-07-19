@@ -1829,13 +1829,35 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       {/* HERO — NerdWallet-inspired */}
       <section className="relative bg-white overflow-hidden">
         <div className="container-x relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-[520px] md:min-h-[600px] py-16">
-          <div className="max-w-2xl">
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.08]">
-              Smart renovation decisions start with <span className="text-accent">CostReno</span>
+          <div>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 mb-6">
+              <span className="w-2 h-2 rounded-full bg-accent" />
+              <span className="text-xs font-bold text-accent uppercase tracking-wider">ZIP-Adjusted · Updated Weekly</span>
+            </div>
+
+            {/* H1 */}
+            <h1 className="font-display text-4xl sm:text-5xl md:text-[56px] font-extrabold tracking-tight text-ink leading-[1.08]">
+              Know what your renovation should actually cost — before anyone quotes you a number.
             </h1>
+
+            {/* Subtitle */}
             <p className="mt-5 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-              Navigate every home project move with guidance that you can trust.
+              Real local pricing, a red-flag check on any contractor quote, and guides written to be used, not skimmed.
             </p>
+
+            {/* AI badge + stats */}
+            <div className="mt-8 flex flex-col gap-4">
+              <div className="inline-flex items-center gap-2">
+                <span className="w-6 h-6 rounded bg-accent flex items-center justify-center text-[10px] font-bold text-white">C</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">CostReno AI · Answers in seconds</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-6 text-sm">
+                <span><strong className="text-ink font-bold">50K+</strong> <span className="text-muted-foreground">estimates run</span></span>
+                <span><strong className="text-ink font-bold">$2.3M</strong> <span className="text-muted-foreground">saved on quotes</span></span>
+                <span><strong className="text-ink font-bold">100%</strong> <span className="text-muted-foreground">free, no signup</span></span>
+              </div>
+            </div>
           </div>
           <div className="hidden lg:block">
             <img src="/home.png" alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates" className="w-full h-auto max-w-lg ml-auto" />
