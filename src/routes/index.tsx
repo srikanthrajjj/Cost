@@ -1827,23 +1827,25 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </header>
 
       {/* HERO — NerdWallet-inspired */}
-      <section className="relative min-h-[520px] md:min-h-[600px] overflow-hidden">
-        {/* Full-width background image */}
-        <img src="/them.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
-
-        <div className="container-x relative z-10 flex flex-col justify-center min-h-[520px] md:min-h-[600px] py-16">
+      <section className="relative bg-white overflow-hidden">
+        <div className="container-x relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-[520px] md:min-h-[600px] py-16">
           <div className="max-w-2xl">
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.08]">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.08]">
               Smart renovation decisions start with <span className="text-accent">CostReno</span>
             </h1>
-            <p className="mt-5 text-lg md:text-xl text-white/80 max-w-xl leading-relaxed">
+            <p className="mt-5 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
               Navigate every home project move with guidance that you can trust.
             </p>
           </div>
+          <div className="hidden lg:block">
+            <img src="/home.png" alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates" className="w-full h-auto max-w-lg ml-auto" />
+          </div>
+        </div>
 
-          {/* AI Chat Input */}
-          <div className="mt-10 max-w-2xl w-full">
-            <div className="relative rounded-2xl bg-white shadow-2xl overflow-hidden">
+        {/* AI Chat Input */}
+        <div className="container-x relative z-10 pb-16 -mt-4">
+          <div className="max-w-2xl w-full">
+            <div className="relative rounded-2xl bg-white border border-border shadow-xl overflow-hidden">
               <div className="flex items-center gap-3 px-5 py-4">
                 <Search className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="relative flex-1 min-w-0">
