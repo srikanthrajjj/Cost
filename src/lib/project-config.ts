@@ -71,7 +71,7 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     slug: "kitchen-remodel-cost",
     projectType: "kitchen",
     name: "Kitchen Remodel",
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
     seoTitle: "Kitchen Remodel Cost 2026 — Average Prices & Budget Guide | CostReno",
     seoDescription: "How much does a kitchen remodel cost in 2026? Average cost is $50,000. Get personalized estimates, compare materials, and plan your renovation budget.",
     h1: "How Much Does a Kitchen Remodel Cost in 2026?",
