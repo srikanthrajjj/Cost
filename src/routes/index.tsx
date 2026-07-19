@@ -1860,7 +1860,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </div>
           </div>
           <div className="hidden lg:block">
-            <img src="/home.png" alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates" className="w-full h-auto max-w-lg ml-auto" />
+            <img src="/home.png" alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates" className="w-full h-auto max-w-2xl ml-auto scale-110" />
           </div>
         </div>
 
