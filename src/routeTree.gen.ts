@@ -14,8 +14,12 @@ import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
 import { Route as GuidesKitchenRemodelRouteImport } from './routes/guides/kitchen-remodel'
+import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
+import { Route as GuidesFlooringRouteImport } from './routes/guides/flooring'
+import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathroom-remodel'
 
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
   id: '/quote-analyzer',
@@ -42,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesWindowReplacementRoute = GuidesWindowReplacementRouteImport.update({
+  id: '/guides/window-replacement',
+  path: '/guides/window-replacement',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuidesRoofReplacementRoute = GuidesRoofReplacementRouteImport.update({
   id: '/guides/roof-replacement',
   path: '/guides/roof-replacement',
@@ -52,6 +61,21 @@ const GuidesKitchenRemodelRoute = GuidesKitchenRemodelRouteImport.update({
   path: '/guides/kitchen-remodel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesHvacInstallationRoute = GuidesHvacInstallationRouteImport.update({
+  id: '/guides/hvac-installation',
+  path: '/guides/hvac-installation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesFlooringRoute = GuidesFlooringRouteImport.update({
+  id: '/guides/flooring',
+  path: '/guides/flooring',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesBathroomRemodelRoute = GuidesBathroomRemodelRouteImport.update({
+  id: '/guides/bathroom-remodel',
+  path: '/guides/bathroom-remodel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,8 +83,12 @@ export interface FileRoutesByFullPath {
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
+  '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
+  '/guides/window-replacement': typeof GuidesWindowReplacementRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,8 +96,12 @@ export interface FileRoutesByTo {
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
+  '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
+  '/guides/window-replacement': typeof GuidesWindowReplacementRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,8 +110,12 @@ export interface FileRoutesById {
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
+  '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
+  '/guides/window-replacement': typeof GuidesWindowReplacementRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -89,8 +125,12 @@ export interface FileRouteTypes {
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/quote-analyzer'
+    | '/guides/bathroom-remodel'
+    | '/guides/flooring'
+    | '/guides/hvac-installation'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
+    | '/guides/window-replacement'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -98,8 +138,12 @@ export interface FileRouteTypes {
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/quote-analyzer'
+    | '/guides/bathroom-remodel'
+    | '/guides/flooring'
+    | '/guides/hvac-installation'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
+    | '/guides/window-replacement'
   id:
     | '__root__'
     | '/'
@@ -107,8 +151,12 @@ export interface FileRouteTypes {
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/quote-analyzer'
+    | '/guides/bathroom-remodel'
+    | '/guides/flooring'
+    | '/guides/hvac-installation'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
+    | '/guides/window-replacement'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,8 +165,12 @@ export interface RootRouteChildren {
   EstimateRoute: typeof EstimateRoute
   KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
+  GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
+  GuidesFlooringRoute: typeof GuidesFlooringRoute
+  GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
   GuidesKitchenRemodelRoute: typeof GuidesKitchenRemodelRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
+  GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -158,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/window-replacement': {
+      id: '/guides/window-replacement'
+      path: '/guides/window-replacement'
+      fullPath: '/guides/window-replacement'
+      preLoaderRoute: typeof GuidesWindowReplacementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/roof-replacement': {
       id: '/guides/roof-replacement'
       path: '/guides/roof-replacement'
@@ -172,6 +231,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesKitchenRemodelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/hvac-installation': {
+      id: '/guides/hvac-installation'
+      path: '/guides/hvac-installation'
+      fullPath: '/guides/hvac-installation'
+      preLoaderRoute: typeof GuidesHvacInstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/flooring': {
+      id: '/guides/flooring'
+      path: '/guides/flooring'
+      fullPath: '/guides/flooring'
+      preLoaderRoute: typeof GuidesFlooringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/bathroom-remodel': {
+      id: '/guides/bathroom-remodel'
+      path: '/guides/bathroom-remodel'
+      fullPath: '/guides/bathroom-remodel'
+      preLoaderRoute: typeof GuidesBathroomRemodelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -181,8 +261,12 @@ const rootRouteChildren: RootRouteChildren = {
   EstimateRoute: EstimateRoute,
   KitchenRemodelCostRoute: KitchenRemodelCostRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
+  GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
+  GuidesFlooringRoute: GuidesFlooringRoute,
+  GuidesHvacInstallationRoute: GuidesHvacInstallationRoute,
   GuidesKitchenRemodelRoute: GuidesKitchenRemodelRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
+  GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
