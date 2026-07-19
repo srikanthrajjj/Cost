@@ -911,6 +911,17 @@ function Landing() {
   const [notifyOpen, setNotifyOpen] = useState<string | null>(null);
   const [notifyEmail, setNotifyEmail] = useState("");
   const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
+  const [projectIdx, setProjectIdx] = useState(0);
+  const heroProjects = ["kitchen remodel", "roof replacement", "bathroom renovation", "HVAC installation", "window replacement"];
+  const displayProject = heroProjects[projectIdx];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProjectIdx((prev) => (prev + 1) % heroProjects.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<
@@ -1604,14 +1615,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
   };
 
   const searchTerms = [
-    "kitchen remodels",
-    "roof replacement",
-    "bathroom renovations",
-    "HVAC costs",
-    "window replacement",
-    "solar panels",
-    "flooring options",
-    "deck construction",
+    "How much should a roof replacement cost?",
+    "Can you review my contractor quote?",
+    "Do I need a permit for my project?",
+    "How much does flooring cost?",
+    "Is this quote overpriced?",
   ];
   const [termIdx, setTermIdx] = useState(0);
   const [displayTerm, setDisplayTerm] = useState("");
@@ -1828,34 +1836,90 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
       {/* HERO — NerdWallet-inspired */}
       <section className="relative bg-white overflow-hidden">
-        <div className="container-x relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center min-h-[520px] md:min-h-[600px] py-16">
+        <div className="container-x relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-8 md:py-10">
           <div>
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 mb-6">
-              <span className="w-2 h-2 rounded-full bg-accent" />
-              <span className="text-xs font-bold text-accent uppercase tracking-wider">ZIP-Adjusted · Updated Weekly</span>
-            </div>
-
             {/* H1 */}
             <h1 className="font-display text-4xl sm:text-5xl md:text-[56px] font-extrabold tracking-tight text-ink leading-[1.08]">
-              Know what your renovation should actually cost — before anyone quotes you a number.
+              Know what your <span className="text-accent inline-block min-w-[200px]">{displayProject}</span> should actually cost.
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-5 text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-              Real local pricing, a red-flag check on any contractor quote, and guides written to be used, not skimmed.
+            <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
+              <strong className="text-ink">Stop overpaying.</strong> Our AI tools powered by live local data have saved homeowners <strong className="text-accent">$2.3M on inflated quotes</strong>. Get real pricing, spot red flags, and renovate with confidence.
             </p>
 
-            {/* AI badge + stats */}
-            <div className="mt-8 flex flex-col gap-4">
-              <div className="inline-flex items-center gap-2">
-                <span className="w-6 h-6 rounded bg-accent flex items-center justify-center text-[10px] font-bold text-white">C</span>
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">CostReno AI · Answers in seconds</span>
+            {/* AI Chat Input - Inside hero left column */}
+            <div className="mt-4 max-w-xl">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded bg-accent flex items-center justify-center">
+                  <Sparkles className="h-3 w-3 text-white" />
+                </div>
+                <span className="text-xs font-bold text-ink">Ask CostReno AI</span>
               </div>
-              <div className="flex flex-wrap items-center gap-6 text-sm">
-                <span><strong className="text-ink font-bold">50K+</strong> <span className="text-muted-foreground">estimates run</span></span>
-                <span><strong className="text-ink font-bold">$2.3M</strong> <span className="text-muted-foreground">saved on quotes</span></span>
-                <span><strong className="text-ink font-bold">100%</strong> <span className="text-muted-foreground">free, no signup</span></span>
+              <div className="relative rounded-xl bg-white border-2 border-accent/30 shadow-lg shadow-accent/5 overflow-hidden hover:border-accent/50 transition-colors cursor-pointer" onClick={() => setChatOpen(true)}>
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <div className="relative flex-1 min-w-0">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setChatOpen(true)}
+                      onBlur={() => {}}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter") {
+                          const query = searchQuery.trim();
+                          setChatOpen(true);
+                          setShowSuggestions(false);
+                          if (query) {
+                            const newMessages = [{ role: "user" as const, text: query }];
+                            setChatMessages(newMessages);
+                            setChatInput("");
+                            setSearchQuery("");
+                            setIsAiTyping(true);
+                            const aiResponse = await getAIResponse(newMessages);
+                            setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
+                            setIsAiTyping(false);
+                          }
+                        }
+                      }}
+                      className="w-full bg-transparent text-sm outline-none text-ink"
+                    />
+                    {searchQuery.length === 0 && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-muted-foreground whitespace-nowrap overflow-hidden max-w-full">
+                        {displayTerm}<span className="animate-pulse">|</span>
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const query = searchQuery.trim();
+                      setChatOpen(true);
+                      if (query) {
+                        const newMessages = [{ role: "user" as const, text: query }];
+                        setChatMessages(newMessages);
+                        setChatInput("");
+                        setSearchQuery("");
+                        setIsAiTyping(true);
+                        const aiResponse = await getAIResponse(newMessages);
+                        setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
+                        setIsAiTyping(false);
+                      }
+                    }}
+                    className="flex items-center justify-center w-9 h-9 rounded-lg bg-accent text-white hover:bg-accent/90 transition shrink-0"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              {/* Trust stats - inside input container */}
+              <div className="grid grid-cols-3 gap-2 mt-2.5 text-xs text-center">
+                <span><strong className="text-ink font-bold">50K+</strong> <span className="text-muted-foreground">estimates</span></span>
+                <span><strong className="text-ink font-bold">$2.3M</strong> <span className="text-muted-foreground">saved</span></span>
+                <span><strong className="text-ink font-bold">100%</strong> <span className="text-muted-foreground">free</span></span>
               </div>
             </div>
           </div>
@@ -1864,176 +1928,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           </div>
         </div>
 
-        {/* AI Chat Input */}
-        <div className="container-x relative z-10 pb-16 -mt-4">
-          <div className="max-w-2xl w-full">
-            <div className="relative rounded-2xl bg-white border border-border shadow-xl overflow-hidden">
-              <div className="flex items-center gap-3 px-5 py-4">
-                <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-                <div className="relative flex-1 min-w-0">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    onFocus={() => setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    onKeyDown={async (e) => {
-                      if (e.key === "Enter") {
-                        const query = searchQuery.trim();
-                        setChatOpen(true);
-                        setShowSuggestions(false);
-                        if (query) {
-                          const newMessages = [{ role: "user" as const, text: query }];
-                          setChatMessages(newMessages);
-                          setChatInput("");
-                          setSearchQuery("");
-                          setIsAiTyping(true);
-                          const aiResponse = await getAIResponse(newMessages);
-                          setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
-                          setIsAiTyping(false);
-                        }
-                      }
-                    }}
-                    className="w-full bg-transparent text-base outline-none text-ink"
-                  />
-                  {searchQuery.length === 0 && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-base text-muted-foreground/60 whitespace-nowrap">
-                      Ask me about <span className="font-bold text-ink">{displayTerm}</span>
-                      <span className="animate-pulse">|</span>
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={async () => {
-                    const query = searchQuery.trim();
-                    setChatOpen(true);
-                    if (query) {
-                      const newMessages = [{ role: "user" as const, text: query }];
-                      setChatMessages(newMessages);
-                      setChatInput("");
-                      setSearchQuery("");
-                      setIsAiTyping(true);
-                      const aiResponse = await getAIResponse(newMessages);
-                      setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
-                      setIsAiTyping(false);
-                    }
-                  }}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-white hover:bg-accent/90 transition shrink-0"
-                >
-                  <Send className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Suggestions dropdown */}
-              {showSuggestions && (
-                <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl bg-card border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-3">
-                    {searchQuery.length === 0 ? (
-                      <>
-                        <div className="px-2 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                          Popular Projects
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {popularProjects.map((project) => (
-                            <button
-                              key={project.name}
-                              className="flex items-center gap-3 p-3 text-left hover:bg-accent/5 rounded-xl transition-all group/item hover:shadow-md"
-                              onMouseDown={() => {
-                                setSelectedProject(project.name);
-                                setSearchQuery(project.name);
-                                setShowSuggestions(false);
-                              }}
-                            >
-                              <img
-                                src={project.img}
-                                alt={project.name}
-                                className="w-12 h-12 rounded-lg object-cover"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold text-ink truncate group-hover/item:text-accent transition-colors">
-                                  {project.name}
-                                </div>
-                                <div className="text-[10px] text-muted-foreground">
-                                  {project.avgCost} • {project.duration}
-                                </div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    ) : filteredProjects.length > 0 ? (
-                      <>
-                        <div className="px-2 py-2 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                          Projects Matching "{searchQuery}"
-                        </div>
-                        <div className="space-y-1">
-                          {filteredProjects.map((project) => (
-                            <button
-                              key={project.name}
-                              className="w-full flex items-center gap-3 p-3 text-left hover:bg-accent/5 rounded-xl transition-all group/item hover:shadow-md"
-                              onMouseDown={() => {
-                                setSelectedProject(project.name);
-                                setSearchQuery(project.name);
-                                setShowSuggestions(false);
-                              }}
-                            >
-                              <img
-                                src={project.img}
-                                alt={project.name}
-                                className="w-12 h-12 rounded-lg object-cover"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div
-                                  className="text-sm font-semibold text-ink truncate"
-                                  dangerouslySetInnerHTML={{
-                                    __html: highlightMatch(project.name, searchQuery),
-                                  }}
-                                />
-                                <div className="text-[10px] text-muted-foreground">
-                                  {project.avgCost} • {project.duration}
-                                </div>
-                              </div>
-                              <span className="text-[10px] text-accent font-medium">
-                                Estimate →
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="py-8 text-center">
-                        <Search className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
-                        <div className="text-sm text-muted-foreground">
-                          No projects found for "{searchQuery}"
-                        </div>
-                        <div className="text-[10px] text-muted-foreground mt-1">
-                          Try "roof", "kitchen", or "HVAC"
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* AI Badge bar */}
-              <div className="flex items-center gap-2 px-5 py-2.5 bg-accent/10 border-t border-border/30">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-5 h-5 rounded bg-accent flex items-center justify-center">
-                    <Sparkles className="h-3 w-3 text-white" />
-                  </div>
-                  <span className="text-xs font-bold text-ink tracking-wide">
-                    COST<span className="text-accent">RENO</span> AI
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
-
       {/* Chat Interface Modal */}
       {chatOpen && (
         <div
@@ -2089,46 +1984,25 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             >
               <div className={`mx-auto space-y-5 ${isFullScreen ? "max-w-xl" : ""}`}>
                 {chatMessages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                    <div className="w-16 h-16 rounded-2xl bg-[#082A4B] flex items-center justify-center mb-5 shadow-lg">
-                      <Sparkles className="h-8 w-8 text-accent" />
-                    </div>
-                    <p className="text-base font-bold text-ink">Your renovation copilot is ready</p>
-                    <p className="text-sm text-muted-foreground mt-1.5 max-w-xs leading-relaxed">
-                      Ask anything — I'll answer, estimate costs, compare materials, and guide you
-                      to the right tool.
+                  <div className="flex flex-col items-center justify-center h-full py-6">
+                    {/* Welcome text */}
+                    <h2 className="text-xl font-extrabold text-ink text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      Save thousands on your next renovation.
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-2 text-center max-w-sm leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+                      Our AI analyzes live local data to give you real costs, catch overpriced quotes, and guide you step-by-step.
                     </p>
 
-                    {/* Capability pills */}
-                    <div className="flex flex-wrap gap-2 mt-5 justify-center max-w-sm">
-                      {[
-                        { emoji: "🧮", label: "Estimate costs" },
-                        { emoji: "📋", label: "Analyze a quote" },
-                        { emoji: "⚖️", label: "Compare materials" },
-                        { emoji: "🛡️", label: "Insurance coverage" },
-                        { emoji: "🗺️", label: "Build a plan" },
-                        { emoji: "📖", label: "Project guides" },
-                      ].map((pill) => (
-                        <span
-                          key={pill.label}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 text-xs text-muted-foreground font-medium border border-border/50"
-                        >
-                          {pill.emoji} {pill.label}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Starter questions */}
+                    {/* Questions - staggered animation */}
                     <div className="mt-6 w-full max-w-sm space-y-2">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium text-left px-1">
-                        Try asking
-                      </p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-1 animate-in fade-in duration-500 delay-300">Ask me anything</p>
                       {[
-                        "I have water damage in my bathroom — what should I do?",
-                        "Is my contractor quote of $18,000 for a roof fair?",
-                        "What's the best material for a wet bathroom floor?",
-                        "Help me plan a full home renovation under $50,000",
-                      ].map((q) => (
+                        { q: "How much should a roof replacement cost?", delay: "delay-[400ms]" },
+                        { q: "Can you review my contractor quote?", delay: "delay-[500ms]" },
+                        { q: "Do I need a permit for my project?", delay: "delay-[600ms]" },
+                        { q: "How much does flooring cost?", delay: "delay-[700ms]" },
+                        { q: "Is this quote overpriced?", delay: "delay-[800ms]" },
+                      ].map(({ q, delay }) => (
                         <button
                           key={q}
                           onClick={async () => {
@@ -2136,12 +2010,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             if (isEstimateQ) {
                               setChatMessages([
                                 { role: "user", text: q },
-                                {
-                                  role: "widget",
-                                  text: "",
-                                  widgetType: "estimator",
-                                  widgetDone: false,
-                                },
+                                { role: "widget", text: "", widgetType: "estimator", widgetDone: false },
                               ]);
                               setTimeout(scrollToBottom, 50);
                               return;
@@ -2155,14 +2024,38 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             setIsAiTyping(false);
                             setTimeout(scrollToBottom, 50);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background hover:border-accent/40 hover:bg-accent/5 transition text-left group"
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background hover:border-accent/40 hover:bg-accent/5 transition text-left group animate-in fade-in slide-in-from-bottom-3 duration-500 ${delay}`}
                         >
-                          <span className="text-sm text-ink/70 group-hover:text-ink transition leading-snug">
-                            {q}
-                          </span>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-accent shrink-0 transition" />
+                          <MessageCircle className="h-4 w-4 text-accent shrink-0" />
+                          <span className="text-sm text-ink/80 group-hover:text-ink transition leading-snug flex-1">{q}</span>
+                          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-accent shrink-0 transition" />
                         </button>
                       ))}
+                    </div>
+
+                    {/* Active Tools */}
+                    <div className="mt-5 w-full max-w-sm animate-in fade-in duration-500 delay-[900ms]">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2 px-1">Active Tools</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <a href="/estimate" className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition">
+                          <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
+                            <Calculator className="h-3.5 w-3.5 text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-ink">Cost Estimator</p>
+                            <p className="text-[10px] text-accent font-medium">Live</p>
+                          </div>
+                        </a>
+                        <a href="/quote-analyzer" className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition">
+                          <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
+                            <Search className="h-3.5 w-3.5 text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-ink">Quote Review</p>
+                            <p className="text-[10px] text-accent font-medium">Live</p>
+                          </div>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
