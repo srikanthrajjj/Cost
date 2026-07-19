@@ -27,6 +27,7 @@ import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import { SiteNav } from "@/components/SiteNav";
 import type { EstimatorAnswers, LiveEstimate } from "@/lib/estimator-engine";
 import type { StepDef, Question } from "@/lib/estimator-steps";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -1173,45 +1174,7 @@ function EstimatorPage() {
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
       {/* Header - Same as landing page */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <a href="/" className="shrink-0">
-              <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
-            </a>
-          </div>
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
-            <a href="/" className="hover:text-foreground transition-colors whitespace-nowrap">Home</a>
-            <a href="/estimate" className="text-accent hover:text-foreground transition-colors whitespace-nowrap">Cost Estimator</a>
-            <a href="/quote-analyzer" className="hover:text-foreground transition-colors whitespace-nowrap">Quote Review</a>
-            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
-            <div className="relative group">
-              <button className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1">
-                Renovation Guides
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
-              </button>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
-                  {[{name:"Roofing",href:"/guides/roof-replacement"},{name:"Kitchen",href:"/kitchen-remodel-cost"},{name:"Bathroom",href:"/bathroom-remodel-cost"},{name:"HVAC",href:"/hvac-installation-cost"},{name:"Windows",href:"/window-replacement-cost"},{name:"Flooring",href:"/flooring-cost"},{name:"Solar",href:"#"},{name:"Foundation",href:"#"}].map((item) => (
-                    <a key={item.name} href={item.href} className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Renovation Tools</a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <a
-              href="#"
-              className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
-            >
-              Start Free
-            </a>
-          </div>
-        </div>
-      </header>
+      <SiteNav active="estimator" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
         {/* Progress bar + Start over */}
