@@ -117,11 +117,11 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_GUIDES = [
-  { title: "Kitchen Remodel Cost Guide", href: "/kitchen-remodel-cost", icon: "🍳" },
-  { title: "HVAC Installation Guide", href: "/hvac-installation-cost", icon: "❄️" },
-  { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "🪟" },
-  { title: "Bathroom Remodel Guide", href: "/bathroom-remodel-cost", icon: "🚿" },
-  { title: "Solar Panel Installation", href: "/solar-installation-cost", icon: "☀️" },
+  { title: "Kitchen Remodel Cost Guide", href: "/kitchen-remodel-cost", icon: "/Kitchen.svg" },
+  { title: "HVAC Installation Guide", href: "/hvac-installation-cost", icon: "/Air Conditioner.svg" },
+  { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "/Window.svg" },
+  { title: "Bathroom Remodel Guide", href: "/bathroom-remodel-cost", icon: "/Bathtub.svg" },
+  { title: "Solar Panel Installation", href: "/solar-installation-cost", icon: "/Solar Panel.svg" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -608,7 +608,7 @@ function RoofReplacementGuide() {
                     href={guide.href}
                     className="flex items-center gap-3 p-4 rounded-xl border border-border bg-white hover:border-accent/40 hover:shadow-md transition"
                   >
-                    <span className="text-2xl">{guide.icon}</span>
+                    <img src={guide.icon} alt={guide.title} className="w-8 h-8 object-contain" />
                     <span className="text-sm font-semibold text-ink">{guide.title}</span>
                     <ArrowRight className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
                   </a>
@@ -647,7 +647,7 @@ function RoofReplacementGuide() {
                       href={guide.href}
                       className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
                     >
-                      <span className="text-base">{guide.icon}</span>
+                      <img src={guide.icon} alt="" className="w-5 h-5 object-contain" />
                       <span>{guide.title}</span>
                     </a>
                   ))}
@@ -704,3 +704,5 @@ function RoofReplacementGuide() {
     </div>
   );
 }
+
+
