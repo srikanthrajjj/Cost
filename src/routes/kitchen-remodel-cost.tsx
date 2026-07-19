@@ -319,7 +319,7 @@ function Step3({ answers, autoAdvance }: { answers: KitchenAnswers; autoAdvance:
   return (
     <div>
       <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Scope of Work</p>
-      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-2">What are you planning?</h2>
+      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-2">What kind of remodel are you planning?</h2>
       <p className="text-sm text-muted-foreground mb-6">This determines which cost model applies and which questions we'll ask next.</p>
       <div className="space-y-3">
         {scopes.map((s) => (
@@ -351,7 +351,7 @@ function Step4({ answers, setAnswer, autoAdvance, next }: { answers: KitchenAnsw
   return (
     <div>
       <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Cabinets</p>
-      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-2">What kind of cabinets?</h2>
+      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-2">What type of cabinets do you want?</h2>
       <p className="text-sm text-muted-foreground mb-6">Cabinets are 30-40% of a kitchen remodel budget — the single biggest line item.</p>
       
       {/* Reface option */}
@@ -364,8 +364,8 @@ function Step4({ answers, setAnswer, autoAdvance, next }: { answers: KitchenAnsw
             className="mt-1 h-4 w-4 rounded border-border text-accent focus:ring-accent"
           />
           <div>
-            <p className="text-sm font-bold text-ink">Keep existing boxes, just reface?</p>
-            <p className="text-xs text-muted-foreground mt-0.5">New doors and drawer fronts on existing cabinet frames. Saves 30-40% vs full replacement. Cost: ~$4,000.</p>
+            <p className="text-sm font-bold text-ink">Want to keep your existing cabinet boxes and just reface them?</p>
+            <p className="text-xs text-muted-foreground mt-0.5">New doors and drawer fronts on existing frames. This can cut 30-40% off the cabinet cost. ~$4,000.</p>
           </div>
         </label>
       </div>
@@ -405,7 +405,7 @@ function Step5({ answers, setAnswer, next }: { answers: KitchenAnswers; setAnswe
     { value: "laminate", label: "Laminate", price: "+$1,500" },
     { value: "butcherblock", label: "Butcher Block", price: "+$2,500" },
     { value: "granite", label: "Granite", price: "+$4,500" },
-    { value: "quartz", label: "Quartz", price: "+$5,000" },
+    { value: "quartz", label: "Quartz", price: "+$3,500–$6,000" },
   ];
   const appliances = [
     { value: "keep", label: "Keep Existing", price: "$0" },
@@ -415,9 +415,8 @@ function Step5({ answers, setAnswer, next }: { answers: KitchenAnswers; setAnswe
   return (
     <div>
       <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Countertops & Appliances</p>
-      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-6">Materials & appliances</h2>
+      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-6">What countertop material are you considering?</h2>
       
-      <h3 className="text-sm font-bold text-ink mb-3">Countertop Material</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8">
         {countertops.map((c) => (
           <button
@@ -433,7 +432,7 @@ function Step5({ answers, setAnswer, next }: { answers: KitchenAnswers; setAnswe
         ))}
       </div>
 
-      <h3 className="text-sm font-bold text-ink mb-3">Appliance Package</h3>
+      <h3 className="text-sm font-bold text-ink mb-3">What about appliances?</h3>
       <div className="space-y-2 mb-6">
         {appliances.map((a) => (
           <button
@@ -479,8 +478,8 @@ function Step6({ answers, setAnswer, next }: { answers: KitchenAnswers; setAnswe
   return (
     <div>
       <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Layout & Structural</p>
-      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-2">Any structural changes?</h2>
-      <p className="text-sm text-muted-foreground mb-6">These are the items that most often turn into "surprise" costs. Select all that apply.</p>
+      <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-2">Are any of these part of your project?</h2>
+      <p className="text-sm text-muted-foreground mb-6">Select all that apply. These are the items that most often turn into "surprise" costs after signing.</p>
       <div className="space-y-2 mb-6">
         {items.map((item) => (
           <label
@@ -515,8 +514,8 @@ function Step6({ answers, setAnswer, next }: { answers: KitchenAnswers; setAnswe
 function Step7({ answers, autoAdvance }: { answers: KitchenAnswers; autoAdvance: any }) {
   const timelines = [
     { value: "flexible", label: "Flexible", desc: "No rush — get the best price", price: "No premium" },
-    { value: "under8weeks", label: "Under 8 Weeks", desc: "Faster scheduling needed", price: "+10% labor" },
-    { value: "hard", label: "Hard Deadline", desc: "Must be done by a specific date", price: "+18% labor" },
+    { value: "under8weeks", label: "Need it done in under 8 weeks", desc: "Faster scheduling needed", price: "+10% labor" },
+    { value: "hard", label: "I have a hard deadline", desc: "Must be done by a specific date", price: "+18% labor" },
   ];
   return (
     <div>
