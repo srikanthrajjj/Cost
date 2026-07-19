@@ -753,39 +753,84 @@ function QuoteAnalyzerPage() {
     const currentIdx = stageKeys.indexOf(processingStage as any);
 
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[#f7f8fa]">
         <Header />
-        <div className="container-x py-20 max-w-lg mx-auto text-center">
-          {/* Animated spinner */}
-          <div className="w-20 h-20 mx-auto mb-8 relative">
-            <div className="absolute inset-0 rounded-full border-4 border-border" />
-            <div className="absolute inset-0 rounded-full border-4 border-accent border-t-transparent animate-spin" />
-            <div className="absolute inset-0 flex items-center justify-center text-2xl">
-              {STAGE_LABELS[processingStage as keyof typeof STAGE_LABELS]?.icon ?? "🔍"}
+        <div className="max-w-md mx-auto px-4 py-20 text-center">
+          {/* Document scanning animation */}
+          <div className="w-24 h-24 mx-auto mb-8 relative">
+            {/* Outer ring - spinning */}
+            <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "3s" }} viewBox="0 0 96 96">
+              <circle cx="48" cy="48" r="44" fill="none" stroke="#e5e7eb" strokeWidth="4" />
+              <circle cx="48" cy="48" r="44" fill="none" stroke="#03A44D" strokeWidth="4" strokeDasharray="138 138" strokeLinecap="round" />
+            </svg>
+            {/* Inner document icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative">
+                <svg className="w-10 h-10 text-muted-foreground/60" viewBox="0 0 40 40" fill="none">
+                  <rect x="8" y="4" width="24" height="32" rx="2" fill="white" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="13" y1="12" x2="27" y2="12" stroke="#e5e7eb" strokeWidth="2" />
+                  <line x1="13" y1="17" x2="27" y2="17" stroke="#e5e7eb" strokeWidth="2" />
+                  <line x1="13" y1="22" x2="23" y2="22" stroke="#e5e7eb" strokeWidth="2" />
+                  <line x1="13" y1="27" x2="20" y2="27" stroke="#e5e7eb" strokeWidth="2" />
+                </svg>
+                {/* Scanning line */}
+                <div className="absolute left-2 right-2 h-0.5 bg-accent/80 rounded animate-bounce" style={{ animationDuration: "1.5s", top: "40%" }} />
+                {/* Red flag indicator */}
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 flex items-center justify-center animate-ping" style={{ animationDuration: "2s" }}>
+                  <span className="text-[8px] text-white font-bold">!</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <h2 className="font-display text-xl font-bold text-ink">
-            Analyzing your quote...
+          {/* Stage text */}
+          <h2 className="font-display text-xl font-bold text-ink animate-in fade-in duration-300" key={processingStage}>
+            {processingStage === "reading" && "Reading your document..."}
+            {processingStage === "extracting" && "Extracting line items..."}
+            {processingStage === "matching" && "Cross-referencing pricing..."}
+            {processingStage === "analyzing" && "Scanning for red flags..."}
+            {processingStage === "reporting" && "Generating your report..."}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground animate-in fade-in duration-300" key={`sub-${processingStage}`}>
             {STAGE_LABELS[processingStage as keyof typeof STAGE_LABELS]?.label ?? "Processing..."}
           </p>
 
-          {/* Progress steps */}
-          <div className="mt-8 flex justify-center gap-2">
+          {/* Progress bar segments */}
+          <div className="mt-8 flex justify-center gap-1.5">
             {stageKeys.map((stage, idx) => (
               <div
                 key={stage}
-                className={`h-2 w-10 rounded-full transition-all duration-500 ${
-                  idx < currentIdx ? "bg-accent" : idx === currentIdx ? "bg-accent/50 animate-pulse" : "bg-border"
+                className={`h-2.5 w-12 rounded-full transition-all duration-700 ${
+                  idx < currentIdx ? "bg-accent" : idx === currentIdx ? "bg-accent animate-pulse" : "bg-border"
                 }`}
               />
             ))}
           </div>
 
+          {/* Live findings - appears during analysis */}
+          {currentIdx >= 2 && (
+            <div className="mt-8 space-y-2 text-left animate-in fade-in slide-in-from-bottom-3 duration-500">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border">
+                <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                <span className="text-xs text-ink">Materials identified</span>
+              </div>
+              {currentIdx >= 3 && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in duration-300">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                  <span className="text-xs text-ink">Potential issue found — checking...</span>
+                </div>
+              )}
+              {currentIdx >= 4 && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in duration-300">
+                  <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                  <span className="text-xs text-ink">Pricing compared to local data</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Tip */}
-          <div className="mt-10 p-4 rounded-xl bg-muted/50 border border-border text-xs text-muted-foreground leading-relaxed animate-in fade-in duration-300" key={tipIdx}>
+          <div className="mt-8 p-4 rounded-xl bg-white border border-border text-xs text-muted-foreground leading-relaxed" key={tipIdx}>
             {PROCESSING_TIPS[tipIdx]}
           </div>
 
