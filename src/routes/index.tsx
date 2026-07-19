@@ -1799,11 +1799,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </button>
               <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="w-44 rounded-xl border border-border bg-white shadow-xl p-2">
-                  {["Roofing", "Kitchen", "Bathroom", "HVAC", "Windows", "Flooring", "Solar", "Foundation"].map((item) => (
-                    <a key={item} href="#" className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">
-                      {item}
-                    </a>
-                  ))}
+                  {[{name:"Roofing",href:"/guides/roof-replacement-cost"},{name:"Kitchen",href:"/kitchen-remodel-cost"},{name:"Bathroom",href:"/bathroom-remodel-cost"},{name:"HVAC",href:"/hvac-installation-cost"},{name:"Windows",href:"/window-replacement-cost"},{name:"Flooring",href:"/flooring-cost"},{name:"Solar",href:"#"},{name:"Foundation",href:"#"}].map((item) => (<a key={item.name} href={item.href} className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors">{item.name}</a>))}
                 </div>
               </div>
             </div>
@@ -3371,3 +3367,4 @@ function FooterCol({ title, items }: { title: string; items: string[] }) {
     </div>
   );
 }
+
