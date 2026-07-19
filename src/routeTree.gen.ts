@@ -14,6 +14,7 @@ import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
 
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
   id: '/quote-analyzer',
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesRoofReplacementRoute = GuidesRoofReplacementRouteImport.update({
+  id: '/guides/roof-replacement',
+  path: '/guides/roof-replacement',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +70,7 @@ export interface FileRoutesById {
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,6 +80,7 @@ export interface FileRouteTypes {
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/quote-analyzer'
+    | '/guides/roof-replacement'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -78,6 +88,7 @@ export interface FileRouteTypes {
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/quote-analyzer'
+    | '/guides/roof-replacement'
   id:
     | '__root__'
     | '/'
@@ -85,6 +96,7 @@ export interface FileRouteTypes {
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/quote-analyzer'
+    | '/guides/roof-replacement'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +105,7 @@ export interface RootRouteChildren {
   EstimateRoute: typeof EstimateRoute
   KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
+  GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/roof-replacement': {
+      id: '/guides/roof-replacement'
+      path: '/guides/roof-replacement'
+      fullPath: '/guides/roof-replacement'
+      preLoaderRoute: typeof GuidesRoofReplacementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   EstimateRoute: EstimateRoute,
   KitchenRemodelCostRoute: KitchenRemodelCostRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
+  GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
