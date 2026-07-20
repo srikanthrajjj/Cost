@@ -25,51 +25,104 @@ function DisclaimerPage() {
 
           <div className="prose prose-lg max-w-none text-left">
             <p>
-              This page summarizes important limitations of CostReno in plain language. It works
-              alongside, and does not replace, our Terms of Service and Privacy Policy.
+              This Disclaimer explains the limitations of CostReno in plain language. It should be
+              read together with our Terms of Service and Privacy Policy.
             </p>
 
-            <h2>Estimates are general guidance, not guarantees</h2>
+            <h2>Estimates Are General Guidance</h2>
             <p>
-              Every cost figure on CostReno, single number or range, is a general estimate based on
-              regional data, typical project patterns, and information you provide. It is not a
-              binding quote, appraisal, or promise of what your specific project will cost. Real
-              costs depend on details a website cannot fully see: exact site conditions, code
-              requirements, contractor pricing, material availability, and more.
+              All renovation cost estimates, price ranges, comparisons, savings calculations, and
+              timelines provided by CostReno are for informational purposes only.
             </p>
-
-            <h2>We are not a contractor, insurer, or law firm</h2>
             <p>
-              CostReno does not perform construction work, sell insurance, adjust claims, or
-              practice law. Nothing on this site should be treated as legal, insurance, or financial
-              advice specific to your situation. For those, consult a licensed contractor, public
-              adjuster, insurance professional, or attorney.
+              They are generated using regional pricing data, historical trends, AI analysis, and
+              the information you provide. They are not contractor quotes, appraisals, guarantees,
+              or promises of actual project costs.
             </p>
+            <p>Actual costs may vary significantly based on factors including:</p>
+            <ul>
+              <li>Property conditions</li>
+              <li>Labor rates</li>
+              <li>Material availability</li>
+              <li>Permit requirements</li>
+              <li>Project scope</li>
+              <li>Contractor pricing</li>
+              <li>Local market conditions</li>
+            </ul>
 
-            <h2>AI-assisted features can make mistakes</h2>
+            <h2>We Are Not Construction or Insurance Professionals</h2>
+            <p>CostReno is not:</p>
+            <ul>
+              <li>A licensed contractor</li>
+              <li>An architect or engineer</li>
+              <li>An insurance company</li>
+              <li>A public adjuster</li>
+              <li>A law firm</li>
+              <li>A financial advisor</li>
+            </ul>
             <p>
-              Photo detection, quote analysis, and document review features use AI models that can
-              misread materials, miss details, or misinterpret documents. Always review AI-generated
-              results yourself, and verify anything important, especially before making a decision
-              involving an insurance claim or a signed contract.
+              Nothing on this website should be interpreted as legal, insurance, engineering,
+              architectural, financial, or professional construction advice. If you need
+              professional guidance, consult an appropriately licensed professional.
             </p>
 
-            <h2>Your documents, your responsibility</h2>
+            <h2>AI Can Be Wrong</h2>
             <p>
-              When you upload a quote, photo, or insurance document, you're responsible for
-              confirming you're allowed to share it and for removing any information you'd rather
-              not include. See our Privacy Policy for how uploaded content is handled.
+              Some CostReno features use artificial intelligence to analyze photos, contractor
+              quotes, invoices, and other uploaded documents.
             </p>
-
-            <h2>Before you sign anything</h2>
+            <p>AI may:</p>
+            <ul>
+              <li>Misidentify materials</li>
+              <li>Miss important scope items</li>
+              <li>Misinterpret contractor documents</li>
+              <li>Produce inaccurate estimates</li>
+              <li>Generate incomplete recommendations</li>
+            </ul>
             <p>
-              Always get a written quote from a licensed, insured contractor, and consider a second
-              opinion before committing to a project, especially for costs significantly different
-              from what CostReno's estimate shows.
+              AI-generated results should always be reviewed and independently verified before
+              making renovation, insurance, or financial decisions.
             </p>
 
-            <h2>Questions about this disclaimer</h2>
-            <p>Questions about this disclaimer can be directed to support@costreno.com.</p>
+            <h2>Quote Reviews Are Not Professional Opinions</h2>
+            <p>
+              CostReno's quote review tools are designed to help identify potential pricing
+              differences, missing scope items, and questions you may wish to discuss with your
+              contractor.
+            </p>
+            <p>
+              They should not be interpreted as confirmation that a contractor's quote is accurate,
+              inaccurate, fair, unfair, complete, or incomplete. Only your contractor or another
+              qualified professional can evaluate your specific project in full.
+            </p>
+
+            <h2>Your Uploaded Content</h2>
+            <p>
+              You are responsible for ensuring you have permission to upload any photos, contractor
+              quotes, invoices, or insurance documents. We recommend removing unnecessary personal
+              or sensitive information before uploading files. Please review our Privacy Policy to
+              understand how uploaded content is processed and protected.
+            </p>
+
+            <h2>Before You Sign a Contract</h2>
+            <p>Before approving a renovation project, we recommend that you:</p>
+            <ul>
+              <li>Obtain written quotes from licensed and insured contractors</li>
+              <li>Review the complete project scope</li>
+              <li>Ask questions about missing or unclear items</li>
+              <li>Compare multiple quotes when practical</li>
+              <li>Verify important pricing and technical details independently</li>
+            </ul>
+            <p>
+              CostReno should be used as a research and decision-support tool—not as the sole basis
+              for selecting a contractor or approving a project.
+            </p>
+
+            <h2>Contact</h2>
+            <p>If you have questions about this Disclaimer, please contact:</p>
+            <p>
+              <strong>Email:</strong> <a href="mailto:support@costreno.com">support@costreno.com</a>
+            </p>
           </div>
         </div>
       </main>
