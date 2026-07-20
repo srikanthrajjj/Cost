@@ -152,7 +152,7 @@ export function SiteFooter() {
             </h3>
             <ul className="space-y-2.5">
               <li>
-                <a href="#" className="text-sm text-white/70 hover:text-accent transition">
+                <a href="/about" className="text-sm text-white/70 hover:text-accent transition">
                   About Us
                 </a>
               </li>
