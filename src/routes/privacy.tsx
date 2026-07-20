@@ -26,8 +26,7 @@ function PrivacyPage() {
           <div className="prose prose-lg max-w-none text-left">
             <p>
               This policy explains what information CostReno collects, how it is used, and the
-              choices you have. This is a draft for legal review before publication and is not a
-              substitute for advice from a licensed attorney.
+              choices you have.
             </p>
 
             <h2>1. Information we collect</h2>
@@ -48,7 +47,7 @@ function PrivacyPage() {
 
             <h3>Information collected automatically</h3>
             <p>
-              Basic usage data (pages visited, general device/browser type, approximate location
+              Basic usage data (pages visited, general device and browser type, approximate location
               from IP address) for analytics purposes
             </p>
 
@@ -87,13 +86,13 @@ function PrivacyPage() {
               <li>
                 Uploaded photos, quotes, and documents are retained for up to 6 months from the date
                 of upload, after which they are deleted from our systems. Aggregated or
-                de-identified patterns learned from this data (for example, a general pricing trend)
-                may be retained beyond this period, but not in a form that identifies you or your
+                de-identified patterns learned from this data, such as a general pricing trend, may
+                be retained beyond this period, but not in a form that identifies you or your
                 property
               </li>
               <li>
                 You may request earlier deletion of any uploaded content at any time by contacting
-                us at support@costreno.com
+                us at privacy@costreno.com
               </li>
             </ul>
 
@@ -101,8 +100,8 @@ function PrivacyPage() {
             <p>We do not sell your personal information. We may share information with:</p>
             <ul>
               <li>
-                Service providers who help operate the platform (hosting, AI processing, analytics),
-                under confidentiality obligations
+                Service providers who help operate the platform, such as hosting, AI processing, and
+                analytics providers, under confidentiality obligations
               </li>
               <li>Law enforcement or regulators if required by law</li>
               <li>
@@ -112,11 +111,18 @@ function PrivacyPage() {
             </ul>
 
             <h2>5. Data retention</h2>
-            <p>
-              [SPECIFY retention periods once finalized — recommend defining separate retention for:
-              wizard answers, uploaded photos, uploaded quote/insurance documents, and email
-              addresses]
-            </p>
+            <ul>
+              <li>
+                Wizard answers and estimate details are retained for 12 months, or until you request
+                deletion, whichever comes first
+              </li>
+              <li>
+                Uploaded photos, quotes, and insurance documents are retained for up to 6 months, as
+                described in Section 3
+              </li>
+              <li>Email addresses are retained until you unsubscribe or request deletion</li>
+              <li>Basic analytics data is retained for up to 24 months in aggregated form</li>
+            </ul>
 
             <h2>6. Your choices and rights</h2>
             <ul>
@@ -124,21 +130,31 @@ function PrivacyPage() {
                 You may use the core cost estimator without providing an email address or account
               </li>
               <li>
-                If you are a California resident, you may have rights under the CCPA/CPRA to know,
-                delete, or opt out of the sale of personal information [confirm applicability and
-                add required CCPA-specific language]
+                If you are a California resident, you have rights under the CCPA and CPRA, including
+                the right to know what personal information we collect, the right to request
+                deletion of your personal information, the right to correct inaccurate information,
+                and the right to opt out of the sale or sharing of personal information. CostReno
+                does not sell personal information as defined under these laws
               </li>
-              <li>You may unsubscribe from email updates at any time</li>
+              <li>
+                Residents of other US states with comparable privacy laws have similar rights, which
+                we honor consistent with applicable law
+              </li>
+              <li>
+                You may unsubscribe from email updates at any time using the link in any email
+              </li>
               <li>
                 You may request access to or deletion of your data by contacting
-                support@costreno.com
+                privacy@costreno.com
               </li>
             </ul>
 
             <h2>7. Security</h2>
             <p>
-              We use reasonable technical and organizational measures to protect information, but no
-              method of transmission or storage is completely secure.
+              We use industry-standard technical measures to protect your information, including
+              encryption of data in transit and access controls limiting who can view uploaded
+              content. No method of transmission or storage is completely secure, and we cannot
+              guarantee absolute security.
             </p>
 
             <h2>8. Children's privacy</h2>
@@ -150,17 +166,20 @@ function PrivacyPage() {
             <h2>9. International operations</h2>
             <p>
               CostReno's estimates and content are intended for properties located in the United
-              States.
+              States. Our team and service providers may be located outside the United States, which
+              means your information may be processed and stored in other countries. By using the
+              Service, you consent to this transfer and processing.
             </p>
 
             <h2>10. Changes to this policy</h2>
             <p>
               We may update this policy from time to time. Material changes will be reflected by
-              updating the "Last updated" date above.
+              updating the "Last updated" date above, and significant changes will be communicated
+              via email to registered users where applicable.
             </p>
 
             <h2>11. Contact</h2>
-            <p>support@costreno.com</p>
+            <p>Questions about this policy can be directed to privacy@costreno.com.</p>
           </div>
         </div>
       </main>
