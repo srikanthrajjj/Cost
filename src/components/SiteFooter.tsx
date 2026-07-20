@@ -175,7 +175,7 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-white/70 hover:text-accent transition">
+                <a href="/terms" className="text-sm text-white/70 hover:text-accent transition">
                   Terms of Service
                 </a>
               </li>
@@ -202,7 +202,7 @@ export function SiteFooter() {
             <a href="/disclaimer" className="hover:text-white/70 transition">
               Disclaimer
             </a>
-            <a href="#" className="hover:text-white/70 transition">
+            <a href="/terms" className="hover:text-white/70 transition">
               Terms
             </a>
             <a href="#" className="hover:text-white/70 transition">
