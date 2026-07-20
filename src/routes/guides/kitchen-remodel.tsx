@@ -74,7 +74,7 @@ const SIGNS_LIST = [
 
 const PROCESS_STEPS = [
   { step: "1", title: "Planning & Design", desc: "Work with a designer or contractor to create a layout, select materials, establish a budget, and define the scope of work. This phase typically takes 2–4 weeks." },
-  { step: "2", title: "Permits & Ordering", desc: "Pull necessary permits for plumbing, electrical, or structural changes. Order cabinets, countertops, and appliances — lead times can be 4–8 weeks for custom items." },
+  { step: "2", title: "Permits & Ordering", desc: "Pull necessary permits for plumbing, electrical, or structural changes. Order cabinets, countertops, and appliances. Lead times can be 4–8 weeks for custom items." },
   { step: "3", title: "Demolition", desc: "Existing cabinets, countertops, flooring, and fixtures are removed. Any hidden issues (water damage, outdated wiring) are identified and addressed." },
   { step: "4", title: "Rough-In Work", desc: "Plumbing, electrical, and HVAC are rerouted or updated to match the new layout. Walls are framed or moved if the floor plan is changing." },
   { step: "5", title: "Installation", desc: "Cabinets, countertops, flooring, backsplash, and appliances are installed. This is the most visible transformation phase." },

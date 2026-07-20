@@ -31,9 +31,10 @@ import {
   Star,
   Lock,
 } from "lucide-react";
-import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
+import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
-import { chatWithKnowledge } from "@/lib/chat-with-knowledge";
+import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
+import { serverChatWithKnowledge } from "@/lib/chat-server";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import { SiteNav } from "@/components/SiteNav";
@@ -178,10 +179,10 @@ const PROCESSING_TIPS = [
   "💡 Tip: Always get 3 quotes minimum before committing to a contractor.",
   "💡 40% of roofing quotes omit critical items like drip edge or ice shield.",
   "💡 A good contractor warranty should be 5-10 years on workmanship.",
-  "💡 Ask if permit costs are included — they often aren't.",
+  "💡 Ask if permit costs are included. They often aren't.",
   "💡 Material quality accounts for 44% of your total project cost.",
   "💡 Check contractor licensing at your state's licensing board website.",
-  "💡 Insurance may cover storm damage — document everything with photos.",
+  "💡 Insurance may cover storm damage. Document everything with photos.",
   "💡 \"Cost-plus\" contracts can spiral. Always prefer fixed-price quotes.",
 ];
 
@@ -216,8 +217,6 @@ function QuoteAnalyzerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const SK_API_KEY = import.meta.env.VITE_SK_API_KEY || "";
-
   // Load analysis from sessionStorage if available (from chat flow)
   useEffect(() => {
     try {
@@ -250,17 +249,9 @@ function QuoteAnalyzerPage() {
   }, [error]);
 
   const handleFileUpload = async (file: File) => {
-    if (!SK_API_KEY) {
-      setError("API key not configured. Set VITE_SK_API_KEY in your environment.");
-      setState("error");
-      return;
-    }
     setState("processing");
     setError("");
     setResult(null);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
 
     try {
       setProcessingStage("reading");
@@ -273,28 +264,20 @@ function QuoteAnalyzerPage() {
       }
 
       const combinedText = `Analyze this contractor quote:\n\n${extracted.text}`;
-      const analysis = await analyzeQuoteFull(combinedText, SK_API_KEY, {
-        signal: controller.signal,
-        onStageChange: (stage) => setProcessingStage(stage),
-      });
+      const analysis = await serverAnalyzeQuoteFull({ data: { rawText: combinedText } });
 
       setResult(analysis);
       setState("complete");
     } catch (err) {
-      if (err instanceof OpenRouterError && err.code === "cancelled") {
-        setState("idle");
-      } else {
-        setError(friendlyOpenRouterMessage(err));
-        setState("error");
-      }
+      setError(friendlyOpenRouterMessage(err));
+      setState("error");
     } finally {
       abortRef.current = null;
     }
   };
 
-  const handleCancel = () => {
-    abortRef.current?.abort();
-  };
+  // Cancel not supported in server function mode
+  const handleCancel = () => {};
 
   const reset = () => {
     setState("idle");
@@ -594,7 +577,7 @@ function QuoteAnalyzerPage() {
                 },
                 {
                   q: "How accurate is the AI analysis?",
-                  a: "Our AI is trained on thousands of real contractor quotes and cross-references current local pricing data. It identifies missing scope items, overpriced line items, and code compliance issues with high accuracy. However, we always recommend getting multiple quotes.",
+                  a: "Our AI is trained on thousands of real contractor quotes and cross-references current local pricing data. It identifies missing scope items, overpriced line items, and code compliance issues with strong clarity. However, we always recommend getting multiple quotes.",
                 },
                 {
                   q: "What should I do if red flags are found?",
@@ -602,7 +585,7 @@ function QuoteAnalyzerPage() {
                 },
                 {
                   q: "Can I use this before signing a contract?",
-                  a: "Yes — that's exactly when you should use it. Upload your quote before signing to ensure you're getting fair pricing, complete scope, and proper materials specified. It's the smartest step before committing to a contractor.",
+                  a: "Yes. That's exactly when you should use it. Upload your quote before signing to ensure you're getting fair pricing, complete scope, and proper materials specified. It's the smartest step before committing to a contractor.",
                 },
               ].map((faq) => (
                 <details key={faq.q} className="group rounded-xl border border-border bg-white overflow-hidden">
@@ -683,7 +666,7 @@ function QuoteAnalyzerPage() {
               </p>
               <div className="text-sm text-muted-foreground leading-relaxed space-y-4 text-left">
                 <p>
-                  Getting a contractor quote for your home improvement project is just the first step. Whether you're planning a roof replacement, kitchen remodel, or bathroom renovation, understanding what's in your quote — and what's missing — can save you thousands of dollars.
+                  Getting a contractor quote for your home improvement project is just the first step. Whether you're planning a roof replacement, kitchen remodel, or bathroom renovation, understanding what's in your quote, and what's missing, can save you thousands of dollars.
                 </p>
                 <p>
                   CostReno's AI Quote Analyzer is purpose-built for homeowners who want to make informed decisions. Unlike generic AI tools, our system is trained specifically on contractor quotes, building codes, and regional pricing data. It understands the difference between a fair price and an inflated one, between complete scope and missing critical items.
@@ -704,7 +687,7 @@ function QuoteAnalyzerPage() {
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
-              <Upload className="h-4 w-4" /> Analyze Your Quote — Free
+               <Upload className="h-4 w-4" /> Analyze Your Quote. Free
             </button>
             <p className="mt-3 text-xs text-muted-foreground">
               Trusted by thousands of homeowners. Results in seconds.
@@ -766,7 +749,7 @@ function QuoteAnalyzerPage() {
             {currentIdx >= 0 && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">Document received — extracting text</span>
+                <span className="text-xs text-ink">Document received. Extracting text</span>
               </div>
             )}
             {currentIdx >= 1 && (
@@ -784,13 +767,13 @@ function QuoteAnalyzerPage() {
             {currentIdx >= 3 && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-amber-200 bg-amber-50/50 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                <span className="text-xs text-ink">Flagged potential issues — verifying now</span>
+                <span className="text-xs text-ink">Flagged potential issues. Verifying now</span>
               </div>
             )}
             {currentIdx >= 4 && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">Report ready — compiling results</span>
+                <span className="text-xs text-ink">Report ready. Compiling results</span>
               </div>
             )}
           </div>
@@ -827,15 +810,15 @@ function QuoteAnalyzerPage() {
   }
 
   // ─── COMPLETE STATE ──────────────────────────────────────────────────────────
-  return <CompleteView result={result!} reset={reset} chatOpen={chatOpen} setChatOpen={setChatOpen} activeTab={activeTab} setActiveTab={setActiveTab} expandedCards={expandedCards} setExpandedCards={setExpandedCards} selectedRow={selectedRow} setSelectedRow={setSelectedRow} apiKey={SK_API_KEY} />;
+  return <CompleteView result={result!} reset={reset} chatOpen={chatOpen} setChatOpen={setChatOpen} activeTab={activeTab} setActiveTab={setActiveTab} expandedCards={expandedCards} setExpandedCards={setExpandedCards} selectedRow={selectedRow} setSelectedRow={setSelectedRow} />;
 }
 
 
 // ─── Complete View (Report Page) ──────────────────────────────────────────────
-function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActiveTab, expandedCards, setExpandedCards, selectedRow, setSelectedRow, apiKey }: {
+function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActiveTab, expandedCards, setExpandedCards, selectedRow, setSelectedRow }: {
   result: QuoteAnalysisResult; reset: () => void; chatOpen: boolean; setChatOpen: (v: boolean) => void;
   activeTab: string; setActiveTab: (v: any) => void; expandedCards: Set<string>; setExpandedCards: (v: Set<string>) => void;
-  selectedRow: number | null; setSelectedRow: (v: number | null) => void; apiKey: string;
+  selectedRow: number | null; setSelectedRow: (v: number | null) => void;
 }) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -983,7 +966,7 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
 
           {/* Right sidebar: Insights cards - always visible */}
           <aside className="hidden xl:block w-[300px] shrink-0 border-l border-border bg-white p-4 h-[calc(100vh-56px)] sticky top-14 overflow-y-auto space-y-4">
-            <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("explorer")}><h3 className="text-sm font-bold text-ink mb-1">Missing Items ({analysis.missingScope.length})</h3><p className="text-[10px] text-muted-foreground mb-3">Items not found in your quote.</p>{analysis.missingScope.length === 0 ? <p className="text-xs text-accent font-medium">None — great!</p> : <div className="space-y-2">{analysis.missingScope.slice(0, 4).map((item, i) => (<div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /><div className="flex-1 min-w-0"><p className="text-xs font-bold text-ink">{item.title.replace("Missing: ", "")}</p><p className="text-[10px] text-muted-foreground truncate">{item.explanation}</p></div></div>))}</div>}<button className="mt-3 text-xs font-semibold text-accent hover:underline">View All →</button></div>
+            <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("explorer")}><h3 className="text-sm font-bold text-ink mb-1">Missing Items ({analysis.missingScope.length})</h3><p className="text-[10px] text-muted-foreground mb-3">Items not found in your quote.</p>{analysis.missingScope.length === 0 ? <p className="text-xs text-accent font-medium">None. Great!</p> : <div className="space-y-2">{analysis.missingScope.slice(0, 4).map((item, i) => (<div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /><div className="flex-1 min-w-0"><p className="text-xs font-bold text-ink">{item.title.replace("Missing: ", "")}</p><p className="text-[10px] text-muted-foreground truncate">{item.explanation}</p></div></div>))}</div>}<button className="mt-3 text-xs font-semibold text-accent hover:underline">View All →</button></div>
             <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("overview")}><h3 className="text-sm font-bold text-ink mb-1">Pricing Insights</h3><p className="text-xl font-display font-bold text-ink">{extraction.totalPrice > 0 ? `$${extraction.totalPrice.toLocaleString()}` : "—"}</p><p className="text-[10px] text-muted-foreground">Total Quote Amount</p>{extraction.totalPrice > 0 && <div className="mt-2 pt-2 border-t border-border"><p className="text-[10px] text-muted-foreground">Typical Range</p><p className="text-xs font-bold text-ink">${Math.round(extraction.totalPrice * 0.88).toLocaleString()} – ${Math.round(extraction.totalPrice * 1.12).toLocaleString()}</p><span className="mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-accent/10 text-accent">Fair Price</span></div>}</div>
             <div className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition" onClick={() => setActiveTab("questions")}><h3 className="text-sm font-bold text-ink mb-1">Smart Questions</h3><p className="text-[10px] text-muted-foreground mb-2">Ask your contractor:</p><div className="space-y-2">{analysis.questionsToAsk.slice(0, 3).map((q, i) => (<div key={i} className="flex items-start gap-2"><span className="text-[9px] text-muted-foreground mt-0.5 shrink-0">{i + 1}.</span><p className="text-[11px] text-ink leading-relaxed">{q.length > 80 ? q.substring(0, 80) + "..." : q}</p></div>))}</div><button className="mt-3 text-xs font-semibold text-accent hover:underline">View All →</button></div>
             {/* AI Analyst - Hero selling point */}
@@ -996,7 +979,7 @@ function CompleteView({ result, reset, chatOpen, setChatOpen, activeTab, setActi
           </aside>
         </main>
       </div>
-      {chatOpen && <AIChatPanel analysis={analysis} extraction={extraction} onClose={() => setChatOpen(false)} apiKey={apiKey} />}
+      {chatOpen && <AIChatPanel analysis={analysis} extraction={extraction} onClose={() => setChatOpen(false)} />}
       <EmailDownloadModal
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
@@ -1482,11 +1465,10 @@ function formatAIResponse(text: string): string {
 }
 
 // ─── AI Chat Panel ────────────────────────────────────────────────────────────
-function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
+function AIChatPanel({ analysis, extraction, onClose }: {
   analysis: QuoteAnalysis;
   extraction: QuoteAnalysisResult["extraction"];
   onClose: () => void;
-  apiKey: string;
 }) {
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [input, setInput] = useState("");
@@ -1544,7 +1526,7 @@ function AIChatPanel({ analysis, extraction, onClose, apiKey }: {
       }
 
       const projectType = extraction.projectType as any;
-      const response = await chatWithKnowledge(chatMsgs, apiKey, projectType || undefined);
+      const response = await serverChatWithKnowledge({ data: { messages: chatMsgs, userProjectType: projectType || undefined } });
       setMessages((prev) => [...prev, { role: "ai", text: response }]);
     } catch {
       setMessages((prev) => [...prev, { role: "ai", text: "Sorry, I encountered an error. Please try again." }]);

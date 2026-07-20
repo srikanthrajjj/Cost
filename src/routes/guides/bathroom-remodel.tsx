@@ -105,7 +105,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I use my bathroom during a remodel?",
-    a: "No — your bathroom will be out of commission during the remodel. Plan to use another bathroom in your home. If you only have one bathroom, discuss a phased approach with your contractor to minimize downtime.",
+    a: "No. Your bathroom will be out of commission during the remodel. Plan to use another bathroom in your home. If you only have one bathroom, discuss a phased approach with your contractor to minimize downtime.",
   },
   {
     q: "What gives the best ROI on a bathroom remodel?",
@@ -445,7 +445,7 @@ function BathroomRemodelGuide() {
                 5. How to Choose a Bathroom Contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                A bathroom remodel involves plumbing, electrical, and waterproofing — all areas where quality matters. Use this checklist to vet candidates:
+                A bathroom remodel involves plumbing, electrical, and waterproofing, all areas where quality matters. Use this checklist to vet candidates:
               </p>
               <div className="space-y-3">
                 {CONTRACTOR_CHECKLIST.map((item) => (

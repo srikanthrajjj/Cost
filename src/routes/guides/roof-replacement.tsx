@@ -364,7 +364,7 @@ function RoofReplacementGuide() {
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
                 <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Don't just compare upfront cost — calculate the cost per year of life. A $20,000 metal roof lasting 50 years ($400/year) is cheaper long-term than a $9,000 asphalt roof lasting 20 years ($450/year).
+                  Don't just compare upfront cost. Calculate the cost per year of life. A $20,000 metal roof lasting 50 years ($400/year) is cheaper long-term than a $9,000 asphalt roof lasting 20 years ($450/year).
                 </p>
               </div>
             </section>
@@ -418,7 +418,7 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Clay & Concrete Tiles</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Extremely durable and fire-resistant. Common in Mediterranean, Spanish, and Southwestern-style homes. Heavy — your roof structure may need reinforcement. Best for warm, dry climates.
+                    Extremely durable and fire-resistant. Common in Mediterranean, Spanish, and Southwestern-style homes. Heavy. Your roof structure may need reinforcement. Best for warm, dry climates.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
                     <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">50+ year lifespan</span>
@@ -430,7 +430,7 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Slate</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    The premium option — natural stone that can last over 100 years. Fireproof, incredibly beautiful, and adds significant home value. Very heavy and requires specialized installers. Best for high-end homes where longevity and aesthetics justify the investment.
+                    The premium option. Natural stone that can last over 100 years. Fireproof, incredibly beautiful, and adds significant home value. Very heavy and requires specialized installers. Best for high-end homes where longevity and aesthetics justify the investment.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
                     <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">75–100 year lifespan</span>
@@ -499,7 +499,7 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Permit costs</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Typically $100–$500 depending on your municipality. This should be included in your contractor's quote — not an add-on surprise.
+                    Typically $100–$500 depending on your municipality. This should be included in your contractor's quote, not an add-on surprise.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">

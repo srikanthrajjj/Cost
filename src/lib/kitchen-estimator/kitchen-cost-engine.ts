@@ -8,6 +8,7 @@ import type {
   KitchenLiveEstimate,
   CostBreakdownItem,
   MaterialRecommendation,
+  DetectedFeatures,
 } from "./types";
 import type { KitchenCostParams } from "./cost-params";
 
@@ -135,7 +136,8 @@ function getRegionalMultiplier(
 function computeCategoryCosts(
   answers: KitchenEstimateAnswers,
   params: KitchenCostParams,
-  regionalMultiplier: number
+  regionalMultiplier: number,
+  features?: DetectedFeatures
 ): { low: Record<string, number>; mid: Record<string, number>; high: Record<string, number> } {
   const sizeMultiplier = SIZE_MULTIPLIERS[answers.kitchenSize] ?? 1.0;
   const scopeFactor = params.scopeFactors[answers.remodelScope] ?? 1.0;
@@ -242,6 +244,44 @@ function computeCategoryCosts(
     low[category] = Math.round(categoryLow);
     mid[category] = Math.round(categoryMid);
     high[category] = Math.round(categoryHigh);
+  }
+
+  // ─── AI Feature-Based Adjustments ────────────────────────────────────────
+
+  // 1. Waterfall edge → premium countertop (1.15×)
+  if (features?.countertopDetails?.waterfallEdge) {
+    const wf = 1.15;
+    low["countertops"] = Math.round(low["countertops"] * wf);
+    mid["countertops"] = Math.round(mid["countertops"] * wf);
+    high["countertops"] = Math.round(high["countertops"] * wf);
+  }
+
+  // 2. AI-detected island → auto-add island structural cost (only if user didn't select it)
+  if (features?.island?.present && !answers.structuralChanges.includes("island-addition")) {
+    const islandCost = { low: 3000, mid: 5500, high: 8000 };
+    low["structural"] = (low["structural"] ?? 0) + islandCost.low;
+    mid["structural"] = (mid["structural"] ?? 0) + islandCost.mid;
+    high["structural"] = (high["structural"] ?? 0) + islandCost.high;
+  }
+
+  // 3. Premium features → lump sum added to structural category
+  if (features?.premiumFeatures && features.premiumFeatures.length > 0) {
+    const premiumCount = features.premiumFeatures.length;
+    const perPremium = { low: 400, mid: 600, high: 900 };
+    low["structural"] = (low["structural"] ?? 0) + premiumCount * perPremium.low;
+    mid["structural"] = (mid["structural"] ?? 0) + premiumCount * perPremium.mid;
+    high["structural"] = (high["structural"] ?? 0) + premiumCount * perPremium.high;
+  }
+
+  // 4. Luxury quality indicator → premium multiplier on cabinets & countertops
+  if (features?.qualityIndicator === "Luxury") {
+    const luxMult = 1.2;
+    low["cabinets"] = Math.round(low["cabinets"] * luxMult);
+    mid["cabinets"] = Math.round(mid["cabinets"] * luxMult);
+    high["cabinets"] = Math.round(high["cabinets"] * luxMult);
+    low["countertops"] = Math.round(low["countertops"] * luxMult);
+    mid["countertops"] = Math.round(mid["countertops"] * luxMult);
+    high["countertops"] = Math.round(high["countertops"] * luxMult);
   }
 
   // Add contingency (10-15% of total)
@@ -438,17 +478,19 @@ function calculateConfidence(answers: KitchenEstimateAnswers): number {
  *
  * @param answers - The collected kitchen estimate answers from user input
  * @param params - Cost calculation parameters (base costs, multipliers, etc.)
+ * @param features - Optional AI-detected features for enriched pricing adjustments
  * @returns A complete KitchenLiveEstimate with range, breakdown, and recommendations
  */
 export function calculateKitchenEstimate(
   answers: KitchenEstimateAnswers,
-  params: KitchenCostParams
+  params: KitchenCostParams,
+  features?: DetectedFeatures
 ): KitchenLiveEstimate {
   // Get regional multiplier
   const regionalMultiplier = getRegionalMultiplier(answers, params.regionalMultipliers);
 
   // Compute per-category costs
-  const categoryCosts = computeCategoryCosts(answers, params, regionalMultiplier);
+  const categoryCosts = computeCategoryCosts(answers, params, regionalMultiplier, features);
 
   // Sum totals
   let totalLow = Object.values(categoryCosts.low).reduce((sum, v) => sum + v, 0);

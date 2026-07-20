@@ -38,11 +38,17 @@ export interface EstimatorAnswers {
   addSkylights?: boolean;
 
   // Kitchen
+  kitchenMethod?: "manual" | "ai";
+  kitchenPhotos?: string;
   kitchenScope?: "full" | "partial";
   kitchenCabinets?: "stock" | "semi-custom" | "custom";
   kitchenCountertops?: "laminate" | "quartz" | "granite" | "marble";
   kitchenFlooring?: "tile" | "hardwood" | "vinyl" | "none";
   kitchenAppliances?: boolean;
+  kitchenLayout?: "keep" | "minor" | "major";
+  kitchenApplianceTier?: "keep" | "standard" | "midrange" | "premium";
+  kitchenBacksplash?: "tile" | "glass" | "stone" | "none";
+  kitchenFixtures?: "keep" | "standard" | "upgrade";
 
   // Bathroom
   bathroomScope?: "full" | "partial";
@@ -108,21 +114,16 @@ export interface LiveEstimate {
 
 // ─── Regional cost multipliers by state (ZIP prefix → multiplier) ─────────────
 const STATE_MULTIPLIERS: Record<string, number> = {
-  CA: 1.45,
-  NY: 1.4,
-  MA: 1.35,
-  WA: 1.3,
-  CO: 1.2,
-  TX: 1.05,
-  FL: 1.05,
-  GA: 1.0,
-  OH: 0.95,
-  MI: 0.95,
-  IN: 0.9,
-  KY: 0.88,
-  MS: 0.85,
-  AR: 0.85,
-  WV: 0.85,
+  // High cost
+  HI: 1.55, CA: 1.45, NY: 1.40, MA: 1.35, CT: 1.32, NJ: 1.30, WA: 1.30, AK: 1.28, DC: 1.35,
+  // Above average
+  MD: 1.25, NH: 1.22, VT: 1.20, CO: 1.20, OR: 1.18, RI: 1.20, IL: 1.15, MN: 1.12, DE: 1.15, ME: 1.12,
+  // Average
+  VA: 1.10, AZ: 1.08, PA: 1.05, TX: 1.05, FL: 1.05, NV: 1.05, NC: 1.02, GA: 1.0, UT: 1.0, WI: 1.0,
+  // Below average
+  OH: 0.95, MI: 0.95, IA: 0.93, SC: 0.93, NE: 0.92, TN: 0.92, MO: 0.90, IN: 0.90, LA: 0.90, NM: 0.90,
+  KS: 0.90, ID: 0.90, MT: 0.90, ND: 0.88, SD: 0.88, KY: 0.88, OK: 0.87, AL: 0.87, AR: 0.85, MS: 0.85,
+  WV: 0.83, WY: 0.88,
 };
 
 // ─── Base costs per project (national average mid-point) ─────────────────────
@@ -229,41 +230,143 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
       mid += 1500;
       high += 2500;
     }
+    if (answers.roofCondition === "poor") {
+      low *= 1.1;
+      mid *= 1.15;
+      high *= 1.2;
+    }
     if (answers.roofAction) confidence += 15;
     if (answers.roofMaterial) confidence += 15;
+    if (answers.roofSize) confidence += 10;
+    if (answers.roofCondition) confidence += 5;
   } else if (project === "kitchen") {
-    low = Math.round(low * regionMult);
-    mid = Math.round(mid * regionMult);
-    high = Math.round(high * regionMult);
+    // Kitchen size factor — cap at reasonable range
+    // If user entered home size (>500), assume kitchen is ~10% of that
+    const rawSqft = sqft || 150;
+    const kitchenSqft = rawSqft > 500 ? rawSqft * 0.1 : rawSqft;
+    const kitchenSizeFactor = Math.max(0.6, Math.min(2.0, kitchenSqft / 150));
+
+    low = Math.round(low * kitchenSizeFactor * regionMult);
+    mid = Math.round(mid * kitchenSizeFactor * regionMult);
+    high = Math.round(high * kitchenSizeFactor * regionMult);
+
+    // Scope — partial remodel significantly reduces cost
     if (answers.kitchenScope === "partial") {
       low *= 0.4;
-      mid *= 0.5;
-      high *= 0.55;
+      mid *= 0.45;
+      high *= 0.5;
+    }
+
+    // Cabinets (adjustments relative to base which assumes mid-range)
+    if (answers.kitchenCabinets === "stock") {
+      low *= 0.85;
+      mid *= 0.85;
+      high *= 0.9;
     }
     if (answers.kitchenCabinets === "semi-custom") {
-      mid += 5000;
-      high += 8000;
+      mid *= 1.1;
+      high *= 1.15;
     }
     if (answers.kitchenCabinets === "custom") {
-      low += 5000;
-      mid += 15000;
-      high += 25000;
+      low *= 1.15;
+      mid *= 1.3;
+      high *= 1.4;
+    }
+
+    // Countertops (relative adjustments)
+    if (answers.kitchenCountertops === "laminate") {
+      low *= 0.92;
+      mid *= 0.92;
     }
     if (answers.kitchenCountertops === "quartz") {
-      mid += 2000;
-      high += 4000;
+      mid *= 1.05;
+      high *= 1.08;
+    }
+    if (answers.kitchenCountertops === "granite") {
+      mid *= 1.08;
+      high *= 1.12;
     }
     if (answers.kitchenCountertops === "marble") {
-      mid += 4000;
-      high += 8000;
+      mid *= 1.12;
+      high *= 1.18;
     }
-    if (answers.kitchenAppliances) {
+
+    // Flooring (additive — smaller impact)
+    if (answers.kitchenFlooring === "hardwood") {
+      mid += 1500;
+      high += 2500;
+    }
+    if (answers.kitchenFlooring === "tile") {
+      mid += 800;
+      high += 1500;
+    }
+
+    // Backsplash
+    if ((answers as any).kitchenBacksplash === "tile") {
+      mid += 1200;
+      high += 2000;
+    }
+    if ((answers as any).kitchenBacksplash === "glass") {
+      mid += 2000;
+      high += 3000;
+    }
+    if ((answers as any).kitchenBacksplash === "stone") {
+      mid += 2500;
+      high += 4000;
+    }
+
+    // Fixtures
+    if ((answers as any).kitchenFixtures === "standard") {
+      mid += 1000;
+      high += 2000;
+    }
+    if ((answers as any).kitchenFixtures === "upgrade") {
+      mid += 2500;
+      high += 4500;
+    }
+
+    // Layout changes (major cost driver — percentage based)
+    if ((answers as any).kitchenLayout === "minor") {
+      low *= 1.1;
+      mid *= 1.15;
+      high *= 1.2;
+    }
+    if ((answers as any).kitchenLayout === "major") {
+      low *= 1.25;
+      mid *= 1.35;
+      high *= 1.5;
+    }
+
+    // Appliance tier
+    if ((answers as any).kitchenApplianceTier === "standard") {
+      low += 3000;
+      mid += 4500;
+      high += 6000;
+    }
+    if ((answers as any).kitchenApplianceTier === "midrange") {
+      low += 5000;
+      mid += 8000;
+      high += 11000;
+    }
+    if ((answers as any).kitchenApplianceTier === "premium") {
+      low += 10000;
+      mid += 16000;
+      high += 22000;
+    }
+    // Legacy boolean support
+    if (answers.kitchenAppliances && !(answers as any).kitchenApplianceTier) {
       low += 3000;
       mid += 6000;
-      high += 12000;
+      high += 10000;
     }
-    if (answers.kitchenScope) confidence += 15;
+
+    // Confidence
+    if (answers.kitchenScope || (answers as any).kitchenMethod === "ai") confidence += 15;
     if (answers.kitchenCabinets) confidence += 10;
+    if (answers.kitchenCountertops) confidence += 8;
+    if ((answers as any).kitchenLayout) confidence += 10;
+    if ((answers as any).kitchenApplianceTier) confidence += 8;
+    if (answers.kitchenFlooring) confidence += 5;
   } else if (project === "bathroom") {
     const count = answers.bathroomCount ?? 1;
     low = Math.round(low * count * regionMult);

@@ -112,7 +112,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What gives the best ROI on flooring?",
-    a: "Hardwood flooring offers the best ROI at approximately 70–80% recoup at resale and is the #1 requested feature by home buyers. LVP is a close second with excellent ROI at a lower investment. Avoid overly trendy choices — classic looks like oak hardwood or neutral LVP appeal to the broadest audience.",
+    a: "Hardwood flooring offers the best ROI at approximately 70–80% recoup at resale and is the #1 requested feature by home buyers. LVP is a close second with excellent ROI at a lower investment. Avoid overly trendy choices. Classic looks like oak hardwood or neutral LVP appeal to the broadest audience.",
   },
 ];
 
@@ -360,7 +360,7 @@ function FlooringGuide() {
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
                 <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Order 10% extra material to account for cuts, waste, and future repairs. Flooring from the same dye lot is essential for color matching — buy it all at once rather than reordering later.
+                  Order 10% extra material to account for cuts, waste, and future repairs. Flooring from the same dye lot is essential for color matching. Buy it all at once rather than reordering later.
                 </p>
               </div>
             </section>
@@ -401,7 +401,7 @@ function FlooringGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Porcelain Tile</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Virtually indestructible and completely waterproof. Available in endless styles including wood-look, stone-look, and modern patterns. Ideal for bathrooms, kitchens, and entryways. Harder and colder underfoot — consider radiant heating for comfort.
+                    Virtually indestructible and completely waterproof. Available in endless styles including wood-look, stone-look, and modern patterns. Ideal for bathrooms, kitchens, and entryways. Harder and colder underfoot. Consider radiant heating for comfort.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
                     <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">$5–$15/sq ft installed</span>
@@ -413,7 +413,7 @@ function FlooringGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Carpet</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Soft, warm, and sound-absorbing — ideal for bedrooms and cozy spaces. Modern carpet is stain-resistant and available in many textures and colors. Not recommended for kitchens, bathrooms, or homes with allergy sufferers. Budget-friendly option that's quick to install.
+                    Soft, warm, and sound-absorbing. Ideal for bedrooms and cozy spaces. Modern carpet is stain-resistant and available in many textures and colors. Not recommended for kitchens, bathrooms, or homes with allergy sufferers. Budget-friendly option that's quick to install.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
                     <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">$2–$5/sq ft installed</span>

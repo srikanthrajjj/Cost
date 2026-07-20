@@ -39,11 +39,14 @@ import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import type { EstimatorAnswers, ProjectType } from "@/lib/estimator-engine";
 import type { Question } from "@/lib/estimator-steps";
-import { chatWithKnowledge, extractProjectTypeFromChat } from "@/lib/chat-with-knowledge";
+import { extractProjectTypeFromChat } from "@/lib/chat-with-knowledge";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
-import { analyzeQuoteFull, type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
-import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
+import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
+import { serverChatWithKnowledge } from "@/lib/chat-server";
+import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
+import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { SiteNav } from "@/components/SiteNav";
+import { TrustBar } from "@/components/TrustBar";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
@@ -156,44 +159,44 @@ const projects = [
 const steps = [
   {
     icon: Search,
-    title: "Choose Your Project",
+    title: "Choose your project",
     desc: "Select from 100+ home improvement projects",
   },
   {
     icon: Calculator,
-    title: "Estimate Your Cost",
-    desc: "Get accurate, location-based estimates in seconds",
+    title: "Estimate your cost",
+    desc: "Get clear, location-based estimates in seconds",
   },
   {
     icon: GitCompare,
-    title: "Compare Your Options",
+    title: "Compare your options",
     desc: "Materials, styles, and contractors side by side",
   },
   {
     icon: Check,
-    title: "Plan With Confidence",
+    title: "Plan with confidence",
     desc: "Make the best decision for your home and budget",
   },
 ];
 const trust = [
   {
     icon: MapPin,
-    title: "Accurate & Local Data",
+    title: "Clear & local data",
     desc: "Real pricing from thousands of projects in your area.",
   },
   {
     icon: Sparkles,
-    title: "Unbiased Recommendations",
+    title: "Unbiased recommendations",
     desc: "We don't sell. We help you make the best decision for your home.",
   },
   {
     icon: TrendingUp,
-    title: "Expert-Backed Insights",
+    title: "Expert-backed insights",
     desc: "Guidance from industry professionals and building experts.",
   },
   {
     icon: Lock,
-    title: "Privacy First",
+    title: "Privacy first",
     desc: "Your data is secure and never shared with contractors.",
   },
 ];
@@ -704,7 +707,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
       const breakdown = estimate.breakdown
         .map((b) => `${b.label}: $${b.amount.toLocaleString()}`)
         .join(" · ");
-      const summary = `Here's your estimate summary:\n\n**Estimated Cost: $${estimate.mid.toLocaleString()}**\nRange: $${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}\nConfidence: ${estimate.confidence}%\nTimeline: ${estimate.timeline}\nPermit required: ${estimate.permitRequired ? "Yes" : "No"}\nInsurance eligible: ${estimate.insuranceEligible ? "Possibly — check your policy" : "Not typically"}\n\n${breakdown}\n\nWant me to help you analyze a contractor quote, check insurance coverage, or compare materials?`;
+      const summary = `Here's your estimate summary:\n\n**Estimated Cost: $${estimate.mid.toLocaleString()}**\nRange: $${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}\nConfidence: ${estimate.confidence}%\nTimeline: ${estimate.timeline}\nPermit required: ${estimate.permitRequired ? "Yes" : "No"}\nInsurance eligible: ${estimate.insuranceEligible ? "Possibly. Check your policy." : "Not typically"}\n\n${breakdown}\n\nWant me to help you analyze a contractor quote, check insurance coverage, or compare materials?`;
       onComplete(summary);
     }
   }, [finished]);
@@ -878,7 +881,7 @@ function ThinkingIndicator() {
   const tips = [
     "💡 CostReno AI uses verified industry data, not generic estimates.",
     "💡 Always compare at least 3 contractor quotes before deciding.",
-    "💡 Ask if permit fees are included — they often aren't.",
+    "💡 Ask if permit fees are included. They often aren't.",
     "💡 Material quality accounts for 44% of your total project cost.",
     "💡 Check contractor licensing at your state's licensing board.",
   ];
@@ -910,9 +913,6 @@ function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [notifyOpen, setNotifyOpen] = useState<string | null>(null);
-  const [notifyEmail, setNotifyEmail] = useState("");
-  const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
   const [projectIdx, setProjectIdx] = useState(0);
   const heroProjects = ["kitchen remodel", "roof replacement", "bathroom renovation", "HVAC installation", "window replacement"];
   const displayProject = heroProjects[projectIdx];
@@ -959,7 +959,6 @@ function Landing() {
     };
   }, []);
 
-  const SK_API_KEY = import.meta.env.VITE_SK_API_KEY || "";
   const DEBUG_QUOTE_ANALYSIS = import.meta.env.DEV;
 
   const QUOTE_ANALYSIS_KEYWORDS = [
@@ -1190,16 +1189,13 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
   const getAIResponse = async (
     messages: { role: "user" | "ai"; text: string }[],
   ): Promise<string> => {
-    if (!SK_API_KEY) {
-      return "API key not configured. Please set VITE_SK_API_KEY in your environment.";
-    }
     try {
       const chatMessages: ChatMessage[] = messages.map((m) => ({
         role: m.role === "ai" ? "assistant" : "user",
         content: m.text,
       }));
       const projectType = extractProjectTypeFromChat(chatMessages);
-      const response = await chatWithKnowledge(chatMessages, SK_API_KEY, projectType ?? undefined);
+      const response = await serverChatWithKnowledge({ data: { messages: chatMessages, userProjectType: projectType ?? undefined } });
       return response;
     } catch (error) {
       console.error("AI API error:", error);
@@ -1220,10 +1216,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     "💡 Tip: Always get 3 quotes minimum before committing to a contractor.",
     "💡 Did you know? 40% of roofing quotes omit critical items like drip edge or ice shield.",
     "💡 Tip: A good contractor warranty should be 5-10 years on workmanship.",
-    "💡 Pro tip: Ask if permit costs are included — they often aren't.",
+    "💡 Pro tip: Ask if permit costs are included. They often aren't.",
     "💡 Insight: Material quality accounts for 44% of your total project cost.",
     "💡 Tip: Check contractor licensing at your state's licensing board website.",
-    "💡 Did you know? Insurance may cover storm damage — document everything with photos.",
+    "💡 Did you know? Insurance may cover storm damage. Document everything with photos.",
     "💡 Tip: \"Cost-plus\" contracts can spiral. Always prefer fixed-price quotes.",
   ];
 
@@ -1241,10 +1237,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
   const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
 
   const handleSendMessage = async () => {
-    if (!SK_API_KEY) {
-      return;
-    }
-
     const hasAttachments = attachments.length > 0;
     const fileToProcess = attachments[0]?.file;
 
@@ -1281,7 +1273,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       }
 
       if (extractedText.length < 20) {
-        setChatMessages((prev) => [...prev, { role: "ai", text: "📄 That file seems to be scanned or image-based — I can't read the text from it.\n\nTry a text-based PDF, or copy-paste the quote content directly into chat." }]);
+        setChatMessages((prev) => [...prev, { role: "ai", text: "📄 That file seems to be scanned or image-based. I can't read the text from it.\n\nTry a text-based PDF, or copy-paste the quote content directly into chat." }]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
         return;
@@ -1298,9 +1290,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       if (rejectScore >= 3 || (quoteScore < 3 && rejectScore >= 1)) {
         // Clearly NOT a renovation quote — show friendly rejection
         const funnyMessages = [
-          "🏠 Whoa there! That doesn't look like a contractor quote.\n\nI'm CostReno AI — I specialize in **renovation quotes, home improvement estimates, and contractor proposals**.\n\nUpload a roofing quote, kitchen remodel estimate, or any contractor bid and I'll analyze it for missing items, red flags, and overcharges!\n\n💡 *Pro tip: If you have a contractor quote in email, save it as PDF and upload it here.*",
-          "😄 Nice try! But that's not quite my area of expertise.\n\nI'm built to analyze **contractor quotes and renovation estimates** — not tax docs, resumes, or recipes!\n\nGot a quote from a roofer, plumber, or kitchen contractor? Upload that and I'll tell you what's missing, what's overpriced, and what questions to ask.\n\n💡 *Try uploading: roofing estimate, bathroom remodel quote, HVAC proposal, etc.*",
-          "🔨 Hmm, that document doesn't seem related to home renovation.\n\nI'm your **renovation quote analyzer** — I read contractor bids and find:\n- ❌ Missing scope items\n- 🚩 Red flags and overcharges\n- ❓ Questions you should ask\n\nUpload a **contractor quote or estimate** and let me work my magic!\n\n💡 *Supported: roofing, kitchen, bathroom, HVAC, windows, solar, flooring, deck, plumbing, electrical quotes.*",
+          "🏠 Whoa there! That doesn't look like a contractor quote.\n\nI'm CostReno AI. I specialize in **renovation quotes, home improvement estimates, and contractor proposals**.\n\nUpload a roofing quote, kitchen remodel estimate, or any contractor bid and I'll analyze it for missing items, red flags, and overcharges!\n\n💡 *Pro tip: If you have a contractor quote in email, save it as PDF and upload it here.*",
+          "😄 Nice try! But that's not quite my area of expertise.\n\nI'm built to analyze **contractor quotes and renovation estimates**, not tax docs, resumes, or recipes!\n\nGot a quote from a roofer, plumber, or kitchen contractor? Upload that and I'll tell you what's missing, what's overpriced, and what questions to ask.\n\n💡 *Try uploading: roofing estimate, bathroom remodel quote, HVAC proposal, etc.*",
+          "🔨 Hmm, that document doesn't seem related to home renovation.\n\nI'm your **renovation quote analyzer**. I read contractor bids and find:\n- ❌ Missing scope items\n- 🚩 Red flags and overcharges\n- ❓ Questions you should ask\n\nUpload a **contractor quote or estimate** and let me work my magic!\n\n💡 *Supported: roofing, kitchen, bathroom, HVAC, windows, solar, flooring, deck, plumbing, electrical quotes.*",
         ];
         const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
         setChatMessages((prev) => [...prev, { role: "ai", text: randomMsg }]);
@@ -1397,20 +1389,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
       const combinedText = `${userText}\n\nExtracted from ${file.name}:\n${extractedText}`;
 
-      console.log("[QUOTE DEBUG] Step 9: Calling analyzeQuoteFull()...");
-      const analysis = await analyzeQuoteFull(combinedText, SK_API_KEY, {
-        signal: abortController.signal,
-        onStageChange: (stage) => setProcessingStep(STAGE_MESSAGES[stage]),
-        onRetry: ({ attempt, maxAttempts, reason }) => {
-          const reasonText =
-            reason === "rate_limit"
-              ? "AI is rate-limited"
-              : reason === "timeout"
-                ? "AI response timed out"
-                : "AI request failed";
-          setProcessingStep(`⏳ ${reasonText} — retrying (${attempt}/${maxAttempts})...`);
-        },
-      });
+      console.log("[QUOTE DEBUG] Step 9: Calling serverAnalyzeQuoteFull()...");
+      const analysis = await serverAnalyzeQuoteFull({ data: { rawText: combinedText } });
 
       console.log(
         "[QUOTE DEBUG] Step 10: Extractor result:",
@@ -1892,6 +1872,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
 
       </section>
+
+      <TrustBar region={userLocation ?? "your area"} />
+
       {/* Chat Interface Modal */}
       {chatOpen && (
         <div
@@ -1958,7 +1941,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                     {/* Questions - staggered animation */}
                     <div className="mt-6 w-full max-w-sm space-y-2">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-1 animate-in fade-in duration-500 delay-300">Ask me anything</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold px-1 animate-in fade-in duration-500 delay-300">Ask me anything</p>
                       {[
                         { q: "How much should a roof replacement cost?", delay: "delay-[400ms]" },
                         { q: "Can you review my contractor quote?", delay: "delay-[500ms]" },
@@ -1998,7 +1981,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                     {/* Active Tools */}
                     <div className="mt-5 w-full max-w-sm animate-in fade-in duration-500 delay-[900ms]">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2 px-1">Active Tools</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-2 px-1">Active Tools</p>
                       <div className="grid grid-cols-2 gap-2">
                         <a href="/estimate" className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition">
                           <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
@@ -2103,7 +2086,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             <ChatEstimator onComplete={handleEstimatorComplete} />
                           ) : (
                             <div className="px-3 py-2 rounded-xl bg-accent/8 border border-accent/20 text-xs text-accent font-semibold flex items-center gap-2">
-                              <Check className="h-3.5 w-3.5" /> Estimate completed — see results
+                              <Check className="h-3.5 w-3.5" /> Estimate completed. See results
                               below
                             </div>
                           )}
@@ -2320,7 +2303,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       await handleSendMessage();
                     }
                   }}
-                  placeholder="Ask me anything — costs, materials, insurance, plans..."
+                  placeholder="Ask me anything about costs, materials, insurance, plans..."
                   className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground/60"
                   disabled={isProcessingQuote}
                 />
@@ -2361,7 +2344,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </h2>
               <p className="text-sm text-muted-foreground text-center mt-2 leading-relaxed">
                 Your location helps us provide{" "}
-                <span className="font-semibold text-ink">accurate, local cost estimates</span> for
+                <span className="font-semibold text-ink">clear, local cost estimates</span> for
                 your home projects. Construction costs vary significantly by region due to labor
                 rates, material availability, and local regulations.
               </p>
@@ -2408,11 +2391,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       )}
 
       {/* POPULAR PROJECTS */}
-      <section className="container-x bg-white py-20 overflow-hidden">
+      <section className="container-x py-20 overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="font-display text-[28px] md:text-[32px] font-bold text-ink leading-[1.08] mb-4">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-[1.08] mb-4">
                 What project are you planning?
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
@@ -2469,21 +2452,18 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                     <div className={`relative flex-1 p-5 ${isDisabled ? "pointer-events-none opacity-60" : ""}`}>
                       <div className="flex items-start justify-between gap-3 mb-4">
-                        <h3 className="text-[15px] font-semibold text-ink line-clamp-2 pr-2">
+                        <h3 className="text-sm font-bold text-ink line-clamp-2 pr-2">
                           {p.name}
                         </h3>
-                        <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
-                          <p.icon className="h-5 w-5 text-primary" />
-                        </div>
                       </div>
 
                       <div className="space-y-3">
                         <div>
-                          <div className="font-display text-[20px] font-bold text-ink">
-                            {p.avgCost}
+                          <div className="font-display text-[18px] font-bold text-ink leading-snug">
+                            {p.price}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            Typical: {p.price}
+                          <div className="text-[11px] text-muted-foreground mt-1">
+                            Typical average: {p.avgCost}
                           </div>
                         </div>
 
@@ -2502,7 +2482,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                                 : "text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
                             }`}
                           >
-                            {isDisabled ? "Coming Soon" : "Get Estimate"}
+                            {isDisabled ? "Coming Soon" : `Estimate my ${p.projectType}`}
                           </button>
                         </div>
                       </div>
@@ -2518,7 +2498,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* SMART TOOLS */}
-      <section className="container-x py-24">
+      <section className="container-x py-20">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 mb-5">
@@ -2527,7 +2507,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               Smart Tools
             </span>
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-ink leading-tight max-w-3xl mx-auto">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight max-w-3xl mx-auto">
             Estimate costs. Review quotes. That's all you need.
           </h2>
           <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
@@ -2552,7 +2532,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </div>
             <h3 className="font-display text-sm font-bold text-ink mb-1.5">Cost Estimator</h3>
             <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
-              Get accurate, local cost estimates for your project in minutes.
+              Get clear, local cost estimates for your project in minutes.
             </p>
             <a href="/estimate" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors">
               Get Estimate <ArrowRight className="h-3.5 w-3.5" />
@@ -2588,83 +2568,34 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             { id: "timeline", name: "Project Timeline", desc: "Get a clear step-by-step timeline from start to finish.", icon: '<rect x="3" y="5" width="22" height="20" rx="3" /><line x1="3" y1="11" x2="25" y2="11" /><line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" /><line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" /><circle cx="9" cy="17" r="1.5" /><circle cx="14" cy="17" r="1.5" /><circle cx="19" cy="17" r="1.5" />' },
             { id: "permits", name: "Permit Guide", desc: "Know exactly which permits you need and how to get them.", icon: '<path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" /><line x1="10" y1="12" x2="18" y2="12" /><line x1="10" y1="16" x2="18" y2="16" /><line x1="10" y1="20" x2="15" y2="20" />' },
           ].map((tool) => (
-            <div key={tool.id} className={`relative flex flex-col rounded-2xl border border-border bg-white p-6 overflow-hidden transition-all duration-200 ${notifyOpen === tool.id ? "ring-2 ring-accent/30" : ""}`} style={{ opacity: 0.75 }}>
-              <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-bold text-accent uppercase tracking-wider">Soon</span>
-              <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-muted-foreground" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: tool.icon }} />
+            <div key={tool.id} className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 overflow-hidden transition-all duration-300" style={{ opacity: 0.75 }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4 group-hover:bg-accent/10 transition-colors duration-300">
+                  <svg className="w-6 h-6 text-muted-foreground group-hover:text-accent transition-colors duration-300" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: tool.icon }} />
+                </div>
+                <h3 className="font-display text-sm font-bold text-ink mb-1.5">{tool.name}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">{tool.desc}</p>
+                <div className="pt-3 border-t border-border/30 mt-auto">
+                  <p className="text-xs text-accent font-semibold text-center leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    We're crafting something smart here. Stay tuned.
+                  </p>
+                </div>
               </div>
-              <h3 className="font-display text-sm font-bold text-ink mb-1.5">{tool.name}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">{tool.desc}</p>
-              
-              {notifySuccess === tool.id ? (
-                <div className="w-full py-2 rounded-lg bg-accent/10 text-accent text-xs font-semibold flex items-center justify-center gap-1">
-                  <Check className="h-3.5 w-3.5" /> You'll be notified!
-                </div>
-              ) : notifyOpen === tool.id ? (
-                <div className="w-full flex flex-col gap-2">
-                  <input
-                    type="email"
-                    placeholder="your@email.com"
-                    value={notifyEmail}
-                    onChange={(e) => setNotifyEmail(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && notifyEmail.trim()) {
-                        console.log(`Notify ${notifyEmail} for tool: ${tool.id}`);
-                        setNotifySuccess(tool.id);
-                        setNotifyEmail("");
-                        setNotifyOpen(null);
-                        setTimeout(() => setNotifySuccess(null), 3000);
-                      }
-                    }}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-white text-xs placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        if (notifyEmail.trim()) {
-                          console.log(`Notify ${notifyEmail} for tool: ${tool.id}`);
-                          setNotifySuccess(tool.id);
-                          setNotifyEmail("");
-                          setNotifyOpen(null);
-                          setTimeout(() => setNotifySuccess(null), 3000);
-                        }
-                      }}
-                      disabled={!notifyEmail.trim()}
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    >
-                      Notify Me
-                    </button>
-                    <button
-                      onClick={() => { setNotifyOpen(null); setNotifyEmail(""); }}
-                      className="flex-1 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold hover:bg-muted/30 transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setNotifyOpen(tool.id)}
-                  className="w-full py-2 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:border-accent/40 hover:text-accent transition"
-                >
-                  Notify Me
-                </button>
-              )}
             </div>
           ))}
         </div>
       </section>
 
       {/* PLAN YOUR RENOVATION */}
-      <section className="container-x py-16">
+      <section className="container-x py-20">
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
-            Plan Your Home Renovation in 4 Simple Steps
+            Plan your home renovation in 4 simple steps
           </h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto">
-            Whether you're replacing a roof, remodeling a kitchen, or upgrading your HVAC system — CostReno helps you plan with confidence from start to finish.
+            Whether you're replacing a roof, remodeling a kitchen, or renovating a bathroom, CostReno helps you plan with confidence from start to finish.
           </p>
         </div>
 
@@ -2673,23 +2604,23 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           {[
             {
               num: "1",
-              title: "Select Your Project",
-              desc: "Choose from roofing, kitchen, bathroom, HVAC, flooring, windows, solar, and more home improvement projects.",
+              title: "Select your project",
+              desc: "Choose from roofing, kitchen, and bathroom home improvement projects.",
             },
             {
               num: "2",
-              title: "Get a Local Cost Estimate",
-              desc: "Get accurate renovation cost estimates based on your ZIP code, property size, and current regional labor and material pricing.",
+              title: "Get a local cost estimate",
+              desc: "Get clear renovation cost ranges based on your ZIP code, property size, and current regional labor and material pricing.",
             },
             {
               num: "3",
-              title: "Review Your Contractor Quote",
+              title: "Review your contractor quote",
               desc: "Upload your contractor bid and let AI find missing scope, overpriced line items, and red flags before you sign.",
             },
             {
               num: "4",
-              title: "Make a Confident Decision",
-              desc: "Use expert recommendations, material comparisons, ROI analysis, and renovation guides to make the best choice for your home.",
+              title: "Make a confident decision",
+              desc: "Use expert recommendations, material comparisons, and ROI analysis to make the best choice for your home. Coming soon.",
             },
           ].map((step, i) => (
             <div key={step.num} className="relative flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-white">
@@ -2708,7 +2639,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
         {/* Popular Projects */}
         <div className="mt-12 text-center">
-          <h3 className="font-display text-lg font-bold text-ink mb-4">Popular Renovation Projects</h3>
+          <h3 className="font-display text-sm font-bold text-ink mb-4">Popular renovation projects</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {["Roof Replacement", "Kitchen Remodel", "Bathroom Remodel", "HVAC", "Windows", "Flooring", "Solar"].map((project) => (
               <a
@@ -2730,11 +2661,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* FEATURED GUIDES */}
-      <section className="container-x py-10">
+      <section className="container-x py-20">
         <div className="flex items-end justify-between mb-6">
           <div>
             <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
-              Latest Homeowner Guides
+              Latest homeowner guides
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Expert insights to help you plan smarter
@@ -2744,7 +2675,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             href="#"
             className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
           >
-            View all guides <ArrowRight color="white" className="h-3.5 w-3.5" />
+            View all guides <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
@@ -2814,10 +2745,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* TRUST & REVIEWS */}
-      <section className="container-x py-16">
+      <section className="container-x py-20">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
-            Trusted by Homeowners Nationwide
+            Trusted by homeowners nationwide
           </h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-lg mx-auto">
             Join thousands of homeowners who saved money and made better renovation decisions with CostReno.
@@ -2898,16 +2829,16 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* COMPARISONS */}
-      <section className="container-x py-10">
+      <section className="container-x py-20">
         <div className="flex items-end justify-between mb-6">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
-            Popular Comparisons
+            Popular comparisons
           </h2>
           <a
             href="#"
             className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
           >
-            View all comparisons <ArrowRight color="white" className="h-3.5 w-3.5" />
+            View all comparisons <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
@@ -2936,7 +2867,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                   href="#"
                   className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                 >
-                  Compare Now <ArrowRight color="white" className="h-3 w-3" />
+                  Compare Now <ArrowRight className="h-3 w-3" />
                 </a>
               </div>
             </article>
@@ -2945,7 +2876,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* NEWSLETTER */}
-      <section className="container-x py-12">
+      <section className="container-x py-20">
         <div className="rounded-2xl border border-border bg-card p-6 md:p-8 grid md:grid-cols-[auto_1fr_auto] gap-8 items-center">
           <img
             src={blueprint}

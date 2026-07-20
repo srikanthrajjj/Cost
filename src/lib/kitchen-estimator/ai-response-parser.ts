@@ -1,4 +1,4 @@
-import type { AIDetectionResult, DetectedAttribute } from "./types";
+import type { AIDetectionResult, DetectedAttribute, DetectedFeatures } from "./types";
 
 /**
  * The raw structured response expected from the AI vision API.
@@ -10,6 +10,7 @@ interface AIVisionResponse {
   estimatedSize: { value: string; confidence: number };
   overallCondition: { value: string; confidence: number };
   observations: string[];
+  detectedFeatures?: DetectedFeatures;
 }
 
 /**
@@ -86,35 +87,44 @@ function getFallbackResult(): AIDetectionResult {
  */
 export function parseAIResponse(rawResponse: string): AIDetectionResult {
   try {
-    const parsed: AIVisionResponse = JSON.parse(rawResponse);
+    const parsed = JSON.parse(rawResponse);
+
+    // Handle array responses (AI sometimes wraps JSON in [])
+    const data: AIVisionResponse = Array.isArray(parsed) ? parsed[0] : parsed;
 
     // Validate that we have a valid object to work with
-    if (!parsed || typeof parsed !== "object") {
+    if (!data || typeof data !== "object") {
       return getFallbackResult();
     }
 
-    const observations: string[] = Array.isArray(parsed.observations)
-      ? parsed.observations.filter(
+    const observations: string[] = Array.isArray(data.observations)
+      ? data.observations.filter(
           (obs): obs is string => typeof obs === "string"
         )
       : [];
 
+    const detectedFeatures =
+      data.detectedFeatures && typeof data.detectedFeatures === "object"
+        ? (data.detectedFeatures as DetectedFeatures)
+        : undefined;
+
     return {
-      cabinetType: buildAttribute(parsed.cabinetType, "cabinetType"),
+      cabinetType: buildAttribute(data.cabinetType, "cabinetType"),
       countertopMaterial: buildAttribute(
-        parsed.countertopMaterial,
+        data.countertopMaterial,
         "countertopMaterial"
       ),
       flooringMaterial: buildAttribute(
-        parsed.flooringMaterial,
+        data.flooringMaterial,
         "flooringMaterial"
       ),
-      kitchenSize: buildAttribute(parsed.estimatedSize, "estimatedSize"),
+      kitchenSize: buildAttribute(data.estimatedSize, "estimatedSize"),
       overallCondition: buildAttribute(
-        parsed.overallCondition,
+        data.overallCondition,
         "overallCondition"
       ),
       observations,
+      detectedFeatures,
     };
   } catch {
     // JSON parse failed or any other unexpected error

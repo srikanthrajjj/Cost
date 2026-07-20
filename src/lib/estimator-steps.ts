@@ -9,7 +9,8 @@ export type QuestionType =
   | "text" // text input
   | "toggle" // yes/no
   | "slider" // range slider
-  | "budget"; // budget input with preset chips
+  | "budget" // budget input with preset chips
+  | "photo-upload"; // AI photo upload for kitchen
 
 export interface Choice {
   value: string;
@@ -125,6 +126,31 @@ export const ALL_STEPS: StepDef[] = [
         max: 15000,
         step: 100,
         unit: "sq ft",
+        showIf: (a) => a.projectType !== "kitchen" && a.projectType !== "bathroom",
+      },
+      {
+        id: "squareFootage",
+        type: "number",
+        title: "Kitchen size (sq ft)",
+        subtitle: "Average kitchen is 100–200 sq ft",
+        placeholder: "150",
+        min: 40,
+        max: 500,
+        step: 10,
+        unit: "sq ft",
+        showIf: (a) => a.projectType === "kitchen",
+      },
+      {
+        id: "squareFootage",
+        type: "number",
+        title: "Bathroom size (sq ft)",
+        subtitle: "Average bathroom is 40–100 sq ft",
+        placeholder: "70",
+        min: 20,
+        max: 300,
+        step: 5,
+        unit: "sq ft",
+        showIf: (a) => a.projectType === "bathroom",
       },
       {
         id: "yearBuilt",
@@ -132,7 +158,7 @@ export const ALL_STEPS: StepDef[] = [
         title: "Year built",
         placeholder: "1985",
         min: 1900,
-        max: 2024,
+        max: 2026,
         step: 1,
         optional: true,
       },
@@ -141,6 +167,7 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "Number of stories",
         optional: true,
+        showIf: (a) => a.projectType !== "kitchen" && a.projectType !== "bathroom",
         choices: [
           { value: "1", label: "1 story", icon: "1️⃣" },
           { value: "2", label: "2 stories", icon: "2️⃣" },
@@ -212,9 +239,51 @@ export const ALL_STEPS: StepDef[] = [
     showIf: (a) => a.projectType === "kitchen",
     questions: [
       {
+        id: "kitchenMethod",
+        type: "select-grid",
+        title: "How would you like to estimate?",
+        choices: [
+          { value: "manual", icon: "📋", label: "Answer Questions", desc: "3-5 minutes" },
+          { value: "ai", icon: "📸", label: "Upload Photos (AI)", desc: "2-3 minutes" },
+        ],
+      },
+      {
+        id: "kitchenPhotos" as any,
+        type: "photo-upload",
+        title: "Upload 2-6 photos of your kitchen",
+        subtitle: "Our AI will detect materials, size, and condition automatically.",
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod === "ai",
+      },
+      {
+        id: "kitchenLayout" as any,
+        type: "select-grid",
+        title: "Are you changing the kitchen layout?",
+        subtitle: "Layout changes are a major cost driver — moving plumbing, electrical, or walls.",
+        choices: [
+          { value: "keep", icon: "✅", label: "Keep Current Layout", desc: "No structural changes" },
+          { value: "minor", icon: "🔄", label: "Minor Changes", desc: "Move island or add peninsula" },
+          { value: "major", icon: "🏗️", label: "Major Changes", desc: "Remove walls, move plumbing/electrical" },
+        ],
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod === "ai",
+      },
+      {
+        id: "kitchenApplianceTier" as any,
+        type: "select-grid",
+        title: "What about appliances?",
+        subtitle: "Appliances can add $3K–$20K+ depending on tier.",
+        choices: [
+          { value: "keep", icon: "👍", label: "Keep Existing", desc: "No new appliances" },
+          { value: "standard", icon: "🔲", label: "Standard", desc: "$3K–$6K" },
+          { value: "midrange", icon: "⭐", label: "Mid-Range", desc: "$6K–$12K" },
+          { value: "premium", icon: "👑", label: "Premium / Built-in", desc: "$12K–$25K+" },
+        ],
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod === "ai",
+      },
+      {
         id: "kitchenScope",
         type: "select-grid",
         title: "Scope of remodel",
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod !== "ai",
         choices: [
           { value: "full", icon: "🍳", label: "Full Remodel", desc: "Everything" },
           { value: "partial", icon: "🔧", label: "Partial Update", desc: "Select items only" },
@@ -224,6 +293,7 @@ export const ALL_STEPS: StepDef[] = [
         id: "kitchenCabinets",
         type: "select-grid",
         title: "Cabinet style",
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod !== "ai",
         choices: [
           { value: "stock", icon: "📦", label: "Stock", desc: "Budget-friendly" },
           { value: "semi-custom", icon: "🪚", label: "Semi-Custom", desc: "Most popular" },
@@ -234,6 +304,7 @@ export const ALL_STEPS: StepDef[] = [
         id: "kitchenCountertops",
         type: "select-grid",
         title: "Countertop material",
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod !== "ai",
         choices: [
           { value: "laminate", icon: "⬜", label: "Laminate", desc: "Budget" },
           { value: "quartz", icon: "💎", label: "Quartz", desc: "Popular" },
@@ -242,9 +313,28 @@ export const ALL_STEPS: StepDef[] = [
         ],
       },
       {
-        id: "kitchenAppliances",
-        type: "toggle",
-        title: "Include new appliances?",
+        id: "kitchenLayout" as any,
+        type: "select-grid",
+        title: "Are you changing the kitchen layout?",
+        subtitle: "Layout changes are a major cost driver.",
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod !== "ai",
+        choices: [
+          { value: "keep", icon: "✅", label: "Keep Current Layout", desc: "No structural changes" },
+          { value: "minor", icon: "🔄", label: "Minor Changes", desc: "Move island or add peninsula" },
+          { value: "major", icon: "🏗️", label: "Major Changes", desc: "Remove walls, move plumbing/electrical" },
+        ],
+      },
+      {
+        id: "kitchenApplianceTier" as any,
+        type: "select-grid",
+        title: "What about appliances?",
+        showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod !== "ai",
+        choices: [
+          { value: "keep", icon: "👍", label: "Keep Existing", desc: "No new appliances" },
+          { value: "standard", icon: "🔲", label: "Standard", desc: "$3K–$6K" },
+          { value: "midrange", icon: "⭐", label: "Mid-Range", desc: "$6K–$12K" },
+          { value: "premium", icon: "👑", label: "Premium / Built-in", desc: "$12K–$25K+" },
+        ],
       },
     ],
   },

@@ -106,11 +106,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What size HVAC system do I need?",
-    a: "System size depends on your home's square footage, insulation quality, number of windows, ceiling height, and local climate. A proper Manual J load calculation is essential — never accept a quote based solely on square footage rules of thumb. An oversized system short-cycles and wastes energy.",
+    a: "System size depends on your home's square footage, insulation quality, number of windows, ceiling height, and local climate. A proper Manual J load calculation is essential. Never accept a quote based solely on square footage rules of thumb. An oversized system short-cycles and wastes energy.",
   },
   {
     q: "Do I need a permit for HVAC installation?",
-    a: "Yes — almost all HVAC installations require a mechanical permit. This ensures the work meets building codes for safety, venting, electrical connections, and refrigerant handling. Your contractor should pull the permit and schedule the required inspection.",
+    a: "Yes. Almost all HVAC installations require a mechanical permit. This ensures the work meets building codes for safety, venting, electrical connections, and refrigerant handling. Your contractor should pull the permit and schedule the required inspection.",
   },
 ];
 
@@ -475,7 +475,7 @@ function HvacInstallationGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">When is a permit required?</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Mechanical permits are required for virtually all HVAC installations — replacing equipment, adding new systems, modifying ductwork, or changing fuel types. Only minor repairs and filter replacements are exempt. Your contractor should pull the permit before starting work.
+                    Mechanical permits are required for virtually all HVAC installations: replacing equipment, adding new systems, modifying ductwork, or changing fuel types. Only minor repairs and filter replacements are exempt. Your contractor should pull the permit before starting work.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">

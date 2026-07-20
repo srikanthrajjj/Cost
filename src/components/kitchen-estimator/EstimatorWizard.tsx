@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { Loader2, AlertCircle, RefreshCw, ClipboardList } from "lucide-react";
 import {
   wizardReducer,
@@ -11,7 +11,9 @@ import {
 import { getActiveSteps } from "../../lib/kitchen-estimator/step-filter";
 import { calculateKitchenEstimate } from "../../lib/kitchen-estimator/kitchen-cost-engine";
 import { defaultKitchenCostParams } from "../../lib/kitchen-estimator/cost-params";
+import { canContinue, MIN_PHOTOS, MAX_PHOTOS } from "../../lib/kitchen-estimator/file-validation";
 import { analyzeKitchen } from "../../lib/kitchen-estimator/analyze-kitchen";
+import { extractKitchenFeatures } from "../../lib/kitchen-estimator/extract-features";
 import { PathSelector } from "./PathSelector";
 import { PhotoUploader } from "./PhotoUploader";
 import { DetectionEditor } from "./DetectionEditor";
@@ -63,15 +65,28 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
 
     if (!hasAnswers && !state.aiDetections) return null;
 
-    return calculateKitchenEstimate(state.answers, defaultKitchenCostParams);
+    return calculateKitchenEstimate(state.answers, defaultKitchenCostParams, state.aiDetections?.detectedFeatures);
   }, [state.answers, state.aiDetections]);
+
+  // ─── Auto-analyze when enough photos are uploaded ───────────────────────
+
+  useEffect(() => {
+    if (
+      state.currentPath === "ai" &&
+      !state.aiDetections &&
+      !state.isAnalyzing &&
+      canContinue(state.photos)
+    ) {
+      handleAnalyze();
+    }
+  }, [state.photos.length, state.currentPath, state.aiDetections, state.isAnalyzing]);
 
   // ─── Handlers ────────────────────────────────────────────────────────────
 
   const handleSelectPath = useCallback((path: "ai" | "manual") => {
     dispatch({ type: "SELECT_PATH", payload: path });
   }, []);
-
+ 
   const handlePhotosChange = useCallback((photos: File[]) => {
     dispatch({ type: "SET_PHOTOS", payload: photos });
   }, []);
@@ -83,10 +98,22 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
       // Convert photos to base64
       const base64Photos = await Promise.all(state.photos.map(fileToBase64));
 
-      const result = await analyzeKitchen({ data: { photos: base64Photos } });
+      // Fire both prompts in parallel:
+      //   Prompt 1 — five pricing inputs (required, drives estimate)
+      //   Prompt 2 — detailed feature extraction (enrichment, non-blocking if fails)
+      const [pricingResult, featuresResult] = await Promise.all([
+        analyzeKitchen(base64Photos),
+        extractKitchenFeatures({ data: { photos: base64Photos } }),
+      ]);
 
-      if (result.success) {
-        const detections = result.data;
+      if (pricingResult.success) {
+        const detections = pricingResult.data;
+
+        // Enrich with detailed features if available
+        if (featuresResult.success) {
+          detections.detectedFeatures = featuresResult.data;
+        }
+
         dispatch({ type: "SET_AI_RESULT", payload: detections });
 
         // Pre-fill answers from AI detections
@@ -116,10 +143,36 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
             payload: { field: "aiObservations", value: detections.observations },
           });
         }
+
+        // Auto-detect additional fields from detailed features
+        const features = detections.detectedFeatures;
+        if (features) {
+          // Island detected → auto-add island structural change
+          if (features.island?.present) {
+            dispatch({
+              type: "UPDATE_ANSWER",
+              payload: { field: "structuralChanges", value: ["island-addition"] },
+            });
+          }
+
+          // Premium or high-end appliances → suggest high-end tier
+          const fridgeType = features.appliances?.refrigerator?.type ?? "";
+          if (fridgeType.includes("BuiltIn") || fridgeType.includes("PanelReady")) {
+            dispatch({
+              type: "UPDATE_ANSWER",
+              payload: { field: "applianceTier", value: "highend" },
+            });
+          }
+        }
       } else {
-        dispatch({ type: "SET_ERROR", payload: result.error });
+        console.error("[handleAnalyze] Server returned error:", pricingResult.error, "code:", (pricingResult as any).code);
+        dispatch({ type: "SET_ERROR", payload: pricingResult.error });
       }
-    } catch {
+    } catch (err) {
+      console.error("[handleAnalyze] Caught exception:", err);
+      if (err instanceof Error) {
+        console.error("[handleAnalyze] Error name:", err.name, "| message:", err.message, "| stack:", err.stack);
+      }
       dispatch({
         type: "SET_ERROR",
         payload: "We couldn't analyze your photos. You can try again or switch to the manual estimate.",
@@ -309,7 +362,7 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
 
   if (isComplete && stepsForCurrentPath.length > 0) {
     const finalEstimate =
-      liveEstimate ?? calculateKitchenEstimate(state.answers, defaultKitchenCostParams);
+      liveEstimate ?? calculateKitchenEstimate(state.answers, defaultKitchenCostParams, state.aiDetections?.detectedFeatures);
 
     return (
       <ResultsPage

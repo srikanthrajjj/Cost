@@ -77,11 +77,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CostReno — Accurate Cost, Smarter Renovations" },
+      { title: "CostReno — Clear Costs, Smarter Renovations" },
       {
         name: "description",
         content:
-          "Accurate home improvement estimates, expert guidance, and data-driven insights. 100+ interactive calculators updated weekly.",
+          "Clear home improvement estimates, expert guidance, and data-driven insights. 100+ interactive calculators updated weekly.",
       },
       { name: "author", content: "CostReno" },
       { property: "og:title", content: "CostReno — Real home improvement costs" },

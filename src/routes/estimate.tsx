@@ -90,13 +90,45 @@ const PROJECT_NAMES: Record<string, string> = {
   electrical: "Electrical",
 };
 
+// ─── Option icons for AI detection review ─────────────────────────────────────
+const OPTION_ICONS: Record<string, string> = {
+  // Cabinets
+  "kitchenCabinets:stock": "📦",
+  "kitchenCabinets:semi-custom": "🪚",
+  "kitchenCabinets:custom": "✨",
+  // Countertops
+  "kitchenCountertops:laminate": "⬜",
+  "kitchenCountertops:quartz": "💎",
+  "kitchenCountertops:granite": "🪨",
+  "kitchenCountertops:marble": "⚪",
+  // Flooring
+  "kitchenFlooring:tile": "🔲",
+  "kitchenFlooring:hardwood": "🪵",
+  "kitchenFlooring:vinyl": "📐",
+  "kitchenFlooring:none": "✅",
+  // Backsplash
+  "kitchenBacksplash:tile": "🧱",
+  "kitchenBacksplash:glass": "🪟",
+  "kitchenBacksplash:stone": "🪨",
+  "kitchenBacksplash:none": "❌",
+  // Fixtures
+  "kitchenFixtures:keep": "👍",
+  "kitchenFixtures:standard": "🚰",
+  "kitchenFixtures:upgrade": "✨",
+  // Condition
+  "currentCondition:excellent": "🌟",
+  "currentCondition:good": "👍",
+  "currentCondition:fair": "⚠️",
+  "currentCondition:poor": "🔧",
+};
+
 // ─── Step label map ───────────────────────────────────────────────────────────
 const STEP_LABELS: Record<string, string> = {
   project: "Project",
   location: "Location",
   property: "Property",
   "details-roof": "Details",
-  "details-kitchen": "Details",
+  "details-kitchen": "Kitchen",
   "details-bathroom": "Details",
   "details-hvac": "Details",
   "details-windows": "Details",
@@ -119,9 +151,9 @@ const TIPS: Partial<Record<keyof EstimatorAnswers, string>> = {
     "A full replacement is often more cost-effective than repeated repairs on roofs older than 15 years.",
   yearBuilt: "Homes built before 1980 may require additional permits and asbestos testing.",
   kitchenCabinets:
-    "Semi-custom cabinets offer the best value — 80% of the look for 50% of custom cabinet cost.",
+    "Semi-custom cabinets offer the best value. 80% of the look for 50% of custom cabinet cost.",
   bathroomFixtures:
-    "Mid-range fixtures offer the best ROI — luxury upgrades rarely return full cost at resale.",
+    "Mid-range fixtures offer the best ROI. Luxury upgrades rarely return full cost at resale.",
   hvacType:
     "Heat pumps are up to 3× more efficient than traditional systems and may qualify for tax credits.",
   windowType:
@@ -129,7 +161,7 @@ const TIPS: Partial<Record<keyof EstimatorAnswers, string>> = {
   solarBattery:
     "Battery storage qualifies for the 30% federal ITC (Investment Tax Credit) through 2032.",
   causeOfProject:
-    "Storm and water damage claims have the highest insurance approval rates — document everything.",
+    "Storm and water damage claims have the highest insurance approval rates. Document everything.",
   currentCondition:
     "Poor condition adds 15–25% to project cost due to extra prep, demo, and repair work.",
 };
@@ -446,6 +478,22 @@ function NumberQuestion({
   onChange: (v: number) => void;
 }) {
   const [raw, setRaw] = useState(value?.toString() ?? "");
+  const [touched, setTouched] = useState(false);
+
+  const numVal = parseFloat(raw);
+  const isEmpty = raw.trim() === "";
+  const isInvalid = !isEmpty && (isNaN(numVal) || (q.min !== undefined && numVal < q.min) || (q.max !== undefined && numVal > q.max));
+
+  const errorMsg = touched && isEmpty && !q.optional
+    ? "This field is required"
+    : touched && isInvalid
+      ? q.min !== undefined && q.max !== undefined
+        ? `Enter a value between ${q.min.toLocaleString()} and ${q.max.toLocaleString()}`
+        : q.min !== undefined && numVal < q.min
+          ? `Minimum is ${q.min.toLocaleString()}`
+          : `Maximum is ${q.max?.toLocaleString()}`
+      : null;
+
   return (
     <div className="max-w-sm space-y-2">
       <div className="relative">
@@ -456,12 +504,15 @@ function NumberQuestion({
           min={q.min}
           max={q.max}
           step={q.step}
+          onBlur={() => setTouched(true)}
           onChange={(e) => {
             setRaw(e.target.value);
             const n = parseFloat(e.target.value);
             if (!isNaN(n)) onChange(n);
           }}
-          className="w-full h-14 rounded-xl border-2 border-border bg-white px-5 pr-20 text-lg font-semibold text-ink outline-none focus:border-accent transition-colors"
+          className={`w-full h-14 rounded-xl border-2 bg-white px-5 pr-20 text-lg font-semibold text-ink outline-none transition-colors ${
+            errorMsg ? "border-red-400 focus:border-red-500" : "border-border focus:border-accent"
+          }`}
         />
         {q.unit && (
           <span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
@@ -469,7 +520,12 @@ function NumberQuestion({
           </span>
         )}
       </div>
-      {q.subtitle && <p className="text-xs text-muted-foreground">{q.subtitle}</p>}
+      {errorMsg && (
+        <p className="text-xs text-red-600 flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" /> {errorMsg}
+        </p>
+      )}
+      {!errorMsg && q.subtitle && <p className="text-xs text-muted-foreground">{q.subtitle}</p>}
     </div>
   );
 }
@@ -484,18 +540,42 @@ function TextQuestion({
   value: string | undefined;
   onChange: (v: string) => void;
 }) {
+  const [touched, setTouched] = useState(false);
+  const isZip = q.id === "zipCode";
+  const isEmpty = !value || value.trim() === "";
+  const isInvalidZip = isZip && value && !/^\d{5}$/.test(value.trim());
+
+  const errorMsg = touched && isEmpty && !q.optional
+    ? "This field is required"
+    : touched && isInvalidZip
+      ? "Enter a valid 5-digit ZIP code"
+      : null;
+
   return (
-    <div className="max-w-sm">
+    <div className="max-w-sm space-y-2">
       <div className="relative">
         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           value={value ?? ""}
           placeholder={q.placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full h-14 rounded-xl border-2 border-border bg-white pl-11 pr-5 text-lg font-semibold text-ink outline-none focus:border-accent transition-colors"
+          maxLength={isZip ? 5 : undefined}
+          inputMode={isZip ? "numeric" : undefined}
+          onBlur={() => setTouched(true)}
+          onChange={(e) => {
+            const val = isZip ? e.target.value.replace(/\D/g, "").slice(0, 5) : e.target.value;
+            onChange(val);
+          }}
+          className={`w-full h-14 rounded-xl border-2 bg-white pl-11 pr-5 text-lg font-semibold text-ink outline-none transition-colors ${
+            errorMsg ? "border-red-400 focus:border-red-500" : "border-border focus:border-accent"
+          }`}
         />
       </div>
+      {errorMsg && (
+        <p className="text-xs text-red-600 flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" /> {errorMsg}
+        </p>
+      )}
     </div>
   );
 }
@@ -795,15 +875,231 @@ function StepStepper({ steps, currentIdx }: { steps: StepDef[]; currentIdx: numb
   );
 }
 
+// ─── Photo Upload Question (AI Kitchen Analysis) ─────────────────────────────
+function PhotoUploadQuestion({
+  answers,
+  onChange,
+  onAdvance,
+}: {
+  answers: EstimatorAnswers;
+  onChange: (key: keyof EstimatorAnswers, value: unknown) => void;
+  onAdvance: () => void;
+}) {
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [detections, setDetections] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = async (files: FileList | File[]) => {
+    const arr = Array.from(files).slice(0, 6 - photos.length);
+    const valid = arr.filter(
+      (f) => ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 10 * 1024 * 1024
+    );
+    if (valid.length === 0) return;
+    const newPhotos = [...photos, ...valid].slice(0, 6);
+    setPhotos(newPhotos);
+    const newPreviews = await Promise.all(
+      newPhotos.map((f) => new Promise<string>((res) => { const r = new FileReader(); r.onloadend = () => res(r.result as string); r.readAsDataURL(f); }))
+    );
+    setPreviews(newPreviews);
+  };
+
+  const handleAnalyze = async () => {
+    if (photos.length < 2) return;
+    setIsAnalyzing(true);
+    setError(null);
+    try {
+      const base64Photos = await Promise.all(
+        photos.map((f) => new Promise<string>((res) => { const r = new FileReader(); r.onloadend = () => res(r.result as string); r.readAsDataURL(f); }))
+      );
+      const { analyzeKitchen } = await import("@/lib/kitchen-estimator/analyze-kitchen");
+      const result = await analyzeKitchen(base64Photos);
+      if (result.success) {
+        setDetections(result.data);
+        // Pre-fill answers
+        const d = result.data;
+        const cabinetMap: Record<string, string> = { stock: "stock", semicustom: "semi-custom", custom: "custom", reface: "stock" };
+        const counterMap: Record<string, string> = { laminate: "laminate", quartz: "quartz", granite: "granite", marble: "marble", butcherblock: "laminate" };
+        if (d.cabinetType.value && cabinetMap[d.cabinetType.value]) onChange("kitchenCabinets" as any, cabinetMap[d.cabinetType.value]);
+        if (d.countertopMaterial.value && counterMap[d.countertopMaterial.value]) onChange("kitchenCountertops" as any, counterMap[d.countertopMaterial.value]);
+        onChange("kitchenScope" as any, "full");
+      } else {
+        setError(result.error);
+      }
+    } catch {
+      setError("Analysis failed. You can continue with manual questions instead.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleSkip = () => {
+    onChange("kitchenMethod" as any, "manual");
+    onChange("kitchenPhotos" as any, "skipped");
+  };
+
+  const handleConfirm = () => {
+    onAdvance();
+  };
+
+  // ─── POST-ANALYSIS: Show detections as editable cards ─────────────────────
+  if (detections) {
+    const confidenceColor = (c: string) =>
+      c === "high" ? "text-green-600 bg-green-50 border-green-200" :
+      c === "medium" ? "text-amber-600 bg-amber-50 border-amber-200" :
+      "text-red-600 bg-red-50 border-red-200";
+
+    // Fix confidence: condition always medium (can't assess hidden issues from photos),
+    // kitchen size stays at whatever the AI returned (usually medium/low)
+    const conditionConfidence = "medium";
+    const sizeConfidence = detections.kitchenSize.confidence === "high" ? "medium" : detections.kitchenSize.confidence;
+
+    const detectionItems = [
+      { label: "Cabinets", value: detections.cabinetType.value, confidence: detections.cabinetType.confidence, field: "kitchenCabinets", options: ["stock", "semi-custom", "custom"] },
+      { label: "Countertops", value: detections.countertopMaterial.value, confidence: detections.countertopMaterial.confidence, field: "kitchenCountertops", options: ["laminate", "quartz", "granite", "marble"] },
+      { label: "Flooring", value: detections.flooringMaterial.value, confidence: detections.flooringMaterial.confidence, field: "kitchenFlooring", options: ["tile", "hardwood", "vinyl", "none"] },
+      { label: "Backsplash", value: detections.observations?.find((o: string) => /backsplash|tile wall|subway/i.test(o)) ? "tile" : "none", confidence: "medium", field: "kitchenBacksplash", options: ["tile", "glass", "stone", "none"] },
+      { label: "Fixtures", value: "keep", confidence: "low", field: "kitchenFixtures", options: ["keep", "standard", "upgrade"] },
+      { label: "Kitchen Size", value: detections.kitchenSize.value, confidence: sizeConfidence, field: null, options: [] },
+      { label: "Condition", value: detections.overallCondition.value, confidence: conditionConfidence, field: "currentCondition", options: ["excellent", "good", "fair", "poor"] },
+    ];
+
+    return (
+      <div className="max-w-2xl mx-auto space-y-5">
+        {/* Success header */}
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/5 border border-accent/20">
+          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+            <Sparkles className="h-5 w-5 text-accent" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-ink">AI detected your kitchen details</p>
+            <p className="text-xs text-muted-foreground">Review below — tap any item to change it.</p>
+          </div>
+        </div>
+
+        {/* Detection cards with image-backed selectors */}
+        <div className="space-y-4">
+          {detectionItems.map((item) => (
+            <div key={item.label} className="p-4 rounded-xl border border-border bg-white">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium text-ink">{item.label}</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${confidenceColor(item.confidence)}`}>
+                  {item.confidence}
+                </span>
+              </div>
+              {item.field && item.options.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {item.options.map((o) => {
+                    const isSelected = ((answers as any)[item.field] || item.value) === o;
+                    const icon = OPTION_ICONS[`${item.field}:${o}`];
+                    return (
+                      <button
+                        key={o}
+                        onClick={() => onChange(item.field as any, o)}
+                        className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                          isSelected
+                            ? "border-accent bg-accent/5 shadow-sm"
+                            : "border-border bg-white hover:border-accent/40"
+                        }`}
+                      >
+                        {icon && <span className="text-xl">{icon}</span>}
+                        <span className={`text-[11px] font-medium capitalize ${isSelected ? "text-accent" : "text-muted-foreground"}`}>
+                          {o.replace("-", " ")}
+                        </span>
+                        {isSelected && (
+                          <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-accent flex items-center justify-center">
+                            <Check className="h-2.5 w-2.5 text-white" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-1 text-sm font-semibold text-ink capitalize">{item.value}</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Observations */}
+        {detections.observations?.length > 0 && (
+          <div className="p-4 rounded-xl border border-border bg-muted/20">
+            <p className="text-xs font-semibold text-ink mb-2">AI Observations</p>
+            <ul className="space-y-1">
+              {detections.observations.map((obs: string, i: number) => (
+                <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                  <span className="mt-1 w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                  {obs}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Confirm button */}
+        <button
+          onClick={handleConfirm}
+          className="w-full rounded-xl bg-accent py-3.5 text-sm font-semibold text-white hover:bg-accent/90 transition"
+        >
+          Continue with these selections →
+        </button>
+      </div>
+    );
+  }
+
+  // ─── PRE-ANALYSIS: Upload UI ──────────────────────────────────────────────
+  return (
+    <div className="max-w-lg mx-auto space-y-4">
+      <div
+        onClick={() => fileInputRef.current?.click()}
+        className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border p-6 cursor-pointer hover:border-accent/40 hover:bg-muted/20 transition-all"
+      >
+        <span className="text-2xl">📸</span>
+        <div className="text-center">
+          <p className="text-sm font-medium text-ink">Click to upload kitchen photos</p>
+          <p className="text-xs text-muted-foreground">JPEG, PNG, WebP • 2-6 photos • Max 10 MB each</p>
+        </div>
+      </div>
+      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => e.target.files && handleFiles(e.target.files)} className="hidden" />
+      {previews.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {previews.map((src, i) => (
+            <div key={i} className="aspect-square rounded-lg overflow-hidden border border-border">
+              <img src={src} alt={`Kitchen ${i + 1}`} className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="text-xs text-muted-foreground text-center">
+        {photos.length}/6 photos uploaded{photos.length < 2 && " (need at least 2)"}
+      </div>
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 text-center">{error}</div>}
+      <div className="flex flex-col gap-2">
+        <button onClick={handleAnalyze} disabled={photos.length < 2 || isAnalyzing} className="w-full rounded-xl bg-accent py-3 text-sm font-semibold text-white hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {isAnalyzing ? "Analyzing..." : "Analyze My Kitchen"}
+        </button>
+        <button onClick={handleSkip} className="w-full rounded-xl border border-border py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 transition">
+          Skip — answer manually instead
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Question Renderer ────────────────────────────────────────────────────────
 function QuestionRenderer({
   question,
   answers,
   onChange,
+  onAdvance,
 }: {
   question: Question;
   answers: EstimatorAnswers;
   onChange: (key: keyof EstimatorAnswers, value: unknown) => void;
+  onAdvance?: () => void;
 }) {
   const val = answers[question.id];
   const h = (v: unknown) => onChange(question.id, v);
@@ -819,6 +1115,11 @@ function QuestionRenderer({
     return <ToggleQuestion q={question} value={val as boolean} onChange={h} />;
   if (question.type === "budget")
     return <BudgetQuestion q={question} value={val as number} onChange={h} />;
+  if (question.type === "photo-upload")
+    return <PhotoUploadQuestion answers={answers} onChange={onChange} onAdvance={() => {
+      onChange("kitchenPhotos" as any, "analyzed");
+      if (onAdvance) setTimeout(onAdvance, 200);
+    }} />;
   return null;
 }
 
@@ -1043,47 +1344,50 @@ function FinalReport({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 function EstimatorPage() {
   const { project: urlProject } = Route.useSearch();
-  const [answers, setAnswers] = useState<EstimatorAnswers>(() => {
-    try {
-      // Check for project from URL param first, then sessionStorage, then localStorage
-      const preselected = urlProject || sessionStorage.getItem("costreno_preselected_project");
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const baseAnswers = stored ? JSON.parse(stored) : {};
-      if (preselected && !baseAnswers.projectType) {
-        return { ...baseAnswers, projectType: preselected as any };
-      }
-      return baseAnswers;
-    } catch {
-      return {};
-    }
-  });
-  const [stepIdx, setStepIdx] = useState(() => {
-    // If project was preselected from URL or chat, start at step 1 (location)
-    const preselected = urlProject || sessionStorage.getItem("costreno_preselected_project");
-    if (preselected) {
-      sessionStorage.removeItem("costreno_preselected_project"); // Clear it
-      return 1; // Start at Location step
-    }
-    return 0;
-  });
+  const [answers, setAnswers] = useState<EstimatorAnswers>({});
+  const answersRef = useRef<EstimatorAnswers>({});
+  const [stepIdx, setStepIdx] = useState(0);
   const [questionIdx, setQuestionIdx] = useState(0);
   const [done, setDone] = useState(false);
   const [estimate, setEstimate] = useState<LiveEstimate>(() => calculateEstimate({}));
+  const [zipError, setZipError] = useState<string | null>(null);
   const prevMidRef = useRef(0);
+
+  // Hydrate from storage after mount (avoids SSR hydration mismatch)
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const baseAnswers: Record<string, unknown> = stored ? JSON.parse(stored) : {};
+    const preselected = urlProject || sessionStorage.getItem("costreno_preselected_project");
+    if (preselected) {
+      sessionStorage.removeItem("costreno_preselected_project");
+      if (!baseAnswers.projectType) {
+        baseAnswers.projectType = preselected;
+      }
+      setStepIdx(1);
+    }
+    if (Object.keys(baseAnswers).length > 0) {
+      setAnswers(baseAnswers as EstimatorAnswers);
+    }
+  }, []);
 
   // Persist + recalculate
   useEffect(() => {
+    answersRef.current = answers;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
     const newEst = calculateEstimate(answers);
     prevMidRef.current = estimate.mid;
     setEstimate(newEst);
   }, [answers]);
 
-  // ZIP → city
+  // ZIP → city/state lookup
   useEffect(() => {
-    if (answers.zipCode?.length === 5 && !answers.city) {
+    if (answers.zipCode?.length === 5) {
+      setZipError(null);
       fetch(`https://api.zippopotam.us/us/${answers.zipCode}`)
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) throw new Error("Invalid ZIP");
+          return r.json();
+        })
         .then((d) => {
           if (d?.places?.[0]) {
             const p = d.places[0];
@@ -1092,9 +1396,20 @@ function EstimatorPage() {
               city: p["place name"],
               state: p["state abbreviation"],
             }));
+            setZipError(null);
+          } else {
+            throw new Error("No results");
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          setAnswers((prev) => ({ ...prev, city: undefined, state: undefined }));
+          setZipError("ZIP code not found. Please enter a valid US ZIP code.");
+        });
+    } else if (answers.zipCode && answers.zipCode.length < 5) {
+      // Clear while typing
+      if (answers.city) {
+        setAnswers((prev) => ({ ...prev, city: undefined, state: undefined }));
+      }
     }
   }, [answers.zipCode]);
 
@@ -1116,13 +1431,26 @@ function EstimatorPage() {
   const isAnswered = (q: Question) => {
     if (q.optional) return true;
     const v = answers[q.id];
-    return v !== undefined && v !== null && v !== "";
+    if (v === undefined || v === null || v === "") return false;
+    // Validate number fields are within range
+    if (q.type === "number" && typeof v === "number") {
+      if (q.min !== undefined && v < q.min) return false;
+      if (q.max !== undefined && v > q.max) return false;
+    }
+    // Validate ZIP code format
+    if (q.id === "zipCode" && typeof v === "string") {
+      if (!/^\d{5}$/.test(v.trim())) return false;
+      // Must have resolved to a city (valid ZIP)
+      if (!answers.city) return false;
+    }
+    return true;
   };
 
   const advance = useCallback(() => {
+    const currentAnswers = answersRef.current;
     let nextQ = questionIdx + 1;
     while (nextQ < questions.length) {
-      if (!questions[nextQ].showIf || questions[nextQ].showIf!(answers)) break;
+      if (!questions[nextQ].showIf || questions[nextQ].showIf!(currentAnswers)) break;
       nextQ++;
     }
     if (nextQ < questions.length) {
@@ -1130,26 +1458,42 @@ function EstimatorPage() {
       return;
     }
     let nextS = stepIdx + 1;
-    const newSteps = getActiveSteps({ ...answers });
+    const newSteps = getActiveSteps(currentAnswers);
     while (nextS < newSteps.length) {
-      if (!newSteps[nextS].showIf || newSteps[nextS].showIf!(answers)) break;
+      if (!newSteps[nextS].showIf || newSteps[nextS].showIf!(currentAnswers)) break;
       nextS++;
     }
     if (nextS < newSteps.length) {
       setStepIdx(nextS);
       setQuestionIdx(0);
     } else setDone(true);
-  }, [questionIdx, questions, stepIdx, answers]);
+  }, [questionIdx, questions, stepIdx]);
 
   const back = () => {
     if (questionIdx > 0) {
-      setQuestionIdx(questionIdx - 1);
-      return;
+      // Find the previous visible question
+      let prevQ = questionIdx - 1;
+      while (prevQ >= 0) {
+        const q = questions[prevQ];
+        if (!q.showIf || q.showIf(answers)) break;
+        prevQ--;
+      }
+      if (prevQ >= 0) {
+        setQuestionIdx(prevQ);
+        return;
+      }
     }
     if (stepIdx > 0) {
       const ps = steps[stepIdx - 1];
       setStepIdx(stepIdx - 1);
-      setQuestionIdx(ps.questions.length - 1);
+      // Find the last visible question in the previous step
+      let lastQ = ps.questions.length - 1;
+      while (lastQ >= 0) {
+        const q = ps.questions[lastQ];
+        if (!q.showIf || q.showIf(answers)) break;
+        lastQ--;
+      }
+      setQuestionIdx(Math.max(0, lastQ));
     }
   };
 
@@ -1279,12 +1623,18 @@ function EstimatorPage() {
                     question={currentQuestion}
                     answers={answers}
                     onChange={handleAnswerChange}
+                    onAdvance={advance}
                   />
 
                   {/* ZIP detected badge */}
                   {currentQuestion.id === "zipCode" && answers.city && (
                     <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 text-accent text-xs font-semibold">
                       <CheckCircle2 className="h-4 w-4" /> Detected: {answers.city}, {answers.state}
+                    </div>
+                  )}
+                  {currentQuestion.id === "zipCode" && zipError && (
+                    <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
+                      <AlertCircle className="h-4 w-4" /> {zipError}
                     </div>
                   )}
 

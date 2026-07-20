@@ -198,9 +198,9 @@ function ProjectLandingPage() {
           </p>
           <div className="space-y-4">
             {[
-              { step: "1", title: "Initial Assessment", desc: `A licensed contractor inspects your property, takes measurements, and discusses your goals. They should provide a written, itemized estimate within 2-3 days — not a verbal ballpark on the spot.` },
+              { step: "1", title: "Initial Assessment", desc: `A licensed contractor inspects your property, takes measurements, and discusses your goals. They should provide a written, itemized estimate within 2-3 days, not a verbal ballpark on the spot.` },
               { step: "2", title: "Material Selection & Permits", desc: `You choose materials based on budget, durability, and aesthetics. Your contractor handles permit applications. This stage takes 1-2 weeks depending on your municipality.` },
-              { step: "3", title: "Preparation & Demolition", desc: `The work area is protected and old materials are removed. This is when hidden issues (rot, water damage, structural problems) typically surface — expect a potential change order here.` },
+              { step: "3", title: "Preparation & Demolition", desc: `The work area is protected and old materials are removed. This is when hidden issues (rot, water damage, structural problems) typically surface. Expect a potential change order here.` },
               { step: "4", title: "Installation", desc: `New materials are installed according to manufacturer specifications and local building codes. Quality contractors document their work with photos at each stage.` },
               { step: "5", title: "Inspection & Walkthrough", desc: `A final inspection ensures everything meets code. You walk the completed project with your contractor against the original written scope before releasing final payment.` },
             ].map((s) => (
@@ -365,7 +365,7 @@ function ProjectLandingPage() {
             href={`/estimate?project=${project.projectType}`}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
           >
-            Get Instant Estimate — Free <ArrowRight className="h-4 w-4" />
+            Get Instant Estimate. Free <ArrowRight className="h-4 w-4" />
           </a>
         </div>
       </div>

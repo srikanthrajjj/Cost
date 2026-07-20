@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
+import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel-cost'
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
@@ -24,6 +25,11 @@ import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathr
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
   id: '/quote-analyzer',
   path: '/quote-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MethodologyRoute = MethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KitchenRemodelCostRoute = KitchenRemodelCostRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
+  '/methodology': typeof MethodologyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
+  '/methodology': typeof MethodologyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/$projectSlug': typeof ProjectSlugRoute
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
+  '/methodology': typeof MethodologyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/$projectSlug'
     | '/estimate'
     | '/kitchen-remodel-cost'
+    | '/methodology'
     | '/quote-analyzer'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/$projectSlug'
     | '/estimate'
     | '/kitchen-remodel-cost'
+    | '/methodology'
     | '/quote-analyzer'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/$projectSlug'
     | '/estimate'
     | '/kitchen-remodel-cost'
+    | '/methodology'
     | '/quote-analyzer'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   ProjectSlugRoute: typeof ProjectSlugRoute
   EstimateRoute: typeof EstimateRoute
   KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
+  MethodologyRoute: typeof MethodologyRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/quote-analyzer'
       fullPath: '/quote-analyzer'
       preLoaderRoute: typeof QuoteAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/methodology': {
+      id: '/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof MethodologyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kitchen-remodel-cost': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectSlugRoute: ProjectSlugRoute,
   EstimateRoute: EstimateRoute,
   KitchenRemodelCostRoute: KitchenRemodelCostRoute,
+  MethodologyRoute: MethodologyRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
