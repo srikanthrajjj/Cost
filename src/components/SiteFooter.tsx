@@ -162,8 +162,16 @@ export function SiteFooter() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-white/70 hover:text-accent transition">
+                <a href="/privacy" className="text-sm text-white/70 hover:text-accent transition">
                   Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/disclaimer"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Disclaimer
                 </a>
               </li>
               <li>
@@ -188,8 +196,11 @@ export function SiteFooter() {
             © 2026 CostReno. All rights reserved. Estimates are for planning purposes only.
           </p>
           <div className="flex items-center gap-4 text-xs text-white/40">
-            <a href="#" className="hover:text-white/70 transition">
+            <a href="/privacy" className="hover:text-white/70 transition">
               Privacy
+            </a>
+            <a href="/disclaimer" className="hover:text-white/70 transition">
+              Disclaimer
             </a>
             <a href="#" className="hover:text-white/70 transition">
               Terms
