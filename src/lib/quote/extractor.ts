@@ -13,9 +13,8 @@ export async function extractQuote(
 ): Promise<QuoteExtraction> {
   // Truncate input to avoid overwhelming the model
   const maxInputChars = 5000;
-  const truncatedText = text.length > maxInputChars
-    ? text.substring(0, maxInputChars) + "\n[...truncated...]"
-    : text;
+  const truncatedText =
+    text.length > maxInputChars ? text.substring(0, maxInputChars) + "\n[...truncated...]" : text;
 
   const systemPrompt = `You are a JSON extraction bot. You read contractor quotes and output structured JSON. NEVER output explanations, safety notes, or anything except valid JSON.
 
@@ -53,7 +52,7 @@ RULES:
     (content.length < 20 && !content.includes("{"))
   ) {
     throw new Error(
-      "The AI model refused to process this document. Please try uploading again or use a different file format."
+      "The AI model refused to process this document. Please try uploading again or use a different file format.",
     );
   }
 
@@ -67,10 +66,14 @@ RULES:
       try {
         raw = JSON.parse(jsonMatch[0]);
       } catch {
-        throw new Error(`Could not parse AI response as JSON. The model returned: "${content.substring(0, 150)}..."`);
+        throw new Error(
+          `Could not parse AI response as JSON. The model returned: "${content.substring(0, 150)}..."`,
+        );
       }
     } else {
-      throw new Error(`Could not parse AI response as JSON. The model returned: "${content.substring(0, 150)}..."`);
+      throw new Error(
+        `Could not parse AI response as JSON. The model returned: "${content.substring(0, 150)}..."`,
+      );
     }
   }
 
@@ -78,7 +81,7 @@ RULES:
   const extraction = normalizeExtraction(raw);
   if (extraction.materials.length === 0 && extraction.scopeItems.length === 0) {
     throw new Error(
-      "The AI could not extract any items from this document. The PDF may be scanned/image-based. Try a text-based PDF or paste the quote text directly."
+      "The AI could not extract any items from this document. The PDF may be scanned/image-based. Try a text-based PDF or paste the quote text directly.",
     );
   }
 

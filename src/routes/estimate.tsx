@@ -248,7 +248,7 @@ function CardsQuestion({
 
   const handleNotifySubmit = async (projectValue: string) => {
     if (!notifyEmail.trim()) return;
-    
+
     try {
       // TODO: Send email to backend for notification list
       console.log(`Notifying ${notifyEmail} for project: ${projectValue}`);
@@ -296,9 +296,7 @@ function CardsQuestion({
                 </div>
 
                 {/* Project name */}
-                <span className="text-sm font-semibold leading-tight text-ink">
-                  {c.label}
-                </span>
+                <span className="text-sm font-semibold leading-tight text-ink">{c.label}</span>
 
                 {/* Amount */}
                 {amount && (
@@ -482,17 +480,22 @@ function NumberQuestion({
 
   const numVal = parseFloat(raw);
   const isEmpty = raw.trim() === "";
-  const isInvalid = !isEmpty && (isNaN(numVal) || (q.min !== undefined && numVal < q.min) || (q.max !== undefined && numVal > q.max));
+  const isInvalid =
+    !isEmpty &&
+    (isNaN(numVal) ||
+      (q.min !== undefined && numVal < q.min) ||
+      (q.max !== undefined && numVal > q.max));
 
-  const errorMsg = touched && isEmpty && !q.optional
-    ? "This field is required"
-    : touched && isInvalid
-      ? q.min !== undefined && q.max !== undefined
-        ? `Enter a value between ${q.min.toLocaleString()} and ${q.max.toLocaleString()}`
-        : q.min !== undefined && numVal < q.min
-          ? `Minimum is ${q.min.toLocaleString()}`
-          : `Maximum is ${q.max?.toLocaleString()}`
-      : null;
+  const errorMsg =
+    touched && isEmpty && !q.optional
+      ? "This field is required"
+      : touched && isInvalid
+        ? q.min !== undefined && q.max !== undefined
+          ? `Enter a value between ${q.min.toLocaleString()} and ${q.max.toLocaleString()}`
+          : q.min !== undefined && numVal < q.min
+            ? `Minimum is ${q.min.toLocaleString()}`
+            : `Maximum is ${q.max?.toLocaleString()}`
+        : null;
 
   return (
     <div className="max-w-sm space-y-2">
@@ -545,11 +548,12 @@ function TextQuestion({
   const isEmpty = !value || value.trim() === "";
   const isInvalidZip = isZip && value && !/^\d{5}$/.test(value.trim());
 
-  const errorMsg = touched && isEmpty && !q.optional
-    ? "This field is required"
-    : touched && isInvalidZip
-      ? "Enter a valid 5-digit ZIP code"
-      : null;
+  const errorMsg =
+    touched && isEmpty && !q.optional
+      ? "This field is required"
+      : touched && isInvalidZip
+        ? "Enter a valid 5-digit ZIP code"
+        : null;
 
   return (
     <div className="max-w-sm space-y-2">
@@ -895,13 +899,21 @@ function PhotoUploadQuestion({
   const handleFiles = async (files: FileList | File[]) => {
     const arr = Array.from(files).slice(0, 6 - photos.length);
     const valid = arr.filter(
-      (f) => ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 10 * 1024 * 1024
+      (f) =>
+        ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 10 * 1024 * 1024,
     );
     if (valid.length === 0) return;
     const newPhotos = [...photos, ...valid].slice(0, 6);
     setPhotos(newPhotos);
     const newPreviews = await Promise.all(
-      newPhotos.map((f) => new Promise<string>((res) => { const r = new FileReader(); r.onloadend = () => res(r.result as string); r.readAsDataURL(f); }))
+      newPhotos.map(
+        (f) =>
+          new Promise<string>((res) => {
+            const r = new FileReader();
+            r.onloadend = () => res(r.result as string);
+            r.readAsDataURL(f);
+          }),
+      ),
     );
     setPreviews(newPreviews);
   };
@@ -912,7 +924,14 @@ function PhotoUploadQuestion({
     setError(null);
     try {
       const base64Photos = await Promise.all(
-        photos.map((f) => new Promise<string>((res) => { const r = new FileReader(); r.onloadend = () => res(r.result as string); r.readAsDataURL(f); }))
+        photos.map(
+          (f) =>
+            new Promise<string>((res) => {
+              const r = new FileReader();
+              r.onloadend = () => res(r.result as string);
+              r.readAsDataURL(f);
+            }),
+        ),
       );
       const { analyzeKitchen } = await import("@/lib/kitchen-estimator/analyze-kitchen");
       const result = await analyzeKitchen(base64Photos);
@@ -920,10 +939,23 @@ function PhotoUploadQuestion({
         setDetections(result.data);
         // Pre-fill answers
         const d = result.data;
-        const cabinetMap: Record<string, string> = { stock: "stock", semicustom: "semi-custom", custom: "custom", reface: "stock" };
-        const counterMap: Record<string, string> = { laminate: "laminate", quartz: "quartz", granite: "granite", marble: "marble", butcherblock: "laminate" };
-        if (d.cabinetType.value && cabinetMap[d.cabinetType.value]) onChange("kitchenCabinets" as any, cabinetMap[d.cabinetType.value]);
-        if (d.countertopMaterial.value && counterMap[d.countertopMaterial.value]) onChange("kitchenCountertops" as any, counterMap[d.countertopMaterial.value]);
+        const cabinetMap: Record<string, string> = {
+          stock: "stock",
+          semicustom: "semi-custom",
+          custom: "custom",
+          reface: "stock",
+        };
+        const counterMap: Record<string, string> = {
+          laminate: "laminate",
+          quartz: "quartz",
+          granite: "granite",
+          marble: "marble",
+          butcherblock: "laminate",
+        };
+        if (d.cabinetType.value && cabinetMap[d.cabinetType.value])
+          onChange("kitchenCabinets" as any, cabinetMap[d.cabinetType.value]);
+        if (d.countertopMaterial.value && counterMap[d.countertopMaterial.value])
+          onChange("kitchenCountertops" as any, counterMap[d.countertopMaterial.value]);
         onChange("kitchenScope" as any, "full");
       } else {
         setError(result.error);
@@ -947,23 +979,70 @@ function PhotoUploadQuestion({
   // ─── POST-ANALYSIS: Show detections as editable cards ─────────────────────
   if (detections) {
     const confidenceColor = (c: string) =>
-      c === "high" ? "text-green-600 bg-green-50 border-green-200" :
-      c === "medium" ? "text-amber-600 bg-amber-50 border-amber-200" :
-      "text-red-600 bg-red-50 border-red-200";
+      c === "high"
+        ? "text-green-600 bg-green-50 border-green-200"
+        : c === "medium"
+          ? "text-amber-600 bg-amber-50 border-amber-200"
+          : "text-red-600 bg-red-50 border-red-200";
 
     // Fix confidence: condition always medium (can't assess hidden issues from photos),
     // kitchen size stays at whatever the AI returned (usually medium/low)
     const conditionConfidence = "medium";
-    const sizeConfidence = detections.kitchenSize.confidence === "high" ? "medium" : detections.kitchenSize.confidence;
+    const sizeConfidence =
+      detections.kitchenSize.confidence === "high" ? "medium" : detections.kitchenSize.confidence;
 
     const detectionItems = [
-      { label: "Cabinets", value: detections.cabinetType.value, confidence: detections.cabinetType.confidence, field: "kitchenCabinets", options: ["stock", "semi-custom", "custom"] },
-      { label: "Countertops", value: detections.countertopMaterial.value, confidence: detections.countertopMaterial.confidence, field: "kitchenCountertops", options: ["laminate", "quartz", "granite", "marble"] },
-      { label: "Flooring", value: detections.flooringMaterial.value, confidence: detections.flooringMaterial.confidence, field: "kitchenFlooring", options: ["tile", "hardwood", "vinyl", "none"] },
-      { label: "Backsplash", value: detections.observations?.find((o: string) => /backsplash|tile wall|subway/i.test(o)) ? "tile" : "none", confidence: "medium", field: "kitchenBacksplash", options: ["tile", "glass", "stone", "none"] },
-      { label: "Fixtures", value: "keep", confidence: "low", field: "kitchenFixtures", options: ["keep", "standard", "upgrade"] },
-      { label: "Kitchen Size", value: detections.kitchenSize.value, confidence: sizeConfidence, field: null, options: [] },
-      { label: "Condition", value: detections.overallCondition.value, confidence: conditionConfidence, field: "currentCondition", options: ["excellent", "good", "fair", "poor"] },
+      {
+        label: "Cabinets",
+        value: detections.cabinetType.value,
+        confidence: detections.cabinetType.confidence,
+        field: "kitchenCabinets",
+        options: ["stock", "semi-custom", "custom"],
+      },
+      {
+        label: "Countertops",
+        value: detections.countertopMaterial.value,
+        confidence: detections.countertopMaterial.confidence,
+        field: "kitchenCountertops",
+        options: ["laminate", "quartz", "granite", "marble"],
+      },
+      {
+        label: "Flooring",
+        value: detections.flooringMaterial.value,
+        confidence: detections.flooringMaterial.confidence,
+        field: "kitchenFlooring",
+        options: ["tile", "hardwood", "vinyl", "none"],
+      },
+      {
+        label: "Backsplash",
+        value: detections.observations?.find((o: string) => /backsplash|tile wall|subway/i.test(o))
+          ? "tile"
+          : "none",
+        confidence: "medium",
+        field: "kitchenBacksplash",
+        options: ["tile", "glass", "stone", "none"],
+      },
+      {
+        label: "Fixtures",
+        value: "keep",
+        confidence: "low",
+        field: "kitchenFixtures",
+        options: ["keep", "standard", "upgrade"],
+      },
+      {
+        label: "Kitchen Size",
+        value: detections.kitchenSize.value,
+        confidence: sizeConfidence,
+        field: null,
+        options: [],
+      },
+      {
+        label: "Condition",
+        value: detections.overallCondition.value,
+        confidence: conditionConfidence,
+        field: "currentCondition",
+        options: ["excellent", "good", "fair", "poor"],
+      },
     ];
 
     return (
@@ -975,7 +1054,9 @@ function PhotoUploadQuestion({
           </div>
           <div>
             <p className="text-sm font-semibold text-ink">AI detected your kitchen details</p>
-            <p className="text-xs text-muted-foreground">Review below — tap any item to change it.</p>
+            <p className="text-xs text-muted-foreground">
+              Review below — tap any item to change it.
+            </p>
           </div>
         </div>
 
@@ -984,8 +1065,10 @@ function PhotoUploadQuestion({
           {detectionItems.map((item) => (
             <div key={item.label} className="p-4 rounded-xl border border-border bg-white">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-ink">{item.label}</span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${confidenceColor(item.confidence)}`}>
+                <span className="text-sm font-bold text-ink">{item.label}</span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${confidenceColor(item.confidence)}`}
+                >
                   {item.confidence}
                 </span>
               </div>
@@ -1005,7 +1088,9 @@ function PhotoUploadQuestion({
                         }`}
                       >
                         {icon && <span className="text-xl">{icon}</span>}
-                        <span className={`text-[11px] font-medium capitalize ${isSelected ? "text-accent" : "text-muted-foreground"}`}>
+                        <span
+                          className={`text-[11px] font-medium capitalize ${isSelected ? "text-accent" : "text-muted-foreground"}`}
+                        >
                           {o.replace("-", " ")}
                         </span>
                         {isSelected && (
@@ -1060,10 +1145,19 @@ function PhotoUploadQuestion({
         <span className="text-2xl">📸</span>
         <div className="text-center">
           <p className="text-sm font-medium text-ink">Click to upload kitchen photos</p>
-          <p className="text-xs text-muted-foreground">JPEG, PNG, WebP • 2-6 photos • Max 10 MB each</p>
+          <p className="text-xs text-muted-foreground">
+            JPEG, PNG, WebP • 2-6 photos • Max 10 MB each
+          </p>
         </div>
       </div>
-      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => e.target.files && handleFiles(e.target.files)} className="hidden" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        onChange={(e) => e.target.files && handleFiles(e.target.files)}
+        className="hidden"
+      />
       {previews.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {previews.map((src, i) => (
@@ -1076,12 +1170,23 @@ function PhotoUploadQuestion({
       <div className="text-xs text-muted-foreground text-center">
         {photos.length}/6 photos uploaded{photos.length < 2 && " (need at least 2)"}
       </div>
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 text-center">{error}</div>}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 text-center">
+          {error}
+        </div>
+      )}
       <div className="flex flex-col gap-2">
-        <button onClick={handleAnalyze} disabled={photos.length < 2 || isAnalyzing} className="w-full rounded-xl bg-accent py-3 text-sm font-semibold text-white hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+        <button
+          onClick={handleAnalyze}
+          disabled={photos.length < 2 || isAnalyzing}
+          className="w-full rounded-xl bg-accent py-3 text-sm font-semibold text-white hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           {isAnalyzing ? "Analyzing..." : "Analyze My Kitchen"}
         </button>
-        <button onClick={handleSkip} className="w-full rounded-xl border border-border py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 transition">
+        <button
+          onClick={handleSkip}
+          className="w-full rounded-xl border border-border py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 transition"
+        >
           Skip — answer manually instead
         </button>
       </div>
@@ -1116,10 +1221,16 @@ function QuestionRenderer({
   if (question.type === "budget")
     return <BudgetQuestion q={question} value={val as number} onChange={h} />;
   if (question.type === "photo-upload")
-    return <PhotoUploadQuestion answers={answers} onChange={onChange} onAdvance={() => {
-      onChange("kitchenPhotos" as any, "analyzed");
-      if (onAdvance) setTimeout(onAdvance, 200);
-    }} />;
+    return (
+      <PhotoUploadQuestion
+        answers={answers}
+        onChange={onChange}
+        onAdvance={() => {
+          onChange("kitchenPhotos" as any, "analyzed");
+          if (onAdvance) setTimeout(onAdvance, 200);
+        }}
+      />
+    );
   return null;
 }
 
@@ -1157,15 +1268,52 @@ function FinalReport({
         electrical: "Electrical",
       };
 
+      // Build details from answers
+      const details: Record<string, string> = {};
+      if (answers.zipCode)
+        details["Location"] =
+          `${answers.city || ""} ${answers.state || ""} ${answers.zipCode}`.trim();
+      if (answers.propertyType) details["Property Type"] = answers.propertyType.replace("-", " ");
+      if (answers.squareFootage)
+        details[answers.projectType === "kitchen" ? "Kitchen Size" : "Home Size"] =
+          `${answers.squareFootage.toLocaleString()} sq ft`;
+      if (answers.yearBuilt) details["Year Built"] = String(answers.yearBuilt);
+      // Kitchen-specific
+      if (answers.kitchenCabinets) details["Cabinets"] = answers.kitchenCabinets.replace("-", " ");
+      if (answers.kitchenCountertops) details["Countertops"] = answers.kitchenCountertops;
+      if (answers.kitchenFlooring) details["Flooring"] = answers.kitchenFlooring;
+      if ((answers as any).kitchenLayout)
+        details["Layout Changes"] = (answers as any).kitchenLayout;
+      if ((answers as any).kitchenApplianceTier)
+        details["Appliances"] = (answers as any).kitchenApplianceTier;
+      if ((answers as any).kitchenBacksplash)
+        details["Backsplash"] = (answers as any).kitchenBacksplash;
+      // Roof-specific
+      if (answers.roofAction) details["Action"] = answers.roofAction;
+      if (answers.roofMaterial) details["Material"] = answers.roofMaterial;
+      if (answers.roofSize) details["Roof Size"] = `${answers.roofSize.toLocaleString()} sq ft`;
+      // General
+      if (answers.currentCondition) details["Current Condition"] = answers.currentCondition;
+      if (answers.startTimeline) details["Timeline"] = answers.startTimeline.replace("-", " ");
+
       await submitEmailAndDownload({
-        filename: `estimate-${answers.projectType}-${new Date().getTime()}.html`,
+        filename: `costreno-estimate-${answers.projectType}-${Date.now()}.html`,
         email,
         reportType: "estimate",
         data: {
           projectType: projectLabel[answers.projectType ?? ""] ?? "Your Project",
           estimate: fmt(estimate.mid),
+          range: `${fmt(estimate.low)} – ${fmt(estimate.high)}`,
           confidence: estimate.confidence,
-          timestamp: new Date().toLocaleString(),
+          location:
+            answers.city && answers.state
+              ? `${answers.city}, ${answers.state} ${answers.zipCode || ""}`
+              : answers.zipCode || "",
+          timeline: estimate.timeline,
+          permitRequired: estimate.permitRequired,
+          insuranceEligible: estimate.insuranceEligible,
+          breakdown: estimate.breakdown,
+          details,
         },
       });
     } catch (error) {
@@ -1294,24 +1442,43 @@ function FinalReport({
           Recommended Next Steps
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {nextSteps.map((s) => (
-            <button
-              key={s.label}
-              onClick={s.label === "Download PDF Report" ? handleDownloadClick : undefined}
-              className="group flex items-center gap-3 p-4 rounded-xl border border-border hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:text-white transition-all">
-                <s.icon className="h-5 w-5 text-accent group-hover:text-white transition-colors" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-ink group-hover:text-accent transition-colors">
-                  {s.label}
+          {nextSteps.map((s) => {
+            const isQuoteUpload = s.label === "Upload Contractor Quote";
+            const handleClick = () => {
+              if (s.label === "Download PDF Report") handleDownloadClick();
+              else if (isQuoteUpload) window.location.href = "/quote-analyzer";
+            };
+            return (
+              <button
+                key={s.label}
+                onClick={handleClick}
+                className={`group flex items-center gap-3 p-4 rounded-xl border transition-all text-left ${
+                  isQuoteUpload
+                    ? "border-accent/60 shadow-[0_0_0_1px_rgba(3,164,77,0.15)] hover:shadow-[0_0_0_3px_rgba(3,164,77,0.2)] hover:border-accent hover:-translate-y-0.5 bg-accent/[0.03]"
+                    : "border-border hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5"
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                    isQuoteUpload
+                      ? "bg-accent/15 group-hover:bg-accent group-hover:text-white"
+                      : "bg-accent/10 group-hover:bg-accent group-hover:text-white"
+                  }`}
+                >
+                  <s.icon className="h-5 w-5 text-accent group-hover:text-white transition-colors" />
                 </div>
-                <div className="text-xs text-muted-foreground">{s.desc}</div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-accent transition-all shrink-0" />
-            </button>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={`text-sm font-semibold group-hover:text-accent transition-colors ${isQuoteUpload ? "text-accent" : "text-ink"}`}
+                  >
+                    {s.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{s.desc}</div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-accent transition-all shrink-0" />
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1686,5 +1853,3 @@ function EstimatorPage() {
     </div>
   );
 }
-
-

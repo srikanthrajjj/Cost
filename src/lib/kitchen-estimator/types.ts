@@ -153,13 +153,7 @@ export interface KitchenEstimateAnswers {
   kitchenSize: "small" | "medium" | "large";
   remodelScope: "cosmetic" | "midrange" | "full";
   cabinetType: "stock" | "semicustom" | "custom" | "reface";
-  countertopMaterial:
-    | "laminate"
-    | "quartz"
-    | "granite"
-    | "marble"
-    | "butcherblock"
-    | "keep";
+  countertopMaterial: "laminate" | "quartz" | "granite" | "marble" | "butcherblock" | "keep";
   flooringChoice: "tile" | "hardwood" | "vinyl" | "keep" | "none";
   applianceTier: "keep" | "midrange" | "highend";
 

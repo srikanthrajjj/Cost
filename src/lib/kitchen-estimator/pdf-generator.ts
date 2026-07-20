@@ -52,7 +52,7 @@ function buildBreakdownRows(breakdown: CostBreakdownItem[]): string {
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e7eb;">${item.category}</td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${formatCurrency(item.amount)}</td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">${item.percentage}%</td>
-      </tr>`
+      </tr>`,
     )
     .join("");
 }
@@ -62,7 +62,7 @@ function buildBreakdownRows(breakdown: CostBreakdownItem[]): string {
  */
 function buildAIObservationsSection(
   aiDetections: AIDetectionResult,
-  aiObservations?: string[]
+  aiObservations?: string[],
 ): string {
   const observations = aiObservations ?? aiDetections.observations;
   if (!observations || observations.length === 0) return "";
@@ -114,9 +114,7 @@ function buildAIObservationsSection(
 /**
  * Builds the material recommendations section HTML.
  */
-function buildMaterialRecommendations(
-  recommendations: MaterialRecommendation[]
-): string {
+function buildMaterialRecommendations(recommendations: MaterialRecommendation[]): string {
   if (!recommendations || recommendations.length === 0) return "";
 
   const rows = recommendations
@@ -129,7 +127,7 @@ function buildMaterialRecommendations(
           ${rec.costDifference > 0 ? "+" : ""}${formatCurrency(rec.costDifference)}
         </td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">${rec.description}</td>
-      </tr>`
+      </tr>`,
     )
     .join("");
 
@@ -163,7 +161,7 @@ function buildContractorQuestions(questions: string[]): string {
   const items = questions
     .map(
       (q, i) =>
-        `<li style="margin-bottom: 8px; padding-left: 4px;"><span style="font-weight: 600; color: #082A4B;">${i + 1}.</span> ${q}</li>`
+        `<li style="margin-bottom: 8px; padding-left: 4px;"><span style="font-weight: 600; color: #082A4B;">${i + 1}.</span> ${q}</li>`,
     )
     .join("");
 
@@ -185,22 +183,16 @@ function buildPDFHTML(data: PDFGeneratorInput): string {
   const { estimate, answers, aiDetections } = data;
   const date = getFormattedDate();
 
-  const locationText = [answers.city, answers.state, answers.zipCode]
-    .filter(Boolean)
-    .join(", ");
+  const locationText = [answers.city, answers.state, answers.zipCode].filter(Boolean).join(", ");
 
   const aiObservationsHTML =
     answers.path === "ai" && aiDetections
       ? buildAIObservationsSection(aiDetections, answers.aiObservations)
       : "";
 
-  const materialRecsHTML = buildMaterialRecommendations(
-    estimate.materialRecommendations
-  );
+  const materialRecsHTML = buildMaterialRecommendations(estimate.materialRecommendations);
 
-  const contractorQuestionsHTML = buildContractorQuestions(
-    estimate.contractorQuestions
-  );
+  const contractorQuestionsHTML = buildContractorQuestions(estimate.contractorQuestions);
 
   return `<!DOCTYPE html>
 <html lang="en">

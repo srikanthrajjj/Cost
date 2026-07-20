@@ -55,11 +55,36 @@ const TABLE_OF_CONTENTS = [
 ];
 
 const MATERIAL_COSTS = [
-  { material: "Asphalt Shingles", range: "$5,707–$10,772", lifespan: "20–30 years", best: "Budget-friendly" },
-  { material: "Metal Roofing", range: "$12,000–$24,000", lifespan: "40–70 years", best: "Longevity" },
-  { material: "Wood Shakes", range: "$10,000–$18,000", lifespan: "25–30 years", best: "Aesthetics" },
-  { material: "Clay/Concrete Tiles", range: "$15,000–$30,000", lifespan: "50+ years", best: "Durability" },
-  { material: "Slate", range: "$20,000–$40,000+", lifespan: "75–100 years", best: "Premium longevity" },
+  {
+    material: "Asphalt Shingles",
+    range: "$5,707–$10,772",
+    lifespan: "20–30 years",
+    best: "Budget-friendly",
+  },
+  {
+    material: "Metal Roofing",
+    range: "$12,000–$24,000",
+    lifespan: "40–70 years",
+    best: "Longevity",
+  },
+  {
+    material: "Wood Shakes",
+    range: "$10,000–$18,000",
+    lifespan: "25–30 years",
+    best: "Aesthetics",
+  },
+  {
+    material: "Clay/Concrete Tiles",
+    range: "$15,000–$30,000",
+    lifespan: "50+ years",
+    best: "Durability",
+  },
+  {
+    material: "Slate",
+    range: "$20,000–$40,000+",
+    lifespan: "75–100 years",
+    best: "Premium longevity",
+  },
 ];
 
 const SIGNS_LIST = [
@@ -74,12 +99,36 @@ const SIGNS_LIST = [
 ];
 
 const PROCESS_STEPS = [
-  { step: "1", title: "Initial Inspection & Estimate", desc: "A licensed roofer inspects your roof, identifies damage, measures the area, and provides a detailed written estimate with material options." },
-  { step: "2", title: "Material Selection", desc: "Choose your roofing material based on budget, climate, aesthetics, and longevity. Your contractor should provide samples and warranty information." },
-  { step: "3", title: "Permits & Scheduling", desc: "Your contractor pulls necessary permits from the local building department. Most municipalities require a permit for full roof replacements." },
-  { step: "4", title: "Tear-Off & Preparation", desc: "The old roofing material is removed down to the decking. Any rotted or damaged decking is replaced. Ice & water shield and underlayment are installed." },
-  { step: "5", title: "Installation", desc: "New roofing material is installed following manufacturer specifications. Flashing is replaced around chimneys, vents, and valleys." },
-  { step: "6", title: "Cleanup & Final Inspection", desc: "Debris is removed, a magnetic sweep catches stray nails, and a final inspection ensures everything meets code and manufacturer standards." },
+  {
+    step: "1",
+    title: "Initial Inspection & Estimate",
+    desc: "A licensed roofer inspects your roof, identifies damage, measures the area, and provides a detailed written estimate with material options.",
+  },
+  {
+    step: "2",
+    title: "Material Selection",
+    desc: "Choose your roofing material based on budget, climate, aesthetics, and longevity. Your contractor should provide samples and warranty information.",
+  },
+  {
+    step: "3",
+    title: "Permits & Scheduling",
+    desc: "Your contractor pulls necessary permits from the local building department. Most municipalities require a permit for full roof replacements.",
+  },
+  {
+    step: "4",
+    title: "Tear-Off & Preparation",
+    desc: "The old roofing material is removed down to the decking. Any rotted or damaged decking is replaced. Ice & water shield and underlayment are installed.",
+  },
+  {
+    step: "5",
+    title: "Installation",
+    desc: "New roofing material is installed following manufacturer specifications. Flashing is replaced around chimneys, vents, and valleys.",
+  },
+  {
+    step: "6",
+    title: "Cleanup & Final Inspection",
+    desc: "Debris is removed, a magnetic sweep catches stray nails, and a final inspection ensures everything meets code and manufacturer standards.",
+  },
 ];
 
 const CONTRACTOR_CHECKLIST = [
@@ -120,7 +169,11 @@ const FAQ_ITEMS = [
 
 const RELATED_GUIDES = [
   { title: "Kitchen Remodel Cost Guide", href: "/kitchen-remodel-cost", icon: "/Kitchen.svg" },
-  { title: "HVAC Installation Guide", href: "/hvac-installation-cost", icon: "/Air Conditioner.svg" },
+  {
+    title: "HVAC Installation Guide",
+    href: "/hvac-installation-cost",
+    icon: "/Air Conditioner.svg",
+  },
   { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "/Window.svg" },
   { title: "Bathroom Remodel Guide", href: "/bathroom-remodel-cost", icon: "/Bathtub.svg" },
   { title: "Solar Panel Installation", href: "/solar-installation-cost", icon: "/Solar Panel.svg" },
@@ -176,8 +229,18 @@ function RoofReplacementGuide() {
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
-              { "@type": "ListItem", position: 2, name: "Renovation Guides", item: "https://costreno.com/guides" },
-              { "@type": "ListItem", position: 3, name: "Roofing", item: "https://costreno.com/guides/roofing" },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Renovation Guides",
+                item: "https://costreno.com/guides",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: "Roofing",
+                item: "https://costreno.com/guides/roofing",
+              },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],
           }),
@@ -190,11 +253,17 @@ function RoofReplacementGuide() {
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-          <a href="/" className="hover:text-ink transition">Home</a>
+          <a href="/" className="hover:text-ink transition">
+            Home
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Renovation Guides</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Renovation Guides
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Roofing</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Roofing
+          </a>
           <span>/</span>
           <span className="text-ink font-medium">Complete Guide</span>
         </nav>
@@ -212,7 +281,8 @@ function RoofReplacementGuide() {
               Complete Guide to Roof Replacement
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
-              Everything you need to know about roof replacement costs, materials, timeline, permits, and choosing the right contractor.
+              Everything you need to know about roof replacement costs, materials, timeline,
+              permits, and choosing the right contractor.
             </p>
             <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
               <span>15 min read</span>
@@ -241,20 +311,28 @@ function RoofReplacementGuide() {
       {/* Key Takeaways Card */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
-          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">Key Takeaways</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
+            Key Takeaways
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <DollarSign className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Average Cost</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Average Cost
+                </span>
               </div>
-              <div className="font-display text-xl md:text-2xl font-bold text-ink">$8,600–$24,700</div>
+              <div className="font-display text-xl md:text-2xl font-bold text-ink">
+                $8,600–$24,700
+              </div>
               <p className="text-xs text-muted-foreground mt-1">National Average</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Clock className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Typical Timeline</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Typical Timeline
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">3–5 days</div>
               <p className="text-xs text-muted-foreground mt-1">Most homes</p>
@@ -262,7 +340,9 @@ function RoofReplacementGuide() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Shield className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Roof Lifespan</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Roof Lifespan
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">20–50 years</div>
               <p className="text-xs text-muted-foreground mt-1">Depending on material</p>
@@ -270,7 +350,9 @@ function RoofReplacementGuide() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <FileText className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Permits</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Permits
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">Yes</div>
               <p className="text-xs text-muted-foreground mt-1">Most locations</p>
@@ -309,7 +391,8 @@ function RoofReplacementGuide() {
                 1. Signs You Need a New Roof
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Not sure if you need a full replacement or just repairs? Here are the most common warning signs that indicate your roof has reached the end of its useful life:
+                Not sure if you need a full replacement or just repairs? Here are the most common
+                warning signs that indicate your roof has reached the end of its useful life:
               </p>
               <div className="space-y-3 mb-6">
                 {SIGNS_LIST.map((sign) => (
@@ -335,25 +418,41 @@ function RoofReplacementGuide() {
                 2. Roof Replacement Costs by Material
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Costs vary significantly based on the material you choose. Below is a comparison of the most popular roofing materials for a typical 1,700 sq ft roof:
+                Costs vary significantly based on the material you choose. Below is a comparison of
+                the most popular roofing materials for a typical 1,700 sq ft roof:
               </p>
               <div className="rounded-xl border border-border bg-white overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Material</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Cost Range</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">Lifespan</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">Best For</th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Material
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Cost Range
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Lifespan
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">
+                        Best For
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {MATERIAL_COSTS.map((row, i) => (
-                      <tr key={row.material} className={i < MATERIAL_COSTS.length - 1 ? "border-b border-border/50" : ""}>
+                      <tr
+                        key={row.material}
+                        className={i < MATERIAL_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
                         <td className="px-5 py-3 text-sm font-medium text-ink">{row.material}</td>
                         <td className="px-5 py-3 text-sm font-semibold text-ink">{row.range}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">{row.lifespan}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">{row.best}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.lifespan}
+                        </td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                          {row.best}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -364,7 +463,9 @@ function RoofReplacementGuide() {
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
                 <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Don't just compare upfront cost. Calculate the cost per year of life. A $20,000 metal roof lasting 50 years ($400/year) is cheaper long-term than a $9,000 asphalt roof lasting 20 years ($450/year).
+                  Don't just compare upfront cost. Calculate the cost per year of life. A $20,000
+                  metal roof lasting 50 years ($400/year) is cheaper long-term than a $9,000 asphalt
+                  roof lasting 20 years ($450/year).
                 </p>
               </div>
             </section>
@@ -382,11 +483,17 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Asphalt Shingles</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    The most popular choice in the US (80% of homes). Available in 3-tab and architectural styles. Easy to install, widely available, and comes in many colors. Best for homeowners on a budget who plan to stay 15–20 years.
+                    The most popular choice in the US (80% of homes). Available in 3-tab and
+                    architectural styles. Easy to install, widely available, and comes in many
+                    colors. Best for homeowners on a budget who plan to stay 15–20 years.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">20–30 year lifespan</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">$5,707–$10,772</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      20–30 year lifespan
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      $5,707–$10,772
+                    </span>
                   </div>
                 </div>
 
@@ -394,11 +501,17 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Metal Roofing</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Standing seam and metal shingle options. Extremely durable, energy-efficient (reflects solar heat), and resistant to wind, fire, and impact. Ideal for harsh climates and homeowners who want a "last roof" solution.
+                    Standing seam and metal shingle options. Extremely durable, energy-efficient
+                    (reflects solar heat), and resistant to wind, fire, and impact. Ideal for harsh
+                    climates and homeowners who want a "last roof" solution.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">40–70 year lifespan</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">$12,000–$24,000</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      40–70 year lifespan
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      $12,000–$24,000
+                    </span>
                   </div>
                 </div>
 
@@ -406,23 +519,37 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Wood Shakes</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Cedar or redwood shakes offer a beautiful, natural aesthetic. They require more maintenance (periodic treatment) and may not be allowed in fire-prone areas. Best for homeowners prioritizing curb appeal.
+                    Cedar or redwood shakes offer a beautiful, natural aesthetic. They require more
+                    maintenance (periodic treatment) and may not be allowed in fire-prone areas.
+                    Best for homeowners prioritizing curb appeal.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">25–30 year lifespan</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">$10,000–$18,000</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      25–30 year lifespan
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      $10,000–$18,000
+                    </span>
                   </div>
                 </div>
 
                 {/* Clay/Concrete */}
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-lg font-bold text-ink mb-2">Clay & Concrete Tiles</h3>
+                  <h3 className="font-display text-lg font-bold text-ink mb-2">
+                    Clay & Concrete Tiles
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Extremely durable and fire-resistant. Common in Mediterranean, Spanish, and Southwestern-style homes. Heavy. Your roof structure may need reinforcement. Best for warm, dry climates.
+                    Extremely durable and fire-resistant. Common in Mediterranean, Spanish, and
+                    Southwestern-style homes. Heavy. Your roof structure may need reinforcement.
+                    Best for warm, dry climates.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">50+ year lifespan</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">$15,000–$30,000</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      50+ year lifespan
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      $15,000–$30,000
+                    </span>
                   </div>
                 </div>
 
@@ -430,11 +557,18 @@ function RoofReplacementGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Slate</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    The premium option. Natural stone that can last over 100 years. Fireproof, incredibly beautiful, and adds significant home value. Very heavy and requires specialized installers. Best for high-end homes where longevity and aesthetics justify the investment.
+                    The premium option. Natural stone that can last over 100 years. Fireproof,
+                    incredibly beautiful, and adds significant home value. Very heavy and requires
+                    specialized installers. Best for high-end homes where longevity and aesthetics
+                    justify the investment.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">75–100 year lifespan</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">$20,000–$40,000+</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      75–100 year lifespan
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      $20,000–$40,000+
+                    </span>
                   </div>
                 </div>
               </div>
@@ -446,11 +580,15 @@ function RoofReplacementGuide() {
                 4. Roof Replacement Process: Step by Step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Understanding the process helps you plan around disruptions and know what to expect. Here's a typical roof replacement timeline:
+                Understanding the process helps you plan around disruptions and know what to expect.
+                Here's a typical roof replacement timeline:
               </p>
               <div className="space-y-4">
                 {PROCESS_STEPS.map((s) => (
-                  <div key={s.step} className="flex gap-4 p-4 rounded-xl border border-border bg-white">
+                  <div
+                    key={s.step}
+                    className="flex gap-4 p-4 rounded-xl border border-border bg-white"
+                  >
                     <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-accent">{s.step}</span>
                     </div>
@@ -469,11 +607,15 @@ function RoofReplacementGuide() {
                 5. How to Choose a Roofing Contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Your roof is one of the most important components of your home. Use this checklist to vet contractors before signing:
+                Your roof is one of the most important components of your home. Use this checklist
+                to vet contractors before signing:
               </p>
               <div className="space-y-3">
                 {CONTRACTOR_CHECKLIST.map((item) => (
-                  <div key={item} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white">
+                  <div
+                    key={item}
+                    className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white"
+                  >
                     <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     <span className="text-sm text-ink">{item}</span>
                   </div>
@@ -487,34 +629,46 @@ function RoofReplacementGuide() {
                 6. Permits & Inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Most municipalities require a building permit for a full roof replacement. Here's what you need to know:
+                Most municipalities require a building permit for a full roof replacement. Here's
+                what you need to know:
               </p>
               <div className="space-y-4">
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-base font-bold text-ink mb-2">When is a permit required?</h3>
+                  <h3 className="font-display text-base font-bold text-ink mb-2">
+                    When is a permit required?
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Almost always for full replacements. Minor repairs (replacing a few shingles) typically don't require one. Your contractor should know local requirements and handle the application.
+                    Almost always for full replacements. Minor repairs (replacing a few shingles)
+                    typically don't require one. Your contractor should know local requirements and
+                    handle the application.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Permit costs</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Typically $100–$500 depending on your municipality. This should be included in your contractor's quote, not an add-on surprise.
+                    Typically $100–$500 depending on your municipality. This should be included in
+                    your contractor's quote, not an add-on surprise.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Inspections</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Most jurisdictions require at least one inspection (usually after installation). Some require two: one after tear-off/decking repair and one after final installation. Your contractor coordinates these.
+                    Most jurisdictions require at least one inspection (usually after installation).
+                    Some require two: one after tear-off/decking repair and one after final
+                    installation. Your contractor coordinates these.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-ink mb-1">Warning: Skipping permits is risky</p>
+                      <p className="text-sm font-semibold text-ink mb-1">
+                        Warning: Skipping permits is risky
+                      </p>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        Work done without permits can void warranties, create problems when selling your home, and result in fines. Always insist your contractor pulls proper permits.
+                        Work done without permits can void warranties, create problems when selling
+                        your home, and result in fines. Always insist your contractor pulls proper
+                        permits.
                       </p>
                     </div>
                   </div>
@@ -551,9 +705,7 @@ function RoofReplacementGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                8. Related Guides
-              </h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -577,10 +729,13 @@ function RoofReplacementGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Calculate Your Roof Replacement Cost</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Calculate Your Roof Replacement Cost
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Get a personalized estimate based on your ZIP code, roof size, and material preferences. Free, no signup required.
+                  Get a personalized estimate based on your ZIP code, roof size, and material
+                  preferences. Free, no signup required.
                 </p>
                 <a
                   href="/estimate?project=roof"
@@ -611,10 +766,13 @@ function RoofReplacementGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Need Help Reviewing Your Roofing Quote?</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Need Help Reviewing Your Roofing Quote?
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Upload your roofing quote and get instant analysis on pricing, scope, and potential red flags.
+                  Upload your roofing quote and get instant analysis on pricing, scope, and
+                  potential red flags.
                 </p>
                 <a
                   href="/quote-analyzer"
@@ -628,23 +786,38 @@ function RoofReplacementGuide() {
               <div className="rounded-2xl border border-border bg-white p-6">
                 <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
                 <div className="space-y-3">
-                  <a href="/estimate?project=roof" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate?project=roof"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <DollarSign className="h-4 w-4 text-accent shrink-0" />
                     <span>Roofing Cost Calculator</span>
                   </a>
-                  <a href="/quote-analyzer" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/quote-analyzer"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <FileText className="h-4 w-4 text-accent shrink-0" />
                     <span>Roof Quote Review</span>
                   </a>
-                  <a href="/estimate" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <MapPin className="h-4 w-4 text-accent shrink-0" />
                     <span>Local Price Estimator</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Shield className="h-4 w-4 text-accent shrink-0" />
                     <span>Insurance Claim Helper</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Star className="h-4 w-4 text-accent shrink-0" />
                     <span>Contractor Finder</span>
                   </a>
@@ -658,5 +831,3 @@ function RoofReplacementGuide() {
     </div>
   );
 }
-
-

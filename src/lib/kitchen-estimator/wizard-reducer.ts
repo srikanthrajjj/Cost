@@ -1,8 +1,4 @@
-import type {
-  KitchenEstimateAnswers,
-  AIDetectionResult,
-  KitchenLiveEstimate,
-} from "./types";
+import type { KitchenEstimateAnswers, AIDetectionResult, KitchenLiveEstimate } from "./types";
 
 // ─── Wizard State ────────────────────────────────────────────────────────────
 
@@ -64,10 +60,7 @@ export const initialWizardState: WizardState = {
  * Backward navigation (PREV_STEP) preserves all previously entered answers
  * by only decrementing the step counter without clearing any answer data.
  */
-export function wizardReducer(
-  state: WizardState,
-  action: WizardAction
-): WizardState {
+export function wizardReducer(state: WizardState, action: WizardAction): WizardState {
   switch (action.type) {
     case "SELECT_PATH": {
       return {

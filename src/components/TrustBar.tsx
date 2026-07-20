@@ -31,7 +31,8 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
             How Our Estimates Work
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink max-w-xl mx-auto leading-tight">
-            Regionally adjusted,<br /> not a flat national number
+            Regionally adjusted,
+            <br /> not a flat national number
           </h2>
         </div>
 

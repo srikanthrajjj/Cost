@@ -3,6 +3,7 @@
 ## Feature Overview
 
 The download report functionality now captures user emails before generating and downloading reports. This allows CostReno to:
+
 1. Build an email list for home renovation tips and trends
 2. Track user engagement
 3. Provide better customer follow-up
@@ -10,6 +11,7 @@ The download report functionality now captures user emails before generating and
 ## User Interface
 
 ### Modal Dialog
+
 When users click any download button, they see a professional modal with:
 
 ```
@@ -34,6 +36,7 @@ When users click any download button, they see a professional modal with:
 ```
 
 ### Success State (After Submission)
+
 ```
 ┌─────────────────────────────────────────┐
 │  ✓ Success!                             │
@@ -51,6 +54,7 @@ When users click any download button, they see a professional modal with:
 ## Implementation Details
 
 ### Color Scheme (Brand Compliant)
+
 - **Primary Colors:**
   - Dark Navy (#082A4B) for headers and text
   - Green (#03A44D) for accent and primary button
@@ -64,12 +68,14 @@ When users click any download button, they see a professional modal with:
   - Error: Red background (#FEE2E2) with red borders
 
 ### Typography
+
 - Headers: Bold, larger size
 - Labels: Medium weight
 - Body text: Regular weight
 - Privacy notice: Smaller, muted color
 
 ### Form Validation
+
 - Email format validation using regex: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
 - Real-time error clearing on input
 - Helpful error messages:
@@ -78,6 +84,7 @@ When users click any download button, they see a professional modal with:
   - Custom backend errors when applicable
 
 ### Loading States
+
 - Download button shows spinner during processing
 - Button text changes to "Downloading..."
 - Inputs are disabled while downloading
@@ -87,25 +94,31 @@ When users click any download button, they see a professional modal with:
 ## Pages with Download Feature
 
 ### 1. Estimate Page (`/estimate`)
+
 **Locations:**
+
 - "Download PDF Report" in Next Steps section
 - Report Type: Estimate Report
 - Data Included: Project type, estimated cost, confidence score
 
 **Flow:**
+
 1. User completes estimate wizard
 2. User sees "Download PDF Report" button in recommended next steps
 3. Clicks button → Email modal opens
 4. Enters email → Report downloads
 
 ### 2. Quote Analyzer Page (`/quote-analyzer`)
+
 **Locations:**
+
 - "Download Report" button in header (top right)
 - "Download Full Report" button in verdict section (bottom)
 - Report Type: Quote Analysis Report
 - Data Included: Health score, missing items, red flags, contractor info
 
 **Flow:**
+
 1. User uploads quote PDF
 2. AI analyzes the quote
 3. User sees analysis results with download buttons
@@ -115,33 +128,33 @@ When users click any download button, they see a professional modal with:
 ## What Gets Downloaded
 
 ### For Estimates
+
 ```html
 <CostReno Estimate Report>
-Generated: [date/time]
-Project Type: [e.g., Roof Replacement]
-Estimated Cost: $[amount]
-Confidence Score: [%]
+  Generated: [date/time] Project Type: [e.g., Roof Replacement] Estimated Cost: $[amount] Confidence
+  Score: [%]</CostReno
+>
 ```
 
 ### For Quote Analysis
+
 ```html
 <CostReno Quote Analysis Report>
-Generated: [date/time]
-Quote Health Score: [/100]
-Missing Items: [count]
-Items Needing Clarification: [count]
-Red Flags: [count]
-Contractor: [name]
-Total Quote Amount: $[amount]
+  Generated: [date/time] Quote Health Score: [/100] Missing Items: [count] Items Needing
+  Clarification: [count] Red Flags: [count] Contractor: [name] Total Quote Amount:
+  $[amount]</CostReno
+>
 ```
 
 ## User Privacy
 
 The modal includes clear messaging about email usage:
+
 - "Your email is secure and only used to send home renovation tips, trends, and exclusive insights."
 - "We respect your privacy."
 
 Current implementation:
+
 - ✅ Emails validated on client-side
 - ✅ No sensitive data stored locally
 - ✅ Explicit user consent before download
@@ -163,6 +176,7 @@ if (typeof window !== "undefined") {
 ```
 
 Then create an API endpoint to:
+
 1. Validate the email
 2. Generate/send the report
 3. Store email for newsletter (with proper consent)
@@ -171,6 +185,7 @@ Then create an API endpoint to:
 ## Accessibility Features
 
 ✅ **Implemented:**
+
 - Proper form labels (`<label htmlFor="email">`)
 - ARIA-friendly Dialog component
 - Keyboard navigation support
@@ -181,6 +196,7 @@ Then create an API endpoint to:
 ## Mobile Responsiveness
 
 The modal is responsive and works well on:
+
 - Desktop (full width)
 - Tablet (adjusted padding)
 - Mobile (full screen with padding)

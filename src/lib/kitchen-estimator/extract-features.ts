@@ -40,8 +40,7 @@ const VISION_MODEL = "openai/gpt-4o";
 const TIMEOUT_MS = 30000;
 
 export type ExtractFeaturesResult =
-  | { success: true; data: DetectedFeatures }
-  | { success: false; error: string };
+  { success: true; data: DetectedFeatures } | { success: false; error: string };
 
 export const extractKitchenFeatures = createServerFn({ method: "POST" })
   .validator(z.object({ photos: z.array(z.string().min(1)).min(1).max(6) }))
@@ -53,8 +52,7 @@ export const extractKitchenFeatures = createServerFn({ method: "POST" })
     }
 
     const content: Array<
-      | { type: "text"; text: string }
-      | { type: "image_url"; image_url: { url: string } }
+      { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
     > = [
       { type: "text", text: FEATURES_PROMPT },
       ...data.photos.map((photo) => ({
@@ -93,7 +91,10 @@ export const extractKitchenFeatures = createServerFn({ method: "POST" })
         if (response.status === 401) {
           return { success: false, error: "Auth error" };
         }
-        return { success: false, error: `API error: ${response.status} ${errorBody.substring(0, 200)}` };
+        return {
+          success: false,
+          error: `API error: ${response.status} ${errorBody.substring(0, 200)}`,
+        };
       }
 
       const responseData = await response.json().catch(() => null);

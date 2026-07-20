@@ -55,10 +55,30 @@ const TABLE_OF_CONTENTS = [
 ];
 
 const SCOPE_COSTS = [
-  { scope: "Central AC", range: "$4,000–$8,000", timeline: "1 day", includes: "Condenser, evaporator coil, refrigerant lines" },
-  { scope: "Furnace", range: "$3,000–$7,000", timeline: "1 day", includes: "Gas or electric furnace, venting, thermostat" },
-  { scope: "Heat Pump", range: "$5,000–$12,000", timeline: "1–2 days", includes: "Heat pump unit, air handler, refrigerant" },
-  { scope: "Full System", range: "$8,000–$15,000", timeline: "2–3 days", includes: "AC + furnace, ductwork modifications, thermostat" },
+  {
+    scope: "Central AC",
+    range: "$4,000–$8,000",
+    timeline: "1 day",
+    includes: "Condenser, evaporator coil, refrigerant lines",
+  },
+  {
+    scope: "Furnace",
+    range: "$3,000–$7,000",
+    timeline: "1 day",
+    includes: "Gas or electric furnace, venting, thermostat",
+  },
+  {
+    scope: "Heat Pump",
+    range: "$5,000–$12,000",
+    timeline: "1–2 days",
+    includes: "Heat pump unit, air handler, refrigerant",
+  },
+  {
+    scope: "Full System",
+    range: "$8,000–$15,000",
+    timeline: "2–3 days",
+    includes: "AC + furnace, ductwork modifications, thermostat",
+  },
 ];
 
 const SIGNS_LIST = [
@@ -73,11 +93,31 @@ const SIGNS_LIST = [
 ];
 
 const PROCESS_STEPS = [
-  { step: "1", title: "Assessment & Sizing", desc: "A qualified technician performs a Manual J load calculation to determine the correct system size for your home based on square footage, insulation, windows, and climate zone. Oversizing or undersizing both cause problems." },
-  { step: "2", title: "System Selection", desc: "Choose between central AC, heat pump, furnace, or a complete system based on your climate, existing infrastructure, and budget. Discuss SEER/AFUE ratings for energy efficiency." },
-  { step: "3", title: "Permits & Scheduling", desc: "Your contractor pulls mechanical permits required by your municipality. Installation is scheduled, typically 1–3 days depending on the system type and any ductwork modifications needed." },
-  { step: "4", title: "Installation", desc: "Old equipment is removed. New system is installed including indoor and outdoor units, refrigerant lines, electrical connections, and thermostat. Ductwork is modified or sealed as needed." },
-  { step: "5", title: "Testing & Commissioning", desc: "System is charged with refrigerant, airflow is measured at each register, thermostat operation is verified, and a final inspection is scheduled. You receive warranty documentation and maintenance instructions." },
+  {
+    step: "1",
+    title: "Assessment & Sizing",
+    desc: "A qualified technician performs a Manual J load calculation to determine the correct system size for your home based on square footage, insulation, windows, and climate zone. Oversizing or undersizing both cause problems.",
+  },
+  {
+    step: "2",
+    title: "System Selection",
+    desc: "Choose between central AC, heat pump, furnace, or a complete system based on your climate, existing infrastructure, and budget. Discuss SEER/AFUE ratings for energy efficiency.",
+  },
+  {
+    step: "3",
+    title: "Permits & Scheduling",
+    desc: "Your contractor pulls mechanical permits required by your municipality. Installation is scheduled, typically 1–3 days depending on the system type and any ductwork modifications needed.",
+  },
+  {
+    step: "4",
+    title: "Installation",
+    desc: "Old equipment is removed. New system is installed including indoor and outdoor units, refrigerant lines, electrical connections, and thermostat. Ductwork is modified or sealed as needed.",
+  },
+  {
+    step: "5",
+    title: "Testing & Commissioning",
+    desc: "System is charged with refrigerant, airflow is measured at each register, thermostat operation is verified, and a final inspection is scheduled. You receive warranty documentation and maintenance instructions.",
+  },
 ];
 
 const CONTRACTOR_CHECKLIST = [
@@ -172,8 +212,18 @@ function HvacInstallationGuide() {
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
-              { "@type": "ListItem", position: 2, name: "Renovation Guides", item: "https://costreno.com/guides" },
-              { "@type": "ListItem", position: 3, name: "HVAC", item: "https://costreno.com/guides/hvac" },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Renovation Guides",
+                item: "https://costreno.com/guides",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: "HVAC",
+                item: "https://costreno.com/guides/hvac",
+              },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],
           }),
@@ -186,11 +236,17 @@ function HvacInstallationGuide() {
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-          <a href="/" className="hover:text-ink transition">Home</a>
+          <a href="/" className="hover:text-ink transition">
+            Home
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Renovation Guides</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Renovation Guides
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">HVAC</a>
+          <a href="/guides" className="hover:text-ink transition">
+            HVAC
+          </a>
           <span>/</span>
           <span className="text-ink font-medium">Complete Guide</span>
         </nav>
@@ -207,7 +263,8 @@ function HvacInstallationGuide() {
               Complete Guide to HVAC Installation
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
-              Everything you need to know about HVAC installation costs, system types, timeline, permits, and choosing the right contractor.
+              Everything you need to know about HVAC installation costs, system types, timeline,
+              permits, and choosing the right contractor.
             </p>
             <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
               <span>9 min read</span>
@@ -218,7 +275,9 @@ function HvacInstallationGuide() {
               <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
                 <Shield className="h-3.5 w-3.5 text-accent" />
               </div>
-              <span className="text-xs font-medium text-ink">Reviewed by HVAC Industry Experts</span>
+              <span className="text-xs font-medium text-ink">
+                Reviewed by HVAC Industry Experts
+              </span>
             </div>
           </div>
           <div className="rounded-2xl overflow-hidden aspect-[4/3]">
@@ -235,20 +294,28 @@ function HvacInstallationGuide() {
       {/* Key Takeaways Card */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
-          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">Key Takeaways</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
+            Key Takeaways
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <DollarSign className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Average Cost</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Average Cost
+                </span>
               </div>
-              <div className="font-display text-xl md:text-2xl font-bold text-ink">$4,500–$12,000</div>
+              <div className="font-display text-xl md:text-2xl font-bold text-ink">
+                $4,500–$12,000
+              </div>
               <p className="text-xs text-muted-foreground mt-1">National Average</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Clock className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Timeline</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Timeline
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">1–2 days</div>
               <p className="text-xs text-muted-foreground mt-1">Most installations</p>
@@ -256,7 +323,9 @@ function HvacInstallationGuide() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Shield className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Lifespan</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Lifespan
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">15–20 years</div>
               <p className="text-xs text-muted-foreground mt-1">With proper maintenance</p>
@@ -264,7 +333,9 @@ function HvacInstallationGuide() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <FileText className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Permits</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Permits
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">Yes</div>
               <p className="text-xs text-muted-foreground mt-1">Required in most areas</p>
@@ -303,7 +374,8 @@ function HvacInstallationGuide() {
                 1. Signs You Need a New HVAC System
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Not sure if your HVAC system needs replacement or just a repair? Here are the most common signs that it's time for a new system:
+                Not sure if your HVAC system needs replacement or just a repair? Here are the most
+                common signs that it's time for a new system:
               </p>
               <div className="space-y-3 mb-6">
                 {SIGNS_LIST.map((sign) => (
@@ -329,25 +401,41 @@ function HvacInstallationGuide() {
                 2. HVAC Installation Costs by System Type
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Costs vary based on the type of system and complexity of installation. Below is a comparison of typical HVAC installation budgets:
+                Costs vary based on the type of system and complexity of installation. Below is a
+                comparison of typical HVAC installation budgets:
               </p>
               <div className="rounded-xl border border-border bg-white overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">System</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Cost Range</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">Timeline</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">Includes</th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        System
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Cost Range
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Timeline
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">
+                        Includes
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {SCOPE_COSTS.map((row, i) => (
-                      <tr key={row.scope} className={i < SCOPE_COSTS.length - 1 ? "border-b border-border/50" : ""}>
+                      <tr
+                        key={row.scope}
+                        className={i < SCOPE_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
                         <td className="px-5 py-3 text-sm font-medium text-ink">{row.scope}</td>
                         <td className="px-5 py-3 text-sm font-semibold text-ink">{row.range}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">{row.timeline}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">{row.includes}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.timeline}
+                        </td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                          {row.includes}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -358,7 +446,9 @@ function HvacInstallationGuide() {
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
                 <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Ask about available rebates and tax credits. Many utility companies offer rebates for high-efficiency systems, and federal tax credits of up to $2,000 are available for qualifying heat pumps and energy-efficient equipment.
+                  Ask about available rebates and tax credits. Many utility companies offer rebates
+                  for high-efficiency systems, and federal tax credits of up to $2,000 are available
+                  for qualifying heat pumps and energy-efficient equipment.
                 </p>
               </div>
             </section>
@@ -369,54 +459,91 @@ function HvacInstallationGuide() {
                 3. HVAC System Types
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                Choosing the right system type depends on your climate, existing infrastructure, and energy goals. Here are the main options:
+                Choosing the right system type depends on your climate, existing infrastructure, and
+                energy goals. Here are the main options:
               </p>
               <div className="space-y-6">
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Central Air</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    The most common cooling system in American homes. Uses ductwork to distribute cooled air throughout the house. Best for homes with existing ductwork. Modern units achieve SEER ratings of 15–22+ for excellent efficiency.
+                    The most common cooling system in American homes. Uses ductwork to distribute
+                    cooled air throughout the house. Best for homes with existing ductwork. Modern
+                    units achieve SEER ratings of 15–22+ for excellent efficiency.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">Cost: $4,000–$8,000</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 15–20 years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Best for: Hot climates</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      Cost: $4,000–$8,000
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 15–20 years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Best for: Hot climates
+                    </span>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Heat Pumps</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Heat pumps provide both heating and cooling in one system by transferring heat rather than generating it. Highly efficient in moderate climates and increasingly effective in cold climates with modern cold-climate models. Eligible for significant federal tax credits.
+                    Heat pumps provide both heating and cooling in one system by transferring heat
+                    rather than generating it. Highly efficient in moderate climates and
+                    increasingly effective in cold climates with modern cold-climate models.
+                    Eligible for significant federal tax credits.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">Cost: $5,000–$12,000</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 12–15 years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Best for: Moderate climates</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      Cost: $5,000–$12,000
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 12–15 years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Best for: Moderate climates
+                    </span>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Furnaces</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Gas furnaces remain the primary heating system in colder regions. Modern condensing furnaces achieve 95–98% AFUE ratings, meaning nearly all fuel is converted to heat. Electric furnaces are cheaper to install but more expensive to operate in most markets.
+                    Gas furnaces remain the primary heating system in colder regions. Modern
+                    condensing furnaces achieve 95–98% AFUE ratings, meaning nearly all fuel is
+                    converted to heat. Electric furnaces are cheaper to install but more expensive
+                    to operate in most markets.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">Cost: $3,000–$7,000</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 15–25 years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Best for: Cold climates</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      Cost: $3,000–$7,000
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 15–25 years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Best for: Cold climates
+                    </span>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-lg font-bold text-ink mb-2">Ductless Mini-Splits</h3>
+                  <h3 className="font-display text-lg font-bold text-ink mb-2">
+                    Ductless Mini-Splits
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Individual wall-mounted units that provide heating and cooling without ductwork. Ideal for room additions, older homes without ducts, or zoned comfort. Each indoor unit operates independently for precise temperature control.
+                    Individual wall-mounted units that provide heating and cooling without ductwork.
+                    Ideal for room additions, older homes without ducts, or zoned comfort. Each
+                    indoor unit operates independently for precise temperature control.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">Cost: $3,000–$8,000/zone</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 15–20 years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Best for: No-duct homes</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      Cost: $3,000–$8,000/zone
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 15–20 years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Best for: No-duct homes
+                    </span>
                   </div>
                 </div>
               </div>
@@ -428,11 +555,15 @@ function HvacInstallationGuide() {
                 4. HVAC Installation Process: Step by Step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Understanding the process helps you prepare and ensures you get a quality installation. Here's what to expect:
+                Understanding the process helps you prepare and ensures you get a quality
+                installation. Here's what to expect:
               </p>
               <div className="space-y-4">
                 {PROCESS_STEPS.map((s) => (
-                  <div key={s.step} className="flex gap-4 p-4 rounded-xl border border-border bg-white">
+                  <div
+                    key={s.step}
+                    className="flex gap-4 p-4 rounded-xl border border-border bg-white"
+                  >
                     <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-accent">{s.step}</span>
                     </div>
@@ -451,11 +582,15 @@ function HvacInstallationGuide() {
                 5. How to Choose an HVAC Contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                HVAC installation quality directly impacts system efficiency and lifespan. Use this checklist to vet candidates:
+                HVAC installation quality directly impacts system efficiency and lifespan. Use this
+                checklist to vet candidates:
               </p>
               <div className="space-y-3">
                 {CONTRACTOR_CHECKLIST.map((item) => (
-                  <div key={item} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white">
+                  <div
+                    key={item}
+                    className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white"
+                  >
                     <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     <span className="text-sm text-ink">{item}</span>
                   </div>
@@ -473,30 +608,44 @@ function HvacInstallationGuide() {
               </p>
               <div className="space-y-4">
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-base font-bold text-ink mb-2">When is a permit required?</h3>
+                  <h3 className="font-display text-base font-bold text-ink mb-2">
+                    When is a permit required?
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Mechanical permits are required for virtually all HVAC installations: replacing equipment, adding new systems, modifying ductwork, or changing fuel types. Only minor repairs and filter replacements are exempt. Your contractor should pull the permit before starting work.
+                    Mechanical permits are required for virtually all HVAC installations: replacing
+                    equipment, adding new systems, modifying ductwork, or changing fuel types. Only
+                    minor repairs and filter replacements are exempt. Your contractor should pull
+                    the permit before starting work.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Permit costs</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    HVAC permits typically cost $100–$500 depending on your municipality. The permit ensures proper installation, safe gas/electrical connections, and correct venting. Your contractor should include permit costs in their estimate.
+                    HVAC permits typically cost $100–$500 depending on your municipality. The permit
+                    ensures proper installation, safe gas/electrical connections, and correct
+                    venting. Your contractor should include permit costs in their estimate.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Inspections</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    A mechanical inspection verifies proper equipment sizing, safe gas line connections, correct electrical wiring, proper venting and exhaust, and adequate clearances. This typically happens within a few days of installation completion.
+                    A mechanical inspection verifies proper equipment sizing, safe gas line
+                    connections, correct electrical wiring, proper venting and exhaust, and adequate
+                    clearances. This typically happens within a few days of installation completion.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-ink mb-1">Warning: Unpermitted HVAC work voids warranties</p>
+                      <p className="text-sm font-semibold text-ink mb-1">
+                        Warning: Unpermitted HVAC work voids warranties
+                      </p>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        Most manufacturers require permitted installation to honor equipment warranties. Unpermitted work also creates liability issues and can complicate home sales. Always verify your contractor pulls the required permits.
+                        Most manufacturers require permitted installation to honor equipment
+                        warranties. Unpermitted work also creates liability issues and can
+                        complicate home sales. Always verify your contractor pulls the required
+                        permits.
                       </p>
                     </div>
                   </div>
@@ -533,9 +682,7 @@ function HvacInstallationGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                8. Related Guides
-              </h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -559,10 +706,13 @@ function HvacInstallationGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Calculate Your HVAC Installation Cost</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Calculate Your HVAC Installation Cost
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Get a personalized estimate based on your ZIP code, home size, and system preferences. Free, no signup required.
+                  Get a personalized estimate based on your ZIP code, home size, and system
+                  preferences. Free, no signup required.
                 </p>
                 <a
                   href="/estimate?project=hvac"
@@ -593,10 +743,13 @@ function HvacInstallationGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Need Help Reviewing Your HVAC Quote?</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Need Help Reviewing Your HVAC Quote?
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Upload your HVAC installation quote and get instant analysis on pricing, scope, and potential red flags.
+                  Upload your HVAC installation quote and get instant analysis on pricing, scope,
+                  and potential red flags.
                 </p>
                 <a
                   href="/quote-analyzer"
@@ -610,23 +763,38 @@ function HvacInstallationGuide() {
               <div className="rounded-2xl border border-border bg-white p-6">
                 <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
                 <div className="space-y-3">
-                  <a href="/estimate?project=hvac" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate?project=hvac"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <DollarSign className="h-4 w-4 text-accent shrink-0" />
                     <span>HVAC Cost Calculator</span>
                   </a>
-                  <a href="/quote-analyzer" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/quote-analyzer"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <FileText className="h-4 w-4 text-accent shrink-0" />
                     <span>Quote Review Tool</span>
                   </a>
-                  <a href="/estimate" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <MapPin className="h-4 w-4 text-accent shrink-0" />
                     <span>Local Price Estimator</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Shield className="h-4 w-4 text-accent shrink-0" />
                     <span>Insurance Claim Helper</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Star className="h-4 w-4 text-accent shrink-0" />
                     <span>Contractor Finder</span>
                   </a>

@@ -63,10 +63,7 @@ function readProjects(storage: StorageBackend): SavedProject[] {
     // Validate each entry has at minimum an id and projectType
     return parsed.filter(
       (item: unknown) =>
-        typeof item === "object" &&
-        item !== null &&
-        "id" in item &&
-        "projectType" in item
+        typeof item === "object" && item !== null && "id" in item && "projectType" in item,
     ) as SavedProject[];
   } catch {
     // Corrupted data — discard and return empty
@@ -74,26 +71,18 @@ function readProjects(storage: StorageBackend): SavedProject[] {
   }
 }
 
-function writeProjects(
-  storage: StorageBackend,
-  projects: SavedProject[]
-): void {
+function writeProjects(storage: StorageBackend, projects: SavedProject[]): void {
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(projects));
   } catch (error: unknown) {
     if (
       error instanceof DOMException &&
-      (error.name === "QuotaExceededError" ||
-        error.code === 22 ||
-        error.code === 1014)
+      (error.name === "QuotaExceededError" || error.code === 22 || error.code === 1014)
     ) {
       throw new StorageQuotaExceededError();
     }
     // For non-DOMException quota errors (e.g. in test environments)
-    if (
-      error instanceof Error &&
-      error.message.toLowerCase().includes("quota")
-    ) {
+    if (error instanceof Error && error.message.toLowerCase().includes("quota")) {
       throw new StorageQuotaExceededError();
     }
     throw error;

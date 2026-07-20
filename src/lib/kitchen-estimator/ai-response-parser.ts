@@ -19,13 +19,7 @@ interface AIVisionResponse {
  */
 const ALTERNATIVES: Record<string, string[]> = {
   cabinetType: ["stock", "semicustom", "custom", "reface"],
-  countertopMaterial: [
-    "laminate",
-    "quartz",
-    "granite",
-    "marble",
-    "butcherblock",
-  ],
+  countertopMaterial: ["laminate", "quartz", "granite", "marble", "butcherblock"],
   flooringMaterial: ["tile", "hardwood", "vinyl", "laminate", "concrete"],
   estimatedSize: ["small", "medium", "large"],
   overallCondition: ["excellent", "good", "fair", "poor"],
@@ -49,14 +43,12 @@ function mapConfidence(score: number): "high" | "medium" | "low" {
  */
 function buildAttribute(
   field: { value: string; confidence: number } | undefined,
-  fieldKey: string
+  fieldKey: string,
 ): DetectedAttribute {
   const value = field?.value ?? "unknown";
   const confidence = mapConfidence(field?.confidence ?? 0);
   const allAlternatives = ALTERNATIVES[fieldKey] ?? [];
-  const alternatives = allAlternatives.filter(
-    (alt) => alt.toLowerCase() !== value.toLowerCase()
-  );
+  const alternatives = allAlternatives.filter((alt) => alt.toLowerCase() !== value.toLowerCase());
 
   return { value, confidence, alternatives };
 }
@@ -68,10 +60,22 @@ function buildAttribute(
 function getFallbackResult(): AIDetectionResult {
   return {
     cabinetType: { value: "unknown", confidence: "low", alternatives: ALTERNATIVES.cabinetType },
-    countertopMaterial: { value: "unknown", confidence: "low", alternatives: ALTERNATIVES.countertopMaterial },
-    flooringMaterial: { value: "unknown", confidence: "low", alternatives: ALTERNATIVES.flooringMaterial },
+    countertopMaterial: {
+      value: "unknown",
+      confidence: "low",
+      alternatives: ALTERNATIVES.countertopMaterial,
+    },
+    flooringMaterial: {
+      value: "unknown",
+      confidence: "low",
+      alternatives: ALTERNATIVES.flooringMaterial,
+    },
     kitchenSize: { value: "unknown", confidence: "low", alternatives: ALTERNATIVES.estimatedSize },
-    overallCondition: { value: "unknown", confidence: "low", alternatives: ALTERNATIVES.overallCondition },
+    overallCondition: {
+      value: "unknown",
+      confidence: "low",
+      alternatives: ALTERNATIVES.overallCondition,
+    },
     observations: [],
   };
 }
@@ -98,9 +102,7 @@ export function parseAIResponse(rawResponse: string): AIDetectionResult {
     }
 
     const observations: string[] = Array.isArray(data.observations)
-      ? data.observations.filter(
-          (obs): obs is string => typeof obs === "string"
-        )
+      ? data.observations.filter((obs): obs is string => typeof obs === "string")
       : [];
 
     const detectedFeatures =
@@ -110,19 +112,10 @@ export function parseAIResponse(rawResponse: string): AIDetectionResult {
 
     return {
       cabinetType: buildAttribute(data.cabinetType, "cabinetType"),
-      countertopMaterial: buildAttribute(
-        data.countertopMaterial,
-        "countertopMaterial"
-      ),
-      flooringMaterial: buildAttribute(
-        data.flooringMaterial,
-        "flooringMaterial"
-      ),
+      countertopMaterial: buildAttribute(data.countertopMaterial, "countertopMaterial"),
+      flooringMaterial: buildAttribute(data.flooringMaterial, "flooringMaterial"),
       kitchenSize: buildAttribute(data.estimatedSize, "estimatedSize"),
-      overallCondition: buildAttribute(
-        data.overallCondition,
-        "overallCondition"
-      ),
+      overallCondition: buildAttribute(data.overallCondition, "overallCondition"),
       observations,
       detectedFeatures,
     };

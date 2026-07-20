@@ -55,10 +55,30 @@ const TABLE_OF_CONTENTS = [
 ];
 
 const SCOPE_COSTS = [
-  { scope: "Cosmetic Refresh", range: "$8,000–$18,000", timeline: "1–2 weeks", includes: "Paint, hardware, backsplash" },
-  { scope: "Mid-Range Remodel", range: "$25,000–$55,000", timeline: "4–6 weeks", includes: "New cabinets, counters, appliances" },
-  { scope: "Full Gut Renovation", range: "$45,000–$90,000+", timeline: "8–12 weeks", includes: "Layout changes, plumbing, electrical" },
-  { scope: "Luxury Kitchen", range: "$100,000+", timeline: "12–16 weeks", includes: "Custom everything, premium finishes" },
+  {
+    scope: "Cosmetic Refresh",
+    range: "$8,000–$18,000",
+    timeline: "1–2 weeks",
+    includes: "Paint, hardware, backsplash",
+  },
+  {
+    scope: "Mid-Range Remodel",
+    range: "$25,000–$55,000",
+    timeline: "4–6 weeks",
+    includes: "New cabinets, counters, appliances",
+  },
+  {
+    scope: "Full Gut Renovation",
+    range: "$45,000–$90,000+",
+    timeline: "8–12 weeks",
+    includes: "Layout changes, plumbing, electrical",
+  },
+  {
+    scope: "Luxury Kitchen",
+    range: "$100,000+",
+    timeline: "12–16 weeks",
+    includes: "Custom everything, premium finishes",
+  },
 ];
 
 const SIGNS_LIST = [
@@ -73,12 +93,36 @@ const SIGNS_LIST = [
 ];
 
 const PROCESS_STEPS = [
-  { step: "1", title: "Planning & Design", desc: "Work with a designer or contractor to create a layout, select materials, establish a budget, and define the scope of work. This phase typically takes 2–4 weeks." },
-  { step: "2", title: "Permits & Ordering", desc: "Pull necessary permits for plumbing, electrical, or structural changes. Order cabinets, countertops, and appliances. Lead times can be 4–8 weeks for custom items." },
-  { step: "3", title: "Demolition", desc: "Existing cabinets, countertops, flooring, and fixtures are removed. Any hidden issues (water damage, outdated wiring) are identified and addressed." },
-  { step: "4", title: "Rough-In Work", desc: "Plumbing, electrical, and HVAC are rerouted or updated to match the new layout. Walls are framed or moved if the floor plan is changing." },
-  { step: "5", title: "Installation", desc: "Cabinets, countertops, flooring, backsplash, and appliances are installed. This is the most visible transformation phase." },
-  { step: "6", title: "Finishing & Inspection", desc: "Final connections, paint touch-ups, hardware installation, and cleanup. A final inspection ensures all work meets code requirements." },
+  {
+    step: "1",
+    title: "Planning & Design",
+    desc: "Work with a designer or contractor to create a layout, select materials, establish a budget, and define the scope of work. This phase typically takes 2–4 weeks.",
+  },
+  {
+    step: "2",
+    title: "Permits & Ordering",
+    desc: "Pull necessary permits for plumbing, electrical, or structural changes. Order cabinets, countertops, and appliances. Lead times can be 4–8 weeks for custom items.",
+  },
+  {
+    step: "3",
+    title: "Demolition",
+    desc: "Existing cabinets, countertops, flooring, and fixtures are removed. Any hidden issues (water damage, outdated wiring) are identified and addressed.",
+  },
+  {
+    step: "4",
+    title: "Rough-In Work",
+    desc: "Plumbing, electrical, and HVAC are rerouted or updated to match the new layout. Walls are framed or moved if the floor plan is changing.",
+  },
+  {
+    step: "5",
+    title: "Installation",
+    desc: "Cabinets, countertops, flooring, backsplash, and appliances are installed. This is the most visible transformation phase.",
+  },
+  {
+    step: "6",
+    title: "Finishing & Inspection",
+    desc: "Final connections, paint touch-ups, hardware installation, and cleanup. A final inspection ensures all work meets code requirements.",
+  },
 ];
 
 const CONTRACTOR_CHECKLIST = [
@@ -120,7 +164,11 @@ const FAQ_ITEMS = [
 const RELATED_GUIDES = [
   { title: "Roof Replacement Guide", href: "/guides/roof-replacement", icon: "/House.svg" },
   { title: "Bathroom Remodel Guide", href: "/guides/bathroom-remodel", icon: "/Bathtub.svg" },
-  { title: "HVAC Installation Guide", href: "/hvac-installation-cost", icon: "/Air Conditioner.svg" },
+  {
+    title: "HVAC Installation Guide",
+    href: "/hvac-installation-cost",
+    icon: "/Air Conditioner.svg",
+  },
   { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "/Window.svg" },
   { title: "Flooring Guide", href: "/flooring-cost", icon: "/Floor Tiles.svg" },
 ];
@@ -175,8 +223,18 @@ function KitchenRemodelGuide() {
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
-              { "@type": "ListItem", position: 2, name: "Renovation Guides", item: "https://costreno.com/guides" },
-              { "@type": "ListItem", position: 3, name: "Kitchen", item: "https://costreno.com/guides/kitchen" },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Renovation Guides",
+                item: "https://costreno.com/guides",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: "Kitchen",
+                item: "https://costreno.com/guides/kitchen",
+              },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],
           }),
@@ -189,11 +247,17 @@ function KitchenRemodelGuide() {
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-          <a href="/" className="hover:text-ink transition">Home</a>
+          <a href="/" className="hover:text-ink transition">
+            Home
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Renovation Guides</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Renovation Guides
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Kitchen</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Kitchen
+          </a>
           <span>/</span>
           <span className="text-ink font-medium">Complete Guide</span>
         </nav>
@@ -211,7 +275,8 @@ function KitchenRemodelGuide() {
               Complete Guide to Kitchen Remodel
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
-              Everything you need to know about kitchen remodel costs, materials, timeline, permits, and choosing the right contractor.
+              Everything you need to know about kitchen remodel costs, materials, timeline, permits,
+              and choosing the right contractor.
             </p>
             <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
               <span>12 min read</span>
@@ -222,7 +287,9 @@ function KitchenRemodelGuide() {
               <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
                 <Shield className="h-3.5 w-3.5 text-accent" />
               </div>
-              <span className="text-xs font-medium text-ink">Reviewed by Kitchen Design Experts</span>
+              <span className="text-xs font-medium text-ink">
+                Reviewed by Kitchen Design Experts
+              </span>
             </div>
           </div>
           {/* Right Image */}
@@ -240,20 +307,28 @@ function KitchenRemodelGuide() {
       {/* Key Takeaways Card */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
-          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">Key Takeaways</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
+            Key Takeaways
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <DollarSign className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Average Cost</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Average Cost
+                </span>
               </div>
-              <div className="font-display text-xl md:text-2xl font-bold text-ink">$25,000–$75,000</div>
+              <div className="font-display text-xl md:text-2xl font-bold text-ink">
+                $25,000–$75,000
+              </div>
               <p className="text-xs text-muted-foreground mt-1">National Average</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Clock className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Timeline</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Timeline
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">4–8 weeks</div>
               <p className="text-xs text-muted-foreground mt-1">Most projects</p>
@@ -269,7 +344,9 @@ function KitchenRemodelGuide() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <FileText className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Permits</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Permits
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">Sometimes</div>
               <p className="text-xs text-muted-foreground mt-1">Depends on scope</p>
@@ -308,7 +385,8 @@ function KitchenRemodelGuide() {
                 1. Signs You Need a Kitchen Remodel
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Not sure if your kitchen needs a full remodel or just a few updates? Here are the most common signs that it's time for a renovation:
+                Not sure if your kitchen needs a full remodel or just a few updates? Here are the
+                most common signs that it's time for a renovation:
               </p>
               <div className="space-y-3 mb-6">
                 {SIGNS_LIST.map((sign) => (
@@ -334,25 +412,41 @@ function KitchenRemodelGuide() {
                 2. Kitchen Remodel Costs by Scope
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Costs vary significantly based on the scope of your project. Below is a comparison of typical kitchen remodel budgets:
+                Costs vary significantly based on the scope of your project. Below is a comparison
+                of typical kitchen remodel budgets:
               </p>
               <div className="rounded-xl border border-border bg-white overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Scope</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Cost Range</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">Timeline</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">Includes</th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Scope
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Cost Range
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Timeline
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">
+                        Includes
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {SCOPE_COSTS.map((row, i) => (
-                      <tr key={row.scope} className={i < SCOPE_COSTS.length - 1 ? "border-b border-border/50" : ""}>
+                      <tr
+                        key={row.scope}
+                        className={i < SCOPE_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
                         <td className="px-5 py-3 text-sm font-medium text-ink">{row.scope}</td>
                         <td className="px-5 py-3 text-sm font-semibold text-ink">{row.range}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">{row.timeline}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">{row.includes}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.timeline}
+                        </td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                          {row.includes}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -363,7 +457,9 @@ function KitchenRemodelGuide() {
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
                 <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Allocate 15–20% of your budget as a contingency fund. Kitchen remodels frequently uncover hidden issues (water damage, outdated wiring, asbestos) that add to the final cost.
+                  Allocate 15–20% of your budget as a contingency fund. Kitchen remodels frequently
+                  uncover hidden issues (water damage, outdated wiring, asbestos) that add to the
+                  final cost.
                 </p>
               </div>
             </section>
@@ -374,19 +470,29 @@ function KitchenRemodelGuide() {
                 3. Best Kitchen Materials
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                Material selection drives both the look and the budget of your kitchen remodel. Here's what to know about the three biggest categories:
+                Material selection drives both the look and the budget of your kitchen remodel.
+                Here's what to know about the three biggest categories:
               </p>
               <div className="space-y-6">
                 {/* Cabinets */}
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Cabinets</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Cabinets account for 30–40% of your total kitchen budget. Options range from stock cabinets (pre-built, limited sizes) to semi-custom and fully custom. Refacing existing cabinet boxes with new doors and hardware is a cost-effective middle ground for structurally sound cabinets.
+                    Cabinets account for 30–40% of your total kitchen budget. Options range from
+                    stock cabinets (pre-built, limited sizes) to semi-custom and fully custom.
+                    Refacing existing cabinet boxes with new doors and hardware is a cost-effective
+                    middle ground for structurally sound cabinets.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">Stock: $3,000–$8,000</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Semi-Custom: $8,000–$20,000</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Custom: $20,000–$50,000+</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      Stock: $3,000–$8,000
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Semi-Custom: $8,000–$20,000
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Custom: $20,000–$50,000+
+                    </span>
                   </div>
                 </div>
 
@@ -394,12 +500,20 @@ function KitchenRemodelGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Countertops</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Countertops set the tone for your kitchen's style. Quartz and granite remain the most popular choices for durability and aesthetics. Butcher block offers warmth, while marble delivers luxury at a premium price and maintenance requirement.
+                    Countertops set the tone for your kitchen's style. Quartz and granite remain the
+                    most popular choices for durability and aesthetics. Butcher block offers warmth,
+                    while marble delivers luxury at a premium price and maintenance requirement.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">Quartz: $50–$150/sq ft</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Granite: $40–$100/sq ft</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Marble: $75–$200/sq ft</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      Quartz: $50–$150/sq ft
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Granite: $40–$100/sq ft
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Marble: $75–$200/sq ft
+                    </span>
                   </div>
                 </div>
 
@@ -407,12 +521,21 @@ function KitchenRemodelGuide() {
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Flooring</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Kitchen flooring must handle moisture, spills, and heavy foot traffic. Luxury vinyl plank (LVP) has become the most popular choice for its durability and water resistance. Porcelain tile offers premium durability, while hardwood adds warmth but requires more maintenance.
+                    Kitchen flooring must handle moisture, spills, and heavy foot traffic. Luxury
+                    vinyl plank (LVP) has become the most popular choice for its durability and
+                    water resistance. Porcelain tile offers premium durability, while hardwood adds
+                    warmth but requires more maintenance.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">LVP: $3–$7/sq ft</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Porcelain Tile: $5–$15/sq ft</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Hardwood: $8–$15/sq ft</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      LVP: $3–$7/sq ft
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Porcelain Tile: $5–$15/sq ft
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Hardwood: $8–$15/sq ft
+                    </span>
                   </div>
                 </div>
               </div>
@@ -424,11 +547,15 @@ function KitchenRemodelGuide() {
                 4. Kitchen Remodel Process: Step by Step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Understanding the process helps you plan for disruptions and set realistic expectations. Here's a typical kitchen remodel timeline:
+                Understanding the process helps you plan for disruptions and set realistic
+                expectations. Here's a typical kitchen remodel timeline:
               </p>
               <div className="space-y-4">
                 {PROCESS_STEPS.map((s) => (
-                  <div key={s.step} className="flex gap-4 p-4 rounded-xl border border-border bg-white">
+                  <div
+                    key={s.step}
+                    className="flex gap-4 p-4 rounded-xl border border-border bg-white"
+                  >
                     <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-accent">{s.step}</span>
                     </div>
@@ -447,11 +574,15 @@ function KitchenRemodelGuide() {
                 5. How to Choose a Kitchen Contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Your kitchen remodel contractor will be in your home for weeks. Use this checklist to vet candidates before signing:
+                Your kitchen remodel contractor will be in your home for weeks. Use this checklist
+                to vet candidates before signing:
               </p>
               <div className="space-y-3">
                 {CONTRACTOR_CHECKLIST.map((item) => (
-                  <div key={item} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white">
+                  <div
+                    key={item}
+                    className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white"
+                  >
                     <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     <span className="text-sm text-ink">{item}</span>
                   </div>
@@ -465,34 +596,48 @@ function KitchenRemodelGuide() {
                 6. Permits & Inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Whether you need a permit depends on the scope of your kitchen remodel. Here's what you need to know:
+                Whether you need a permit depends on the scope of your kitchen remodel. Here's what
+                you need to know:
               </p>
               <div className="space-y-4">
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-base font-bold text-ink mb-2">When is a permit required?</h3>
+                  <h3 className="font-display text-base font-bold text-ink mb-2">
+                    When is a permit required?
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Permits are required for plumbing changes (moving sinks or adding gas lines), electrical work (new circuits or panel upgrades), structural modifications (removing walls), and HVAC changes. Cosmetic updates like painting, new countertops, or cabinet refacing typically don't require permits.
+                    Permits are required for plumbing changes (moving sinks or adding gas lines),
+                    electrical work (new circuits or panel upgrades), structural modifications
+                    (removing walls), and HVAC changes. Cosmetic updates like painting, new
+                    countertops, or cabinet refacing typically don't require permits.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Permit costs</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Kitchen remodel permits typically cost $200–$1,500 depending on your municipality and the scope of work. Electrical and plumbing permits may be separate. Your contractor should include these costs in their estimate.
+                    Kitchen remodel permits typically cost $200–$1,500 depending on your
+                    municipality and the scope of work. Electrical and plumbing permits may be
+                    separate. Your contractor should include these costs in their estimate.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Inspections</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Inspections occur at multiple stages: after rough-in plumbing and electrical (before walls are closed), and a final inspection after completion. Your contractor coordinates these with the local building department.
+                    Inspections occur at multiple stages: after rough-in plumbing and electrical
+                    (before walls are closed), and a final inspection after completion. Your
+                    contractor coordinates these with the local building department.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-ink mb-1">Warning: Skipping permits is risky</p>
+                      <p className="text-sm font-semibold text-ink mb-1">
+                        Warning: Skipping permits is risky
+                      </p>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        Unpermitted work can void insurance coverage, create problems when selling your home, and result in fines. If a contractor suggests skipping permits to save time or money, consider it a red flag.
+                        Unpermitted work can void insurance coverage, create problems when selling
+                        your home, and result in fines. If a contractor suggests skipping permits to
+                        save time or money, consider it a red flag.
                       </p>
                     </div>
                   </div>
@@ -529,9 +674,7 @@ function KitchenRemodelGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                8. Related Guides
-              </h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -555,10 +698,13 @@ function KitchenRemodelGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Calculate Your Kitchen Remodel Cost</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Calculate Your Kitchen Remodel Cost
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Get a personalized estimate based on your ZIP code, kitchen size, and material preferences. Free, no signup required.
+                  Get a personalized estimate based on your ZIP code, kitchen size, and material
+                  preferences. Free, no signup required.
                 </p>
                 <a
                   href="/kitchen-remodel-cost"
@@ -589,10 +735,13 @@ function KitchenRemodelGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Need Help Reviewing Your Kitchen Quote?</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Need Help Reviewing Your Kitchen Quote?
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Upload your kitchen remodel quote and get instant analysis on pricing, scope, and potential red flags.
+                  Upload your kitchen remodel quote and get instant analysis on pricing, scope, and
+                  potential red flags.
                 </p>
                 <a
                   href="/quote-analyzer"
@@ -606,23 +755,38 @@ function KitchenRemodelGuide() {
               <div className="rounded-2xl border border-border bg-white p-6">
                 <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
                 <div className="space-y-3">
-                  <a href="/kitchen-remodel-cost" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/kitchen-remodel-cost"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <DollarSign className="h-4 w-4 text-accent shrink-0" />
                     <span>Kitchen Cost Calculator</span>
                   </a>
-                  <a href="/quote-analyzer" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/quote-analyzer"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <FileText className="h-4 w-4 text-accent shrink-0" />
                     <span>Quote Review Tool</span>
                   </a>
-                  <a href="/estimate" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <MapPin className="h-4 w-4 text-accent shrink-0" />
                     <span>Local Price Estimator</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Shield className="h-4 w-4 text-accent shrink-0" />
                     <span>Insurance Claim Helper</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Star className="h-4 w-4 text-accent shrink-0" />
                     <span>Contractor Finder</span>
                   </a>

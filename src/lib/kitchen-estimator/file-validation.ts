@@ -5,11 +5,7 @@
 /**
  * Accepted MIME types for kitchen photo uploads.
  */
-export const ACCEPTED_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-] as const;
+export const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 export type AcceptedMimeType = (typeof ACCEPTED_MIME_TYPES)[number];
 

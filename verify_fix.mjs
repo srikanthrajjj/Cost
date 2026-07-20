@@ -27,7 +27,13 @@ function toStringArray(value) {
     return String(v ?? "");
   });
 }
-const PROJECT_TYPE_ALIASES = { roofing: "roof", roofs: "roof", kitchens: "kitchen", bathrooms: "bathroom", bath: "bathroom" };
+const PROJECT_TYPE_ALIASES = {
+  roofing: "roof",
+  roofs: "roof",
+  kitchens: "kitchen",
+  bathrooms: "bathroom",
+  bath: "bathroom",
+};
 function normalizeProjectType(value) {
   const lower = value.trim().toLowerCase();
   return PROJECT_TYPE_ALIASES[lower] ?? lower;
@@ -59,7 +65,9 @@ function normalizeExtraction(raw) {
   const materialsRaw = pick(raw, ["materials"]);
   const scopeItemsRaw = pick(raw, ["scopeItems", "scope_items", "scope"]);
   return {
-    projectType: normalizeProjectType(String(pick(raw, ["projectType", "project_type", "type"]) ?? "")),
+    projectType: normalizeProjectType(
+      String(pick(raw, ["projectType", "project_type", "type"]) ?? ""),
+    ),
     contractor: String(pick(raw, ["contractor", "contractor_name", "contractorName"]) ?? ""),
     materials: Array.isArray(materialsRaw) ? materialsRaw.map(normalizeMaterial) : [],
     scopeItems: Array.isArray(scopeItemsRaw) ? scopeItemsRaw.map(normalizeScopeItem) : [],
@@ -103,8 +111,20 @@ function materialCandidates(knowledge) {
   const candidates = knowledge.materials.map((m) => ({ name: m.name, synonyms: [], knowledge: m }));
   for (const scopeItem of knowledge.scope) {
     if (!scopeItem.requiredMaterials?.length) continue;
-    const stub = { name: scopeItem.name, pros: [], cons: [], cost: scopeItem.typicalCost ?? "", durability: "", maintenance: "", roi: "" };
-    candidates.push({ name: scopeItem.name, synonyms: scopeItem.requiredMaterials, knowledge: stub });
+    const stub = {
+      name: scopeItem.name,
+      pros: [],
+      cons: [],
+      cost: scopeItem.typicalCost ?? "",
+      durability: "",
+      maintenance: "",
+      roi: "",
+    };
+    candidates.push({
+      name: scopeItem.name,
+      synonyms: scopeItem.requiredMaterials,
+      knowledge: stub,
+    });
   }
   return candidates;
 }
@@ -117,43 +137,70 @@ function scopeCandidates(knowledge) {
 }
 function findBestMatch(extractedName, candidates) {
   const normalizedExtracted = normalizeText(extractedName);
-  if (!normalizedExtracted) return { candidate: null, confidence: 0, tier: null, reason: "no exact match" };
+  if (!normalizedExtracted)
+    return { candidate: null, confidence: 0, tier: null, reason: "no exact match" };
   let best = { candidate: null, confidence: 0, tier: null, reason: null };
   let sawSynonymCandidate = false;
   for (const candidate of candidates) {
     const normalizedCandidate = normalizeText(candidate.name);
-    if (normalizedExtracted === normalizedCandidate) return { candidate, confidence: 1.0, tier: "exact", reason: null };
+    if (normalizedExtracted === normalizedCandidate)
+      return { candidate, confidence: 1.0, tier: "exact", reason: null };
     for (const synonym of candidate.synonyms) {
       sawSynonymCandidate = true;
       const normalizedSynonym = normalizeText(synonym);
       if (!normalizedSynonym) continue;
-      if (normalizedExtracted === normalizedSynonym || normalizedExtracted.includes(normalizedSynonym) || normalizedSynonym.includes(normalizedExtracted)) {
-        if (0.95 > best.confidence) best = { candidate, confidence: 0.95, tier: "synonym", reason: null };
+      if (
+        normalizedExtracted === normalizedSynonym ||
+        normalizedExtracted.includes(normalizedSynonym) ||
+        normalizedSynonym.includes(normalizedExtracted)
+      ) {
+        if (0.95 > best.confidence)
+          best = { candidate, confidence: 0.95, tier: "synonym", reason: null };
       }
     }
-    if (normalizedExtracted.includes(normalizedCandidate) || normalizedCandidate.includes(normalizedExtracted)) {
-      if (0.9 > best.confidence) best = { candidate, confidence: 0.9, tier: "contains", reason: null };
+    if (
+      normalizedExtracted.includes(normalizedCandidate) ||
+      normalizedCandidate.includes(normalizedExtracted)
+    ) {
+      if (0.9 > best.confidence)
+        best = { candidate, confidence: 0.9, tier: "contains", reason: null };
     }
     const similarity = calculateStringSimilarity(extractedName, candidate.name);
     if (similarity >= FUZZY_THRESHOLD && similarity > best.confidence) {
       best = { candidate, confidence: similarity, tier: "fuzzy", reason: null };
     }
   }
-  if (!best.candidate) best.reason = sawSynonymCandidate ? "no synonym" : "similarity below threshold";
+  if (!best.candidate)
+    best.reason = sawSynonymCandidate ? "no synonym" : "similarity below threshold";
   return best;
 }
 function matchQuoteSim(extraction, knowledge) {
-  const matchedMaterials = [], matchedScopeItems = [], unmatchedMaterials = [], unmatchedScopeItems = [];
+  const matchedMaterials = [],
+    matchedScopeItems = [],
+    unmatchedMaterials = [],
+    unmatchedScopeItems = [];
   const materialPool = materialCandidates(knowledge);
   for (const item of extraction.materials) {
     const outcome = findBestMatch(item.name, materialPool);
-    if (outcome.candidate) matchedMaterials.push({ original: item, knowledge: outcome.candidate.knowledge, confidence: outcome.confidence, tier: outcome.tier });
+    if (outcome.candidate)
+      matchedMaterials.push({
+        original: item,
+        knowledge: outcome.candidate.knowledge,
+        confidence: outcome.confidence,
+        tier: outcome.tier,
+      });
     else unmatchedMaterials.push(`${item.name} (${outcome.reason})`);
   }
   const scopePool = scopeCandidates(knowledge);
   for (const item of extraction.scopeItems) {
     const outcome = findBestMatch(item.name, scopePool);
-    if (outcome.candidate) matchedScopeItems.push({ original: item, knowledge: outcome.candidate.knowledge, confidence: outcome.confidence, tier: outcome.tier });
+    if (outcome.candidate)
+      matchedScopeItems.push({
+        original: item,
+        knowledge: outcome.candidate.knowledge,
+        confidence: outcome.confidence,
+        tier: outcome.tier,
+      });
     else unmatchedScopeItems.push(`${item.name} (${outcome.reason})`);
   }
   return { matchedMaterials, matchedScopeItems, unmatchedMaterials, unmatchedScopeItems };
@@ -164,24 +211,92 @@ const rawFromBugReport = {
   contractor_name: "Lone Star Roofing LLC",
   project_type: "roofing",
   materials: [
-    { description: "Tear-off shingles", quantity: 32, unit: "sq", price_per_unit: 185, total_price: 5920 },
-    { description: "Synthetic underlayment", quantity: 32, unit: "sq", price_per_unit: 110, total_price: 3520 },
-    { description: "Architectural shingles", quantity: 32, unit: "sq", price_per_unit: 340, total_price: 10880 },
-    { description: "Owens Corning Duration Ice & water shield", quantity: 2, unit: "", price_per_unit: 220, total_price: 440 },
-    { description: "Valleys only Drip edge", quantity: 120, unit: "lf", price_per_unit: 6, total_price: 720 },
-    { description: "Flashing replacement", quantity: 1, unit: "", price_per_unit: 0, total_price: 0 },
-    { description: "Reuse existing Ridge vent", quantity: 45, unit: "lf", price_per_unit: 18, total_price: 810 },
-    { description: "Dumpster & cleanup", quantity: 1, unit: "", price_per_unit: 650, total_price: 650 },
+    {
+      description: "Tear-off shingles",
+      quantity: 32,
+      unit: "sq",
+      price_per_unit: 185,
+      total_price: 5920,
+    },
+    {
+      description: "Synthetic underlayment",
+      quantity: 32,
+      unit: "sq",
+      price_per_unit: 110,
+      total_price: 3520,
+    },
+    {
+      description: "Architectural shingles",
+      quantity: 32,
+      unit: "sq",
+      price_per_unit: 340,
+      total_price: 10880,
+    },
+    {
+      description: "Owens Corning Duration Ice & water shield",
+      quantity: 2,
+      unit: "",
+      price_per_unit: 220,
+      total_price: 440,
+    },
+    {
+      description: "Valleys only Drip edge",
+      quantity: 120,
+      unit: "lf",
+      price_per_unit: 6,
+      total_price: 720,
+    },
+    {
+      description: "Flashing replacement",
+      quantity: 1,
+      unit: "",
+      price_per_unit: 0,
+      total_price: 0,
+    },
+    {
+      description: "Reuse existing Ridge vent",
+      quantity: 45,
+      unit: "lf",
+      price_per_unit: 18,
+      total_price: 810,
+    },
+    {
+      description: "Dumpster & cleanup",
+      quantity: 1,
+      unit: "",
+      price_per_unit: 650,
+      total_price: 650,
+    },
     { description: "Permit", quantity: 1, unit: "", price_per_unit: 0, total_price: 0 },
-    { description: "Labor (lump sum)", quantity: 1, unit: "", price_per_unit: 8950, total_price: 8950 },
+    {
+      description: "Labor (lump sum)",
+      quantity: 1,
+      unit: "",
+      price_per_unit: 8950,
+      total_price: 8950,
+    },
   ],
   scope_items: [
-    "Tear-off shingles", "Synthetic underlayment", "Architectural shingles", "Ice & water shield",
-    "Drip edge", "Flashing replacement", "Ridge vent reuse", "Dumpster & cleanup", "Permit", "Labor (lump sum)",
+    "Tear-off shingles",
+    "Synthetic underlayment",
+    "Architectural shingles",
+    "Ice & water shield",
+    "Drip edge",
+    "Flashing replacement",
+    "Ridge vent reuse",
+    "Dumpster & cleanup",
+    "Permit",
+    "Labor (lump sum)",
   ],
   permits: [{ description: "Permit", included: true }],
   warranties: ["Manufacturer warranty applies", "Workmanship warranty not specified"],
-  exclusions: ["No workmanship warranty", "No change-order policy", "Labor is lump sum", "No insurance certificate", "Start date TBD"],
+  exclusions: [
+    "No workmanship warranty",
+    "No change-order policy",
+    "Labor is lump sum",
+    "No insurance certificate",
+    "Start date TBD",
+  ],
   total_price: 31890,
   confidence_score: 0.9,
 };
@@ -189,7 +304,12 @@ const rawFromBugReport = {
 console.log("=== STEP 1: normalizeExtraction() output ===");
 const extraction = normalizeExtraction(rawFromBugReport);
 console.log("projectType:", extraction.projectType, "(expected: roof)");
-console.log("materials count:", extraction.materials.length, " scopeItems count:", extraction.scopeItems.length);
+console.log(
+  "materials count:",
+  extraction.materials.length,
+  " scopeItems count:",
+  extraction.scopeItems.length,
+);
 
 const knowledge = { materials: roofingMaterials, scope: roofingScopeItems };
 
@@ -198,22 +318,27 @@ const result = matchQuoteSim(extraction, knowledge);
 
 console.log("\nMatched materials:", result.matchedMaterials.length);
 result.matchedMaterials.forEach((m) =>
-  console.log(`  "${m.original.name}" -> "${m.knowledge.name}" (${m.tier}, confidence: ${m.confidence.toFixed(2)})`)
+  console.log(
+    `  "${m.original.name}" -> "${m.knowledge.name}" (${m.tier}, confidence: ${m.confidence.toFixed(2)})`,
+  ),
 );
 console.log("Unmatched materials:", result.unmatchedMaterials);
 
 console.log("\nMatched scope items:", result.matchedScopeItems.length);
 result.matchedScopeItems.forEach((m) =>
-  console.log(`  "${m.original.name}" -> "${m.knowledge.name}" (${m.tier}, confidence: ${m.confidence.toFixed(2)})`)
+  console.log(
+    `  "${m.original.name}" -> "${m.knowledge.name}" (${m.tier}, confidence: ${m.confidence.toFixed(2)})`,
+  ),
 );
 console.log("Unmatched scope items:", result.unmatchedScopeItems);
 
 console.log("\n=== STEP 3: Completeness + red flags (mirrors analyzeQuote) ===");
 const totalRequired = roofingScopeItems.filter((s) => s.required).length;
 const matchedRequired = roofingScopeItems.filter(
-  (s) => s.required && result.matchedScopeItems.some((m) => m.knowledge.id === s.id)
+  (s) => s.required && result.matchedScopeItems.some((m) => m.knowledge.id === s.id),
 ).length;
-const completenessScore = totalRequired > 0 ? Math.round((matchedRequired / totalRequired) * 100) : 0;
+const completenessScore =
+  totalRequired > 0 ? Math.round((matchedRequired / totalRequired) * 100) : 0;
 console.log("Total required scope items:", totalRequired, " Matched required:", matchedRequired);
 console.log("Completeness score:", completenessScore + "%");
 console.log("Red flags available:", roofingRedFlags.length);

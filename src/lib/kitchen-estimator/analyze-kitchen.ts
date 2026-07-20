@@ -60,7 +60,11 @@ export async function analyzeKitchen(photos: string[]): Promise<AnalyzeKitchenRe
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       console.error("[analyzeKitchen] API error:", res.status, body);
-      return { success: false, error: "We couldn't analyze your photos. Try again or skip.", code: "api_error" };
+      return {
+        success: false,
+        error: "We couldn't analyze your photos. Try again or skip.",
+        code: "api_error",
+      };
     }
 
     const data = await res.json().catch(() => null);
@@ -71,11 +75,18 @@ export async function analyzeKitchen(photos: string[]): Promise<AnalyzeKitchenRe
     }
 
     console.log("[analyzeKitchen] AI response:", msg.slice(0, 300));
-    const cleaned = msg.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
+    const cleaned = msg
+      .replace(/^```(?:json)?\s*\n?/i, "")
+      .replace(/\n?```\s*$/i, "")
+      .trim();
     const result = parseAIResponse(cleaned);
 
     if (result.cabinetType.value === "unknown" && result.countertopMaterial.value === "unknown") {
-      return { success: false, error: "Couldn't detect kitchen details. Try again.", code: "parse_error" };
+      return {
+        success: false,
+        error: "Couldn't detect kitchen details. Try again.",
+        code: "parse_error",
+      };
     }
 
     return { success: true, data: result };

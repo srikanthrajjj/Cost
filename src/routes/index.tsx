@@ -889,7 +889,10 @@ function ThinkingIndicator() {
   useEffect(() => {
     const t1 = setTimeout(() => setStageIdx(1), 1800);
     const t2 = setTimeout(() => setStageIdx(2), 3800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   return (
@@ -900,7 +903,10 @@ function ThinkingIndicator() {
       </div>
       <div className="flex gap-1">
         {stages.map((_, i) => (
-          <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= stageIdx ? "bg-accent" : "bg-border"}`} />
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= stageIdx ? "bg-accent" : "bg-border"}`}
+          />
         ))}
       </div>
       <p className="text-[10px] text-muted-foreground leading-relaxed">{tips[tipIdx]}</p>
@@ -914,7 +920,13 @@ function Landing() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [projectIdx, setProjectIdx] = useState(0);
-  const heroProjects = ["kitchen remodel", "roof replacement", "bathroom renovation", "HVAC installation", "window replacement"];
+  const heroProjects = [
+    "kitchen remodel",
+    "roof replacement",
+    "bathroom renovation",
+    "HVAC installation",
+    "window replacement",
+  ];
   const displayProject = heroProjects[projectIdx];
 
   useEffect(() => {
@@ -1195,7 +1207,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         content: m.text,
       }));
       const projectType = extractProjectTypeFromChat(chatMessages);
-      const response = await serverChatWithKnowledge({ data: { messages: chatMessages, userProjectType: projectType ?? undefined } });
+      const response = await serverChatWithKnowledge({
+        data: { messages: chatMessages, userProjectType: projectType ?? undefined },
+      });
       return response;
     } catch (error) {
       console.error("AI API error:", error);
@@ -1220,7 +1234,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     "💡 Insight: Material quality accounts for 44% of your total project cost.",
     "💡 Tip: Check contractor licensing at your state's licensing board website.",
     "💡 Did you know? Insurance may cover storm damage. Document everything with photos.",
-    "💡 Tip: \"Cost-plus\" contracts can spiral. Always prefer fixed-price quotes.",
+    '💡 Tip: "Cost-plus" contracts can spiral. Always prefer fixed-price quotes.',
   ];
 
   const [analysisTipIdx, setAnalysisTipIdx] = useState(0);
@@ -1266,14 +1280,26 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         const extractedContent = await extractTextFromFile(fileToProcess);
         extractedText = extractedContent.text;
       } catch {
-        setChatMessages((prev) => [...prev, { role: "ai", text: "😅 I couldn't read that file. Try uploading a text-based PDF or paste the content directly." }]);
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            text: "😅 I couldn't read that file. Try uploading a text-based PDF or paste the content directly.",
+          },
+        ]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
         return;
       }
 
       if (extractedText.length < 20) {
-        setChatMessages((prev) => [...prev, { role: "ai", text: "📄 That file seems to be scanned or image-based. I can't read the text from it.\n\nTry a text-based PDF, or copy-paste the quote content directly into chat." }]);
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            text: "📄 That file seems to be scanned or image-based. I can't read the text from it.\n\nTry a text-based PDF, or copy-paste the quote content directly into chat.",
+          },
+        ]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
         return;
@@ -1281,8 +1307,61 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
       // Step 2: Check if it's a renovation/contractor quote
       const textLower = extractedText.substring(0, 3000).toLowerCase();
-      const quoteSignals = ["estimate", "quote", "proposal", "contractor", "labor", "material", "total", "scope", "warranty", "permit", "invoice", "bid", "install", "replacement", "repair", "sq ft", "linear ft", "roofing", "plumbing", "hvac", "kitchen", "bathroom", "shingle", "drywall", "flooring", "demolition", "tear off", "flashing"];
-      const rejectSignals = ["tax", "salary", "income", "deduction", "employer", "hra", "allowance", "tds", "pan", "aadhaar", "passport", "visa", "resume", "education", "gpa", "university", "semester", "recipe", "ingredients", "calories", "prescription", "medication", "diagnosis"];
+      const quoteSignals = [
+        "estimate",
+        "quote",
+        "proposal",
+        "contractor",
+        "labor",
+        "material",
+        "total",
+        "scope",
+        "warranty",
+        "permit",
+        "invoice",
+        "bid",
+        "install",
+        "replacement",
+        "repair",
+        "sq ft",
+        "linear ft",
+        "roofing",
+        "plumbing",
+        "hvac",
+        "kitchen",
+        "bathroom",
+        "shingle",
+        "drywall",
+        "flooring",
+        "demolition",
+        "tear off",
+        "flashing",
+      ];
+      const rejectSignals = [
+        "tax",
+        "salary",
+        "income",
+        "deduction",
+        "employer",
+        "hra",
+        "allowance",
+        "tds",
+        "pan",
+        "aadhaar",
+        "passport",
+        "visa",
+        "resume",
+        "education",
+        "gpa",
+        "university",
+        "semester",
+        "recipe",
+        "ingredients",
+        "calories",
+        "prescription",
+        "medication",
+        "diagnosis",
+      ];
 
       const quoteScore = quoteSignals.filter((s) => textLower.includes(s)).length;
       const rejectScore = rejectSignals.filter((s) => textLower.includes(s)).length;
@@ -1313,7 +1392,15 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           ...filteredMessages,
           { role: "user" as const, text: enhancedUserText },
         ]);
-        setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse + "\n\n💡 *If this is a contractor quote, try saying \"analyze this quote\" for a full detailed analysis with our Quote Analyzer.*" }]);
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            text:
+              aiResponse +
+              '\n\n💡 *If this is a contractor quote, try saying "analyze this quote" for a full detailed analysis with our Quote Analyzer.*',
+          },
+        ]);
         setIsAiTyping(false);
         setTimeout(scrollToBottom, 50);
       }
@@ -1426,7 +1513,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       const clarifyCount = analysis.analysis.needsClarification.length;
       const missingCount = analysis.analysis.missingScope.length;
       const score = analysis.analysis.summary.completenessScore;
-      const totalExtracted = analysis.extraction.materials.length + analysis.extraction.scopeItems.length;
+      const totalExtracted =
+        analysis.extraction.materials.length + analysis.extraction.scopeItems.length;
 
       if (totalExtracted === 0) {
         setChatMessages((prev) => [
@@ -1783,12 +1871,17 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           <div>
             {/* H1 */}
             <h1 className="font-display text-4xl sm:text-5xl md:text-[56px] font-extrabold tracking-tight text-ink leading-[1.08]">
-              Know what your <span className="text-accent inline-block min-w-[200px]">{displayProject}</span> should actually cost.
+              Know what your{" "}
+              <span className="text-accent inline-block min-w-[200px]">{displayProject}</span>{" "}
+              should actually cost.
             </h1>
 
             {/* Subtitle */}
             <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              <strong className="text-ink">Stop overpaying.</strong> Our AI tools powered by live local data have saved homeowners <strong className="text-accent">$2.3M on inflated quotes</strong>. Get real pricing, spot red flags, and renovate with confidence.
+              <strong className="text-ink">Stop overpaying.</strong> Our AI tools powered by live
+              local data have saved homeowners{" "}
+              <strong className="text-accent">$2.3M on inflated quotes</strong>. Get real pricing,
+              spot red flags, and renovate with confidence.
             </p>
 
             {/* AI Chat Input - Inside hero left column */}
@@ -1799,7 +1892,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 </div>
                 <span className="text-xs font-bold text-ink">Ask CostReno AI</span>
               </div>
-              <div className="relative rounded-xl bg-white border-2 border-accent/30 shadow-lg shadow-accent/5 overflow-hidden hover:border-accent/50 transition-colors cursor-pointer" onClick={() => setChatOpen(true)}>
+              <div
+                className="relative rounded-xl bg-white border-2 border-accent/30 shadow-lg shadow-accent/5 overflow-hidden hover:border-accent/50 transition-colors cursor-pointer"
+                onClick={() => setChatOpen(true)}
+              >
                 <div className="flex items-center gap-3 px-4 py-3">
                   <Search className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="relative flex-1 min-w-0">
@@ -1833,7 +1929,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                     />
                     {searchQuery.length === 0 && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-muted-foreground whitespace-nowrap overflow-hidden max-w-full">
-                        {displayTerm}<span className="animate-pulse">|</span>
+                        {displayTerm}
+                        <span className="animate-pulse">|</span>
                       </span>
                     )}
                   </div>
@@ -1860,17 +1957,29 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </div>
               {/* Trust stats - inside input container */}
               <div className="grid grid-cols-3 gap-2 mt-2.5 text-xs text-center">
-                <span><strong className="text-ink font-bold">50K+</strong> <span className="text-muted-foreground">estimates</span></span>
-                <span><strong className="text-ink font-bold">$2.3M</strong> <span className="text-muted-foreground">saved</span></span>
-                <span><strong className="text-ink font-bold">100%</strong> <span className="text-muted-foreground">free</span></span>
+                <span>
+                  <strong className="text-ink font-bold">50K+</strong>{" "}
+                  <span className="text-muted-foreground">estimates</span>
+                </span>
+                <span>
+                  <strong className="text-ink font-bold">$2.3M</strong>{" "}
+                  <span className="text-muted-foreground">saved</span>
+                </span>
+                <span>
+                  <strong className="text-ink font-bold">100%</strong>{" "}
+                  <span className="text-muted-foreground">free</span>
+                </span>
               </div>
             </div>
           </div>
           <div className="hidden lg:block">
-            <img src="/home.png" alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates" className="w-full h-auto max-w-2xl ml-auto scale-110" />
+            <img
+              src="/home.png"
+              alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates"
+              className="w-full h-auto max-w-2xl ml-auto scale-110"
+            />
           </div>
         </div>
-
       </section>
 
       <TrustBar region={userLocation ?? "your area"} />
@@ -1936,12 +2045,15 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       Save thousands on your next renovation.
                     </h2>
                     <p className="text-sm text-muted-foreground mt-2 text-center max-w-sm leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
-                      Our AI analyzes live local data to give you real costs, catch overpriced quotes, and guide you step-by-step.
+                      Our AI analyzes live local data to give you real costs, catch overpriced
+                      quotes, and guide you step-by-step.
                     </p>
 
                     {/* Questions - staggered animation */}
                     <div className="mt-6 w-full max-w-sm space-y-2">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold px-1 animate-in fade-in duration-500 delay-300">Ask me anything</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold px-1 animate-in fade-in duration-500 delay-300">
+                        Ask me anything
+                      </p>
                       {[
                         { q: "How much should a roof replacement cost?", delay: "delay-[400ms]" },
                         { q: "Can you review my contractor quote?", delay: "delay-[500ms]" },
@@ -1956,7 +2068,12 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             if (isEstimateQ) {
                               setChatMessages([
                                 { role: "user", text: q },
-                                { role: "widget", text: "", widgetType: "estimator", widgetDone: false },
+                                {
+                                  role: "widget",
+                                  text: "",
+                                  widgetType: "estimator",
+                                  widgetDone: false,
+                                },
                               ]);
                               setTimeout(scrollToBottom, 50);
                               return;
@@ -1973,7 +2090,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background hover:border-accent/40 hover:bg-accent/5 transition text-left group animate-in fade-in slide-in-from-bottom-3 duration-500 ${delay}`}
                         >
                           <MessageCircle className="h-4 w-4 text-accent shrink-0" />
-                          <span className="text-sm text-ink/80 group-hover:text-ink transition leading-snug flex-1">{q}</span>
+                          <span className="text-sm text-ink/80 group-hover:text-ink transition leading-snug flex-1">
+                            {q}
+                          </span>
                           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-accent shrink-0 transition" />
                         </button>
                       ))}
@@ -1981,9 +2100,14 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                     {/* Active Tools */}
                     <div className="mt-5 w-full max-w-sm animate-in fade-in duration-500 delay-[900ms]">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-2 px-1">Active Tools</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-2 px-1">
+                        Active Tools
+                      </p>
                       <div className="grid grid-cols-2 gap-2">
-                        <a href="/estimate" className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition">
+                        <a
+                          href="/estimate"
+                          className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition"
+                        >
                           <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
                             <Calculator className="h-3.5 w-3.5 text-accent" />
                           </div>
@@ -1992,7 +2116,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             <p className="text-[10px] text-accent font-medium">Live</p>
                           </div>
                         </a>
-                        <a href="/quote-analyzer" className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition">
+                        <a
+                          href="/quote-analyzer"
+                          className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition"
+                        >
                           <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
                             <Search className="h-3.5 w-3.5 text-accent" />
                           </div>
@@ -2035,18 +2162,36 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                                     key={idx}
                                     className="flex items-center gap-2.5 bg-white border border-border rounded-xl px-3 py-2.5 shadow-sm"
                                   >
-                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                                      isPdf ? "bg-red-50" : isImage ? "bg-blue-50" : "bg-muted"
-                                    }`}>
+                                    <div
+                                      className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                                        isPdf ? "bg-red-50" : isImage ? "bg-blue-50" : "bg-muted"
+                                      }`}
+                                    >
                                       {isPdf ? (
-                                        <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg
+                                          className="w-5 h-5 text-red-500"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="1.5"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
                                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                           <polyline points="14 2 14 8 20 8" />
                                           <path d="M9 15h6" />
                                           <path d="M9 11h6" />
                                         </svg>
                                       ) : isImage ? (
-                                        <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg
+                                          className="w-5 h-5 text-blue-500"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="1.5"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
                                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                                           <circle cx="8.5" cy="8.5" r="1.5" />
                                           <polyline points="21 15 16 10 5 21" />
@@ -2060,7 +2205,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                                         {fileName}
                                       </p>
                                       <p className="text-[10px] text-muted-foreground">
-                                        {isPdf ? "PDF Document" : isImage ? "Image" : ext.toUpperCase() + " File"}
+                                        {isPdf
+                                          ? "PDF Document"
+                                          : isImage
+                                            ? "Image"
+                                            : ext.toUpperCase() + " File"}
                                       </p>
                                     </div>
                                   </div>
@@ -2136,9 +2285,13 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                       {/* Progress steps */}
                       <div className="flex gap-1.5">
-                        {(["reading", "extracting", "matching", "analyzing", "reporting"] as const).map((stage, idx) => {
+                        {(
+                          ["reading", "extracting", "matching", "analyzing", "reporting"] as const
+                        ).map((stage, idx) => {
                           const currentStageIdx = Object.keys(STAGE_MESSAGES).indexOf(
-                            Object.entries(STAGE_MESSAGES).find(([, v]) => v === processingStep)?.[0] ?? "reading"
+                            Object.entries(STAGE_MESSAGES).find(
+                              ([, v]) => v === processingStep,
+                            )?.[0] ?? "reading",
                           );
                           const isComplete = idx < currentStageIdx;
                           const isCurrent = idx === currentStageIdx;
@@ -2146,7 +2299,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             <div
                               key={stage}
                               className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                                isComplete ? "bg-accent" : isCurrent ? "bg-accent/50 animate-pulse" : "bg-border"
+                                isComplete
+                                  ? "bg-accent"
+                                  : isCurrent
+                                    ? "bg-accent/50 animate-pulse"
+                                    : "bg-border"
                               }`}
                             />
                           );
@@ -2154,7 +2311,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       </div>
 
                       {/* Rotating tip */}
-                      <p className="text-[11px] text-muted-foreground leading-relaxed animate-in fade-in duration-500" key={analysisTipIdx}>
+                      <p
+                        className="text-[11px] text-muted-foreground leading-relaxed animate-in fade-in duration-500"
+                        key={analysisTipIdx}
+                      >
                         {ANALYSIS_TIPS[analysisTipIdx]}
                       </p>
 
@@ -2195,27 +2355,46 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                   {attachments.map((file, i) => {
                     const isPdf = file.type === "application/pdf";
                     const isImage = file.type.startsWith("image/");
-                    const fileSizeStr = file.size < 1024 * 1024
-                      ? `${(file.size / 1024).toFixed(0)} KB`
-                      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+                    const fileSizeStr =
+                      file.size < 1024 * 1024
+                        ? `${(file.size / 1024).toFixed(0)} KB`
+                        : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
                     return (
                       <div
                         key={i}
                         className="relative flex items-center gap-3 bg-white border border-border rounded-xl px-3 py-2.5 shadow-sm max-w-[220px] group"
                       >
                         {/* File type icon */}
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                          isPdf ? "bg-red-50" : isImage ? "bg-blue-50" : "bg-muted"
-                        }`}>
+                        <div
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                            isPdf ? "bg-red-50" : isImage ? "bg-blue-50" : "bg-muted"
+                          }`}
+                        >
                           {isPdf ? (
-                            <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg
+                              className="w-5 h-5 text-red-500"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
                               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                               <polyline points="14 2 14 8 20 8" />
                               <path d="M10 12h4" />
                               <path d="M10 16h4" />
                             </svg>
                           ) : isImage ? (
-                            <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg
+                              className="w-5 h-5 text-blue-500"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
                               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                               <circle cx="8.5" cy="8.5" r="1.5" />
                               <polyline points="21 15 16 10 5 21" />
@@ -2344,9 +2523,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </h2>
               <p className="text-sm text-muted-foreground text-center mt-2 leading-relaxed">
                 Your location helps us provide{" "}
-                <span className="font-semibold text-ink">clear, local cost estimates</span> for
-                your home projects. Construction costs vary significantly by region due to labor
-                rates, material availability, and local regulations.
+                <span className="font-semibold text-ink">clear, local cost estimates</span> for your
+                home projects. Construction costs vary significantly by region due to labor rates,
+                material availability, and local regulations.
               </p>
               <div className="mt-5 space-y-3">
                 <div className="relative">
@@ -2415,7 +2594,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 overflow-x-auto pb-6 hide-scrollbar">
               {projects.map((p, idx) => {
                 const isDisabled = idx >= 3; // Disable cards 4, 5, 6 (indices 3, 4, 5)
-                
+
                 return (
                   <a
                     key={p.name}
@@ -2450,11 +2629,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       )}
                     </div>
 
-                    <div className={`relative flex-1 p-5 ${isDisabled ? "pointer-events-none opacity-60" : ""}`}>
+                    <div
+                      className={`relative flex-1 p-5 ${isDisabled ? "pointer-events-none opacity-60" : ""}`}
+                    >
                       <div className="flex items-start justify-between gap-3 mb-4">
-                        <h3 className="text-sm font-bold text-ink line-clamp-2 pr-2">
-                          {p.name}
-                        </h3>
+                        <h3 className="text-sm font-bold text-ink line-clamp-2 pr-2">{p.name}</h3>
                       </div>
 
                       <div className="space-y-3">
@@ -2472,7 +2651,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             disabled={isDisabled}
                             onClick={() => {
                               if (!isDisabled) {
-                                sessionStorage.setItem("costreno_preselected_project", p.projectType);
+                                sessionStorage.setItem(
+                                  "costreno_preselected_project",
+                                  p.projectType,
+                                );
                                 window.location.href = "/estimate";
                               }
                             }}
@@ -2487,8 +2669,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                         </div>
                       </div>
                     </div>
-
-
                   </a>
                 );
               })}
@@ -2521,7 +2701,15 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
             <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg className="w-6 h-6 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="w-6 h-6 text-accent"
+                viewBox="0 0 28 28"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="4" y="3" width="20" height="22" rx="3" />
                 <rect x="7" y="6" width="14" height="5" rx="1.5" />
                 <line x1="8" y1="22" x2="8" y2="19" strokeWidth="2.5" />
@@ -2534,7 +2722,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
               Get clear, local cost estimates for your project in minutes.
             </p>
-            <a href="/estimate" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors">
+            <a
+              href="/estimate"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+            >
               Get Estimate <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
@@ -2543,7 +2734,15 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
             <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg className="w-6 h-6 text-accent" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="w-6 h-6 text-accent"
+                viewBox="0 0 28 28"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M6 3h11l5 5v17H6V3z" />
                 <path d="M17 3v5h5" />
                 <circle cx="13" cy="16" r="4" />
@@ -2554,28 +2753,76 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
               Upload a contractor quote and get AI-powered analysis instantly.
             </p>
-            <a href="/quote-analyzer" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors">
+            <a
+              href="/quote-analyzer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+            >
               Review a Quote <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
           {/* Coming Soon Tools */}
           {[
-            { id: "insurance", name: "Insurance Checker", desc: "Find out what's covered and maximize your insurance benefits.", icon: '<path d="M14 3L5 7v7c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V7L14 3z" /><path d="M10 14l3 3 5-5" strokeWidth="2" />' },
-            { id: "materials", name: "Material Compare", desc: "Compare materials side-by-side on cost, durability, and lifespan.", icon: '<path d="M14 3L3 9l11 6 11-6-11-6z" /><path d="M3 14l11 6 11-6" /><path d="M3 19l11 6 11-6" />' },
-            { id: "budget", name: "Budget Planner", desc: "Plan your budget and explore options from start to finish.", icon: '<circle cx="14" cy="14" r="10" /><path d="M14 14L14 4" strokeWidth="2" /><path d="M14 14 A10 10 0 0 1 22.7 19" strokeWidth="2.5" /><circle cx="14" cy="14" r="2.5" />' },
-            { id: "roi", name: "ROI Calculator", desc: "See the return on your investment and increase home value.", icon: '<polyline points="3,22 9,16 14,19 21,9 25,5" /><polyline points="21,5 25,5 25,9" strokeWidth="2" />' },
-            { id: "timeline", name: "Project Timeline", desc: "Get a clear step-by-step timeline from start to finish.", icon: '<rect x="3" y="5" width="22" height="20" rx="3" /><line x1="3" y1="11" x2="25" y2="11" /><line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" /><line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" /><circle cx="9" cy="17" r="1.5" /><circle cx="14" cy="17" r="1.5" /><circle cx="19" cy="17" r="1.5" />' },
-            { id: "permits", name: "Permit Guide", desc: "Know exactly which permits you need and how to get them.", icon: '<path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" /><line x1="10" y1="12" x2="18" y2="12" /><line x1="10" y1="16" x2="18" y2="16" /><line x1="10" y1="20" x2="15" y2="20" />' },
+            {
+              id: "insurance",
+              name: "Insurance Checker",
+              desc: "Find out what's covered and maximize your insurance benefits.",
+              icon: '<path d="M14 3L5 7v7c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V7L14 3z" /><path d="M10 14l3 3 5-5" strokeWidth="2" />',
+            },
+            {
+              id: "materials",
+              name: "Material Compare",
+              desc: "Compare materials side-by-side on cost, durability, and lifespan.",
+              icon: '<path d="M14 3L3 9l11 6 11-6-11-6z" /><path d="M3 14l11 6 11-6" /><path d="M3 19l11 6 11-6" />',
+            },
+            {
+              id: "budget",
+              name: "Budget Planner",
+              desc: "Plan your budget and explore options from start to finish.",
+              icon: '<circle cx="14" cy="14" r="10" /><path d="M14 14L14 4" strokeWidth="2" /><path d="M14 14 A10 10 0 0 1 22.7 19" strokeWidth="2.5" /><circle cx="14" cy="14" r="2.5" />',
+            },
+            {
+              id: "roi",
+              name: "ROI Calculator",
+              desc: "See the return on your investment and increase home value.",
+              icon: '<polyline points="3,22 9,16 14,19 21,9 25,5" /><polyline points="21,5 25,5 25,9" strokeWidth="2" />',
+            },
+            {
+              id: "timeline",
+              name: "Project Timeline",
+              desc: "Get a clear step-by-step timeline from start to finish.",
+              icon: '<rect x="3" y="5" width="22" height="20" rx="3" /><line x1="3" y1="11" x2="25" y2="11" /><line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" /><line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" /><circle cx="9" cy="17" r="1.5" /><circle cx="14" cy="17" r="1.5" /><circle cx="19" cy="17" r="1.5" />',
+            },
+            {
+              id: "permits",
+              name: "Permit Guide",
+              desc: "Know exactly which permits you need and how to get them.",
+              icon: '<path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" /><line x1="10" y1="12" x2="18" y2="12" /><line x1="10" y1="16" x2="18" y2="16" /><line x1="10" y1="20" x2="15" y2="20" />',
+            },
           ].map((tool) => (
-            <div key={tool.id} className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 overflow-hidden transition-all duration-300" style={{ opacity: 0.75 }}>
+            <div
+              key={tool.id}
+              className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 overflow-hidden transition-all duration-300"
+              style={{ opacity: 0.75 }}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               <div className="relative z-10 flex flex-col h-full">
                 <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4 group-hover:bg-accent/10 transition-colors duration-300">
-                  <svg className="w-6 h-6 text-muted-foreground group-hover:text-accent transition-colors duration-300" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: tool.icon }} />
+                  <svg
+                    className="w-6 h-6 text-muted-foreground group-hover:text-accent transition-colors duration-300"
+                    viewBox="0 0 28 28"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    dangerouslySetInnerHTML={{ __html: tool.icon }}
+                  />
                 </div>
                 <h3 className="font-display text-sm font-bold text-ink mb-1.5">{tool.name}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">{tool.desc}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
+                  {tool.desc}
+                </p>
                 <div className="pt-3 border-t border-border/30 mt-auto">
                   <p className="text-xs text-accent font-semibold text-center leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     We're crafting something smart here. Stay tuned.
@@ -2595,7 +2842,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             Plan your home renovation in 4 simple steps
           </h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto">
-            Whether you're replacing a roof, remodeling a kitchen, or renovating a bathroom, CostReno helps you plan with confidence from start to finish.
+            Whether you're replacing a roof, remodeling a kitchen, or renovating a bathroom,
+            CostReno helps you plan with confidence from start to finish.
           </p>
         </div>
 
@@ -2623,7 +2871,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               desc: "Use expert recommendations, material comparisons, and ROI analysis to make the best choice for your home. Coming soon.",
             },
           ].map((step, i) => (
-            <div key={step.num} className="relative flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-white">
+            <div
+              key={step.num}
+              className="relative flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-white"
+            >
               {/* Connector line (hidden on mobile) */}
               {i < 3 && (
                 <div className="hidden lg:block absolute top-10 -right-3 w-6 border-t-2 border-dashed border-border z-10" />
@@ -2639,9 +2890,19 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
         {/* Popular Projects */}
         <div className="mt-12 text-center">
-          <h3 className="font-display text-sm font-bold text-ink mb-4">Popular renovation projects</h3>
+          <h3 className="font-display text-sm font-bold text-ink mb-4">
+            Popular renovation projects
+          </h3>
           <div className="flex flex-wrap justify-center gap-2">
-            {["Roof Replacement", "Kitchen Remodel", "Bathroom Remodel", "HVAC", "Windows", "Flooring", "Solar"].map((project) => (
+            {[
+              "Roof Replacement",
+              "Kitchen Remodel",
+              "Bathroom Remodel",
+              "HVAC",
+              "Windows",
+              "Flooring",
+              "Solar",
+            ].map((project) => (
               <a
                 key={project}
                 href="/estimate"
@@ -2751,7 +3012,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             Trusted by homeowners nationwide
           </h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-lg mx-auto">
-            Join thousands of homeowners who saved money and made better renovation decisions with CostReno.
+            Join thousands of homeowners who saved money and made better renovation decisions with
+            CostReno.
           </p>
         </div>
 
@@ -2763,8 +3025,13 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             { value: "$2.3M", label: "Saved by Homeowners" },
             { value: "100%", label: "Free & Private" },
           ].map((stat) => (
-            <div key={stat.label} className="text-center py-5 px-3 rounded-xl border border-border bg-white">
-              <div className="font-display text-2xl md:text-3xl font-bold text-ink">{stat.value}</div>
+            <div
+              key={stat.label}
+              className="text-center py-5 px-3 rounded-xl border border-border bg-white"
+            >
+              <div className="font-display text-2xl md:text-3xl font-bold text-ink">
+                {stat.value}
+              </div>
               <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
             </div>
           ))}
@@ -2802,11 +3069,17 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               rating: 5,
             },
           ].map((review) => (
-            <div key={review.name} className="flex flex-col rounded-2xl border border-border bg-white p-5">
+            <div
+              key={review.name}
+              className="flex flex-col rounded-2xl border border-border bg-white p-5"
+            >
               {/* Stars */}
               <div className="flex items-center gap-0.5 mb-3">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className={`h-3.5 w-3.5 ${i <= review.rating ? "text-amber-400 fill-amber-400" : "text-muted"}`} />
+                  <Star
+                    key={i}
+                    className={`h-3.5 w-3.5 ${i <= review.rating ? "text-amber-400 fill-amber-400" : "text-muted"}`}
+                  />
                 ))}
               </div>
               {/* Quote */}
@@ -2820,7 +3093,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 </div>
                 <div>
                   <div className="text-xs font-bold text-ink">{review.name}</div>
-                  <div className="text-[10px] text-muted-foreground">{review.location} · {review.project}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {review.location} · {review.project}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2919,7 +3194,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       </section>
 
-
       <SiteFooter />
     </div>
   );
@@ -2941,7 +3215,3 @@ function FooterCol({ title, items }: { title: string; items: string[] }) {
     </div>
   );
 }
-
-
-
-

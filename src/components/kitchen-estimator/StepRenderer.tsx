@@ -111,7 +111,7 @@ function SingleCardStep({
         onNext();
       }, 250);
     },
-    [onChange, onNext]
+    [onChange, onNext],
   );
 
   const handleKeyDown = useCallback(
@@ -122,9 +122,7 @@ function SingleCardStep({
       const buttons = groupRef.current?.querySelectorAll<HTMLElement>('[role="radio"]');
       if (!buttons) return;
 
-      const currentIndex = Array.from(buttons).findIndex(
-        (btn) => btn === document.activeElement
-      );
+      const currentIndex = Array.from(buttons).findIndex((btn) => btn === document.activeElement);
 
       let nextIndex: number | null = null;
 
@@ -144,7 +142,7 @@ function SingleCardStep({
         }
       }
     },
-    [step.options, handleSelect]
+    [step.options, handleSelect],
   );
 
   return (
@@ -170,7 +168,7 @@ function SingleCardStep({
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               isSelected
                 ? "border-[#082A4B] bg-[#082A4B]/5 shadow-md"
-                : "border-border bg-white hover:border-[#082A4B]/40 hover:shadow-sm"
+                : "border-border bg-white hover:border-[#082A4B]/40 hover:shadow-sm",
             )}
           >
             {isSelected && (
@@ -183,7 +181,7 @@ function SingleCardStep({
                 "flex h-12 w-12 items-center justify-center rounded-lg transition-colors",
                 isSelected
                   ? "bg-[#082A4B]/10 text-[#082A4B]"
-                  : "bg-muted text-muted-foreground group-hover:bg-[#082A4B]/5 group-hover:text-[#082A4B]/80"
+                  : "bg-muted text-muted-foreground group-hover:bg-[#082A4B]/5 group-hover:text-[#082A4B]/80",
               )}
               aria-hidden="true"
             >
@@ -198,7 +196,10 @@ function SingleCardStep({
               )}
             </div>
             {option.priceImpact && (
-              <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground" aria-label={`Price impact: ${option.priceImpact}`}>
+              <span
+                className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
+                aria-label={`Price impact: ${option.priceImpact}`}
+              >
                 {option.priceImpact}
               </span>
             )}
@@ -237,7 +238,7 @@ function MultiCardStep({
         onChange([...withoutNone, optionValue]);
       }
     },
-    [selected, onChange]
+    [selected, onChange],
   );
 
   return (
@@ -260,7 +261,7 @@ function MultiCardStep({
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               isSelected
                 ? "border-[#082A4B] bg-[#082A4B]/5 shadow-md"
-                : "border-border bg-white hover:border-[#082A4B]/40 hover:shadow-sm"
+                : "border-border bg-white hover:border-[#082A4B]/40 hover:shadow-sm",
             )}
           >
             {isSelected && (
@@ -273,7 +274,7 @@ function MultiCardStep({
                 "flex h-12 w-12 items-center justify-center rounded-lg transition-colors",
                 isSelected
                   ? "bg-[#082A4B]/10 text-[#082A4B]"
-                  : "bg-muted text-muted-foreground group-hover:bg-[#082A4B]/5 group-hover:text-[#082A4B]/80"
+                  : "bg-muted text-muted-foreground group-hover:bg-[#082A4B]/5 group-hover:text-[#082A4B]/80",
               )}
             >
               <OptionIcon name={option.icon} className="h-6 w-6" />
@@ -344,7 +345,7 @@ function ZipInputStep({
       const cleaned = e.target.value.replace(/\D/g, "").slice(0, 5);
       onChange(cleaned);
     },
-    [onChange]
+    [onChange],
   );
 
   return (
@@ -378,13 +379,7 @@ function ZipInputStep({
 
 // ─── Continue Button ─────────────────────────────────────────────────────────
 
-function ContinueButton({
-  disabled,
-  onClick,
-}: {
-  disabled: boolean;
-  onClick: () => void;
-}) {
+function ContinueButton({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -395,7 +390,7 @@ function ContinueButton({
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028a40] focus-visible:ring-offset-2",
         disabled
           ? "cursor-not-allowed bg-muted text-muted-foreground"
-          : "bg-[#028a40] text-white hover:bg-[#028a40]/90"
+          : "bg-[#028a40] text-white hover:bg-[#028a40]/90",
       )}
       aria-label="Continue to next step"
     >
@@ -406,13 +401,7 @@ function ContinueButton({
 
 // ─── Step Renderer (Main Export) ─────────────────────────────────────────────
 
-export function StepRenderer({
-  step,
-  value,
-  onChange,
-  onNext,
-  onBack,
-}: StepRendererProps) {
+export function StepRenderer({ step, value, onChange, onNext, onBack }: StepRendererProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   // Trigger enter animation on mount / step change
@@ -439,9 +428,7 @@ export function StepRenderer({
     <section
       className={cn(
         "mx-auto w-full max-w-3xl px-4 py-8 transition-all duration-300 ease-out",
-        isVisible
-          ? "translate-y-0 opacity-100"
-          : "translate-y-3 opacity-0"
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
       )}
       aria-labelledby={`step-title-${step.id}`}
     >
@@ -454,9 +441,7 @@ export function StepRenderer({
           {step.title}
         </h2>
         {step.subtitle && (
-          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            {step.subtitle}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">{step.subtitle}</p>
         )}
       </div>
 
@@ -471,25 +456,13 @@ export function StepRenderer({
           />
         )}
         {step.type === "multi-card" && (
-          <MultiCardStep
-            step={step}
-            value={value as string[] | undefined}
-            onChange={onChange}
-          />
+          <MultiCardStep step={step} value={value as string[] | undefined} onChange={onChange} />
         )}
         {step.type === "text-input" && (
-          <TextInputStep
-            step={step}
-            value={value as string | undefined}
-            onChange={onChange}
-          />
+          <TextInputStep step={step} value={value as string | undefined} onChange={onChange} />
         )}
         {step.type === "zip-input" && (
-          <ZipInputStep
-            step={step}
-            value={value as string | undefined}
-            onChange={onChange}
-          />
+          <ZipInputStep step={step} value={value as string | undefined} onChange={onChange} />
         )}
       </div>
 
@@ -506,9 +479,7 @@ export function StepRenderer({
         </button>
 
         {/* Show Continue button for non-auto-advance steps */}
-        {!step.autoAdvance && (
-          <ContinueButton disabled={!canContinue} onClick={onNext} />
-        )}
+        {!step.autoAdvance && <ContinueButton disabled={!canContinue} onClick={onNext} />}
       </div>
     </section>
   );

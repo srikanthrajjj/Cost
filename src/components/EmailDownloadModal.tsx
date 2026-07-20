@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "./ui/dialog";
 import { Button } from "./ui/button";
 import { AlertCircle, CheckCircle2, Mail } from "lucide-react";
 
@@ -54,7 +61,9 @@ export function EmailDownloadModal({
         onClose();
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to process download. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Failed to process download. Please try again.",
+      );
     }
   };
 
@@ -78,8 +87,8 @@ export function EmailDownloadModal({
                 Get Your {reportName}
               </DialogTitle>
               <DialogDescription>
-                Enter your email to download the report. We'll also send you home renovation tips and trends to keep
-                you updated.
+                Enter your email to download the report. We'll also send you home renovation tips
+                and trends to keep you updated.
               </DialogDescription>
             </DialogHeader>
 
@@ -110,8 +119,8 @@ export function EmailDownloadModal({
               )}
 
               <p className="text-[10px] text-muted-foreground">
-                Your email is secure and only used to send home renovation tips, trends, and exclusive insights. We
-                respect your privacy.
+                Your email is secure and only used to send home renovation tips, trends, and
+                exclusive insights. We respect your privacy.
               </p>
 
               <DialogFooter className="gap-2">
@@ -134,9 +143,7 @@ export function EmailDownloadModal({
                       Downloading...
                     </>
                   ) : (
-                    <>
-                      Download
-                    </>
+                    <>Download</>
                   )}
                 </button>
               </DialogFooter>

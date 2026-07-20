@@ -19,11 +19,7 @@ interface PhotoError {
   message: string;
 }
 
-export function PhotoUploader({
-  photos,
-  onPhotosChange,
-  onAnalyze,
-}: PhotoUploaderProps) {
+export function PhotoUploader({ photos, onPhotosChange, onAnalyze }: PhotoUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [errors, setErrors] = useState<PhotoError[]>([]);
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
@@ -144,12 +140,10 @@ export function PhotoUploader({
     <div className="w-full max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold font-display text-primary">
-          Upload Kitchen Photos
-        </h2>
+        <h2 className="text-2xl font-bold font-display text-primary">Upload Kitchen Photos</h2>
         <p className="text-muted-foreground font-sans">
-          Upload {MIN_PHOTOS}–{MAX_PHOTOS} photos of your kitchen for AI
-          analysis. Include different angles for the best results.
+          Upload {MIN_PHOTOS}–{MAX_PHOTOS} photos of your kitchen for AI analysis. Include different
+          angles for the best results.
         </p>
       </div>
 
@@ -193,13 +187,9 @@ export function PhotoUploader({
 
         <div className="text-center space-y-1">
           <p className="text-sm font-medium text-primary">
-            {isDragOver
-              ? "Drop photos here"
-              : "Drag & drop photos here"}
+            {isDragOver ? "Drop photos here" : "Drag & drop photos here"}
           </p>
-          <p className="text-xs text-muted-foreground">
-            or click to browse files
-          </p>
+          <p className="text-xs text-muted-foreground">or click to browse files</p>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -227,8 +217,7 @@ export function PhotoUploader({
         >
           <Image className="h-4 w-4 shrink-0" />
           <span>
-            Maximum of {MAX_PHOTOS} photos reached. Remove a photo to add a
-            different one.
+            Maximum of {MAX_PHOTOS} photos reached. Remove a photo to add a different one.
           </span>
         </div>
       )}
@@ -243,8 +232,7 @@ export function PhotoUploader({
             >
               <X className="h-4 w-4 shrink-0 mt-0.5" />
               <span>
-                <strong className="font-medium">{error.fileName}:</strong>{" "}
-                {error.message}
+                <strong className="font-medium">{error.fileName}:</strong> {error.message}
               </span>
             </div>
           ))}
@@ -306,9 +294,7 @@ export function PhotoUploader({
 
                   {/* File name overlay */}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5">
-                    <p className="truncate text-[11px] text-white/90">
-                      {file.name}
-                    </p>
+                    <p className="truncate text-[11px] text-white/90">{file.name}</p>
                   </div>
                 </div>
               );

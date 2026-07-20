@@ -34,12 +34,7 @@ function stem(word: string): string {
 }
 
 function tokenize(text: string): Set<string> {
-  return new Set(
-    normalizeText(text)
-      .split(" ")
-      .filter(Boolean)
-      .map(stem),
-  );
+  return new Set(normalizeText(text).split(" ").filter(Boolean).map(stem));
 }
 
 /**

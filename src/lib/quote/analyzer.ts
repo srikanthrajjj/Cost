@@ -59,7 +59,12 @@ const ROOFING_SYSTEMS: SystemCategory[] = [
 // "missing" when partial evidence exists.
 
 function normalizeForSearch(text: string): string {
-  return text.toLowerCase().replace(/[-_&]/g, " ").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+  return text
+    .toLowerCase()
+    .replace(/[-_&]/g, " ")
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -83,7 +88,17 @@ function findEvidenceInQuote(
 
   // Additional keyword-based matching for common items
   const keywordMap: Record<string, string[]> = {
-    tear_off_layers: ["tear off", "tear-off", "tearoff", "remove shingles", "removal", "dumpster", "cleanup", "clean up", "disposal"],
+    tear_off_layers: [
+      "tear off",
+      "tear-off",
+      "tearoff",
+      "remove shingles",
+      "removal",
+      "dumpster",
+      "cleanup",
+      "clean up",
+      "disposal",
+    ],
     drip_edge: ["drip edge", "drip-edge", "dripedge"],
     valley_flashing: ["valley flashing", "valley", "flashing"],
     starter_strip: ["starter strip", "starter", "shingles", "architectural"],
@@ -139,10 +154,7 @@ function findEvidenceInQuote(
 
 // ─── Clarification Detection ──────────────────────────────────────────────────
 
-function detectClarificationNeeded(
-  notes: string | undefined,
-  scopeItem: ScopeItem,
-): string | null {
+function detectClarificationNeeded(notes: string | undefined, scopeItem: ScopeItem): string | null {
   const combined = (notes ?? "").toLowerCase().trim();
   if (!combined) return null;
 
@@ -150,7 +162,8 @@ function detectClarificationNeeded(
 
   // "Valleys only" on ice & water shield → ask about eaves
   if (
-    (scopeNameLower.includes("ice") && scopeNameLower.includes("water")) &&
+    scopeNameLower.includes("ice") &&
+    scopeNameLower.includes("water") &&
     combined.includes("valleys only")
   ) {
     return `Listed as "valleys only." Confirm whether eaves and other vulnerable areas are also covered per local code requirements.`;
@@ -167,7 +180,11 @@ function detectClarificationNeeded(
   }
 
   // "Per homeowner" or "by owner" on permits
-  if (combined.includes("homeowner") || combined.includes("by owner") || combined.includes("owner responsibility")) {
+  if (
+    combined.includes("homeowner") ||
+    combined.includes("by owner") ||
+    combined.includes("owner responsibility")
+  ) {
     return `Responsibility assigned to homeowner. Confirm local permit requirements and factor additional costs.`;
   }
 
@@ -210,12 +227,13 @@ function calculateWeightedScore(
       }
 
       const presentInCategory = categoryItems.filter((i) => i.status === "present").length;
-      const clarifyInCategory = categoryItems.filter((i) => i.status === "needs_clarification").length;
+      const clarifyInCategory = categoryItems.filter(
+        (i) => i.status === "needs_clarification",
+      ).length;
       const totalInCategory = categoryItems.length;
 
       // Weighted: present = full, clarification = 75%, missing = 0
-      const categoryScore =
-        (presentInCategory + clarifyInCategory * 0.75) / totalInCategory;
+      const categoryScore = (presentInCategory + clarifyInCategory * 0.75) / totalInCategory;
       earnedWeight += system.weight * categoryScore;
     }
 
@@ -223,8 +241,14 @@ function calculateWeightedScore(
     // If the quote has shingle materials, that covers "Roof Covering"
     const hasRoofCovering = extracted.materials.some((m) => {
       const n = m.name.toLowerCase();
-      return n.includes("shingle") || n.includes("architectural") || n.includes("asphalt") ||
-        n.includes("metal") || n.includes("tile") || n.includes("slate");
+      return (
+        n.includes("shingle") ||
+        n.includes("architectural") ||
+        n.includes("asphalt") ||
+        n.includes("metal") ||
+        n.includes("tile") ||
+        n.includes("slate")
+      );
     });
     if (hasRoofCovering) {
       // Find "Roof Covering" system and ensure it gets full weight
@@ -246,7 +270,9 @@ function calculateWeightedScore(
       return n.includes("underlayment") || n.includes("synthetic") || n.includes("felt");
     });
     if (hasUnderlayment) {
-      const underlaymentSystem = ROOFING_SYSTEMS.find((s) => s.name === "Underlayment & Protection");
+      const underlaymentSystem = ROOFING_SYSTEMS.find(
+        (s) => s.name === "Underlayment & Protection",
+      );
       if (underlaymentSystem) {
         const categoryItems = classifiedItems.filter((i) =>
           underlaymentSystem.scopeIds.includes(i.knowledge.id ?? ""),
@@ -411,7 +437,10 @@ export async function analyzeQuote(
   // Also add matched materials not already in presentItems
   for (const mat of matchedMaterials) {
     const matName = mat.original.name;
-    if (!presentNamesSet.has(matName.toLowerCase()) && !presentNamesSet.has(mat.knowledge.name.toLowerCase())) {
+    if (
+      !presentNamesSet.has(matName.toLowerCase()) &&
+      !presentNamesSet.has(mat.knowledge.name.toLowerCase())
+    ) {
       presentItems.push({
         name: mat.original.name,
         matchedAs: mat.original.name,
@@ -423,7 +452,10 @@ export async function analyzeQuote(
   // Also add matched scope items not already in presentItems
   for (const scope of matchedScopeItems) {
     const scopeName = scope.original.name;
-    if (!presentNamesSet.has(scopeName.toLowerCase()) && !presentNamesSet.has(scope.knowledge.name.toLowerCase())) {
+    if (
+      !presentNamesSet.has(scopeName.toLowerCase()) &&
+      !presentNamesSet.has(scope.knowledge.name.toLowerCase())
+    ) {
       presentItems.push({
         name: scope.original.name,
         matchedAs: scope.original.name,
@@ -433,7 +465,14 @@ export async function analyzeQuote(
   }
 
   // Add notable unmatched items from the quote that represent real work (e.g. "Labor")
-  const importantUnmatchedKeywords = ["labor", "installation", "cleanup", "dumpster", "disposal", "delivery"];
+  const importantUnmatchedKeywords = [
+    "labor",
+    "installation",
+    "cleanup",
+    "dumpster",
+    "disposal",
+    "delivery",
+  ];
   for (const item of extracted.scopeItems) {
     const nameLower = item.name.toLowerCase();
     if (

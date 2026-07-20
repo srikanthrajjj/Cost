@@ -42,9 +42,7 @@ function PathCard({
         <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
           {iconMap[option.icon]}
         </div>
-        <CardTitle className="font-display text-xl text-primary">
-          {option.title}
-        </CardTitle>
+        <CardTitle className="font-display text-xl text-primary">{option.title}</CardTitle>
         <CardDescription className="text-sm text-muted-foreground">
           {option.description}
         </CardDescription>
@@ -74,37 +72,29 @@ function PathCard({
 export function PathSelector({ onSelectPath }: PathSelectorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      const cards = containerRef.current?.querySelectorAll<HTMLElement>('[role="button"]');
-      if (!cards || cards.length === 0) return;
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const cards = containerRef.current?.querySelectorAll<HTMLElement>('[role="button"]');
+    if (!cards || cards.length === 0) return;
 
-      const currentIndex = Array.from(cards).findIndex(
-        (card) => card === document.activeElement
-      );
+    const currentIndex = Array.from(cards).findIndex((card) => card === document.activeElement);
 
-      let nextIndex: number | null = null;
+    let nextIndex: number | null = null;
 
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        e.preventDefault();
-        nextIndex = currentIndex < cards.length - 1 ? currentIndex + 1 : 0;
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        e.preventDefault();
-        nextIndex = currentIndex > 0 ? currentIndex - 1 : cards.length - 1;
-      }
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      nextIndex = currentIndex < cards.length - 1 ? currentIndex + 1 : 0;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      nextIndex = currentIndex > 0 ? currentIndex - 1 : cards.length - 1;
+    }
 
-      if (nextIndex !== null) {
-        cards[nextIndex].focus();
-      }
-    },
-    []
-  );
+    if (nextIndex !== null) {
+      cards[nextIndex].focus();
+    }
+  }, []);
 
   return (
-    <section
-      className="mx-auto w-full max-w-3xl px-4 py-8"
-      aria-labelledby="path-selector-heading"
-    >
+    <section className="mx-auto w-full max-w-3xl px-4 py-8" aria-labelledby="path-selector-heading">
       <div className="mb-8 text-center">
         <h2
           id="path-selector-heading"
@@ -112,9 +102,7 @@ export function PathSelector({ onSelectPath }: PathSelectorProps) {
         >
           How would you like to estimate your kitchen remodel?
         </h2>
-        <p className="mt-2 text-muted-foreground">
-          Choose the path that works best for you.
-        </p>
+        <p className="mt-2 text-muted-foreground">Choose the path that works best for you.</p>
       </div>
       <div
         ref={containerRef}

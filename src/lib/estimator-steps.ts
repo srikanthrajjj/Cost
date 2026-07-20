@@ -260,9 +260,24 @@ export const ALL_STEPS: StepDef[] = [
         title: "Are you changing the kitchen layout?",
         subtitle: "Layout changes are a major cost driver — moving plumbing, electrical, or walls.",
         choices: [
-          { value: "keep", icon: "✅", label: "Keep Current Layout", desc: "No structural changes" },
-          { value: "minor", icon: "🔄", label: "Minor Changes", desc: "Move island or add peninsula" },
-          { value: "major", icon: "🏗️", label: "Major Changes", desc: "Remove walls, move plumbing/electrical" },
+          {
+            value: "keep",
+            icon: "✅",
+            label: "Keep Current Layout",
+            desc: "No structural changes",
+          },
+          {
+            value: "minor",
+            icon: "🔄",
+            label: "Minor Changes",
+            desc: "Move island or add peninsula",
+          },
+          {
+            value: "major",
+            icon: "🏗️",
+            label: "Major Changes",
+            desc: "Remove walls, move plumbing/electrical",
+          },
         ],
         showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod === "ai",
       },
@@ -319,9 +334,24 @@ export const ALL_STEPS: StepDef[] = [
         subtitle: "Layout changes are a major cost driver.",
         showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod !== "ai",
         choices: [
-          { value: "keep", icon: "✅", label: "Keep Current Layout", desc: "No structural changes" },
-          { value: "minor", icon: "🔄", label: "Minor Changes", desc: "Move island or add peninsula" },
-          { value: "major", icon: "🏗️", label: "Major Changes", desc: "Remove walls, move plumbing/electrical" },
+          {
+            value: "keep",
+            icon: "✅",
+            label: "Keep Current Layout",
+            desc: "No structural changes",
+          },
+          {
+            value: "minor",
+            icon: "🔄",
+            label: "Minor Changes",
+            desc: "Move island or add peninsula",
+          },
+          {
+            value: "major",
+            icon: "🏗️",
+            label: "Major Changes",
+            desc: "Remove walls, move plumbing/electrical",
+          },
         ],
       },
       {

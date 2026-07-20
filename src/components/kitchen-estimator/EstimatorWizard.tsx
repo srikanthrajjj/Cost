@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { Loader2, AlertCircle, RefreshCw, ClipboardList } from "lucide-react";
-import {
-  wizardReducer,
-  initialWizardState,
-} from "../../lib/kitchen-estimator/wizard-reducer";
-import {
-  type EstimatorConfig,
-  defaultKitchenConfig,
-} from "../../lib/kitchen-estimator/config";
+import { wizardReducer, initialWizardState } from "../../lib/kitchen-estimator/wizard-reducer";
+import { type EstimatorConfig, defaultKitchenConfig } from "../../lib/kitchen-estimator/config";
 import { getActiveSteps } from "../../lib/kitchen-estimator/step-filter";
 import { calculateKitchenEstimate } from "../../lib/kitchen-estimator/kitchen-cost-engine";
 import { defaultKitchenCostParams } from "../../lib/kitchen-estimator/cost-params";
@@ -65,7 +59,11 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
 
     if (!hasAnswers && !state.aiDetections) return null;
 
-    return calculateKitchenEstimate(state.answers, defaultKitchenCostParams, state.aiDetections?.detectedFeatures);
+    return calculateKitchenEstimate(
+      state.answers,
+      defaultKitchenCostParams,
+      state.aiDetections?.detectedFeatures,
+    );
   }, [state.answers, state.aiDetections]);
 
   // ─── Auto-analyze when enough photos are uploaded ───────────────────────
@@ -86,7 +84,7 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
   const handleSelectPath = useCallback((path: "ai" | "manual") => {
     dispatch({ type: "SELECT_PATH", payload: path });
   }, []);
- 
+
   const handlePhotosChange = useCallback((photos: File[]) => {
     dispatch({ type: "SET_PHOTOS", payload: photos });
   }, []);
@@ -165,17 +163,30 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
           }
         }
       } else {
-        console.error("[handleAnalyze] Server returned error:", pricingResult.error, "code:", (pricingResult as any).code);
+        console.error(
+          "[handleAnalyze] Server returned error:",
+          pricingResult.error,
+          "code:",
+          (pricingResult as any).code,
+        );
         dispatch({ type: "SET_ERROR", payload: pricingResult.error });
       }
     } catch (err) {
       console.error("[handleAnalyze] Caught exception:", err);
       if (err instanceof Error) {
-        console.error("[handleAnalyze] Error name:", err.name, "| message:", err.message, "| stack:", err.stack);
+        console.error(
+          "[handleAnalyze] Error name:",
+          err.name,
+          "| message:",
+          err.message,
+          "| stack:",
+          err.stack,
+        );
       }
       dispatch({
         type: "SET_ERROR",
-        payload: "We couldn't analyze your photos. You can try again or switch to the manual estimate.",
+        payload:
+          "We couldn't analyze your photos. You can try again or switch to the manual estimate.",
       });
     }
   }, [state.photos]);
@@ -255,8 +266,7 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
     );
   }, [state.currentPath, activeSteps]);
 
-  const stepsForCurrentPath =
-    state.currentPath === "ai" ? aiFollowUpSteps : activeSteps;
+  const stepsForCurrentPath = state.currentPath === "ai" ? aiFollowUpSteps : activeSteps;
 
   const isComplete = state.currentStep >= stepsForCurrentPath.length;
 
@@ -319,9 +329,7 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
           <AlertCircle className="h-8 w-8 text-destructive" />
         </div>
         <div className="text-center space-y-2">
-          <h2 className="font-display text-xl font-bold text-[#082A4B]">
-            Something went wrong
-          </h2>
+          <h2 className="font-display text-xl font-bold text-[#082A4B]">Something went wrong</h2>
           <p className="max-w-md text-sm text-muted-foreground">{state.error}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -362,7 +370,12 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
 
   if (isComplete && stepsForCurrentPath.length > 0) {
     const finalEstimate =
-      liveEstimate ?? calculateKitchenEstimate(state.answers, defaultKitchenCostParams, state.aiDetections?.detectedFeatures);
+      liveEstimate ??
+      calculateKitchenEstimate(
+        state.answers,
+        defaultKitchenCostParams,
+        state.aiDetections?.detectedFeatures,
+      );
 
     return (
       <ResultsPage

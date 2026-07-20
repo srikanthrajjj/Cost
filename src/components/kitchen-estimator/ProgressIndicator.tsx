@@ -40,9 +40,7 @@ function useAnimatedValue(target: number, duration = 400): number {
 
       // Ease-out cubic for smooth deceleration
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(
-        startRef.current + (target - startRef.current) * eased
-      );
+      const current = Math.round(startRef.current + (target - startRef.current) * eased);
 
       setDisplay(current);
 
@@ -86,9 +84,7 @@ export function ProgressIndicator({
           <span className="font-body text-xs font-medium text-[#082A4B]/70">
             Step {currentStep + 1} of {totalSteps}
           </span>
-          <span className="font-body text-xs font-medium text-[#082A4B]/50">
-            {percentage}%
-          </span>
+          <span className="font-body text-xs font-medium text-[#082A4B]/50">{percentage}%</span>
         </div>
 
         {/* Progress bar */}
@@ -112,14 +108,12 @@ export function ProgressIndicator({
         <div
           className={cn(
             "flex items-center justify-between gap-3 border-t border-[#082A4B]/5 pt-2",
-            "animate-in fade-in duration-300"
+            "animate-in fade-in duration-300",
           )}
           aria-live="polite"
           aria-atomic="true"
         >
-          <span className="font-body text-xs text-[#082A4B]/60">
-            Estimated cost
-          </span>
+          <span className="font-body text-xs text-[#082A4B]/60">Estimated cost</span>
           <div className="text-right">
             <span className="font-display text-base font-bold text-[#03A44D]">
               {formatCurrency(animatedMid)}

@@ -55,10 +55,30 @@ const TABLE_OF_CONTENTS = [
 ];
 
 const SCOPE_COSTS = [
-  { scope: "Vinyl", range: "$400–$800/window", timeline: "30–60 min each", includes: "Double-pane, Low-E, argon filled" },
-  { scope: "Wood", range: "$600–$1,200/window", timeline: "45–90 min each", includes: "Solid wood frame, custom sizes available" },
-  { scope: "Fiberglass", range: "$700–$1,500/window", timeline: "45–90 min each", includes: "Premium durability, paintable, energy efficient" },
-  { scope: "Aluminum", range: "$350–$700/window", timeline: "30–60 min each", includes: "Slim profile, low maintenance, modern look" },
+  {
+    scope: "Vinyl",
+    range: "$400–$800/window",
+    timeline: "30–60 min each",
+    includes: "Double-pane, Low-E, argon filled",
+  },
+  {
+    scope: "Wood",
+    range: "$600–$1,200/window",
+    timeline: "45–90 min each",
+    includes: "Solid wood frame, custom sizes available",
+  },
+  {
+    scope: "Fiberglass",
+    range: "$700–$1,500/window",
+    timeline: "45–90 min each",
+    includes: "Premium durability, paintable, energy efficient",
+  },
+  {
+    scope: "Aluminum",
+    range: "$350–$700/window",
+    timeline: "30–60 min each",
+    includes: "Slim profile, low maintenance, modern look",
+  },
 ];
 
 const SIGNS_LIST = [
@@ -73,11 +93,31 @@ const SIGNS_LIST = [
 ];
 
 const PROCESS_STEPS = [
-  { step: "1", title: "Measurement & Selection", desc: "A technician measures all window openings precisely. You choose frame material, glass type (double/triple pane, Low-E coating), and style (casement, double-hung, sliding). Custom orders take 3–6 weeks." },
-  { step: "2", title: "Preparation", desc: "Interior trim and window treatments are carefully removed. Drop cloths protect flooring and furniture. For full-frame replacement, exterior trim and siding around the opening is also removed." },
-  { step: "3", title: "Removal & Inspection", desc: "Old windows are removed and the rough opening is inspected for water damage, rot, or insulation issues. Any damaged framing is repaired before new window installation." },
-  { step: "4", title: "Installation", desc: "New windows are set, leveled, shimmed, and fastened. Proper flashing and waterproofing are applied. Insulation foam fills gaps between the window frame and rough opening." },
-  { step: "5", title: "Finishing & Sealing", desc: "Interior and exterior trim is installed or replaced. Caulking and weatherstripping ensure a tight seal. Hardware is tested and screens are installed. Final cleanup and debris removal." },
+  {
+    step: "1",
+    title: "Measurement & Selection",
+    desc: "A technician measures all window openings precisely. You choose frame material, glass type (double/triple pane, Low-E coating), and style (casement, double-hung, sliding). Custom orders take 3–6 weeks.",
+  },
+  {
+    step: "2",
+    title: "Preparation",
+    desc: "Interior trim and window treatments are carefully removed. Drop cloths protect flooring and furniture. For full-frame replacement, exterior trim and siding around the opening is also removed.",
+  },
+  {
+    step: "3",
+    title: "Removal & Inspection",
+    desc: "Old windows are removed and the rough opening is inspected for water damage, rot, or insulation issues. Any damaged framing is repaired before new window installation.",
+  },
+  {
+    step: "4",
+    title: "Installation",
+    desc: "New windows are set, leveled, shimmed, and fastened. Proper flashing and waterproofing are applied. Insulation foam fills gaps between the window frame and rough opening.",
+  },
+  {
+    step: "5",
+    title: "Finishing & Sealing",
+    desc: "Interior and exterior trim is installed or replaced. Caulking and weatherstripping ensure a tight seal. Hardware is tested and screens are installed. Final cleanup and debris removal.",
+  },
 ];
 
 const CONTRACTOR_CHECKLIST = [
@@ -117,7 +157,11 @@ const FAQ_ITEMS = [
 const RELATED_GUIDES = [
   { title: "Kitchen Remodel Guide", href: "/guides/kitchen-remodel", icon: "/Kitchen.svg" },
   { title: "Bathroom Remodel Guide", href: "/guides/bathroom-remodel", icon: "/Bathtub.svg" },
-  { title: "HVAC Installation Guide", href: "/guides/hvac-installation", icon: "/Air Conditioner.svg" },
+  {
+    title: "HVAC Installation Guide",
+    href: "/guides/hvac-installation",
+    icon: "/Air Conditioner.svg",
+  },
   { title: "Roof Replacement Guide", href: "/guides/roof-replacement", icon: "/House.svg" },
   { title: "Flooring Guide", href: "/guides/flooring", icon: "/Floor Tiles.svg" },
 ];
@@ -172,8 +216,18 @@ function WindowReplacementGuide() {
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
-              { "@type": "ListItem", position: 2, name: "Renovation Guides", item: "https://costreno.com/guides" },
-              { "@type": "ListItem", position: 3, name: "Windows", item: "https://costreno.com/guides/windows" },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Renovation Guides",
+                item: "https://costreno.com/guides",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: "Windows",
+                item: "https://costreno.com/guides/windows",
+              },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],
           }),
@@ -186,11 +240,17 @@ function WindowReplacementGuide() {
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-          <a href="/" className="hover:text-ink transition">Home</a>
+          <a href="/" className="hover:text-ink transition">
+            Home
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Renovation Guides</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Renovation Guides
+          </a>
           <span>/</span>
-          <a href="/guides" className="hover:text-ink transition">Windows</a>
+          <a href="/guides" className="hover:text-ink transition">
+            Windows
+          </a>
           <span>/</span>
           <span className="text-ink font-medium">Complete Guide</span>
         </nav>
@@ -207,7 +267,8 @@ function WindowReplacementGuide() {
               Complete Guide to Window Replacement
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
-              Everything you need to know about window replacement costs, materials, timeline, permits, and choosing the right contractor.
+              Everything you need to know about window replacement costs, materials, timeline,
+              permits, and choosing the right contractor.
             </p>
             <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
               <span>9 min read</span>
@@ -218,7 +279,9 @@ function WindowReplacementGuide() {
               <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
                 <Shield className="h-3.5 w-3.5 text-accent" />
               </div>
-              <span className="text-xs font-medium text-ink">Reviewed by Window Industry Experts</span>
+              <span className="text-xs font-medium text-ink">
+                Reviewed by Window Industry Experts
+              </span>
             </div>
           </div>
           <div className="rounded-2xl overflow-hidden aspect-[4/3]">
@@ -235,20 +298,28 @@ function WindowReplacementGuide() {
       {/* Key Takeaways Card */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
-          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">Key Takeaways</h2>
+          <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
+            Key Takeaways
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <DollarSign className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Average Cost</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Average Cost
+                </span>
               </div>
-              <div className="font-display text-xl md:text-2xl font-bold text-ink">$6,000–$21,000</div>
+              <div className="font-display text-xl md:text-2xl font-bold text-ink">
+                $6,000–$21,000
+              </div>
               <p className="text-xs text-muted-foreground mt-1">Full home (10–15 windows)</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Clock className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Timeline</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Timeline
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">1–3 days</div>
               <p className="text-xs text-muted-foreground mt-1">Full home replacement</p>
@@ -264,7 +335,9 @@ function WindowReplacementGuide() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <FileText className="h-4 w-4 text-accent" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Permits</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase">
+                  Permits
+                </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">Sometimes</div>
               <p className="text-xs text-muted-foreground mt-1">Depends on scope</p>
@@ -303,7 +376,8 @@ function WindowReplacementGuide() {
                 1. Signs You Need New Windows
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Not sure if your windows need replacement? Here are the most common signs that it's time for an upgrade:
+                Not sure if your windows need replacement? Here are the most common signs that it's
+                time for an upgrade:
               </p>
               <div className="space-y-3 mb-6">
                 {SIGNS_LIST.map((sign) => (
@@ -329,25 +403,41 @@ function WindowReplacementGuide() {
                 2. Window Replacement Costs by Material
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Costs vary based on frame material, glass type, and window size. Below is a comparison of typical per-window costs (installed):
+                Costs vary based on frame material, glass type, and window size. Below is a
+                comparison of typical per-window costs (installed):
               </p>
               <div className="rounded-xl border border-border bg-white overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Material</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">Cost Range</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">Timeline</th>
-                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">Includes</th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Material
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Cost Range
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Timeline
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden md:table-cell">
+                        Includes
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {SCOPE_COSTS.map((row, i) => (
-                      <tr key={row.scope} className={i < SCOPE_COSTS.length - 1 ? "border-b border-border/50" : ""}>
+                      <tr
+                        key={row.scope}
+                        className={i < SCOPE_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
                         <td className="px-5 py-3 text-sm font-medium text-ink">{row.scope}</td>
                         <td className="px-5 py-3 text-sm font-semibold text-ink">{row.range}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">{row.timeline}</td>
-                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">{row.includes}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.timeline}
+                        </td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                          {row.includes}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -358,7 +448,9 @@ function WindowReplacementGuide() {
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
                 <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Ask about energy tax credits. ENERGY STAR certified windows may qualify for federal tax credits of up to $600. Many states also offer additional rebates for energy-efficient window upgrades.
+                  Ask about energy tax credits. ENERGY STAR certified windows may qualify for
+                  federal tax credits of up to $600. Many states also offer additional rebates for
+                  energy-efficient window upgrades.
                 </p>
               </div>
             </section>
@@ -369,54 +461,90 @@ function WindowReplacementGuide() {
                 3. Window Frame Materials
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                Frame material impacts cost, durability, maintenance, and energy efficiency. Here's what to know about each option:
+                Frame material impacts cost, durability, maintenance, and energy efficiency. Here's
+                what to know about each option:
               </p>
               <div className="space-y-6">
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Vinyl</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    The most popular choice for replacement windows due to excellent value. Vinyl frames never need painting, won't rot, and provide good insulation. Available in white and limited colors. Not ideal for very hot climates where frames may warp.
+                    The most popular choice for replacement windows due to excellent value. Vinyl
+                    frames never need painting, won't rot, and provide good insulation. Available in
+                    white and limited colors. Not ideal for very hot climates where frames may warp.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">$400–$800/window</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 20–40 years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Maintenance: None</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      $400–$800/window
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 20–40 years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Maintenance: None
+                    </span>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Wood</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Premium choice for traditional and historic homes. Wood frames offer excellent insulation and can be painted any color. Requires regular maintenance (painting/staining every 3–5 years) to prevent rot. Many modern wood windows have aluminum or vinyl cladding on the exterior.
+                    Premium choice for traditional and historic homes. Wood frames offer excellent
+                    insulation and can be painted any color. Requires regular maintenance
+                    (painting/staining every 3–5 years) to prevent rot. Many modern wood windows
+                    have aluminum or vinyl cladding on the exterior.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">$600–$1,200/window</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 30–50+ years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Maintenance: High</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      $600–$1,200/window
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 30–50+ years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Maintenance: High
+                    </span>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Fiberglass</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    The best all-around performance material. Fiberglass frames are extremely strong, energy efficient, and expand/contract at the same rate as glass (preventing seal failure). Paintable, low-maintenance, and work in all climates. Higher cost but longest-lasting.
+                    The best all-around performance material. Fiberglass frames are extremely
+                    strong, energy efficient, and expand/contract at the same rate as glass
+                    (preventing seal failure). Paintable, low-maintenance, and work in all climates.
+                    Higher cost but longest-lasting.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">$700–$1,500/window</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 40–50+ years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Maintenance: Minimal</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      $700–$1,500/window
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 40–50+ years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Maintenance: Minimal
+                    </span>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">Aluminum</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Slim profiles allow maximum glass area for modern architectural styles. Very strong and weather-resistant. Poor insulation compared to other materials (conducts heat), though thermal breaks improve performance. Most affordable option for large or custom windows.
+                    Slim profiles allow maximum glass area for modern architectural styles. Very
+                    strong and weather-resistant. Poor insulation compared to other materials
+                    (conducts heat), though thermal breaks improve performance. Most affordable
+                    option for large or custom windows.
                   </p>
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">$350–$700/window</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Lifespan: 20–30 years</span>
-                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">Maintenance: Low</span>
+                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                      $350–$700/window
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Lifespan: 20–30 years
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                      Maintenance: Low
+                    </span>
                   </div>
                 </div>
               </div>
@@ -428,11 +556,15 @@ function WindowReplacementGuide() {
                 4. Window Replacement Process: Step by Step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Understanding the process helps you prepare your home and set realistic expectations. Here's what to expect:
+                Understanding the process helps you prepare your home and set realistic
+                expectations. Here's what to expect:
               </p>
               <div className="space-y-4">
                 {PROCESS_STEPS.map((s) => (
-                  <div key={s.step} className="flex gap-4 p-4 rounded-xl border border-border bg-white">
+                  <div
+                    key={s.step}
+                    className="flex gap-4 p-4 rounded-xl border border-border bg-white"
+                  >
                     <div className="w-8 h-8 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-accent">{s.step}</span>
                     </div>
@@ -451,11 +583,15 @@ function WindowReplacementGuide() {
                 5. How to Choose a Window Contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Proper installation is critical for window performance and warranty coverage. Use this checklist to vet candidates:
+                Proper installation is critical for window performance and warranty coverage. Use
+                this checklist to vet candidates:
               </p>
               <div className="space-y-3">
                 {CONTRACTOR_CHECKLIST.map((item) => (
-                  <div key={item} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white">
+                  <div
+                    key={item}
+                    className="flex items-start gap-3 p-3 rounded-lg border border-border bg-white"
+                  >
                     <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     <span className="text-sm text-ink">{item}</span>
                   </div>
@@ -469,34 +605,49 @@ function WindowReplacementGuide() {
                 6. Permits & Inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Permit requirements for window replacement vary by municipality and scope. Here's what you need to know:
+                Permit requirements for window replacement vary by municipality and scope. Here's
+                what you need to know:
               </p>
               <div className="space-y-4">
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-base font-bold text-ink mb-2">When is a permit required?</h3>
+                  <h3 className="font-display text-base font-bold text-ink mb-2">
+                    When is a permit required?
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Same-size replacement windows (insert or pocket installation) typically don't require permits. Permits are usually required when changing window sizes, adding new window openings, or modifying structural headers. Egress windows for bedrooms may also require permits to verify code compliance.
+                    Same-size replacement windows (insert or pocket installation) typically don't
+                    require permits. Permits are usually required when changing window sizes, adding
+                    new window openings, or modifying structural headers. Egress windows for
+                    bedrooms may also require permits to verify code compliance.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Permit costs</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Window permits typically cost $50–$300 depending on your municipality and the scope of work. Full-frame replacements with structural modifications may require higher permit fees and engineering review.
+                    Window permits typically cost $50–$300 depending on your municipality and the
+                    scope of work. Full-frame replacements with structural modifications may require
+                    higher permit fees and engineering review.
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-base font-bold text-ink mb-2">Inspections</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    When required, inspections verify proper flashing and waterproofing, correct installation methods, egress compliance for bedroom windows, and structural integrity of any modified openings.
+                    When required, inspections verify proper flashing and waterproofing, correct
+                    installation methods, egress compliance for bedroom windows, and structural
+                    integrity of any modified openings.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-ink mb-1">Warning: Improper installation voids warranties</p>
+                      <p className="text-sm font-semibold text-ink mb-1">
+                        Warning: Improper installation voids warranties
+                      </p>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        Most window manufacturers require installation by certified professionals following specific guidelines. Improper flashing or waterproofing can lead to water damage that's not covered by homeowner's insurance if installation wasn't permitted and inspected.
+                        Most window manufacturers require installation by certified professionals
+                        following specific guidelines. Improper flashing or waterproofing can lead
+                        to water damage that's not covered by homeowner's insurance if installation
+                        wasn't permitted and inspected.
                       </p>
                     </div>
                   </div>
@@ -533,9 +684,7 @@ function WindowReplacementGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                8. Related Guides
-              </h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -559,10 +708,13 @@ function WindowReplacementGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Calculate Your Window Replacement Cost</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Calculate Your Window Replacement Cost
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Get a personalized estimate based on your ZIP code, number of windows, and material preferences. Free, no signup required.
+                  Get a personalized estimate based on your ZIP code, number of windows, and
+                  material preferences. Free, no signup required.
                 </p>
                 <a
                   href="/estimate?project=windows"
@@ -593,10 +745,13 @@ function WindowReplacementGuide() {
               <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
-                  <h3 className="font-display text-base font-bold text-ink">Need Help Reviewing Your Window Quote?</h3>
+                  <h3 className="font-display text-base font-bold text-ink">
+                    Need Help Reviewing Your Window Quote?
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                  Upload your window replacement quote and get instant analysis on pricing, scope, and potential red flags.
+                  Upload your window replacement quote and get instant analysis on pricing, scope,
+                  and potential red flags.
                 </p>
                 <a
                   href="/quote-analyzer"
@@ -610,23 +765,38 @@ function WindowReplacementGuide() {
               <div className="rounded-2xl border border-border bg-white p-6">
                 <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
                 <div className="space-y-3">
-                  <a href="/estimate?project=windows" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate?project=windows"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <DollarSign className="h-4 w-4 text-accent shrink-0" />
                     <span>Window Cost Calculator</span>
                   </a>
-                  <a href="/quote-analyzer" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/quote-analyzer"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <FileText className="h-4 w-4 text-accent shrink-0" />
                     <span>Quote Review Tool</span>
                   </a>
-                  <a href="/estimate" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="/estimate"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <MapPin className="h-4 w-4 text-accent shrink-0" />
                     <span>Local Price Estimator</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Shield className="h-4 w-4 text-accent shrink-0" />
                     <span>Insurance Claim Helper</span>
                   </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition">
+                  <a
+                    href="#"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
+                  >
                     <Star className="h-4 w-4 text-accent shrink-0" />
                     <span>Contractor Finder</span>
                   </a>

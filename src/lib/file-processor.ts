@@ -46,8 +46,11 @@ async function loadPdfjs(): Promise<any> {
   });
 
   // pdfjs loaded as ES module via import map won't attach to window, use dynamic import instead
-  const pdfjsLib = await import(/* @vite-ignore */ "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+  const pdfjsLib = await import(
+    /* @vite-ignore */ "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs"
+  );
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
   (window as any).__pdfjsLib = pdfjsLib;
   return pdfjsLib;
 }
@@ -91,7 +94,9 @@ async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
     return result;
   } catch (error) {
     console.error("[FILE PROCESSOR] PDF extraction error:", error);
-    throw new Error(`Failed to extract PDF text: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to extract PDF text: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -117,7 +122,10 @@ async function extractTextFromImage(file: File): Promise<ExtractedFileContent> {
       const text = ocrSimple(imageData);
 
       resolve({
-        text: text.length > 50 ? `${text.substring(0, 50)}... (Image preview - please paste text for accurate analysis)` : text,
+        text:
+          text.length > 50
+            ? `${text.substring(0, 50)}... (Image preview - please paste text for accurate analysis)`
+            : text,
         pages: 1,
       });
     };

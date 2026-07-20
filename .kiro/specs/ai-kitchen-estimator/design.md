@@ -243,7 +243,7 @@ interface KitchenCostParams {
 
 function calculateKitchenEstimate(
   answers: KitchenEstimateAnswers,
-  config: KitchenCostParams
+  config: KitchenCostParams,
 ): KitchenLiveEstimate;
 ```
 
@@ -385,9 +385,9 @@ interface AIVisionRequest {
       role: "user";
       content: [
         { type: "text"; text: string }, // Structured prompt
-        ...{ type: "image_url"; image_url: { url: string } }[] // base64 images
+        ...{ type: "image_url"; image_url: { url: string } }[], // base64 images
       ];
-    }
+    },
   ];
 }
 
@@ -402,57 +402,55 @@ interface AIVisionResponse {
 }
 ```
 
-
-
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: File Validation Correctness
 
-*For any* file submission to the Photo_Uploader, the file SHALL be accepted if and only if its MIME type is one of `image/jpeg`, `image/png`, or `image/webp` AND its size is ≤ 10 MB. Furthermore, the continue action SHALL be enabled if and only if the total number of accepted files is between 2 and 6 (inclusive).
+_For any_ file submission to the Photo_Uploader, the file SHALL be accepted if and only if its MIME type is one of `image/jpeg`, `image/png`, or `image/webp` AND its size is ≤ 10 MB. Furthermore, the continue action SHALL be enabled if and only if the total number of accepted files is between 2 and 6 (inclusive).
 
 **Validates: Requirements 2.1, 2.4, 2.5, 2.6, 2.10**
 
 ### Property 2: AI Response Parsing Completeness
 
-*For any* valid JSON response from the AI vision API containing cabinet type, countertop material, flooring material, kitchen size, overall condition, and observations fields, the parser SHALL extract all fields into an `AIDetectionResult` with non-null values and valid confidence levels (`high`, `medium`, or `low`) for each detected attribute.
+_For any_ valid JSON response from the AI vision API containing cabinet type, countertop material, flooring material, kitchen size, overall condition, and observations fields, the parser SHALL extract all fields into an `AIDetectionResult` with non-null values and valid confidence levels (`high`, `medium`, or `low`) for each detected attribute.
 
 **Validates: Requirements 3.3**
 
 ### Property 3: Detection Edit State Consistency
 
-*For any* detection field and any new user-provided value, when the user modifies a detected attribute in the Detection_Editor, the `KitchenEstimateAnswers` state SHALL reflect the new value and the Cost_Engine SHALL produce an updated estimate using the modified value (not the original AI-detected value).
+_For any_ detection field and any new user-provided value, when the user modifies a detected attribute in the Detection_Editor, the `KitchenEstimateAnswers` state SHALL reflect the new value and the Cost_Engine SHALL produce an updated estimate using the modified value (not the original AI-detected value).
 
 **Validates: Requirements 4.3**
 
 ### Property 4: Conditional Step Filtering
 
-*For any* combination of `KitchenEstimateAnswers`, the set of active steps returned by the wizard SHALL include only steps whose `showIf` condition evaluates to true (or steps with no `showIf` condition), and SHALL exclude all steps whose `showIf` condition evaluates to false.
+_For any_ combination of `KitchenEstimateAnswers`, the set of active steps returned by the wizard SHALL include only steps whose `showIf` condition evaluates to true (or steps with no `showIf` condition), and SHALL exclude all steps whose `showIf` condition evaluates to false.
 
 **Validates: Requirements 5.6**
 
 ### Property 5: Navigation State Preservation
 
-*For any* sequence of wizard steps where the user has entered answers, navigating backward to a previously completed step SHALL restore the exact answer values that were previously selected for that step, with no data loss or mutation.
+_For any_ sequence of wizard steps where the user has entered answers, navigating backward to a previously completed step SHALL restore the exact answer values that were previously selected for that step, with no data loss or mutation.
 
 **Validates: Requirements 5.7**
 
 ### Property 6: Progress Calculation Accuracy
 
-*For any* current step index `n` and total step count `t` (where 0 ≤ n < t and t > 0), the Progress_Indicator SHALL display the percentage as `Math.round(((n + 1) / t) * 100)` and the label as `"Step {n+1} of {t}"`.
+_For any_ current step index `n` and total step count `t` (where 0 ≤ n < t and t > 0), the Progress_Indicator SHALL display the percentage as `Math.round(((n + 1) / t) * 100)` and the label as `"Step {n+1} of {t}"`.
 
 **Validates: Requirements 6.1, 6.2**
 
 ### Property 7: Cost Engine Estimate Ordering Invariant
 
-*For any* valid `KitchenEstimateAnswers` and any valid `KitchenCostParams` configuration, the Cost_Engine SHALL produce an estimate where `low ≤ mid ≤ high`, all values are non-negative, and all breakdown percentages sum to approximately 100% (±2% for rounding).
+_For any_ valid `KitchenEstimateAnswers` and any valid `KitchenCostParams` configuration, the Cost_Engine SHALL produce an estimate where `low ≤ mid ≤ high`, all values are non-negative, and all breakdown percentages sum to approximately 100% (±2% for rounding).
 
 **Validates: Requirements 10.4, 6.3**
 
 ### Property 8: Project Save/Load Round-Trip
 
-*For any* valid `SavedProject` object, saving it to the Project_Store and then loading it by its ID SHALL produce an object with equivalent `answers`, `aiDetections`, `estimate`, `path`, and `projectType` values.
+_For any_ valid `SavedProject` object, saving it to the Project_Store and then loading it by its ID SHALL produce an object with equivalent `answers`, `aiDetections`, `estimate`, `path`, and `projectType` values.
 
 **Validates: Requirements 8.3**
 
@@ -460,36 +458,36 @@ interface AIVisionResponse {
 
 ### AI Analysis Errors
 
-| Error Condition | Behavior | User-Facing Message |
-|---|---|---|
-| API returns non-200 status | Show error state, offer retry or manual path switch | "We couldn't analyze your photos. You can try again or switch to the manual estimate." |
-| API timeout (>30 seconds) | Abort request, show timeout error | "The analysis is taking longer than expected. Try again or continue with the manual estimate." |
-| Invalid/unparseable API response | Show error state, offer retry | "Something went wrong with the analysis. Please try again." |
-| API key missing/invalid | Disable AI path at Path_Selector level | "AI analysis is temporarily unavailable. Use the manual estimate for now." |
+| Error Condition                  | Behavior                                            | User-Facing Message                                                                            |
+| -------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| API returns non-200 status       | Show error state, offer retry or manual path switch | "We couldn't analyze your photos. You can try again or switch to the manual estimate."         |
+| API timeout (>30 seconds)        | Abort request, show timeout error                   | "The analysis is taking longer than expected. Try again or continue with the manual estimate." |
+| Invalid/unparseable API response | Show error state, offer retry                       | "Something went wrong with the analysis. Please try again."                                    |
+| API key missing/invalid          | Disable AI path at Path_Selector level              | "AI analysis is temporarily unavailable. Use the manual estimate for now."                     |
 
 ### Photo Upload Errors
 
-| Error Condition | Behavior | User-Facing Message |
-|---|---|---|
-| Invalid file format | Reject file, show inline error | "Only JPEG, PNG, and WebP images are accepted." |
-| File exceeds 10 MB | Reject file, show inline error | "This image is too large. Maximum file size is 10 MB." |
+| Error Condition        | Behavior                                 | User-Facing Message                                                   |
+| ---------------------- | ---------------------------------------- | --------------------------------------------------------------------- |
+| Invalid file format    | Reject file, show inline error           | "Only JPEG, PNG, and WebP images are accepted."                       |
+| File exceeds 10 MB     | Reject file, show inline error           | "This image is too large. Maximum file size is 10 MB."                |
 | Max photos reached (6) | Reject additional file, show inline info | "Maximum of 6 photos reached. Remove a photo to add a different one." |
-| File read error | Show error for that specific file | "This file couldn't be read. Please try a different image." |
+| File read error        | Show error for that specific file        | "This file couldn't be read. Please try a different image."           |
 
 ### Project Save/Load Errors
 
-| Error Condition | Behavior | User-Facing Message |
-|---|---|---|
-| localStorage unavailable | Disable save button, show tooltip | "Saving is not available in this browser mode." |
-| localStorage quota exceeded | Show error, suggest PDF export | "Storage is full. Download your estimate as a PDF instead." |
-| Corrupted saved data | Discard corrupted project, offer fresh start | "Your saved project couldn't be loaded. Start a new estimate?" |
+| Error Condition             | Behavior                                     | User-Facing Message                                            |
+| --------------------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| localStorage unavailable    | Disable save button, show tooltip            | "Saving is not available in this browser mode."                |
+| localStorage quota exceeded | Show error, suggest PDF export               | "Storage is full. Download your estimate as a PDF instead."    |
+| Corrupted saved data        | Discard corrupted project, offer fresh start | "Your saved project couldn't be loaded. Start a new estimate?" |
 
 ### Cost Engine Edge Cases
 
-| Condition | Handling |
-|---|---|
-| No cost-impacting answers yet | Return null estimate, hide live estimate panel |
-| Invalid ZIP code | Skip regional multiplier (use 1.0 default), show warning |
+| Condition                        | Handling                                                        |
+| -------------------------------- | --------------------------------------------------------------- |
+| No cost-impacting answers yet    | Return null estimate, hide live estimate panel                  |
+| Invalid ZIP code                 | Skip regional multiplier (use 1.0 default), show warning        |
 | Extreme values after calculation | Clamp: minimum $5,000 for any kitchen remodel, maximum $250,000 |
 
 ## Testing Strategy

@@ -12,7 +12,11 @@ export interface GenerateReportOptions {
  */
 function deduplicateQuestions(questions: string[]): string[] {
   const normalize = (q: string) =>
-    q.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter((w) => w.length > 3);
+    q
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .split(/\s+/)
+      .filter((w) => w.length > 3);
 
   const result: string[] = [];
   for (const q of questions) {
@@ -90,21 +94,25 @@ export async function generateReport(
   options: GenerateReportOptions = {},
 ): Promise<string> {
   // Pre-format data for the LLM
-  const presentList = analysis.presentItems.length > 0
-    ? analysis.presentItems.map((i) => `- ✅ ${i.name}`).join("\n")
-    : "- No items matched.";
+  const presentList =
+    analysis.presentItems.length > 0
+      ? analysis.presentItems.map((i) => `- ✅ ${i.name}`).join("\n")
+      : "- No items matched.";
 
-  const clarificationList = analysis.needsClarification.length > 0
-    ? analysis.needsClarification.map((i) => `- ⚠️ ${i.name}: ${i.question}`).join("\n")
-    : "";
+  const clarificationList =
+    analysis.needsClarification.length > 0
+      ? analysis.needsClarification.map((i) => `- ⚠️ ${i.name}: ${i.question}`).join("\n")
+      : "";
 
-  const missingList = analysis.missingScope.length > 0
-    ? analysis.missingScope.map((i) => `- ❌ ${i.title.replace("Missing: ", "")}`).join("\n")
-    : "- No critical items missing.";
+  const missingList =
+    analysis.missingScope.length > 0
+      ? analysis.missingScope.map((i) => `- ❌ ${i.title.replace("Missing: ", "")}`).join("\n")
+      : "- No critical items missing.";
 
-  const redFlagList = analysis.redFlags.length > 0
-    ? analysis.redFlags.map((f) => `- 🚩 ${f.title}: ${f.explanation}`).join("\n")
-    : "";
+  const redFlagList =
+    analysis.redFlags.length > 0
+      ? analysis.redFlags.map((f) => `- 🚩 ${f.title}: ${f.explanation}`).join("\n")
+      : "";
 
   // Deduplicate questions
   const uniqueQuestions = deduplicateQuestions(analysis.questionsToAsk);
@@ -114,9 +122,8 @@ export async function generateReport(
 
   // Quote facts vs expert advice
   const quoteFacts = extractQuoteFacts(analysis);
-  const quoteFactsFormatted = quoteFacts.length > 0
-    ? quoteFacts.map((f) => `- ${f}`).join("\n")
-    : "";
+  const quoteFactsFormatted =
+    quoteFacts.length > 0 ? quoteFacts.map((f) => `- ${f}`).join("\n") : "";
 
   const systemPrompt = `You are an independent renovation consultant writing a final report for a homeowner who received a contractor quote.
 
@@ -182,13 +189,19 @@ QUOTE FACTS (what the document explicitly states):
 ${quoteFactsFormatted || "(no notable statements extracted)"}
 
 QUESTIONS (deduplicated, max 8):
-${uniqueQuestions.slice(0, 8).map((q) => `- ${q}`).join("\n")}
+${uniqueQuestions
+  .slice(0, 8)
+  .map((q) => `- ${q}`)
+  .join("\n")}
 
 RECOMMENDATIONS:
 ${analysis.recommendations.map((r) => `- ${r}`).join("\n")}
 
 BUILDING CODES (informational context):
-${analysis.buildingCodes.slice(0, 4).map((c) => `- ${c.title}: ${c.explanation}`).join("\n")}
+${analysis.buildingCodes
+  .slice(0, 4)
+  .map((c) => `- ${c.title}: ${c.explanation}`)
+  .join("\n")}
 
 Write the report now. List every present item by name. Separate facts from advice. End with a verdict.`;
 

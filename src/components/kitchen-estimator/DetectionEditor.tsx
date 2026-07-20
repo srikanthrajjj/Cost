@@ -1,6 +1,10 @@
 import { Check, Sparkles, AlertTriangle, AlertCircle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { AIDetectionResult, DetectedAttribute, DetectedFeatures } from "../../lib/kitchen-estimator/types";
+import type {
+  AIDetectionResult,
+  DetectedAttribute,
+  DetectedFeatures,
+} from "../../lib/kitchen-estimator/types";
 
 interface DetectionEditorProps {
   detections: AIDetectionResult;
@@ -64,7 +68,7 @@ function ConfidenceBadge({ confidence }: { confidence: "high" | "medium" | "low"
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
-        styles[confidence]
+        styles[confidence],
       )}
       aria-label={`AI confidence: ${confidence}`}
     >
@@ -92,9 +96,7 @@ function FieldEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <label className="font-display text-sm font-semibold text-[#082A4B]">
-          {label}
-        </label>
+        <label className="font-display text-sm font-semibold text-[#082A4B]">{label}</label>
         <ConfidenceBadge confidence={attribute.confidence} />
       </div>
       <div
@@ -117,7 +119,7 @@ function FieldEditor({
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 isSelected
                   ? "border-[#082A4B] bg-[#082A4B]/5 text-[#082A4B] shadow-sm"
-                  : "border-border bg-white text-muted-foreground hover:border-[#082A4B]/40 hover:bg-[#082A4B]/[0.02]"
+                  : "border-border bg-white text-muted-foreground hover:border-[#082A4B]/40 hover:bg-[#082A4B]/[0.02]",
               )}
             >
               {isSelected && (
@@ -140,11 +142,7 @@ function FieldEditor({
   );
 }
 
-export function DetectionEditor({
-  detections,
-  onUpdate,
-  onConfirm,
-}: DetectionEditorProps) {
+export function DetectionEditor({ detections, onUpdate, onConfirm }: DetectionEditorProps) {
   // Track current selected values (AI values are pre-filled)
   const fields: Array<{ key: string; attribute: DetectedAttribute }> = [
     { key: "cabinetType", attribute: detections.cabinetType },
@@ -291,8 +289,13 @@ function KitchenDetailsInline({ features }: { features: DetectedFeatures }) {
     rows.push({ label: "Faucet", value: v });
   }
 
-  if (features.appliances?.refrigerator?.type) rows.push({ label: "Refrigerator", value: features.appliances.refrigerator.type });
-  if (features.appliances?.range?.type) rows.push({ label: "Range", value: `${features.appliances.range.type} (${features.appliances.range.fuel ?? "N/A"})` });
+  if (features.appliances?.refrigerator?.type)
+    rows.push({ label: "Refrigerator", value: features.appliances.refrigerator.type });
+  if (features.appliances?.range?.type)
+    rows.push({
+      label: "Range",
+      value: `${features.appliances.range.type} (${features.appliances.range.fuel ?? "N/A"})`,
+    });
 
   if (features.lighting) {
     const parts: string[] = [];
@@ -303,18 +306,25 @@ function KitchenDetailsInline({ features }: { features: DetectedFeatures }) {
     if (parts.length) rows.push({ label: "Lighting", value: parts.join(", ") });
   }
 
-  if (features.flooring?.material) rows.push({ label: "Flooring", value: features.flooring.material });
+  if (features.flooring?.material)
+    rows.push({ label: "Flooring", value: features.flooring.material });
   if (features.walls?.finish) rows.push({ label: "Walls", value: features.walls.finish });
   if (features.ceiling?.type) rows.push({ label: "Ceiling", value: features.ceiling.type });
   if (features.qualityIndicator) rows.push({ label: "Quality", value: features.qualityIndicator });
   if (features.overallStyle) rows.push({ label: "Style", value: features.overallStyle });
 
   if (features.premiumFeatures?.length) {
-    rows.push({ label: "Premium", value: features.premiumFeatures.map(f => f.replace(/[<>]/g, "")).join(", ") });
+    rows.push({
+      label: "Premium",
+      value: features.premiumFeatures.map((f) => f.replace(/[<>]/g, "")).join(", "),
+    });
   }
 
   if (features.visibleWear?.length) {
-    rows.push({ label: "Wear", value: features.visibleWear.map(w => w.replace(/[<>]/g, "")).join(", ") });
+    rows.push({
+      label: "Wear",
+      value: features.visibleWear.map((w) => w.replace(/[<>]/g, "")).join(", "),
+    });
   }
 
   return (

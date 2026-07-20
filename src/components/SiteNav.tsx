@@ -36,15 +36,34 @@ export function SiteNav({ active }: SiteNavProps) {
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
-          <a href="/estimate" className={cn("hover:text-foreground transition-colors whitespace-nowrap", active === "estimator" && "text-accent")}>
+          <a
+            href="/estimate"
+            className={cn(
+              "hover:text-foreground transition-colors whitespace-nowrap",
+              active === "estimator" && "text-accent",
+            )}
+          >
             Cost Estimator
           </a>
-          <a href="/quote-analyzer" className={cn("hover:text-foreground transition-colors whitespace-nowrap", active === "quote" && "text-accent")}>
+          <a
+            href="/quote-analyzer"
+            className={cn(
+              "hover:text-foreground transition-colors whitespace-nowrap",
+              active === "quote" && "text-accent",
+            )}
+          >
             Quote Review
           </a>
-          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">Insurance Claims</a>
+          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">
+            Insurance Claims
+          </a>
           <div className="relative group">
-            <button className={cn("hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1", active === "guides" && "text-accent")}>
+            <button
+              className={cn(
+                "hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1",
+                active === "guides" && "text-accent",
+              )}
+            >
               Renovation Guides
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
             </button>
@@ -90,14 +109,20 @@ export function SiteNav({ active }: SiteNavProps) {
             <a
               href="/estimate"
               onClick={() => setMenuOpen(false)}
-              className={cn("rounded-lg px-3 py-2.5 transition-colors", active === "estimator" ? "text-accent bg-accent/5" : "hover:bg-muted")}
+              className={cn(
+                "rounded-lg px-3 py-2.5 transition-colors",
+                active === "estimator" ? "text-accent bg-accent/5" : "hover:bg-muted",
+              )}
             >
               Cost Estimator
             </a>
             <a
               href="/quote-analyzer"
               onClick={() => setMenuOpen(false)}
-              className={cn("rounded-lg px-3 py-2.5 transition-colors", active === "quote" ? "text-accent bg-accent/5" : "hover:bg-muted")}
+              className={cn(
+                "rounded-lg px-3 py-2.5 transition-colors",
+                active === "quote" ? "text-accent bg-accent/5" : "hover:bg-muted",
+              )}
             >
               Quote Review
             </a>
@@ -112,10 +137,15 @@ export function SiteNav({ active }: SiteNavProps) {
               <button
                 type="button"
                 onClick={() => setGuidesOpen(!guidesOpen)}
-                className={cn("flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors", active === "guides" ? "text-accent bg-accent/5" : "hover:bg-muted")}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors",
+                  active === "guides" ? "text-accent bg-accent/5" : "hover:bg-muted",
+                )}
               >
                 Renovation Guides
-                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", guidesOpen && "rotate-180")} />
+                <ChevronDown
+                  className={cn("h-3.5 w-3.5 transition-transform", guidesOpen && "rotate-180")}
+                />
               </button>
               {guidesOpen && (
                 <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-border pl-3">
