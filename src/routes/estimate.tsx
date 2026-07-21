@@ -28,6 +28,7 @@ import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import type { EstimatorAnswers, LiveEstimate } from "@/lib/estimator-engine";
@@ -1304,6 +1305,9 @@ function FinalReport({
   const handleEmailSubmit = async (email: string) => {
     setIsDownloading(true);
     try {
+      // Subscribe to newsletter (fire and forget)
+      subscribeToNewsletter({ data: { email, source: "estimate-download" } }).catch(() => {});
+
       const projectLabel: Record<string, string> = {
         roof: "Roof Replacement",
         kitchen: "Kitchen Remodel",

@@ -38,6 +38,7 @@ import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
 import { serverChatWithKnowledge } from "@/lib/chat-server";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
@@ -321,6 +322,10 @@ function QuoteAnalyzerPage() {
     setIsDownloading(true);
     try {
       const { analysis, extraction } = result;
+
+      // Subscribe to newsletter (fire and forget)
+      subscribeToNewsletter({ data: { email, source: "quote-download" } }).catch(() => {});
+
       await submitEmailAndDownload({
         filename: `quote-analysis-${new Date().getTime()}.html`,
         email,
@@ -332,6 +337,12 @@ function QuoteAnalyzerPage() {
           redFlags: analysis.redFlags.length,
           contractor: extraction.contractor,
           totalPrice: extraction.totalPrice,
+          projectType: extraction.projectType,
+          missingScope: analysis.missingScope,
+          needsClarification: analysis.needsClarification,
+          redFlagsList: analysis.redFlags,
+          lineItems: extraction.scopeItems || [],
+          summary: analysis.summary?.text || analysis.summary || "",
         },
       });
     } catch (error) {
@@ -1016,6 +1027,10 @@ function CompleteView({
     setIsDownloading(true);
     try {
       const { analysis, extraction } = result;
+
+      // Subscribe to newsletter (fire and forget)
+      subscribeToNewsletter({ data: { email, source: "quote-download" } }).catch(() => {});
+
       await submitEmailAndDownload({
         filename: `quote-analysis-${new Date().getTime()}.html`,
         email,
