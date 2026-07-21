@@ -293,7 +293,7 @@ function CompareQuotesPage() {
                         className={`rounded-xl border-2 border-dashed bg-white p-8 text-center transition-all cursor-pointer group shadow-sm min-h-[180px] flex flex-col items-center justify-center ${
                           isDragOver
                             ? "border-accent bg-accent/5"
-                            : "border-border hover:border-accent/40 hover:bg-accent/5"
+                            : "border-gray-300 hover:border-accent hover:bg-accent/5"
                         }`}
                         onClick={() => inputRef.current?.click()}
                         onDragOver={(e) => {
@@ -310,17 +310,17 @@ function CompareQuotesPage() {
                           if (file) handleFileSelect(file, slot);
                         }}
                       >
-                        <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-3 group-hover:bg-accent/10 transition">
-                          <Upload className="h-5 w-5 text-muted-foreground group-hover:text-accent transition" />
+                        <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:scale-105 transition-all">
+                          <Upload className="h-6 w-6 text-accent group-hover:text-white transition" />
                         </div>
-                        <p className="text-sm font-semibold text-ink mb-1">Upload quote {slot}</p>
-                        <p className="text-xs text-muted-foreground mb-3">
+                        <p className="text-base font-bold text-ink mb-1">Upload quote {slot}</p>
+                        <p className="text-sm text-muted-foreground mb-4">
                           Drag & drop or click to choose
                         </p>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50 text-xs font-medium text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent transition">
-                          <FileText className="h-3.5 w-3.5" /> Choose file
+                        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-bold group-hover:bg-accent/90 transition shadow-sm shadow-accent/20">
+                          <FileText className="h-4 w-4" /> Choose file
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-3">
+                        <p className="text-[11px] text-muted-foreground mt-3">
                           PDF, JPG, PNG (max 15 MB)
                         </p>
                       </div>
