@@ -1,0 +1,20 @@
+[
+  {
+    "city": "Austin",
+    "state": "Texas",
+    "stateAbbr": "TX",
+    "slug": "austin",
+    "stateSlug": "texas",
+    "zipPrefix": "73301",
+    "laborCostMultiplier": 1.05,
+    "typicalHomeAge": "2000s (new construction dominant in suburbs); 1970s–1990s in central Austin",
+    "climateNotes": "Hot semi-arid (Köppen BSh). High solar exposure, 300+ sunny days per year, occasional hail events, hot summers with mild winters. Summer temps regularly exceed 100°F.",
+    "regionalNotes": "Rapid population growth has increased contractor demand and labor rates above state average. Strong housing market with mix of new construction and older teardown/rebuild projects.",
+    "nearestPermitOffice": "Austin Development Services Department",
+    "population": 961855,
+    "medianHomeValue": 550000,
+    "introParagraphs": {
+      "roof-replacement": "Austin's hot semi-arid climate with over 300 days of sunshine per year creates unique demands on residential roofing. Summer temperatures regularly exceeding 100°F accelerate asphalt shingle degradation, while occasional hail events common to Central Texas can cause granule loss and impact damage. As a result, roof replacement in Austin typically involves impact-resistant materials designed to withstand both thermal stress and storm events prevalent in the region."
+    }
+  }
+]

@@ -376,10 +376,12 @@ function QuoteAnalyzerPage() {
                 </span>
               </div>
               <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
-                Get an Expert Review of Your Contractor Quote <span className="text-accent">in Seconds</span>
+                Get an Expert Review of Your Contractor Quote{" "}
+                <span className="text-accent">in Seconds</span>
               </h1>
               <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-                Upload your quote and uncover what's included, what's missing, and what could cost you more.
+                Upload your quote and uncover what's included, what's missing, and what could cost
+                you more.
               </p>
               {/* Trust indicators */}
               <div className="mt-8 flex flex-wrap gap-5">

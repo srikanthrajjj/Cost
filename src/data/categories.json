@@ -1,0 +1,38 @@
+[
+  {
+    "id": "roof-replacement",
+    "name": "Roof Replacement",
+    "description": "Complete roof tear-off and replacement",
+    "icon": "Shield",
+    "avgCost": "$11,500",
+    "costRange": "$8,600 - $24,700",
+    "timeframe": "3 - 5 Days",
+    "roi": "68%",
+    "seoTitle": "Roof Replacement Cost in {city}, {state} | CostReno",
+    "seoDescription": "Get the average cost of roof replacement in {city}, {state}. Compare local pricing, contractor quotes, and roofing materials with CostReno's AI-powered estimator.",
+    "keywords": ["roof replacement", "roofing costs", "new roof", "roof repair", "shingles"],
+    "faq": [
+      {
+        "question": "How much does a roof replacement cost in {city}?",
+        "answer": "Roof replacement in {city} typically costs between $8,600 and $24,700 depending on your home size, roof pitch, and material choice. Local labor rates and permit requirements also influence the final price."
+      },
+      {
+        "question": "What roofing materials are best for {city}'s climate?",
+        "answer": "Given {city}'s hot summers and occasional hail events, impact-resistant asphalt shingles (Class 3 or 4) are a popular choice. Metal roofing is also gaining traction for its durability and energy efficiency in hot climates."
+      },
+      {
+        "question": "Do I need a permit for roof replacement in {city}?",
+        "answer": "Yes, most municipalities require a permit for roof replacement. The cost is typically included in your contractor's quote, but it's important to verify that your contractor will obtain the necessary permits before work begins."
+      },
+      {
+        "question": "How long does a roof replacement take in {city}?",
+        "answer": "Most roof replacements take 3 to 5 days, though complex roofs or larger homes may require additional time. Weather conditions in {city}, particularly summer heat, can also affect the timeline."
+      },
+      {
+        "question": "Should I get multiple quotes for roof replacement in {city}?",
+        "answer": "Yes, we recommend getting at least 3 written quotes from licensed and insured contractors. This helps you understand fair market pricing and gives you leverage in negotiations."
+      }
+    ],
+    "methodologyNote": "Cost estimates are based on regional pricing data, historical trends, and user-submitted quotes. Actual costs may vary based on your specific property, material selection, and contractor pricing."
+  }
+]

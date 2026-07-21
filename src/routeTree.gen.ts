@@ -9,10 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel-cost'
 import { Route as EstimateRouteImport } from './routes/estimate'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
@@ -21,10 +26,21 @@ import { Route as GuidesKitchenRemodelRouteImport } from './routes/guides/kitche
 import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
 import { Route as GuidesFlooringRouteImport } from './routes/guides/flooring'
 import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathroom-remodel'
+import { Route as StateCityCategoryRouteImport } from './routes/$state/$city/$category'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
   id: '/quote-analyzer',
   path: '/quote-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MethodologyRoute = MethodologyRouteImport.update({
@@ -40,6 +56,21 @@ const KitchenRemodelCostRoute = KitchenRemodelCostRouteImport.update({
 const EstimateRoute = EstimateRouteImport.update({
   id: '/estimate',
   path: '/estimate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectSlugRoute = ProjectSlugRouteImport.update({
@@ -82,117 +113,178 @@ const GuidesBathroomRemodelRoute = GuidesBathroomRemodelRouteImport.update({
   path: '/guides/bathroom-remodel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StateCityCategoryRoute = StateCityCategoryRouteImport.update({
+  id: '/$state/$city/$category',
+  path: '/$state/$city/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
+  '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
+  '/$state/$city/$category': typeof StateCityCategoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
+  '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
+  '/$state/$city/$category': typeof StateCityCategoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
+  '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
+  '/$state/$city/$category': typeof StateCityCategoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$projectSlug'
+    | '/about'
+    | '/contact'
+    | '/disclaimer'
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/methodology'
+    | '/privacy'
     | '/quote-analyzer'
+    | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
     | '/guides/hvac-installation'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
+    | '/$state/$city/$category'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$projectSlug'
+    | '/about'
+    | '/contact'
+    | '/disclaimer'
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/methodology'
+    | '/privacy'
     | '/quote-analyzer'
+    | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
     | '/guides/hvac-installation'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
+    | '/$state/$city/$category'
   id:
     | '__root__'
     | '/'
     | '/$projectSlug'
+    | '/about'
+    | '/contact'
+    | '/disclaimer'
     | '/estimate'
     | '/kitchen-remodel-cost'
     | '/methodology'
+    | '/privacy'
     | '/quote-analyzer'
+    | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
     | '/guides/hvac-installation'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
+    | '/$state/$city/$category'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  DisclaimerRoute: typeof DisclaimerRoute
   EstimateRoute: typeof EstimateRoute
   KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
   MethodologyRoute: typeof MethodologyRoute
+  PrivacyRoute: typeof PrivacyRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
+  TermsRoute: typeof TermsRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
   GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
   GuidesKitchenRemodelRoute: typeof GuidesKitchenRemodelRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
+  StateCityCategoryRoute: typeof StateCityCategoryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quote-analyzer': {
       id: '/quote-analyzer'
       path: '/quote-analyzer'
       fullPath: '/quote-analyzer'
       preLoaderRoute: typeof QuoteAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/methodology': {
@@ -214,6 +306,27 @@ declare module '@tanstack/react-router' {
       path: '/estimate'
       fullPath: '/estimate'
       preLoaderRoute: typeof EstimateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$projectSlug': {
@@ -272,22 +385,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesBathroomRemodelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$state/$city/$category': {
+      id: '/$state/$city/$category'
+      path: '/$state/$city/$category'
+      fullPath: '/$state/$city/$category'
+      preLoaderRoute: typeof StateCityCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectSlugRoute: ProjectSlugRoute,
+  AboutRoute: AboutRoute,
+  ContactRoute: ContactRoute,
+  DisclaimerRoute: DisclaimerRoute,
   EstimateRoute: EstimateRoute,
   KitchenRemodelCostRoute: KitchenRemodelCostRoute,
   MethodologyRoute: MethodologyRoute,
+  PrivacyRoute: PrivacyRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
+  TermsRoute: TermsRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
   GuidesHvacInstallationRoute: GuidesHvacInstallationRoute,
   GuidesKitchenRemodelRoute: GuidesKitchenRemodelRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
+  StateCityCategoryRoute: StateCityCategoryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

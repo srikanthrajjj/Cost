@@ -934,7 +934,7 @@ function PhotoUploadQuestion({
         ),
       );
       const { analyzeKitchen } = await import("@/lib/kitchen-estimator/analyze-kitchen");
-      const result = await analyzeKitchen(base64Photos);
+      const result = await analyzeKitchen({ data: { photos: base64Photos } });
       if (result.success) {
         setDetections(result.data);
         // Pre-fill answers

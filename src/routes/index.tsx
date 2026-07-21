@@ -914,6 +914,87 @@ function ThinkingIndicator() {
   );
 }
 
+function QuoteAnalysisSection() {
+  return (
+    <section className="container-x py-20">
+      {/* Header */}
+      <div className="text-center mb-14">
+        <h2 className="font-display text-3xl md:text-4xl lg:text-[42px] font-bold text-ink leading-tight max-w-3xl mx-auto">
+          Everything Your Contractor Quote Isn't Telling You
+        </h2>
+        <p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          Our AI analyzes every line item, uncovers hidden costs, flags risks, compares market
+          pricing, and helps you negotiate with confidence before spending thousands.
+        </p>
+      </div>
+
+      {/* 6-column responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Card 1 - AI-Powered Quote Analysis */}
+        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden">
+          <div className="flex-1 flex items-center justify-center mb-5">
+            <img
+              src="/quote-ai.png"
+              alt="Contractor quote with line items connected to AI analysis engine"
+              className="w-full max-w-[360px] h-auto object-contain rounded-lg"
+            />
+          </div>
+          <div>
+            <h3 className="font-display text-base font-bold text-ink mb-2">
+              AI-Powered Quote Analysis
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Upload any contractor quote, and our AI instantly reads every line item, categorizes
+              costs, identifies hidden details, and transforms complex estimates into clear,
+              actionable insights.
+            </p>
+          </div>
+        </div>
+
+        {/* Card 2 - Placeholder */}
+        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
+            <p className="text-xs text-muted-foreground">Coming soon</p>
+          </div>
+        </div>
+
+        {/* Card 3 - Placeholder */}
+        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
+            <p className="text-xs text-muted-foreground">Coming soon</p>
+          </div>
+        </div>
+
+        {/* Card 4 - Placeholder */}
+        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
+            <p className="text-xs text-muted-foreground">Coming soon</p>
+          </div>
+        </div>
+
+        {/* Card 5 - Placeholder */}
+        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
+            <p className="text-xs text-muted-foreground">Coming soon</p>
+          </div>
+        </div>
+
+        {/* Card 6 - Placeholder */}
+        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
+          <div className="text-center">
+            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
+            <p className="text-xs text-muted-foreground">Coming soon</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Landing() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -2833,6 +2914,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           ))}
         </div>
       </section>
+
+      {/* QUOTE ANALYSIS SECTION */}
+      <QuoteAnalysisSection />
 
       {/* PLAN YOUR RENOVATION */}
       <section className="container-x py-20">
