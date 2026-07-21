@@ -16,6 +16,9 @@ dist-ssr
 .nitro
 *.local
 
+# Local JSON data store (dev fallback when DATABASE_URL is unset)
+data/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

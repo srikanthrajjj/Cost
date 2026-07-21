@@ -1622,7 +1622,15 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       const combinedText = `${userText}\n\nExtracted from ${file.name}:\n${extractedText}`;
 
       console.log("[QUOTE DEBUG] Step 9: Calling serverAnalyzeQuoteFull()...");
-      const analysis = await serverAnalyzeQuoteFull({ data: { rawText: combinedText } });
+      const analysis = await serverAnalyzeQuoteFull({
+        data: {
+          rawText: combinedText,
+          fileName: file.name,
+          fileType: file.type || undefined,
+          fileSize: file.size,
+          source: "home-chat",
+        },
+      });
 
       console.log(
         "[QUOTE DEBUG] Step 10: Extractor result:",

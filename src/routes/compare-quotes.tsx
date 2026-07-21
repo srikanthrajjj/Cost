@@ -218,7 +218,15 @@ function CompareQuotesPage() {
       }
       setAnalyzingQuote1((prev) => (prev ? { ...prev, stage: "extracting" } : null));
       const combined1 = `Analyze this contractor quote:\n\n${extracted1.text}`;
-      const result1 = await serverAnalyzeQuoteFull({ data: { rawText: combined1 } });
+      const result1 = await serverAnalyzeQuoteFull({
+        data: {
+          rawText: combined1,
+          fileName: quote1.fileName,
+          fileType: quote1.file.type || undefined,
+          fileSize: quote1.file.size,
+          source: "compare-quotes",
+        },
+      });
       addComparisonQuote(result1);
       setAnalyzingQuote1(null);
 
@@ -233,7 +241,15 @@ function CompareQuotesPage() {
       }
       setAnalyzingQuote2((prev) => (prev ? { ...prev, stage: "extracting" } : null));
       const combined2 = `Analyze this contractor quote:\n\n${extracted2.text}`;
-      const result2 = await serverAnalyzeQuoteFull({ data: { rawText: combined2 } });
+      const result2 = await serverAnalyzeQuoteFull({
+        data: {
+          rawText: combined2,
+          fileName: quote2.fileName,
+          fileType: quote2.file.type || undefined,
+          fileSize: quote2.file.size,
+          source: "compare-quotes",
+        },
+      });
       addComparisonQuote(result2);
       setAnalyzingQuote2(null);
 

@@ -42,10 +42,18 @@ export const roofingLineItemMarketRates: LineItemMarketRate[] = [
   {
     id: "tear_off",
     label: "Tear-off and disposal",
-    keywords: ["tear-off", "tear off", "tearoff", "removal", "disposal", "dumpster"],
+    keywords: ["tear-off", "tear off", "tearoff", "tear off and disposal"],
     unit: "sq",
     low: 100,
     high: 300,
+  },
+  {
+    id: "dumpster",
+    label: "Dumpster and cleanup",
+    keywords: ["dumpster", "cleanup", "clean up", "haul away", "debris removal"],
+    unit: "each",
+    low: 350,
+    high: 900,
   },
   {
     id: "ice_water_shield",
@@ -66,7 +74,7 @@ export const roofingLineItemMarketRates: LineItemMarketRate[] = [
   {
     id: "valley_flashing",
     label: "Valley flashing",
-    keywords: ["valley flashing", "valley metal", "valley"],
+    keywords: ["valley flashing", "valley metal"],
     unit: "lf",
     low: 8,
     high: 22,
@@ -104,9 +112,17 @@ export const roofingLineItemMarketRates: LineItemMarketRate[] = [
     high: 75,
   },
   {
+    id: "roof_vent",
+    label: "Roof vent",
+    keywords: ["roof vent", "box vent", "turtle vent", "exhaust vent"],
+    unit: "each",
+    low: 40,
+    high: 120,
+  },
+  {
     id: "flashing",
     label: "Flashing",
-    keywords: ["flashing", "step flashing", "chimney flashing", "penetration"],
+    keywords: ["flashing", "step flashing", "chimney flashing", "flashing replacement"],
     unit: "lf",
     low: 6,
     high: 18,
@@ -146,12 +162,68 @@ function normalize(text: string): string {
     .trim();
 }
 
+/** Whether quote units can be multiplied against a market rate unit. */
+export function unitsCompatible(quoteUnit: string, rateUnit: MarketRateUnit): boolean {
+  const u = normalize(quoteUnit);
+  if (!u) return false;
+
+  if (rateUnit === "each") {
+    return (
+      u === "each" ||
+      u === "ea" ||
+      u === "pc" ||
+      u.includes("piece") ||
+      u.includes("lump") ||
+      u.includes("allowance") ||
+      u.includes("job")
+    );
+  }
+
+  if (rateUnit === "lf") {
+    return (
+      u === "lf" ||
+      u === "lin ft" ||
+      u === "linear ft" ||
+      u.includes("linear") ||
+      u === "ft" ||
+      u.includes("foot") ||
+      u.includes("feet")
+    );
+  }
+
+  if (rateUnit === "sq") {
+    return (
+      u === "sq" ||
+      u === "square" ||
+      u.includes("squares") ||
+      u.includes("sq ft") ||
+      u === "sf" ||
+      u === "sqft" ||
+      u.includes("square foot")
+    );
+  }
+
+  if (rateUnit === "sqft") {
+    return (
+      u.includes("sq ft") ||
+      u === "sf" ||
+      u === "sqft" ||
+      u === "sq" ||
+      u.includes("square")
+    );
+  }
+
+  return false;
+}
+
 function normalizeQtyToRateUnit(
   qty: number,
   quoteUnit: string,
   rateUnit: MarketRateUnit,
 ): number {
   if (!qty || qty <= 0) return 0;
+  if (!unitsCompatible(quoteUnit, rateUnit)) return 0;
+
   const u = normalize(quoteUnit);
 
   if (rateUnit === "sq") {
@@ -165,10 +237,6 @@ function normalizeQtyToRateUnit(
     if (u === "sq" || (u.includes("square") && !u.includes("foot") && !u.includes("ft"))) {
       return qty * 100;
     }
-    return qty;
-  }
-
-  if (rateUnit === "lf") {
     return qty;
   }
 
@@ -201,8 +269,9 @@ export function findRoofingMarketRate(itemName: string): LineItemMarketRate | nu
 }
 
 /**
- * Estimate a comparable market total for a line item.
- * Uses qty × mid unit rate when quantity is available.
+ * Estimate a comparable market TOTAL for a line item.
+ * Returns 0 when qty/unit are missing or incompatible so we never show a
+ * bare unit rate (e.g. $3) as if it were a line total.
  */
 export function estimateRoofingMarketPrice(
   itemName: string,
@@ -219,6 +288,14 @@ export function estimateRoofingMarketPrice(
     return normalizedQty * mid;
   }
 
-  // No qty: return mid unit rate as a reference point
-  return mid;
+  // Unknown/incompatible units: do not invent a comparable total
+  return 0;
+}
+
+/** Vendor vs market totals are only comparable within a sane magnitude band. */
+export function isPriceComparisonReliable(vendorPrice: number, marketPrice: number): boolean {
+  if (vendorPrice <= 0 || marketPrice <= 0) return false;
+  const ratio = vendorPrice / marketPrice;
+  // More than ~8× either direction usually means bad qty/unit or misparsed price
+  return ratio >= 0.125 && ratio <= 8;
 }

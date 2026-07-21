@@ -587,34 +587,39 @@ export async function generateReport(
     ${(data.lineItems || []).length > 0 ? `
     <div class="section">
       <div class="section-title">
-        <span>📊</span> Line Items (${(data.lineItems || []).length})
+        <span>📊</span> Line items (${(data.lineItems || []).length})
       </div>
+      <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">
+        Market averages appear only when quantity and unit data are reliable enough for a fair comparison.
+      </p>
       <table class="comparison-table">
         <thead>
           <tr>
             <th>Item</th>
             <th>Qty</th>
             <th>Unit</th>
-            <th>Vendor Price</th>
-            <th>Market Avg</th>
+            <th>Vendor price</th>
+            <th>Market avg</th>
             <th>Difference</th>
           </tr>
         </thead>
         <tbody>
           ${(data.lineItems || []).map((item: any) => {
             const vendorPrice = Number(item.price || item.totalPrice || 0);
-            const marketPrice = Number(item.marketPrice || item.typicalCostMid || 0);
-            const diff = vendorPrice - marketPrice;
-            const diffPct = marketPrice > 0 ? ((diff / marketPrice) * 100).toFixed(1) : 0;
+            const rawMarket = Number(item.marketPrice || item.typicalCostMid || 0);
+            const marketComparable = item.marketComparable === true && rawMarket > 0 && vendorPrice > 0;
+            const marketPrice = marketComparable ? rawMarket : 0;
+            const diff = marketComparable ? vendorPrice - marketPrice : 0;
+            const diffPct = marketComparable ? ((diff / marketPrice) * 100).toFixed(1) : null;
             return `
             <tr>
               <td>${item.name || item.description || '—'}</td>
               <td>${item.qty || item.quantity || '—'}</td>
               <td>${item.unit || '—'}</td>
               <td>${vendorPrice > 0 ? fmt(vendorPrice) : '—'}</td>
-              <td>${marketPrice > 0 ? fmt(marketPrice) : '—'}</td>
-              <td class="${diff > 0 ? 'diff-negative' : diff < 0 ? 'diff-positive' : ''}">
-                ${diff !== 0 ? (diff > 0 ? '+' : '') + fmt(diff) + ' (' + diffPct + '%)' : '—'}
+              <td>${marketPrice > 0 ? fmt(Math.round(marketPrice)) : '—'}</td>
+              <td class="${marketComparable ? (diff > 0 ? 'diff-negative' : diff < 0 ? 'diff-positive' : '') : ''}">
+                ${marketComparable && diff !== 0 ? (diff > 0 ? '+' : '') + fmt(Math.round(diff)) + ' (' + diffPct + '%)' : '—'}
               </td>
             </tr>
             `;

@@ -33,7 +33,11 @@ import {
   GitCompare,
   Monitor,
 } from "lucide-react";
-import { estimateRoofingMarketPrice } from "@/knowledge/roofing/market-rates";
+import {
+  estimateRoofingMarketPrice,
+  isPriceComparisonReliable,
+} from "@/knowledge/roofing/market-rates";
+import { looksLikeMisparsedLineTotal } from "@/lib/quote/extractor";
 import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
@@ -48,6 +52,7 @@ import type { QuoteAnalysis } from "@/lib/quote/types";
 import { addComparisonQuote, getComparisonQuotes } from "@/lib/quote/comparison-store";
 import { QuoteComparisonTray } from "@/components/quote/QuoteComparisonTray";
 import { QuoteComparisonView } from "@/components/quote/QuoteComparisonView";
+import { QuoteFeedbackCard, QuoteFeedbackMobileCta, QuoteFeedbackSidebarCta } from "@/components/quote/QuoteFeedbackCard";
 
 export const Route = createFileRoute("/quote-analyzer")({
   head: () => ({
@@ -254,6 +259,8 @@ function QuoteAnalyzerPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const stageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -318,6 +325,8 @@ function QuoteAnalyzerPage() {
     setResult(null);
     setProcessingProgress(0);
     setProcessingStage("reading");
+    setFeedbackOpen(false);
+    setFeedbackSubmitted(false);
 
     try {
       const { extractTextFromFile } = await import("@/lib/file-processor");
@@ -345,7 +354,15 @@ function QuoteAnalyzerPage() {
         setTimeout(() => setProcessingStage("reporting"), 28000),
       ];
 
-      const analysis = await serverAnalyzeQuoteFull({ data: { rawText: combinedText } });
+      const analysis = await serverAnalyzeQuoteFull({
+        data: {
+          rawText: combinedText,
+          fileName: file.name,
+          fileType: file.type || undefined,
+          fileSize: file.size,
+          source: "quote-analyzer",
+        },
+      });
 
       clearStageTimers();
       setProcessingStage("reporting");
@@ -933,7 +950,7 @@ function QuoteAnalyzerPage() {
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
                 <span className="text-xs text-ink">
-                  Found {Math.floor(Math.random() * 8 + 12)} line items in your quote
+                  Extracting line items from your quote
                 </span>
               </div>
             )}
@@ -1010,25 +1027,53 @@ function QuoteAnalyzerPage() {
     );
   }
 
+  const feedbackAnalysisKey =
+    (result as { uploadId?: string } | null)?.uploadId ||
+    (result
+      ? `${result.extraction.contractor || "quote"}-${result.analysis.summary.completenessScore}-${result.extraction.materials.length + result.extraction.scopeItems.length}`
+      : "none");
+
   return (
-    <CompleteView
-      result={result!}
-      reset={reset}
-      chatOpen={chatOpen}
-      setChatOpen={setChatOpen}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      expandedCards={expandedCards}
-      setExpandedCards={setExpandedCards}
-      selectedRow={selectedRow}
-      setSelectedRow={setSelectedRow}
-      expandedRow={expandedRow}
-      setExpandedRow={setExpandedRow}
-      onCompare={(ids: string[]) => {
-        setCompareIds(ids);
-        setShowCompare(true);
-      }}
-    />
+    <>
+      <CompleteView
+        result={result!}
+        reset={reset}
+        chatOpen={chatOpen}
+        setChatOpen={setChatOpen}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        expandedCards={expandedCards}
+        setExpandedCards={setExpandedCards}
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        expandedRow={expandedRow}
+        setExpandedRow={setExpandedRow}
+        onCompare={(ids: string[]) => {
+          setCompareIds(ids);
+          setShowCompare(true);
+        }}
+        feedbackSubmitted={feedbackSubmitted}
+        onOpenFeedback={() => setFeedbackOpen(true)}
+      />
+      {!feedbackOpen && (
+        <QuoteFeedbackMobileCta
+          onOpen={() => setFeedbackOpen(true)}
+          submitted={feedbackSubmitted}
+        />
+      )}
+      <QuoteFeedbackCard
+        key={feedbackAnalysisKey}
+        analysisKey={feedbackAnalysisKey}
+        projectType={result!.extraction.projectType}
+        contractor={result!.extraction.contractor}
+        completenessScore={result!.analysis.summary.completenessScore}
+        quoteUploadId={(result as { uploadId?: string }).uploadId}
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+        submitted={feedbackSubmitted}
+        onSubmitted={() => setFeedbackSubmitted(true)}
+      />
+    </>
   );
 }
 
@@ -1047,6 +1092,8 @@ function CompleteView({
   expandedRow,
   setExpandedRow,
   onCompare,
+  feedbackSubmitted,
+  onOpenFeedback,
 }: {
   result: QuoteAnalysisResult;
   reset: () => void;
@@ -1061,6 +1108,8 @@ function CompleteView({
   expandedRow: number | null;
   setExpandedRow: (v: number | null) => void;
   onCompare: (ids: string[]) => void;
+  feedbackSubmitted: boolean;
+  onOpenFeedback: () => void;
 }) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -1079,33 +1128,39 @@ function CompleteView({
 
       const summaryText = `Completeness Score: ${analysis.summary.completenessScore}% | ${analysis.summary.matchedItems} items matched | ${analysis.summary.unmatchedItems} items unmatched | Total: ${analysis.summary.totalItems} items`;
 
-      // Combine line items with market price data from matched items
-      const lineItemsWithMarket = [...extraction.materials, ...extraction.scopeItems].map(item => {
-        // Try to find matching material/scope item with market data
-        const matchedItem = (result as any).matchedMaterials?.find((m: any) => m.original.name === item.name) ||
-                           (result as any).matchedScopeItems?.find((m: any) => m.original.name === item.name);
-        
-        // Extract market price from knowledge base if available
-        let marketPrice = 0;
-        if (matchedItem?.knowledge) {
-          const knowledge = matchedItem.knowledge;
-          // Try different possible fields for market price (they are strings like "$5,000 – $15,000")
-          const costString = knowledge.cost || knowledge.typicalCost || "";
-          if (costString) {
-            // Extract numbers from the cost string and calculate mid value
-            const numbers = costString.match(/\$[\d,]+/g);
-            if (numbers && numbers.length > 0) {
-              const values = numbers.map((n: string) => Number(n.replace(/[$,]/g, '')));
-              marketPrice = values.reduce((a: number, b: number) => a + b, 0) / values.length;
-            }
-          }
-        }
-        
-        return {
-          ...item,
-          marketPrice: marketPrice,
-        };
-      });
+      // Use the same unit-aware market rates + reliability guards as the dashboard
+      const lineItemsWithMarket = [
+        ...extraction.materials.map((item) => {
+          const vendorPrice = item.totalPrice || 0;
+          const marketPrice = estimateRoofingMarketPrice(item.name, item.quantity, item.unit);
+          const marketComparable = isPriceComparisonReliable(vendorPrice, marketPrice);
+          return {
+            name: item.name,
+            quantity: item.quantity,
+            qty: item.quantity,
+            unit: item.unit,
+            price: vendorPrice,
+            totalPrice: vendorPrice,
+            marketPrice: marketComparable ? marketPrice : 0,
+            marketComparable,
+          };
+        }),
+        ...extraction.scopeItems.map((item) => {
+          const vendorPrice = item.totalPrice || 0;
+          const marketPrice = estimateRoofingMarketPrice(item.name, item.quantity, item.unit);
+          const marketComparable = isPriceComparisonReliable(vendorPrice, marketPrice);
+          return {
+            name: item.name,
+            quantity: item.quantity,
+            qty: item.quantity,
+            unit: item.unit,
+            price: vendorPrice,
+            totalPrice: vendorPrice,
+            marketPrice: marketComparable ? marketPrice : 0,
+            marketComparable,
+          };
+        }),
+      ];
 
       await submitEmailAndDownload({
         filename: `quote-analysis-${new Date().getTime()}.html`,
@@ -1163,9 +1218,9 @@ function CompleteView({
     return values.reduce((a, b) => a + b, 0) / values.length;
   };
   const getMarketPrice = (name: string, qty: number, unit: string): number => {
-    // Prefer unit-level market rates from project knowledge (qty × mid rate)
+    // Prefer unit-level market rates only when qty/unit are compatible
     const fromRates = estimateRoofingMarketPrice(name, qty, unit);
-    if (fromRates > 0 && qty > 0) return fromRates;
+    if (fromRates > 0) return fromRates;
 
     const matchedMaterial = result.matchedMaterials.find(
       (x) => x.original.name.toLowerCase() === name.toLowerCase(),
@@ -1176,7 +1231,6 @@ function CompleteView({
       if (/\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) {
         const mid = parseMarketPrice(cost);
         if (mid > 0 && qty > 0) return mid * qty;
-        if (mid > 0) return mid;
       }
     }
 
@@ -1189,29 +1243,62 @@ function CompleteView({
       if (mid > 0 && qty > 0 && /\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) {
         return mid * qty;
       }
-      if (mid > 0 && /\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) return mid;
     }
 
-    // Fallback: unit rate alone when qty is missing
-    if (fromRates > 0) return fromRates;
     return 0;
   };
   const scopeRows = [
-    ...extraction.materials.map((m) => ({
-      name: m.name,
-      qty: m.quantity,
-      unit: m.unit,
-      price: m.totalPrice,
-      marketPrice: getMarketPrice(m.name, m.quantity, m.unit),
-    })),
-    ...extraction.scopeItems.map((s) => ({
-      name: s.name,
-      qty: s.quantity,
-      unit: s.unit,
-      price: s.totalPrice,
-      marketPrice: getMarketPrice(s.name, s.quantity, s.unit),
-    })),
+    ...extraction.materials.map((m) => {
+      const priceUnreliable = looksLikeMisparsedLineTotal(m.totalPrice, m.quantity, m.unitPrice);
+      const marketPrice = getMarketPrice(m.name, m.quantity, m.unit);
+      return {
+        name: m.name,
+        qty: m.quantity,
+        unit: m.unit,
+        unitPrice: m.unitPrice,
+        price: priceUnreliable ? 0 : m.totalPrice,
+        rawPrice: m.totalPrice,
+        priceUnreliable,
+        marketPrice,
+        marketComparable: !priceUnreliable && isPriceComparisonReliable(m.totalPrice, marketPrice),
+      };
+    }),
+    ...extraction.scopeItems.map((s) => {
+      const unitPrice = s.unitPrice ?? 0;
+      const priceUnreliable = looksLikeMisparsedLineTotal(s.totalPrice, s.quantity, unitPrice);
+      const marketPrice = getMarketPrice(s.name, s.quantity, s.unit);
+      return {
+        name: s.name,
+        qty: s.quantity,
+        unit: s.unit,
+        unitPrice,
+        price: priceUnreliable ? 0 : s.totalPrice,
+        rawPrice: s.totalPrice,
+        priceUnreliable,
+        marketPrice,
+        marketComparable: !priceUnreliable && isPriceComparisonReliable(s.totalPrice, marketPrice),
+      };
+    }),
   ];
+  const getPriceRecommendation = (row: (typeof scopeRows)[number]) => {
+    if (row.priceUnreliable) {
+      return { label: "Verify price", className: "bg-amber-50 text-amber-600" };
+    }
+    if (row.price <= 0) {
+      return { label: "—", className: "bg-muted text-muted-foreground" };
+    }
+    if (row.marketComparable && row.marketPrice > 0) {
+      if (row.price > row.marketPrice * 1.35) {
+        return { label: "Review carefully", className: "bg-red-50 text-red-600" };
+      }
+      if (row.price > row.marketPrice * 1.15) {
+        return { label: "Worth negotiating", className: "bg-amber-50 text-amber-600" };
+      }
+      return { label: "Good value", className: "bg-green-50 text-green-600" };
+    }
+    // No reliable market comparison: do not invent a value judgment
+    return { label: "—", className: "bg-muted text-muted-foreground" };
+  };
   const getStatus = (name: string) => {
     if (
       analysis.needsClarification.some(
@@ -1304,6 +1391,10 @@ function CompleteView({
             })}
           </nav>
           <div className="px-3 pb-4 mt-auto">
+            <QuoteFeedbackSidebarCta
+              onOpen={onOpenFeedback}
+              submitted={feedbackSubmitted}
+            />
             <div className="rounded-xl border-2 border-accent bg-gradient-to-b from-accent/5 to-accent/15 p-3">
               <div className="flex items-center gap-2 mb-1.5">
                 <Sparkles className="h-4 w-4 text-accent" />
@@ -1458,9 +1549,11 @@ function CompleteView({
                     <tbody>
                       {scopeRows.map((row, i) => {
                         const st = getStatus(row.name);
+                        const recommendation = getPriceRecommendation(row);
+                        const showMarket = row.marketPrice > 0 && row.marketComparable;
                         return (
                           <>
-                            <tr key={i} className={`border-b border-border/50 hover:bg-muted/10 ${row.price > 10000 ? "bg-red-50/20" : row.price > 5000 ? "bg-amber-50/20" : ""}`}>
+                            <tr key={i} className={`border-b border-border/50 hover:bg-muted/10 ${row.priceUnreliable ? "bg-amber-50/20" : row.price > 10000 ? "bg-red-50/20" : row.price > 5000 ? "bg-amber-50/20" : ""}`}>
                               <td className="px-4 py-4 text-muted-foreground cursor-pointer" onClick={() => setExpandedRow(expandedRow === i ? null : i)}>
                                 {expandedRow === i ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                               </td>
@@ -1490,17 +1583,21 @@ function CompleteView({
                                   }`}>
                                     ${row.price.toLocaleString()}
                                   </span>
+                                ) : row.priceUnreliable && row.rawPrice > 0 ? (
+                                  <span className="text-xs font-medium text-amber-600" title="Extracted amount looks like a unit rate or fragment, not a line total">
+                                    Unclear
+                                  </span>
                                 ) : (
                                   <span className="text-muted-foreground text-xs">—</span>
                                 )}
                               </td>
                               <td className="px-3 py-4">
-                                {row.marketPrice > 0 ? (
+                                {showMarket ? (
                                   <span
                                     className={`text-xs font-medium ${
-                                      row.price > 0 && row.price > row.marketPrice * 1.15
+                                      row.price > row.marketPrice * 1.15
                                         ? "text-amber-600"
-                                        : row.price > 0 && row.price < row.marketPrice * 0.85
+                                        : row.price < row.marketPrice * 0.85
                                           ? "text-accent"
                                           : "text-ink"
                                     }`}
@@ -1529,31 +1626,9 @@ function CompleteView({
                                 )}
                               </td>
                               <td className="px-3 py-4">
-                                {st === "included" && row.price > 0 && (
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    row.marketPrice > 0
-                                      ? row.price > row.marketPrice * 1.35
-                                        ? "bg-red-50 text-red-600"
-                                        : row.price > row.marketPrice * 1.15
-                                          ? "bg-amber-50 text-amber-600"
-                                          : "bg-green-50 text-green-600"
-                                      : row.price > 10000
-                                        ? "bg-red-50 text-red-600"
-                                        : row.price > 5000
-                                          ? "bg-amber-50 text-amber-600"
-                                          : "bg-green-50 text-green-600"
-                                  }`}>
-                                    {row.marketPrice > 0
-                                      ? row.price > row.marketPrice * 1.35
-                                        ? "Review carefully"
-                                        : row.price > row.marketPrice * 1.15
-                                          ? "Worth negotiating"
-                                          : "Good value"
-                                      : row.price > 10000
-                                        ? "Review carefully"
-                                        : row.price > 5000
-                                          ? "Worth negotiating"
-                                          : "Good value"}
+                                {st === "included" && (
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${recommendation.className}`}>
+                                    {recommendation.label}
                                   </span>
                                 )}
                                 {st === "clarification" && (
@@ -1569,7 +1644,7 @@ function CompleteView({
                               </td>
                             </tr>
                             {expandedRow === i && (
-                              <tr className={`border-b border-border/50 ${row.price > 10000 ? "bg-red-50/30" : row.price > 5000 ? "bg-amber-50/30" : "bg-muted/30"}`}>
+                              <tr className={`border-b border-border/50 ${row.priceUnreliable ? "bg-amber-50/30" : row.price > 10000 ? "bg-red-50/30" : row.price > 5000 ? "bg-amber-50/30" : "bg-muted/30"}`}>
                                 <td colSpan={7} className="px-4 py-4">
                                   <div className="space-y-3">
                                     <div className="flex items-start gap-2">
@@ -1578,28 +1653,38 @@ function CompleteView({
                                         {st === "included" ? "This item is included in your quote and contributes to the total cost." : st === "clarification" ? "This item needs clarification to ensure it meets your requirements." : "This item was not matched to standard scope items."}
                                       </p>
                                     </div>
-                                    {row.price > 0 && (
-                                      <div className="flex items-start gap-2">
-                                        <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Price analysis:</span>
-                                        <p className="text-xs text-muted-foreground">
-                                          {row.marketPrice > 0
+                                    <div className="flex items-start gap-2">
+                                      <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Price analysis:</span>
+                                      <p className="text-xs text-muted-foreground">
+                                        {row.priceUnreliable
+                                          ? `The extracted amount ($${row.rawPrice.toLocaleString()}) looks like a unit rate, line number, or incomplete fragment rather than a full line total. Ask your contractor to confirm the extended price for this item.`
+                                          : showMarket
                                             ? row.price > row.marketPrice * 1.15
                                               ? `Vendor price is above the current market average of $${Math.round(row.marketPrice).toLocaleString()}. Consider negotiating or comparing with other quotes.`
                                               : row.price < row.marketPrice * 0.85
                                                 ? `Vendor price is below the current market average of $${Math.round(row.marketPrice).toLocaleString()}. Verify scope and material quality are complete.`
                                                 : `Vendor price is close to the current market average of $${Math.round(row.marketPrice).toLocaleString()}.`
-                                            : row.price > 10000
-                                              ? "This is a high-cost item. Consider getting multiple quotes or negotiating."
-                                              : row.price > 5000
-                                                ? "This is a medium-cost item. Verify the quality and scope included."
-                                                : "This is a standard-priced item."}
-                                        </p>
-                                      </div>
-                                    )}
+                                            : row.price > 0
+                                              ? "Not enough reliable quantity or unit data to compare this line against market rates yet."
+                                              : "No line total was found for this item in the quote."}
+                                      </p>
+                                    </div>
                                     <div className="flex items-start gap-2">
                                       <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Recommendation:</span>
                                       <p className="text-xs text-muted-foreground">
-                                        {st === "included" && row.price > 0 ? (row.price > 10000 ? "Review carefully with your contractor. Ask for itemized details." : row.price > 5000 ? "Consider negotiating or comparing with other quotes." : "This appears to be a fair price for this item.") : st === "clarification" ? "Ask your contractor for specific details about this item." : "Verify if this item is necessary for your project."}
+                                        {row.priceUnreliable
+                                          ? "Do not treat this line as a bargain or overcharge until the contractor confirms the total."
+                                          : st === "included" && row.price > 0
+                                            ? recommendation.label === "Review carefully"
+                                              ? "Review carefully with your contractor. Ask for itemized details."
+                                              : recommendation.label === "Worth negotiating"
+                                                ? "Consider negotiating or comparing with other quotes."
+                                                : recommendation.label === "Good value"
+                                                  ? "This appears to be a fair price for this item."
+                                                  : "Confirm quantity and unit pricing with your contractor before drawing conclusions."
+                                            : st === "clarification"
+                                              ? "Ask your contractor for specific details about this item."
+                                              : "Verify if this item is necessary for your project."}
                                       </p>
                                     </div>
                                   </div>
@@ -1616,8 +1701,9 @@ function CompleteView({
                   <div className="sm:hidden space-y-3">
                     {scopeRows.slice(0, 5).map((row, i) => {
                       const st = getStatus(row.name);
+                      const recommendation = getPriceRecommendation(row);
                       return (
-                        <div key={i} className={`rounded-xl border p-4 ${row.price > 10000 ? "border-red-200 bg-red-50/20" : row.price > 5000 ? "border-amber-200 bg-amber-50/20" : "border-border bg-white"}`}>
+                        <div key={i} className={`rounded-xl border p-4 ${row.priceUnreliable ? "border-amber-200 bg-amber-50/20" : row.price > 10000 ? "border-red-200 bg-red-50/20" : row.price > 5000 ? "border-amber-200 bg-amber-50/20" : "border-border bg-white"}`}>
                           <div className="flex items-start gap-3">
                             <div
                               className={`w-6 h-6 rounded flex items-center justify-center shrink-0 mt-0.5 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}
@@ -1632,7 +1718,7 @@ function CompleteView({
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-ink">{row.name}</p>
-                              <div className="flex items-center gap-3 mt-2">
+                              <div className="flex items-center gap-3 mt-2 flex-wrap">
                                 {row.price > 0 && (
                                   <span className={`text-sm font-bold ${
                                     row.price > 10000 ? "text-red-600" : row.price > 5000 ? "text-amber-600" : "text-ink"
@@ -1640,7 +1726,10 @@ function CompleteView({
                                     ${row.price.toLocaleString()}
                                   </span>
                                 )}
-                                {row.marketPrice > 0 && (
+                                {row.priceUnreliable && (
+                                  <span className="text-xs font-medium text-amber-600">Price unclear</span>
+                                )}
+                                {row.marketComparable && row.marketPrice > 0 && (
                                   <span className="text-xs text-muted-foreground">
                                     Market: ${Math.round(row.marketPrice).toLocaleString()}
                                   </span>
@@ -1650,6 +1739,11 @@ function CompleteView({
                                 }`}>
                                   {st === "included" ? "Included" : st === "clarification" ? "Needs clarification" : "—"}
                                 </span>
+                                {st === "included" && recommendation.label !== "—" && (
+                                  <span className={`text-[10px] font-bold ${recommendation.className.includes("amber") ? "text-amber-600" : recommendation.className.includes("red") ? "text-red-600" : recommendation.className.includes("green") ? "text-green-600" : "text-muted-foreground"}`}>
+                                    {recommendation.label}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>

@@ -26,6 +26,7 @@ export interface ExtractedScopeItem {
   description?: string;
   quantity: number;
   unit: string;
+  unitPrice?: number;
   totalPrice: number;
   notes?: string;
 }

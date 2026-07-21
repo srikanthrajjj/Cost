@@ -10,4 +10,6 @@ export {
   roofingLineItemMarketRates,
   findRoofingMarketRate,
   estimateRoofingMarketPrice,
+  isPriceComparisonReliable,
+  unitsCompatible,
 } from "./market-rates";

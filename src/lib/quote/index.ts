@@ -7,6 +7,11 @@ import { OpenRouterError, type OpenRouterCallOptions } from "./openrouter-client
 
 export * from "./types";
 export { extractQuote, matchQuote, analyzeQuote, generateReport };
+export {
+  toMoneyNumber,
+  repairLinePrices,
+  looksLikeMisparsedLineTotal,
+} from "./extractor";
 export { OpenRouterError };
 
 export interface QuoteAnalysisResult {

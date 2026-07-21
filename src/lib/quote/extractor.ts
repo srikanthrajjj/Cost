@@ -12,16 +12,27 @@ export async function extractQuote(
   options: ExtractQuoteOptions = {},
 ): Promise<QuoteExtraction> {
   // Truncate input to avoid overwhelming the model
-  const maxInputChars = 5000;
+  const maxInputChars = 12000;
   const truncatedText =
     text.length > maxInputChars ? text.substring(0, maxInputChars) + "\n[...truncated...]" : text;
 
   const systemPrompt = `You are a JSON extraction bot. You read contractor quotes and output structured JSON. NEVER output explanations, safety notes, or anything except valid JSON.
 
 Output this exact JSON structure (fill with data from the quote):
-{"projectType":"roof","contractor":"Company Name","materials":[{"name":"Material","quantity":1,"unit":"sq ft","unitPrice":0,"totalPrice":0,"notes":""}],"scopeItems":[{"name":"Work Item","description":"Details","quantity":1,"unit":"each","totalPrice":0,"notes":""}],"permits":["permit info"],"warranties":["warranty info"],"exclusions":["exclusion info"],"totalPrice":0,"confidence":0.8}
+{"projectType":"roof","contractor":"Company Name","materials":[{"name":"Material","quantity":32,"unit":"SQ","unitPrice":185,"totalPrice":5920,"notes":""}],"scopeItems":[{"name":"Work Item","description":"Details","quantity":140,"unit":"LF","unitPrice":3,"totalPrice":420,"notes":""}],"permits":["permit info"],"warranties":["warranty info"],"exclusions":["exclusion info"],"totalPrice":0,"confidence":0.8}
 
-RULES:
+PRICE RULES (critical):
+- unitPrice = price PER UNIT only (e.g. $3.00/LF). Never put the extended/line total in unitPrice.
+- totalPrice = EXTENDED LINE TOTAL (quantity × unitPrice), the amount charged for that row.
+- If the quote shows both a unit price and an extended/total column, use the extended/total for totalPrice.
+- If only a unit rate is shown, set unitPrice to that rate and set totalPrice = quantity × unitPrice.
+- NEVER put a unit rate into totalPrice when quantity > 1.
+- NEVER use line numbers, row indexes, page numbers, or section numbers as prices.
+- Prefer columns labeled Amount, Total, Extended, or Price Total over Unit Price / Rate.
+- Preserve original units from the quote (SQ, LF, sq ft, each). Do not invent "each" when a measured unit exists.
+- Currency strings like "$1,420.00" must become the number 1420 (no $ or commas).
+
+OTHER RULES:
 - Output ONLY the JSON object. Nothing else.
 - Extract every line item you can find as either a material or scopeItem.
 - projectType: roof, kitchen, bathroom, hvac, windows, flooring, painting, solar, deck, plumbing, or electrical.
@@ -111,6 +122,84 @@ function normalizeProjectType(value: string): string {
   return PROJECT_TYPE_ALIASES[lower] ?? lower;
 }
 
+/** Parse money-like values safely: "$1,420.00" → 1420, "3.00/LF" → 3 */
+export function toMoneyNumber(value: unknown): number {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value !== "string") return 0;
+  const cleaned = value
+    .trim()
+    .replace(/[$\s]/g, "")
+    .replace(/,/g, "")
+    .replace(/\/.*$/, ""); // drop trailing unit suffixes like /LF
+  if (!cleaned) return 0;
+  const n = Number.parseFloat(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function roughlyEqual(a: number, b: number, tolerance = 0.02): boolean {
+  if (a === 0 && b === 0) return true;
+  const denom = Math.max(Math.abs(a), Math.abs(b), 1);
+  return Math.abs(a - b) / denom <= tolerance;
+}
+
+/**
+ * Repair common LLM price mistakes:
+ * - unit rate copied into totalPrice
+ * - missing total when qty × unitPrice is known
+ */
+export function repairLinePrices(input: {
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}): { quantity: number; unitPrice: number; totalPrice: number; priceUnreliable: boolean } {
+  let { quantity, unitPrice, totalPrice } = input;
+  let priceUnreliable = false;
+
+  if (quantity > 1 && unitPrice > 0) {
+    const expected = quantity * unitPrice;
+    // total equals unit price → model put the rate in totalPrice
+    if (totalPrice === 0 || roughlyEqual(totalPrice, unitPrice)) {
+      totalPrice = expected;
+    } else if (totalPrice < expected * 0.4 && totalPrice < unitPrice * 2) {
+      // total looks like a fragment / wrong column; prefer qty × unit
+      totalPrice = expected;
+    }
+  }
+
+  // qty > 1 but tiny total and no usable unit price → likely misread fragment
+  if (quantity > 1 && totalPrice > 0 && totalPrice < 25 && unitPrice === 0) {
+    priceUnreliable = true;
+  }
+
+  // Suspiciously tiny "total" with qty of 1 may still be a unit rate; leave value but flag
+  if (quantity <= 1 && totalPrice > 0 && totalPrice < 15 && unitPrice === 0) {
+    // Could be a real cheap item; only flag if also looks like a line number pattern later
+  }
+
+  return { quantity, unitPrice, totalPrice, priceUnreliable };
+}
+
+/**
+ * True when a displayed vendor total looks like a unit rate or parse fragment,
+ * not a real extended line amount.
+ */
+export function looksLikeMisparsedLineTotal(
+  totalPrice: number,
+  quantity: number,
+  unitPrice = 0,
+): boolean {
+  if (totalPrice <= 0) return false;
+  if (quantity > 1 && unitPrice > 0 && roughlyEqual(totalPrice, unitPrice)) return true;
+  if (quantity > 1 && totalPrice < 25) return true;
+  if (quantity > 1 && unitPrice > 0) {
+    const expected = quantity * unitPrice;
+    if (expected > 0 && totalPrice < expected * 0.4) return true;
+  }
+  return false;
+}
+
 /**
  * Defensively normalizes raw LLM extraction output into the exact QuoteExtraction
  * shape, regardless of whether the model used camelCase, snake_case, or slightly
@@ -124,10 +213,7 @@ function normalizeExtraction(raw: Record<string, unknown>): QuoteExtraction {
     return undefined;
   };
 
-  const toNumber = (value: unknown): number => {
-    const n = typeof value === "string" ? parseFloat(value) : value;
-    return typeof n === "number" && !Number.isNaN(n) ? n : 0;
-  };
+  const toNumber = toMoneyNumber;
 
   const toStringArray = (value: unknown): string[] => {
     if (!Array.isArray(value)) return [];
@@ -143,12 +229,42 @@ function normalizeExtraction(raw: Record<string, unknown>): QuoteExtraction {
 
   const normalizeMaterial = (m: unknown): ExtractedMaterial => {
     const obj = (m ?? {}) as Record<string, unknown>;
+    const quantity = toNumber(pick(obj, ["quantity", "qty"]));
+    let unitPrice = toNumber(
+      pick(obj, ["unitPrice", "price_per_unit", "unit_price", "pricePerUnit", "rate", "unitRate"]),
+    );
+    let totalPrice = toNumber(
+      pick(obj, [
+        "totalPrice",
+        "total_price",
+        "extendedPrice",
+        "extended_price",
+        "lineTotal",
+        "line_total",
+        "amount",
+        "total",
+      ]),
+    );
+
+    // If model only returned a generic "price", treat it carefully
+    const genericPrice = toNumber(pick(obj, ["price", "cost"]));
+    if (totalPrice === 0 && unitPrice === 0 && genericPrice > 0) {
+      if (quantity > 1) {
+        // Prefer treating lone price as unit rate when qty > 1
+        unitPrice = genericPrice;
+        totalPrice = genericPrice * quantity;
+      } else {
+        totalPrice = genericPrice;
+      }
+    }
+
+    const repaired = repairLinePrices({ quantity, unitPrice, totalPrice });
     return {
       name: String(pick(obj, ["name", "description", "material", "item"]) ?? ""),
-      quantity: toNumber(pick(obj, ["quantity", "qty"])),
+      quantity: repaired.quantity,
       unit: String(pick(obj, ["unit", "units"]) ?? ""),
-      unitPrice: toNumber(pick(obj, ["unitPrice", "price_per_unit", "unit_price", "pricePerUnit"])),
-      totalPrice: toNumber(pick(obj, ["totalPrice", "total_price", "total"])),
+      unitPrice: repaired.unitPrice,
+      totalPrice: repaired.priceUnreliable ? 0 : repaired.totalPrice,
       notes: pick(obj, ["notes", "note"]) as string | undefined,
     };
   };
@@ -156,15 +272,44 @@ function normalizeExtraction(raw: Record<string, unknown>): QuoteExtraction {
   const normalizeScopeItem = (s: unknown): ExtractedScopeItem => {
     // Model may return scope items as plain strings instead of objects
     if (typeof s === "string") {
-      return { name: s, quantity: 0, unit: "", totalPrice: 0 };
+      return { name: s, quantity: 0, unit: "", unitPrice: 0, totalPrice: 0 };
     }
     const obj = (s ?? {}) as Record<string, unknown>;
+    const quantity = toNumber(pick(obj, ["quantity", "qty"]));
+    let unitPrice = toNumber(
+      pick(obj, ["unitPrice", "price_per_unit", "unit_price", "pricePerUnit", "rate", "unitRate"]),
+    );
+    let totalPrice = toNumber(
+      pick(obj, [
+        "totalPrice",
+        "total_price",
+        "extendedPrice",
+        "extended_price",
+        "lineTotal",
+        "line_total",
+        "amount",
+        "total",
+      ]),
+    );
+
+    const genericPrice = toNumber(pick(obj, ["price", "cost"]));
+    if (totalPrice === 0 && unitPrice === 0 && genericPrice > 0) {
+      if (quantity > 1) {
+        unitPrice = genericPrice;
+        totalPrice = genericPrice * quantity;
+      } else {
+        totalPrice = genericPrice;
+      }
+    }
+
+    const repaired = repairLinePrices({ quantity, unitPrice, totalPrice });
     return {
       name: String(pick(obj, ["name", "description", "item"]) ?? ""),
       description: pick(obj, ["description", "details"]) as string | undefined,
-      quantity: toNumber(pick(obj, ["quantity", "qty"])),
+      quantity: repaired.quantity,
       unit: String(pick(obj, ["unit", "units"]) ?? ""),
-      totalPrice: toNumber(pick(obj, ["totalPrice", "total_price", "total"])),
+      unitPrice: repaired.unitPrice,
+      totalPrice: repaired.priceUnreliable ? 0 : repaired.totalPrice,
       notes: pick(obj, ["notes", "note"]) as string | undefined,
     };
   };
@@ -185,7 +330,7 @@ function normalizeExtraction(raw: Record<string, unknown>): QuoteExtraction {
     permits: toStringArray(permitsRaw),
     warranties: toStringArray(warrantiesRaw),
     exclusions: toStringArray(exclusionsRaw),
-    totalPrice: toNumber(pick(raw, ["totalPrice", "total_price", "total"])),
+    totalPrice: toNumber(pick(raw, ["totalPrice", "total_price", "grandTotal", "grand_total", "total"])),
     confidence: toNumber(pick(raw, ["confidence", "confidence_score", "confidenceScore"])),
   };
 }
