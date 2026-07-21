@@ -107,7 +107,7 @@ export function SiteNav({ active }: SiteNavProps) {
         {/* Right side */}
         <div className="flex items-center gap-3">
           <a
-            href="#"
+            href="/estimate"
             className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
           >
             Start Free
