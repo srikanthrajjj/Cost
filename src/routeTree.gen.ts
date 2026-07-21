@@ -23,6 +23,7 @@ import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
+import { Route as GuidesMetalVsAsphaltRoofRouteImport } from './routes/guides/metal-vs-asphalt-roof'
 import { Route as GuidesKitchenRemodelRouteImport } from './routes/guides/kitchen-remodel'
 import { Route as GuidesInflatedQuoteSignsRouteImport } from './routes/guides/inflated-quote-signs'
 import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
@@ -100,6 +101,12 @@ const GuidesRoofReplacementRoute = GuidesRoofReplacementRouteImport.update({
   path: '/guides/roof-replacement',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesMetalVsAsphaltRoofRoute =
+  GuidesMetalVsAsphaltRoofRouteImport.update({
+    id: '/guides/metal-vs-asphalt-roof',
+    path: '/guides/metal-vs-asphalt-roof',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesKitchenRemodelRoute = GuidesKitchenRemodelRouteImport.update({
   id: '/guides/kitchen-remodel',
   path: '/guides/kitchen-remodel',
@@ -150,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
+  '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
@@ -172,6 +180,7 @@ export interface FileRoutesByTo {
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
+  '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
@@ -195,6 +204,7 @@ export interface FileRoutesById {
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
+  '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
+    | '/guides/metal-vs-asphalt-roof'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/$state/$city/$category'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
+    | '/guides/metal-vs-asphalt-roof'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/$state/$city/$category'
@@ -263,6 +275,7 @@ export interface FileRouteTypes {
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
+    | '/guides/metal-vs-asphalt-roof'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/$state/$city/$category'
@@ -286,6 +299,7 @@ export interface RootRouteChildren {
   GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
   GuidesInflatedQuoteSignsRoute: typeof GuidesInflatedQuoteSignsRoute
   GuidesKitchenRemodelRoute: typeof GuidesKitchenRemodelRoute
+  GuidesMetalVsAsphaltRoofRoute: typeof GuidesMetalVsAsphaltRoofRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
   StateCityCategoryRoute: typeof StateCityCategoryRoute
@@ -391,6 +405,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesRoofReplacementRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/metal-vs-asphalt-roof': {
+      id: '/guides/metal-vs-asphalt-roof'
+      path: '/guides/metal-vs-asphalt-roof'
+      fullPath: '/guides/metal-vs-asphalt-roof'
+      preLoaderRoute: typeof GuidesMetalVsAsphaltRoofRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/kitchen-remodel': {
       id: '/guides/kitchen-remodel'
       path: '/guides/kitchen-remodel'
@@ -454,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHvacInstallationRoute: GuidesHvacInstallationRoute,
   GuidesInflatedQuoteSignsRoute: GuidesInflatedQuoteSignsRoute,
   GuidesKitchenRemodelRoute: GuidesKitchenRemodelRoute,
+  GuidesMetalVsAsphaltRoofRoute: GuidesMetalVsAsphaltRoofRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
   StateCityCategoryRoute: StateCityCategoryRoute,

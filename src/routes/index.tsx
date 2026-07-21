@@ -3105,31 +3105,24 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             },
             {
               img: cmpCounter,
-              title: "Metal vs Asphalt Roof",
+              title: "Metal vs asphalt roof in 2026: cost, lifespan, pros & cons",
               tag: "Comparison",
-              read: "6 min read",
-              href: "/guides/roof-replacement#cost-by-material",
+              read: "12 min read",
+              href: "/guides/metal-vs-asphalt-roof",
             },
             {
               img: projKitchen,
-              title: "Kitchen Remodel Cost by ZIP Code",
+              title: "Kitchen remodel cost in 2026: pricing guide by size & ZIP code",
               tag: "Kitchen",
-              read: "10 min read",
+              read: "14 min read",
               href: "/guides/kitchen-remodel",
             },
             {
               img: projBathroom,
-              title: "Bathroom Remodel ROI",
+              title: "Bathroom remodel cost in 2026: pricing guide by type & size",
               tag: "Bathroom",
-              read: "5 min read",
+              read: "14 min read",
               href: "/guides/bathroom-remodel",
-            },
-            {
-              img: projHvac,
-              title: "Should You Replace or Repair Your HVAC?",
-              tag: "HVAC",
-              read: "7 min read",
-              href: "/guides/hvac-installation",
             },
           ].map((g) => (
             <a

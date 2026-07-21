@@ -22,17 +22,20 @@ export const Route = createFileRoute("/guides/bathroom-remodel")({
   component: BathroomRemodelGuide,
   head: () => ({
     meta: [
-      { title: "Complete Guide to Bathroom Remodel (2026) — CostReno" },
+      { title: "Bathroom remodel cost in 2026: complete pricing guide by type & size — CostReno" },
       {
         name: "description",
         content:
-          "Everything you need to know about bathroom remodel costs, materials, timeline, permits, and choosing the right contractor. Updated July 2026.",
+          "How much does a bathroom remodel cost in 2026? Get pricing by bathroom type, size, and materials. Compare full bath, half bath, and master bath costs with our complete guide.",
       },
-      { property: "og:title", content: "Complete Guide to Bathroom Remodel — CostReno" },
+      {
+        property: "og:title",
+        content: "Bathroom remodel cost in 2026: complete pricing guide — CostReno",
+      },
       {
         property: "og:description",
         content:
-          "Learn about bathroom remodel costs ($8,000–$30,000), best materials, contractor selection, permits, and more.",
+          "Complete 2026 bathroom remodel pricing guide. Costs by project scope, materials, and region. Learn about permits, fixtures, and how to compare contractor quotes.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://costreno.com/guides/bathroom-remodel" },

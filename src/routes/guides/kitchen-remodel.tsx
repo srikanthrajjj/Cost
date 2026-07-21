@@ -22,17 +22,22 @@ export const Route = createFileRoute("/guides/kitchen-remodel")({
   component: KitchenRemodelGuide,
   head: () => ({
     meta: [
-      { title: "Complete Guide to Kitchen Remodel (2026) — CostReno" },
+      {
+        title: "Kitchen remodel cost in 2026: complete pricing guide by size & ZIP code — CostReno",
+      },
       {
         name: "description",
         content:
-          "Everything you need to know about kitchen remodel costs, materials, timeline, permits, and choosing the right contractor. Updated July 2026.",
+          "How much does a kitchen remodel cost in 2026? Get pricing by project size, layout, and ZIP code. Compare cabinets, countertops, flooring, and labor costs with our complete guide.",
       },
-      { property: "og:title", content: "Complete Guide to Kitchen Remodel — CostReno" },
+      {
+        property: "og:title",
+        content: "Kitchen remodel cost in 2026: complete pricing guide — CostReno",
+      },
       {
         property: "og:description",
         content:
-          "Learn about kitchen remodel costs ($25,000–$75,000), best materials, contractor selection, permits, and more.",
+          "Complete 2026 kitchen remodel pricing guide. Costs by project scope, materials, and region. Learn about hidden fees, permits, and how to compare contractor quotes.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://costreno.com/guides/kitchen-remodel" },
