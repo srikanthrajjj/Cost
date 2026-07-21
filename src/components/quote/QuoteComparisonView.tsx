@@ -803,13 +803,13 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
 
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="text-center">
-                    <CircularScore score={s.composite} size={56} strokeWidth={4} label="score" />
+                    <CircularScore score={s.composite} size={72} strokeWidth={6} label="score" />
                   </div>
                   <div className="text-center">
                     <CircularScore
                       score={s.qualityScore}
-                      size={56}
-                      strokeWidth={4}
+                      size={72}
+                      strokeWidth={6}
                       label="quality"
                     />
                   </div>
@@ -1160,29 +1160,59 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
                           {row.type === "material" ? "M" : "S"}
                         </span>
                       </div>
-                      {row.prices.map((price, idx) => (
-                        <div key={idx} className="text-right flex items-center justify-end gap-1.5">
-                          <span
-                            className={`text-xs ${
-                              row.isBest[idx]
-                                ? "font-bold text-accent"
-                                : price === null
-                                  ? "text-muted-foreground/40"
-                                  : "text-ink"
-                            }`}
-                          >
-                            {price !== null ? `$${price.toLocaleString()}` : "—"}
-                          </span>
-                          {row.isBest[idx] && (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-accent shrink-0" />
-                          )}
-                        </div>
-                      ))}
+                      {row.prices.map((price, idx) => {
+                        const validPrices = row.prices.filter((p): p is number => p !== null);
+                        const avgPrice = validPrices.length > 0 ? validPrices.reduce((a, b) => a + b, 0) / validPrices.length : 0;
+                        const isFair = price !== null && Math.abs(price - avgPrice) / avgPrice < 0.1;
+                        const isBelow = price !== null && price < avgPrice * 0.9;
+                        const isAbove = price !== null && price > avgPrice * 1.1;
+                        
+                        return (
+                          <div key={idx} className="text-right flex flex-col items-end gap-0.5">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <span
+                                className={`text-xs ${
+                                  row.isBest[idx]
+                                    ? "font-bold text-accent"
+                                    : price === null
+                                      ? "text-muted-foreground/40"
+                                      : "text-ink"
+                                }`}
+                              >
+                                {price !== null ? `$${price.toLocaleString()}` : "—"}
+                              </span>
+                              {row.isBest[idx] && (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-accent shrink-0" />
+                              )}
+                            </div>
+                            {price !== null && (
+                              <span
+                                className={`text-[9px] font-medium ${
+                                  isFair ? "text-green-600" : isBelow ? "text-green-600" : isAbove ? "text-red-600" : "text-muted-foreground"
+                                }`}
+                              >
+                                {isFair ? "Fair" : isBelow ? "Below avg" : isAbove ? "Above avg" : "—"}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                       <div className="w-20 text-right">
                         {row.difference !== null && row.difference > 0 ? (
-                          <span className="text-[10px] font-bold text-amber-600">
-                            ${row.difference.toLocaleString()}
-                          </span>
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span className="text-[10px] font-bold text-amber-600">
+                              ${row.difference.toLocaleString()}
+                            </span>
+                            {row.prices.some((p, i) => {
+                              const validPrices = row.prices.filter((pr): pr is number => pr !== null);
+                              const avgPrice = validPrices.length > 0 ? validPrices.reduce((a, b) => a + b, 0) / validPrices.length : 0;
+                              return p !== null && p > avgPrice * 1.1;
+                            }) && (
+                              <span className="text-[9px] text-green-600 font-medium">
+                                Save ${Math.round(row.difference * 0.5).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-[10px] text-muted-foreground/40">—</span>
                         )}

@@ -31,7 +31,9 @@ import {
   Star,
   Lock,
   GitCompare,
+  Monitor,
 } from "lucide-react";
+import { estimateRoofingMarketPrice } from "@/knowledge/roofing/market-rates";
 import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
@@ -217,6 +219,15 @@ const STAGE_LABELS: Record<QuotePipelineStage | "reading", { label: string; icon
   reporting: { label: "Generating your report", icon: "📝" },
 };
 
+/** Soft ceilings so progress keeps moving within each stage, but never hits 100% until done */
+const STAGE_PROGRESS_CEILING: Record<string, number> = {
+  reading: 14,
+  extracting: 42,
+  matching: 58,
+  analyzing: 82,
+  reporting: 95,
+};
+
 function getHealthGrade(score: number): { label: string; color: string; bg: string } {
   if (score >= 85) return { label: "Excellent", color: "text-accent", bg: "bg-accent/10" };
   if (score >= 70) return { label: "Good", color: "text-blue-600", bg: "bg-blue-50" };
@@ -230,19 +241,27 @@ function QuoteAnalyzerPage() {
   const [result, setResult] = useState<QuoteAnalysisResult | null>(null);
   const [error, setError] = useState<string>("");
   const [processingStage, setProcessingStage] = useState<string>("reading");
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
   const [tipIdx, setTipIdx] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<
-    "overview" | "scope" | "explorer" | "questions" | "timeline"
+    "overview" | "explorer" | "questions" | "timeline"
   >("overview");
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const stageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearStageTimers = () => {
+    stageTimersRef.current.forEach(clearTimeout);
+    stageTimersRef.current = [];
+  };
 
   // Load analysis from sessionStorage if available (from chat flow)
   useEffect(() => {
@@ -268,6 +287,23 @@ function QuoteAnalyzerPage() {
     return () => clearInterval(interval);
   }, [state]);
 
+  // Gradually advance the circular progress toward the current stage ceiling
+  useEffect(() => {
+    if (state !== "processing") return;
+
+    const interval = setInterval(() => {
+      setProcessingProgress((prev) => {
+        const ceiling = STAGE_PROGRESS_CEILING[processingStage] ?? 95;
+        if (prev >= ceiling) return prev;
+        const remaining = ceiling - prev;
+        const increment = Math.max(0.2, remaining * 0.05);
+        return Math.min(ceiling, Math.round((prev + increment) * 10) / 10);
+      });
+    }, 150);
+
+    return () => clearInterval(interval);
+  }, [state, processingStage]);
+
   // Auto-dismiss error toast after 8 seconds
   useEffect(() => {
     if (!error) return;
@@ -276,14 +312,17 @@ function QuoteAnalyzerPage() {
   }, [error]);
 
   const handleFileUpload = async (file: File) => {
+    clearStageTimers();
     setState("processing");
     setError("");
     setResult(null);
+    setProcessingProgress(0);
+    setProcessingStage("reading");
 
     try {
-      setProcessingStage("reading");
       const { extractTextFromFile } = await import("@/lib/file-processor");
       const extracted = await extractTextFromFile(file);
+
       if (extracted.text.length < 10) {
         setError(
           "Could not extract text from this file. Try a different PDF or paste text directly.",
@@ -292,12 +331,29 @@ function QuoteAnalyzerPage() {
         return;
       }
 
+      // Server pipeline runs extracting → matching → analyzing → reporting.
+      // createServerFn can't stream onStageChange, so simulate stage advances
+      // while the request is in flight so the UI keeps moving.
+      setProcessingStage("extracting");
+      setProcessingProgress((p) => Math.max(p, 12));
+
       const combinedText = `Analyze this contractor quote:\n\n${extracted.text}`;
+
+      stageTimersRef.current = [
+        setTimeout(() => setProcessingStage("matching"), 6000),
+        setTimeout(() => setProcessingStage("analyzing"), 14000),
+        setTimeout(() => setProcessingStage("reporting"), 28000),
+      ];
+
       const analysis = await serverAnalyzeQuoteFull({ data: { rawText: combinedText } });
 
+      clearStageTimers();
+      setProcessingStage("reporting");
+      setProcessingProgress(100);
       setResult(analysis);
       setState("complete");
     } catch (err) {
+      clearStageTimers();
       setError(friendlyOpenRouterMessage(err));
       setState("error");
     } finally {
@@ -309,9 +365,12 @@ function QuoteAnalyzerPage() {
   const handleCancel = () => {};
 
   const reset = () => {
+    clearStageTimers();
     setState("idle");
     setResult(null);
     setError("");
+    setProcessingProgress(0);
+    setProcessingStage("reading");
     setActiveTab("overview");
   };
 
@@ -331,7 +390,7 @@ function QuoteAnalyzerPage() {
         email,
         reportType: "analysis",
         data: {
-          score: analysis.quoteHealthScore,
+          score: analysis.summary.completenessScore,
           missingItems: analysis.missingScope.length,
           clarificationItems: analysis.needsClarification.length,
           redFlags: analysis.redFlags.length,
@@ -342,7 +401,7 @@ function QuoteAnalyzerPage() {
           needsClarification: analysis.needsClarification,
           redFlagsList: analysis.redFlags,
           lineItems: extraction.scopeItems || [],
-          summary: analysis.summary?.text || analysis.summary || "",
+          summary: analysis.summary?.toString() || "",
         },
       });
     } catch (error) {
@@ -815,15 +874,12 @@ function QuoteAnalyzerPage() {
       <div className="min-h-screen bg-[#f7f8fa]">
         <Header />
         <div className="max-w-md mx-auto px-4 py-20 text-center">
-          {/* Document scanning animation */}
+          {/* Circular progress bar */}
           <div className="w-24 h-24 mx-auto mb-8 relative">
-            {/* Outer ring - spinning */}
-            <svg
-              className="absolute inset-0 w-full h-full animate-spin"
-              style={{ animationDuration: "3s" }}
-              viewBox="0 0 96 96"
-            >
+            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 96 96">
+              {/* Background circle */}
               <circle cx="48" cy="48" r="44" fill="none" stroke="#e5e7eb" strokeWidth="4" />
+              {/* Progress circle */}
               <circle
                 cx="48"
                 cy="48"
@@ -831,56 +887,39 @@ function QuoteAnalyzerPage() {
                 fill="none"
                 stroke="#03A44D"
                 strokeWidth="4"
-                strokeDasharray="138 138"
                 strokeLinecap="round"
+                strokeDasharray={`${(Math.min(processingProgress, 100) / 100) * 276} 276`}
+                className="transition-[stroke-dasharray] duration-300 ease-out"
               />
             </svg>
-            {/* Inner document icon */}
+            {/* Progress percentage */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                <svg className="w-10 h-10 text-muted-foreground/60" viewBox="0 0 40 40" fill="none">
-                  <rect
-                    x="8"
-                    y="4"
-                    width="24"
-                    height="32"
-                    rx="2"
-                    fill="white"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  />
-                  <line x1="13" y1="12" x2="27" y2="12" stroke="#e5e7eb" strokeWidth="2" />
-                  <line x1="13" y1="17" x2="27" y2="17" stroke="#e5e7eb" strokeWidth="2" />
-                  <line x1="13" y1="22" x2="23" y2="22" stroke="#e5e7eb" strokeWidth="2" />
-                  <line x1="13" y1="27" x2="20" y2="27" stroke="#e5e7eb" strokeWidth="2" />
-                </svg>
-                {/* Scanning line */}
-                <div
-                  className="absolute left-2 right-2 h-0.5 bg-accent/80 rounded animate-bounce"
-                  style={{ animationDuration: "1.5s", top: "40%" }}
-                />
-                {/* Red flag indicator */}
-                <div
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 flex items-center justify-center animate-ping"
-                  style={{ animationDuration: "2s" }}
-                >
-                  <span className="text-[8px] text-white font-bold">!</span>
-                </div>
-              </div>
+              <span className="text-2xl font-bold text-ink">
+                {Math.round(processingProgress)}%
+              </span>
             </div>
           </div>
 
-          {/* Stage text */}
-          <h2
-            className="font-display text-xl font-bold text-ink animate-in fade-in duration-300"
-            key={processingStage}
-          >
-            {processingStage === "reading" && "Reading your document..."}
-            {processingStage === "extracting" && "Pulling out every line item..."}
-            {processingStage === "matching" && "Comparing to local market rates..."}
-            {processingStage === "analyzing" && "Checking for missing scope & red flags..."}
-            {processingStage === "reporting" && "Building your personalized report..."}
-          </h2>
+          {/* Stage text with time estimate */}
+          <div className="text-center mb-4">
+            <h2
+              className="font-display text-xl font-bold text-ink animate-in fade-in duration-300"
+              key={processingStage}
+            >
+              {processingStage === "reading" && "Reading your document..."}
+              {processingStage === "extracting" && "Pulling out every line item..."}
+              {processingStage === "matching" && "Comparing to local market rates..."}
+              {processingStage === "analyzing" && "Checking for missing scope & red flags..."}
+              {processingStage === "reporting" && "Building your personalized report..."}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {processingStage === "reading" && "Estimated: 10-15 seconds"}
+              {processingStage === "extracting" && "Estimated: 15-20 seconds"}
+              {processingStage === "matching" && "Estimated: 20-30 seconds"}
+              {processingStage === "analyzing" && "Estimated: 30-45 seconds"}
+              {processingStage === "reporting" && "Almost done..."}
+            </p>
+          </div>
 
           {/* Live findings - progressive reveals */}
           <div className="mt-6 space-y-2 text-left">
@@ -983,6 +1022,8 @@ function QuoteAnalyzerPage() {
       setExpandedCards={setExpandedCards}
       selectedRow={selectedRow}
       setSelectedRow={setSelectedRow}
+      expandedRow={expandedRow}
+      setExpandedRow={setExpandedRow}
       onCompare={(ids: string[]) => {
         setCompareIds(ids);
         setShowCompare(true);
@@ -1003,6 +1044,8 @@ function CompleteView({
   setExpandedCards,
   selectedRow,
   setSelectedRow,
+  expandedRow,
+  setExpandedRow,
   onCompare,
 }: {
   result: QuoteAnalysisResult;
@@ -1015,10 +1058,13 @@ function CompleteView({
   setExpandedCards: (v: Set<string>) => void;
   selectedRow: number | null;
   setSelectedRow: (v: number | null) => void;
+  expandedRow: number | null;
+  setExpandedRow: (v: number | null) => void;
   onCompare: (ids: string[]) => void;
 }) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleEmailSubmit = async (email: string) => {
     if (!result || !result.analysis) {
@@ -1031,25 +1077,60 @@ function CompleteView({
       // Subscribe to newsletter (fire and forget)
       subscribeToNewsletter({ data: { email, source: "quote-download" } }).catch(() => {});
 
-      const summaryText = `Completeness Score: ${analysis.summary.completenessScore}% | ${analysis.summary.matchedItems} items matched | ${analysis.summary.unmatchedItems} items unmatched | Total: ${analysis.summary.totalItems} items | Quote Health Score: ${analysis.quoteHealthScore || analysis.summary.completenessScore}%`;
+      const summaryText = `Completeness Score: ${analysis.summary.completenessScore}% | ${analysis.summary.matchedItems} items matched | ${analysis.summary.unmatchedItems} items unmatched | Total: ${analysis.summary.totalItems} items`;
+
+      // Combine line items with market price data from matched items
+      const lineItemsWithMarket = [...extraction.materials, ...extraction.scopeItems].map(item => {
+        // Try to find matching material/scope item with market data
+        const matchedItem = (result as any).matchedMaterials?.find((m: any) => m.original.name === item.name) ||
+                           (result as any).matchedScopeItems?.find((m: any) => m.original.name === item.name);
+        
+        // Extract market price from knowledge base if available
+        let marketPrice = 0;
+        if (matchedItem?.knowledge) {
+          const knowledge = matchedItem.knowledge;
+          // Try different possible fields for market price (they are strings like "$5,000 – $15,000")
+          const costString = knowledge.cost || knowledge.typicalCost || "";
+          if (costString) {
+            // Extract numbers from the cost string and calculate mid value
+            const numbers = costString.match(/\$[\d,]+/g);
+            if (numbers && numbers.length > 0) {
+              const values = numbers.map((n: string) => Number(n.replace(/[$,]/g, '')));
+              marketPrice = values.reduce((a: number, b: number) => a + b, 0) / values.length;
+            }
+          }
+        }
+        
+        return {
+          ...item,
+          marketPrice: marketPrice,
+        };
+      });
 
       await submitEmailAndDownload({
         filename: `quote-analysis-${new Date().getTime()}.html`,
         email,
         reportType: "analysis",
         data: {
-          score: analysis.quoteHealthScore ?? analysis.summary.completenessScore,
+          score: analysis.summary.completenessScore,
+          matchedItems: analysis.summary.matchedItems,
+          unmatchedItems: analysis.summary.unmatchedItems,
+          totalItems: analysis.summary.totalItems,
           missingItems: analysis.missingScope.length,
           clarificationItems: analysis.needsClarification.length,
           redFlags: analysis.redFlags.length,
           contractor: extraction.contractor,
           totalPrice: extraction.totalPrice,
           projectType: extraction.projectType,
-          missingScope: analysis.missingScope.map(item => ({ title: item.title, explanation: item.explanation })),
-          needsClarification: analysis.needsClarification.map(item => ({ name: item.name, question: item.question })),
-          redFlagsList: analysis.redFlags.map(flag => ({ title: flag.title, explanation: flag.explanation })),
-          lineItems: [...extraction.materials, ...extraction.scopeItems].map(item => ({ name: item.name, quantity: item.quantity, unit: item.unit, totalPrice: item.totalPrice })),
+          missingScope: analysis.missingScope,
+          needsClarification: analysis.needsClarification,
+          redFlagsList: analysis.redFlags,
+          lineItems: lineItemsWithMarket,
+          presentItems: analysis.presentItems,
           summary: summaryText,
+          recommendations: analysis.recommendations,
+          questionsToAsk: analysis.questionsToAsk,
+          buildingCodes: analysis.buildingCodes,
         },
       });
     } catch (error) {
@@ -1074,18 +1155,61 @@ function CompleteView({
     hour: "numeric",
     minute: "2-digit",
   });
+  const parseMarketPrice = (costString?: string): number => {
+    if (!costString) return 0;
+    const numbers = costString.match(/\$[\d,.]+/g);
+    if (!numbers || numbers.length === 0) return 0;
+    const values = numbers.map((n) => Number(n.replace(/[$,]/g, "")));
+    return values.reduce((a, b) => a + b, 0) / values.length;
+  };
+  const getMarketPrice = (name: string, qty: number, unit: string): number => {
+    // Prefer unit-level market rates from project knowledge (qty × mid rate)
+    const fromRates = estimateRoofingMarketPrice(name, qty, unit);
+    if (fromRates > 0 && qty > 0) return fromRates;
+
+    const matchedMaterial = result.matchedMaterials.find(
+      (x) => x.original.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (matchedMaterial?.knowledge?.cost) {
+      const cost = matchedMaterial.knowledge.cost;
+      // Skip project-level totals (e.g. "$8,000 – $18,000") for line-item comparison
+      if (/\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) {
+        const mid = parseMarketPrice(cost);
+        if (mid > 0 && qty > 0) return mid * qty;
+        if (mid > 0) return mid;
+      }
+    }
+
+    const matchedScope = result.matchedScopeItems.find(
+      (x) => x.original.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (matchedScope?.knowledge?.typicalCost) {
+      const cost = matchedScope.knowledge.typicalCost;
+      const mid = parseMarketPrice(cost);
+      if (mid > 0 && qty > 0 && /\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) {
+        return mid * qty;
+      }
+      if (mid > 0 && /\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) return mid;
+    }
+
+    // Fallback: unit rate alone when qty is missing
+    if (fromRates > 0) return fromRates;
+    return 0;
+  };
   const scopeRows = [
     ...extraction.materials.map((m) => ({
       name: m.name,
       qty: m.quantity,
       unit: m.unit,
       price: m.totalPrice,
+      marketPrice: getMarketPrice(m.name, m.quantity, m.unit),
     })),
     ...extraction.scopeItems.map((s) => ({
       name: s.name,
       qty: s.quantity,
       unit: s.unit,
       price: s.totalPrice,
+      marketPrice: getMarketPrice(s.name, s.quantity, s.unit),
     })),
   ];
   const getStatus = (name: string) => {
@@ -1107,20 +1231,8 @@ function CompleteView({
       return "included";
     return "unmatched";
   };
-  const getConf = (name: string) => {
-    const m = result.matchedMaterials.find(
-      (x) => x.original.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (m) return m.confidence >= 0.9 ? "High" : m.confidence >= 0.7 ? "Medium" : "Low";
-    const s = result.matchedScopeItems.find(
-      (x) => x.original.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (s) return s.confidence >= 0.9 ? "High" : s.confidence >= 0.7 ? "Medium" : "Low";
-    return "Medium";
-  };
   const navItems = [
     { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "scope", label: "Scope Review", icon: FileText },
     { id: "explorer", label: "Missing Items", icon: AlertTriangle },
     { id: "questions", label: "Smart Questions", icon: MessageCircle },
     { id: "timeline", label: "Recommendations", icon: Sparkles },
@@ -1149,7 +1261,7 @@ function CompleteView({
             >
               <Download className="h-3.5 w-3.5" /> Download Report
             </button>
-            <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50">
+            <button onClick={() => setShowShareModal(true)} className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50">
               <Share2 className="h-3.5 w-3.5" /> Share Report
             </button>
             <button
@@ -1213,7 +1325,7 @@ function CompleteView({
           {/* Middle: Main content */}
           <div className="flex-1 min-w-0 px-5 lg:px-8 py-8">
             {/* Score cards — always visible */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8 sticky top-14 z-10 bg-[#f8f9fb] py-4 -mx-5 px-5">
               <div className="rounded-xl border border-border bg-white p-4">
                 <p className="text-[10px] text-muted-foreground font-medium mb-2">
                   Quote Health Score
@@ -1296,19 +1408,35 @@ function CompleteView({
               </div>
             </div>
             {/* Tab-specific content */}
-            {(activeTab === "overview" || activeTab === "scope") && (
+            {activeTab === "overview" && (
               <div className="mb-8">
                 <h2 className="text-base font-bold text-ink mb-1">Scope Review</h2>
                 <p className="text-xs text-muted-foreground mb-4">
                   A detailed review of each line item in your quote.
                 </p>
+                {/* Quick Filters */}
+                <div className="hidden sm:flex flex-wrap gap-2 mb-4">
+                  {["Missing", "Red Flags"].map((filter) => (
+                    <button
+                      key={filter}
+                      type="button"
+                      onClick={() =>
+                        setActiveTab(filter === "Missing" ? "explorer" : "overview")
+                      }
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition border border-border hover:bg-muted/50 text-muted-foreground"
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
                 <div className="rounded-xl border border-border bg-white overflow-hidden">
-                  <table className="w-full text-sm">
+                  {/* Desktop Table View */}
+                  <table className="hidden sm:table w-full text-sm">
                     <thead>
                       <tr className="border-b border-border bg-muted/20">
                         <th className="px-4 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase w-6"></th>
                         <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Line Item
+                          Line item
                         </th>
                         <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
                           Qty
@@ -1317,74 +1445,232 @@ function CompleteView({
                           Price
                         </th>
                         <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
+                          Current market price
+                        </th>
+                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
                           Status
                         </th>
                         <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Match Confidence
+                          AI recommendation
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {scopeRows.map((row, i) => {
                         const st = getStatus(row.name);
-                        const conf = getConf(row.name);
                         return (
-                          <tr key={i} className="border-b border-border/50 hover:bg-muted/10">
-                            <td className="px-4 py-3 text-muted-foreground">
-                              <ChevronRight className="h-3.5 w-3.5" />
-                            </td>
-                            <td className="px-3 py-3">
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}
-                                >
-                                  {st === "included" ? (
-                                    <Check className="h-3 w-3 text-accent" />
-                                  ) : st === "clarification" ? (
-                                    <HelpCircle className="h-3 w-3 text-amber-500" />
-                                  ) : (
-                                    <Info className="h-3 w-3 text-muted-foreground" />
-                                  )}
+                          <>
+                            <tr key={i} className={`border-b border-border/50 hover:bg-muted/10 ${row.price > 10000 ? "bg-red-50/20" : row.price > 5000 ? "bg-amber-50/20" : ""}`}>
+                              <td className="px-4 py-4 text-muted-foreground cursor-pointer" onClick={() => setExpandedRow(expandedRow === i ? null : i)}>
+                                {expandedRow === i ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                              </td>
+                              <td className="px-3 py-4">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}
+                                  >
+                                    {st === "included" ? (
+                                      <Check className="h-3 w-3 text-accent" />
+                                    ) : st === "clarification" ? (
+                                      <HelpCircle className="h-3 w-3 text-amber-500" />
+                                    ) : (
+                                      <Info className="h-3 w-3 text-muted-foreground" />
+                                    )}
+                                  </div>
+                                  <span className="font-medium text-ink">{row.name}</span>
                                 </div>
-                                <span className="font-medium text-ink">{row.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-3 py-3 text-muted-foreground text-xs">
-                              {row.qty > 0 ? `${row.qty} ${row.unit}` : "—"}
-                            </td>
-                            <td className="px-3 py-3 text-ink text-xs font-medium">
-                              {row.price > 0 ? `$${row.price.toLocaleString()}` : "—"}
-                            </td>
-                            <td className="px-3 py-3">
-                              {st === "included" && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">
-                                  Included
-                                </span>
-                              )}
-                              {st === "clarification" && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
-                                  Needs Clarification
-                                </span>
-                              )}
-                              {st === "unmatched" && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
-                                  —
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3 py-3">
-                              <div className="flex items-center gap-1.5">
-                                <span
-                                  className={`w-2 h-2 rounded-full ${conf === "High" ? "bg-accent" : conf === "Medium" ? "bg-amber-400" : "bg-red-400"}`}
-                                />
-                                <span className="text-xs text-muted-foreground">{conf}</span>
-                              </div>
-                            </td>
-                          </tr>
+                              </td>
+                              <td className="px-3 py-4 text-muted-foreground text-xs">
+                                {row.qty > 0 ? `${row.qty} ${row.unit}` : "—"}
+                              </td>
+                              <td className="px-3 py-4">
+                                {row.price > 0 ? (
+                                  <span className={`text-xs font-medium ${
+                                    row.price > 10000 ? "text-red-600" : row.price > 5000 ? "text-amber-600" : "text-ink"
+                                  }`}>
+                                    ${row.price.toLocaleString()}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">—</span>
+                                )}
+                              </td>
+                              <td className="px-3 py-4">
+                                {row.marketPrice > 0 ? (
+                                  <span
+                                    className={`text-xs font-medium ${
+                                      row.price > 0 && row.price > row.marketPrice * 1.15
+                                        ? "text-amber-600"
+                                        : row.price > 0 && row.price < row.marketPrice * 0.85
+                                          ? "text-accent"
+                                          : "text-ink"
+                                    }`}
+                                  >
+                                    ${Math.round(row.marketPrice).toLocaleString()}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">—</span>
+                                )}
+                              </td>
+                              <td className="px-3 py-4">
+                                {st === "included" && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">
+                                    Included
+                                  </span>
+                                )}
+                                {st === "clarification" && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
+                                    Needs clarification
+                                  </span>
+                                )}
+                                {st === "unmatched" && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
+                                    —
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3 py-4">
+                                {st === "included" && row.price > 0 && (
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    row.marketPrice > 0
+                                      ? row.price > row.marketPrice * 1.35
+                                        ? "bg-red-50 text-red-600"
+                                        : row.price > row.marketPrice * 1.15
+                                          ? "bg-amber-50 text-amber-600"
+                                          : "bg-green-50 text-green-600"
+                                      : row.price > 10000
+                                        ? "bg-red-50 text-red-600"
+                                        : row.price > 5000
+                                          ? "bg-amber-50 text-amber-600"
+                                          : "bg-green-50 text-green-600"
+                                  }`}>
+                                    {row.marketPrice > 0
+                                      ? row.price > row.marketPrice * 1.35
+                                        ? "Review carefully"
+                                        : row.price > row.marketPrice * 1.15
+                                          ? "Worth negotiating"
+                                          : "Good value"
+                                      : row.price > 10000
+                                        ? "Review carefully"
+                                        : row.price > 5000
+                                          ? "Worth negotiating"
+                                          : "Good value"}
+                                  </span>
+                                )}
+                                {st === "clarification" && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
+                                    Ask contractor
+                                  </span>
+                                )}
+                                {st === "unmatched" && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
+                                    —
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                            {expandedRow === i && (
+                              <tr className={`border-b border-border/50 ${row.price > 10000 ? "bg-red-50/30" : row.price > 5000 ? "bg-amber-50/30" : "bg-muted/30"}`}>
+                                <td colSpan={7} className="px-4 py-4">
+                                  <div className="space-y-3">
+                                    <div className="flex items-start gap-2">
+                                      <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Why it matters:</span>
+                                      <p className="text-xs text-muted-foreground">
+                                        {st === "included" ? "This item is included in your quote and contributes to the total cost." : st === "clarification" ? "This item needs clarification to ensure it meets your requirements." : "This item was not matched to standard scope items."}
+                                      </p>
+                                    </div>
+                                    {row.price > 0 && (
+                                      <div className="flex items-start gap-2">
+                                        <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Price analysis:</span>
+                                        <p className="text-xs text-muted-foreground">
+                                          {row.marketPrice > 0
+                                            ? row.price > row.marketPrice * 1.15
+                                              ? `Vendor price is above the current market average of $${Math.round(row.marketPrice).toLocaleString()}. Consider negotiating or comparing with other quotes.`
+                                              : row.price < row.marketPrice * 0.85
+                                                ? `Vendor price is below the current market average of $${Math.round(row.marketPrice).toLocaleString()}. Verify scope and material quality are complete.`
+                                                : `Vendor price is close to the current market average of $${Math.round(row.marketPrice).toLocaleString()}.`
+                                            : row.price > 10000
+                                              ? "This is a high-cost item. Consider getting multiple quotes or negotiating."
+                                              : row.price > 5000
+                                                ? "This is a medium-cost item. Verify the quality and scope included."
+                                                : "This is a standard-priced item."}
+                                        </p>
+                                      </div>
+                                    )}
+                                    <div className="flex items-start gap-2">
+                                      <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Recommendation:</span>
+                                      <p className="text-xs text-muted-foreground">
+                                        {st === "included" && row.price > 0 ? (row.price > 10000 ? "Review carefully with your contractor. Ask for itemized details." : row.price > 5000 ? "Consider negotiating or comparing with other quotes." : "This appears to be a fair price for this item.") : st === "clarification" ? "Ask your contractor for specific details about this item." : "Verify if this item is necessary for your project."}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
                         );
                       })}
                     </tbody>
                   </table>
+                  
+                  {/* Mobile Card View */}
+                  <div className="sm:hidden space-y-3">
+                    {scopeRows.slice(0, 5).map((row, i) => {
+                      const st = getStatus(row.name);
+                      return (
+                        <div key={i} className={`rounded-xl border p-4 ${row.price > 10000 ? "border-red-200 bg-red-50/20" : row.price > 5000 ? "border-amber-200 bg-amber-50/20" : "border-border bg-white"}`}>
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`w-6 h-6 rounded flex items-center justify-center shrink-0 mt-0.5 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}
+                            >
+                              {st === "included" ? (
+                                <Check className="h-3 w-3 text-accent" />
+                              ) : st === "clarification" ? (
+                                <HelpCircle className="h-3 w-3 text-amber-500" />
+                              ) : (
+                                <Info className="h-3 w-3 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-ink">{row.name}</p>
+                              <div className="flex items-center gap-3 mt-2">
+                                {row.price > 0 && (
+                                  <span className={`text-sm font-bold ${
+                                    row.price > 10000 ? "text-red-600" : row.price > 5000 ? "text-amber-600" : "text-ink"
+                                  }`}>
+                                    ${row.price.toLocaleString()}
+                                  </span>
+                                )}
+                                {row.marketPrice > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    Market: ${Math.round(row.marketPrice).toLocaleString()}
+                                  </span>
+                                )}
+                                <span className={`text-[10px] font-medium ${
+                                  st === "included" ? "text-accent" : st === "clarification" ? "text-amber-600" : "text-muted-foreground"
+                                }`}>
+                                  {st === "included" ? "Included" : st === "clarification" ? "Needs clarification" : "—"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Desktop CTA for Mobile */}
+                    <div className="rounded-xl border-2 border-accent/30 bg-gradient-to-b from-accent/5 to-accent/10 p-5 text-center">
+                      <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
+                        <Monitor className="h-6 w-6 text-accent" />
+                      </div>
+                      <h3 className="text-sm font-bold text-ink mb-1">View Full Report</h3>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        For detailed line item analysis, expandable rows, and AI recommendations, please view this report on a desktop computer.
+                      </p>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold">
+                        <Monitor className="h-3.5 w-3.5" /> Desktop Required
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 {analysis.missingScope.length > 0 && <div className="mt-3 text-center"></div>}
               </div>
@@ -1633,6 +1919,56 @@ function CompleteView({
         reportName="Quote Analysis Report"
         isLoading={isDownloading}
       />
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-ink">Share Report</h3>
+              <button onClick={() => setShowShareModal(false)} className="text-muted-foreground hover:text-ink">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Share this quote analysis with friends, family, or contractors via WhatsApp, email, or any messaging app.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}/quote-analyzer`}
+                  className="flex-1 px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground bg-muted/30"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/quote-analyzer`);
+                  }}
+                  className="px-3 py-2 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90"
+                >
+                  Copy
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Check out this quote analysis: ${window.location.origin}/quote-analyzer`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-semibold hover:bg-green-600"
+                >
+                  <Share2 className="h-3.5 w-3.5" /> WhatsApp
+                </a>
+                <a
+                  href={`mailto:?subject=Quote Analysis Report&body=${encodeURIComponent(`Check out this quote analysis: ${window.location.origin}/quote-analyzer`)}`}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600"
+                >
+                  <Share2 className="h-3.5 w-3.5" /> Email
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {!chatOpen && (
         <button
           onClick={() => setChatOpen(true)}
@@ -1782,7 +2118,18 @@ function OverviewTab({
             {analysis.redFlags.map((flag, i) => (
               <div key={i} className="p-4 rounded-lg border border-red-100 bg-red-50/50">
                 <p className="text-sm font-semibold text-red-700">{flag.title}</p>
-                <p className="text-xs text-red-600 mt-1">{flag.explanation}</p>
+                <div className="mt-2 space-y-1.5">
+                  <div className="flex items-start gap-2">
+                    <span className="text-[10px] font-bold text-red-600 shrink-0 mt-0.5">Why flagged:</span>
+                    <p className="text-xs text-red-600">{flag.explanation}</p>
+                  </div>
+                  {flag.recommendation && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-[10px] font-bold text-red-600 shrink-0 mt-0.5">What to do:</span>
+                      <p className="text-xs text-red-700 font-medium">{flag.recommendation}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

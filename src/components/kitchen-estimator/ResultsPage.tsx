@@ -617,11 +617,11 @@ export function ResultsPage({ estimate, answers, aiDetections, onStartOver }: Re
           Start Over
         </button>
 
-        {/* Download PDF - Green accent CTA */}
+        {/* Download PDF */}
         <button
           type="button"
           onClick={handleDownloadPDF}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#028a40] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#028a40]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#028a40] focus-visible:ring-offset-2 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[#082A4B]/20 px-6 py-3 text-sm font-semibold text-[#082A4B] transition-colors hover:border-[#082A4B]/40 hover:bg-[#082A4B]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto"
         >
           <Download className="h-4 w-4" />
           Download PDF
