@@ -13,6 +13,11 @@ const GUIDE_LINKS = [
   { name: "Foundation", href: "#" },
 ];
 
+const QUOTE_LINKS = [
+  { name: "Analyze quote", href: "/quote-analyzer" },
+  { name: "Compare multiple quotes", href: "/compare-quotes" },
+];
+
 interface SiteNavProps {
   active?: "estimator" | "quote" | "guides";
 }
@@ -20,6 +25,7 @@ interface SiteNavProps {
 export function SiteNav({ active }: SiteNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [guidesOpen, setGuidesOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   const linkClass = (isActive?: boolean) =>
     cn(
@@ -45,15 +51,30 @@ export function SiteNav({ active }: SiteNavProps) {
           >
             Cost Estimator
           </a>
-          <a
-            href="/quote-analyzer"
-            className={cn(
-              "hover:text-foreground transition-colors whitespace-nowrap",
-              active === "quote" && "text-accent",
-            )}
-          >
-            Quote Review
-          </a>
+          <div className="relative group">
+            <button
+              className={cn(
+                "hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1",
+                active === "quote" && "text-accent",
+              )}
+            >
+              Quote Review
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
+            </button>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="w-48 rounded-xl border border-border bg-white shadow-xl p-2">
+                {QUOTE_LINKS.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="block px-3 py-2 text-sm font-medium text-ink hover:bg-muted/50 rounded-lg transition-colors"
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
           <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">
             Insurance Claims
           </a>
@@ -116,16 +137,35 @@ export function SiteNav({ active }: SiteNavProps) {
             >
               Cost Estimator
             </a>
-            <a
-              href="/quote-analyzer"
-              onClick={() => setMenuOpen(false)}
-              className={cn(
-                "rounded-lg px-3 py-2.5 transition-colors",
-                active === "quote" ? "text-accent bg-accent/5" : "hover:bg-muted",
+            <div>
+              <button
+                type="button"
+                onClick={() => setQuoteOpen(!quoteOpen)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors",
+                  active === "quote" ? "text-accent bg-accent/5" : "hover:bg-muted",
+                )}
+              >
+                Quote Review
+                <ChevronDown
+                  className={cn("h-3.5 w-3.5 transition-transform", quoteOpen && "rotate-180")}
+                />
+              </button>
+              {quoteOpen && (
+                <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-border pl-3">
+                  {QUOTE_LINKS.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-muted transition-colors"
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                </div>
               )}
-            >
-              Quote Review
-            </a>
+            </div>
             <a
               href="#"
               onClick={() => setMenuOpen(false)}
