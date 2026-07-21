@@ -77,6 +77,7 @@ export interface QuoteAnalysis {
     matchedItems: number;
     unmatchedItems: number;
     completenessScore: number;
+    quoteHealthScore?: number;
   };
   /** ✅ Items confirmed present in the quote */
   presentItems: { name: string; matchedAs: string; clarification?: string }[];

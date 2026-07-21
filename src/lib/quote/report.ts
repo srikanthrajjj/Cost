@@ -112,7 +112,7 @@ export async function generateReport(
   const redFlagList =
     analysis.redFlags.length > 0
       ? analysis.redFlags.map((f) => `- 🚩 ${f.title}: ${f.explanation}`).join("\n")
-      : "";
+      : ""; // Empty for AI mode
 
   // Deduplicate questions
   const uniqueQuestions = deduplicateQuestions(analysis.questionsToAsk);
@@ -124,6 +124,11 @@ export async function generateReport(
   const quoteFacts = extractQuoteFacts(analysis);
   const quoteFactsFormatted =
     quoteFacts.length > 0 ? quoteFacts.map((f) => `- ${f}`).join("\n") : "";
+
+  const buildingCodesFormatted =
+    analysis.buildingCodes.length > 0
+      ? analysis.buildingCodes.slice(0, 4).map((c) => `- ${c.title}: ${c.explanation}`).join("\n")
+      : "";
 
   const systemPrompt = `You are an independent renovation consultant writing a final report for a homeowner who received a contractor quote.
 

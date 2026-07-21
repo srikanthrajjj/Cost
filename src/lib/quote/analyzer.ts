@@ -320,7 +320,7 @@ export async function analyzeQuote(
 
   if (!knowledge) {
     return {
-      summary: { totalItems: 0, matchedItems: 0, unmatchedItems: 0, completenessScore: 0 },
+      summary: { totalItems: 0, matchedItems: 0, unmatchedItems: 0, completenessScore: 0, quoteHealthScore: 0 },
       presentItems,
       needsClarification,
       missingScope,
@@ -624,6 +624,7 @@ export async function analyzeQuote(
       matchedItems: matchedMaterials.length + matchedScopeItems.length,
       unmatchedItems: unmatchedMaterials.length + unmatchedScopeItems.length,
       completenessScore,
+      quoteHealthScore: completenessScore,
     },
     presentItems,
     needsClarification,

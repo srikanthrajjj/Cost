@@ -192,7 +192,7 @@ function buildPDFHTML(data: PDFGeneratorInput): string {
 
   const materialRecsHTML = buildMaterialRecommendations(estimate.materialRecommendations);
 
-  const contractorQuestionsHTML = buildContractorQuestions(estimate.contractorQuestions);
+const contractorQuestionsHTML = buildContractorQuestions(estimate.contractorQuestions);
 
   return `<!DOCTYPE html>
 <html lang="en">

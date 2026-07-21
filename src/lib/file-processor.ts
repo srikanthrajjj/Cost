@@ -13,17 +13,26 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFileCont
 
   const fileType = file.type;
 
+  // Normalize and check file type more robustly
+  const normalizedType = fileType.toLowerCase();
+  const isPDF = 
+    normalizedType === "application/pdf" || 
+    normalizedType === "application/octet-stream" ||
+    file.name.toLowerCase().endsWith('.pdf');
+
   console.log("[FILE PROCESSOR] Extracting text from file:", {
     name: file.name,
     type: fileType,
+    normalizedType,
+    isPDF,
     size: file.size,
   });
 
-  if (fileType === "application/pdf" || fileType === "application/octet-stream") {
+  if (isPDF) {
     return extractTextFromPDF(file);
   }
 
-  if (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg") {
+  if (normalizedType === "image/jpeg" || normalizedType === "image/png" || normalizedType === "image/jpg") {
     return extractTextFromImage(file);
   }
 

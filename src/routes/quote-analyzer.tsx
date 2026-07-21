@@ -1031,23 +1031,25 @@ function CompleteView({
       // Subscribe to newsletter (fire and forget)
       subscribeToNewsletter({ data: { email, source: "quote-download" } }).catch(() => {});
 
+      const summaryText = `Completeness Score: ${analysis.summary.completenessScore}% | ${analysis.summary.matchedItems} items matched | ${analysis.summary.unmatchedItems} items unmatched | Total: ${analysis.summary.totalItems} items | Quote Health Score: ${analysis.quoteHealthScore || analysis.summary.completenessScore}%`;
+
       await submitEmailAndDownload({
         filename: `quote-analysis-${new Date().getTime()}.html`,
         email,
         reportType: "analysis",
         data: {
-          score: analysis.quoteHealthScore,
+          score: analysis.quoteHealthScore ?? analysis.summary.completenessScore,
           missingItems: analysis.missingScope.length,
           clarificationItems: analysis.needsClarification.length,
           redFlags: analysis.redFlags.length,
           contractor: extraction.contractor,
           totalPrice: extraction.totalPrice,
           projectType: extraction.projectType,
-          missingScope: analysis.missingScope,
-          needsClarification: analysis.needsClarification,
-          redFlagsList: analysis.redFlags,
-          lineItems: extraction.scopeItems || [],
-          summary: analysis.summary?.text || analysis.summary || "",
+          missingScope: analysis.missingScope.map(item => ({ title: item.title, explanation: item.explanation })),
+          needsClarification: analysis.needsClarification.map(item => ({ name: item.name, question: item.question })),
+          redFlagsList: analysis.redFlags.map(flag => ({ title: flag.title, explanation: flag.explanation })),
+          lineItems: [...extraction.materials, ...extraction.scopeItems].map(item => ({ name: item.name, quantity: item.quantity, unit: item.unit, totalPrice: item.totalPrice })),
+          summary: summaryText,
         },
       });
     } catch (error) {
