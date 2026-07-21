@@ -75,7 +75,10 @@ export function SiteNav({ active }: SiteNavProps) {
               </div>
             </div>
           </div>
-          <a href="#" className="hover:text-foreground transition-colors whitespace-nowrap">
+          <a
+            href="/insurance-claims"
+            className="hover:text-foreground transition-colors whitespace-nowrap"
+          >
             Insurance Claims
           </a>
           <div className="relative group">
@@ -167,7 +170,7 @@ export function SiteNav({ active }: SiteNavProps) {
               )}
             </div>
             <a
-              href="#"
+              href="/insurance-claims"
               onClick={() => setMenuOpen(false)}
               className="rounded-lg px-3 py-2.5 hover:bg-muted transition-colors"
             >

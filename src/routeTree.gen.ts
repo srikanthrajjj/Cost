@@ -14,6 +14,7 @@ import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel-cost'
+import { Route as InsuranceClaimsRouteImport } from './routes/insurance-claims'
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -54,6 +55,11 @@ const MethodologyRoute = MethodologyRouteImport.update({
 const KitchenRemodelCostRoute = KitchenRemodelCostRouteImport.update({
   id: '/kitchen-remodel-cost',
   path: '/kitchen-remodel-cost',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceClaimsRoute = InsuranceClaimsRouteImport.update({
+  id: '/insurance-claims',
+  path: '/insurance-claims',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstimateRoute = EstimateRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
+  '/insurance-claims': typeof InsuranceClaimsRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
+  '/insurance-claims': typeof InsuranceClaimsRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
+  '/insurance-claims': typeof InsuranceClaimsRoute
   '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/disclaimer'
     | '/estimate'
+    | '/insurance-claims'
     | '/kitchen-remodel-cost'
     | '/methodology'
     | '/privacy'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/disclaimer'
     | '/estimate'
+    | '/insurance-claims'
     | '/kitchen-remodel-cost'
     | '/methodology'
     | '/privacy'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/disclaimer'
     | '/estimate'
+    | '/insurance-claims'
     | '/kitchen-remodel-cost'
     | '/methodology'
     | '/privacy'
@@ -289,6 +301,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DisclaimerRoute: typeof DisclaimerRoute
   EstimateRoute: typeof EstimateRoute
+  InsuranceClaimsRoute: typeof InsuranceClaimsRoute
   KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
   MethodologyRoute: typeof MethodologyRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/kitchen-remodel-cost'
       fullPath: '/kitchen-remodel-cost'
       preLoaderRoute: typeof KitchenRemodelCostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance-claims': {
+      id: '/insurance-claims'
+      path: '/insurance-claims'
+      fullPath: '/insurance-claims'
+      preLoaderRoute: typeof InsuranceClaimsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estimate': {
@@ -465,6 +485,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DisclaimerRoute: DisclaimerRoute,
   EstimateRoute: EstimateRoute,
+  InsuranceClaimsRoute: InsuranceClaimsRoute,
   KitchenRemodelCostRoute: KitchenRemodelCostRoute,
   MethodologyRoute: MethodologyRoute,
   PrivacyRoute: PrivacyRoute,
