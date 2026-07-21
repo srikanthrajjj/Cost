@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Shield, Clock, Bell, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Shield, Bell, CheckCircle2 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 export const Route = createFileRoute("/insurance-claims")({
   component: InsuranceClaimsComingSoon,
@@ -70,26 +71,7 @@ function InsuranceClaimsComingSoon() {
           <p className="text-xs text-muted-foreground mb-4">
             Be the first to try our insurance claims tool. No spam, just a launch notification.
           </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Thanks! We'll notify you when we launch.");
-            }}
-            className="flex gap-2"
-          >
-            <input
-              type="email"
-              placeholder="you@email.com"
-              required
-              className="flex-1 px-4 py-2.5 rounded-lg border border-border bg-white text-sm text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
-            />
-            <button
-              type="submit"
-              className="px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20 shrink-0"
-            >
-              Notify me
-            </button>
-          </form>
+          <NewsletterSignup source="insurance-claims-waitlist" compact />
         </div>
 
         <a
