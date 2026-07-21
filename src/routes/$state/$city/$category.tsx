@@ -6,7 +6,6 @@ import { CityHero } from "@/components/city/CityHero";
 import { CityContextBar } from "@/components/city/CityContextBar";
 import { CityToolGrid } from "@/components/city/CityToolGrid";
 import { CityFAQ } from "@/components/city/CityFAQ";
-import { CityMethodologyCallout } from "@/components/city/CityMethodologyCallout";
 import {
   getCityBySlug,
   getCategoryById,
@@ -33,7 +32,7 @@ export const Route = createFileRoute("/$state/$city/$category")({
         <p className="mt-3 text-muted-foreground">This city page doesn't exist yet.</p>
         <a
           href="/"
-          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white text-sm font-semibold"
+          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold"
         >
           Go Home
         </a>
@@ -78,7 +77,7 @@ function CityCategoryPage() {
           <p className="mt-3 text-muted-foreground">This city page doesn't exist yet.</p>
           <a
             href="/"
-            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white text-sm font-semibold"
+            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold"
           >
             Go Home
           </a>
@@ -95,8 +94,6 @@ function CityCategoryPage() {
     question: fillTemplate(item.question, city.city, city.state),
     answer: fillTemplate(item.answer, city.city, city.state),
   }));
-
-  const methodologyNote = fillTemplate(category.methodologyNote, city.city, city.state);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -126,7 +123,6 @@ function CityCategoryPage() {
         />
         <TrustBar region={`${city.city}, ${city.stateAbbr}`} />
         <CityFAQ items={faqItems} categoryName={category.name} city={city.city} />
-        <CityMethodologyCallout methodologyNote={methodologyNote} />
       </main>
       <SiteFooter />
     </div>

@@ -30,6 +30,7 @@ import {
   Zap,
   Star,
   Lock,
+  GitCompare,
 } from "lucide-react";
 import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
@@ -41,6 +42,9 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import type { QuoteAnalysis } from "@/lib/quote/types";
+import { addComparisonQuote, getComparisonQuotes } from "@/lib/quote/comparison-store";
+import { QuoteComparisonTray } from "@/components/quote/QuoteComparisonTray";
+import { QuoteComparisonView } from "@/components/quote/QuoteComparisonView";
 
 export const Route = createFileRoute("/quote-analyzer")({
   head: () => ({
@@ -234,6 +238,8 @@ function QuoteAnalyzerPage() {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -436,7 +442,7 @@ function QuoteAnalyzerPage() {
                       Drag & drop your file here or click to choose
                     </p>
                   </div>
-                  <button className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20">
+                  <button className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20">
                     <FileText className="h-4 w-4" /> Choose File
                   </button>
                   <p className="text-xs text-muted-foreground">PDF, JPG, PNG • Max 15MB</p>
@@ -547,7 +553,7 @@ function QuoteAnalyzerPage() {
           <div className="mt-16 text-center">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
               <Upload className="h-4 w-4" /> Upload Your Quote Now
             </button>
@@ -775,7 +781,7 @@ function QuoteAnalyzerPage() {
           <div className="mt-16 pb-8 text-center">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
               <Upload className="h-4 w-4" /> Analyze Your Quote. Free
             </button>
@@ -942,6 +948,18 @@ function QuoteAnalyzerPage() {
   }
 
   // ─── COMPLETE STATE ──────────────────────────────────────────────────────────
+  if (showCompare) {
+    return (
+      <QuoteComparisonView
+        selectedIds={compareIds}
+        onBack={() => {
+          setShowCompare(false);
+          setCompareIds([]);
+        }}
+      />
+    );
+  }
+
   return (
     <CompleteView
       result={result!}
@@ -954,6 +972,10 @@ function QuoteAnalyzerPage() {
       setExpandedCards={setExpandedCards}
       selectedRow={selectedRow}
       setSelectedRow={setSelectedRow}
+      onCompare={(ids: string[]) => {
+        setCompareIds(ids);
+        setShowCompare(true);
+      }}
     />
   );
 }
@@ -970,6 +992,7 @@ function CompleteView({
   setExpandedCards,
   selectedRow,
   setSelectedRow,
+  onCompare,
 }: {
   result: QuoteAnalysisResult;
   reset: () => void;
@@ -981,6 +1004,7 @@ function CompleteView({
   setExpandedCards: (v: Set<string>) => void;
   selectedRow: number | null;
   setSelectedRow: (v: number | null) => void;
+  onCompare: (ids: string[]) => void;
 }) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -1111,6 +1135,13 @@ function CompleteView({
             <button className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50">
               <Share2 className="h-3.5 w-3.5" /> Share Report
             </button>
+            <button
+              onClick={() => addComparisonQuote(result)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-accent text-accent text-xs font-semibold hover:bg-accent/5"
+            >
+              <GitCompare className="h-3.5 w-3.5" /> Save to compare
+            </button>
+            <QuoteComparisonTray onCompare={onCompare} />
             <button
               onClick={reset}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#082A4B] text-white text-xs font-semibold"

@@ -19,7 +19,7 @@ export function CityHero({ categoryName, city, state, introParagraph }: CityHero
             </span>
           </div>
           <h1 className="font-display text-3xl md:text-5xl font-bold text-ink mb-6">
-            {categoryName} Cost in {city}, {state}
+            {categoryName} cost in {city}, {state}
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-3xl mx-auto">
             {introParagraph}
@@ -27,14 +27,14 @@ export function CityHero({ categoryName, city, state, introParagraph }: CityHero
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/estimate"
-              className="inline-flex items-center justify-center rounded-md bg-accent px-8 py-4 text-base font-semibold text-accent-foreground shadow-sm hover:bg-accent/90 transition-all duration-200"
+              className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 text-base font-semibold text-accent-foreground shadow-sm hover:bg-accent/90 transition-all duration-200"
             >
               Calculate Your Estimate
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
             <a
               href="/quote-analyzer"
-              className="inline-flex items-center justify-center rounded-md border border-border bg-background px-8 py-4 text-base font-semibold text-foreground hover:bg-muted transition"
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-8 py-4 text-base font-semibold text-foreground hover:bg-muted transition"
             >
               Analyze a Quote
             </a>

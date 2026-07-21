@@ -45,7 +45,7 @@ export type ExtractFeaturesResult =
 export const extractKitchenFeatures = createServerFn({ method: "POST" })
   .validator(z.object({ photos: z.array(z.string().min(1)).min(1).max(6) }))
   .handler(async ({ data }): Promise<ExtractFeaturesResult> => {
-    const apiKey = process.env.VITE_SK_API_KEY;
+    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
 
     if (!apiKey) {
       return { success: false, error: "API key not available" };

@@ -1,14 +1,14 @@
 [
   {
     "id": "roof-replacement",
-    "name": "Roof Replacement",
+    "name": "Roof replacement",
     "description": "Complete roof tear-off and replacement",
     "icon": "Shield",
     "avgCost": "$11,500",
     "costRange": "$8,600 - $24,700",
     "timeframe": "3 - 5 Days",
     "roi": "68%",
-    "seoTitle": "Roof Replacement Cost in {city}, {state} | CostReno",
+    "seoTitle": "Roof replacement cost in {city}, {state} | CostReno",
     "seoDescription": "Get the average cost of roof replacement in {city}, {state}. Compare local pricing, contractor quotes, and roofing materials with CostReno's AI-powered estimator.",
     "keywords": ["roof replacement", "roofing costs", "new roof", "roof repair", "shingles"],
     "faq": [

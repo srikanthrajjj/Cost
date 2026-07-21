@@ -243,8 +243,8 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "How would you like to estimate?",
         choices: [
-          { value: "manual", icon: "📋", label: "Answer Questions", desc: "3-5 minutes" },
-          { value: "ai", icon: "📸", label: "Upload Photos (AI)", desc: "2-3 minutes" },
+          { value: "manual", icon: "📋", label: "Answer Questions", desc: "No photos needed" },
+          { value: "ai", icon: "📸", label: "Upload Photos (AI)", desc: "Fewer questions" },
         ],
       },
       {

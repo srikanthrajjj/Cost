@@ -100,7 +100,7 @@ export function EstimatorWizard({ config }: EstimatorWizardProps) {
       //   Prompt 1 — five pricing inputs (required, drives estimate)
       //   Prompt 2 — detailed feature extraction (enrichment, non-blocking if fails)
       const [pricingResult, featuresResult] = await Promise.all([
-        analyzeKitchen(base64Photos),
+        analyzeKitchen({ data: { photos: base64Photos } }),
         extractKitchenFeatures({ data: { photos: base64Photos } }),
       ]);
 

@@ -15,7 +15,7 @@ export const serverChatWithKnowledge = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<string> => {
-    const apiKey = process.env.VITE_SK_API_KEY;
+    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
     if (!apiKey) return "API key not configured.";
     return chatWithKnowledge(data.messages as ChatMessage[], apiKey, data.userProjectType);
   });

@@ -44,14 +44,14 @@ export const Route = createFileRoute("/guides/bathroom-remodel")({
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const TABLE_OF_CONTENTS = [
-  { id: "signs", label: "Signs You Need a Bathroom Remodel" },
-  { id: "costs", label: "Bathroom Remodel Costs" },
-  { id: "materials", label: "Best Bathroom Materials" },
-  { id: "process", label: "Bathroom Remodel Process" },
-  { id: "contractor", label: "How to Choose a Contractor" },
-  { id: "permits", label: "Permits & Inspections" },
-  { id: "faq", label: "Frequently Asked Questions" },
-  { id: "related", label: "Related Guides" },
+  { id: "signs", label: "Signs you need a bathroom remodel" },
+  { id: "costs", label: "Bathroom remodel costs" },
+  { id: "materials", label: "Best bathroom materials" },
+  { id: "process", label: "Bathroom remodel process" },
+  { id: "contractor", label: "How to choose a contractor" },
+  { id: "permits", label: "Permits & inspections" },
+  { id: "faq", label: "Frequently asked questions" },
+  { id: "related", label: "Related guides" },
 ];
 
 const SCOPE_COSTS = [
@@ -95,7 +95,7 @@ const SIGNS_LIST = [
 const PROCESS_STEPS = [
   {
     step: "1",
-    title: "Design & Planning",
+    title: "Design & planning",
     desc: "Finalize layout, select materials (tile, vanity, fixtures), set budget, and determine if plumbing needs to be relocated. This phase takes 1–2 weeks.",
   },
   {
@@ -105,22 +105,22 @@ const PROCESS_STEPS = [
   },
   {
     step: "3",
-    title: "Plumbing & Electrical",
+    title: "Plumbing & electrical",
     desc: "Rough-in plumbing for new fixture locations. Update electrical for new lighting, exhaust fan, or heated floors.",
   },
   {
     step: "4",
-    title: "Waterproofing & Tile",
+    title: "Waterproofing & tile",
     desc: "Waterproof membranes are applied to shower and floor areas. Tile installation on walls, floor, and shower surround.",
   },
   {
     step: "5",
-    title: "Fixture Installation",
+    title: "Fixture installation",
     desc: "Vanity, toilet, shower door, mirrors, lighting, and accessories are installed and connected.",
   },
   {
     step: "6",
-    title: "Finishing & Cleanup",
+    title: "Finishing & cleanup",
     desc: "Grout sealing, caulking, paint touch-ups, final connections, and thorough cleaning. Final inspection if permits were pulled.",
   },
 ];
@@ -271,7 +271,7 @@ function BathroomRemodelGuide() {
               BATHROOM GUIDE
             </span>
             <h1 className="font-display text-3xl sm:text-4xl md:text-[44px] font-extrabold text-ink leading-[1.1] tracking-tight">
-              Complete Guide to Bathroom Remodel
+              Complete guide to bathroom remodel
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
               Everything you need to know about bathroom remodel costs, materials, timeline,
@@ -306,7 +306,7 @@ function BathroomRemodelGuide() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
           <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
-            Key Takeaways
+            Key takeaways
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
@@ -360,7 +360,7 @@ function BathroomRemodelGuide() {
           <div>
             {/* Table of Contents */}
             <div className="rounded-xl border border-border bg-white p-6 mb-10">
-              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of Contents</h2>
+              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of contents</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {TABLE_OF_CONTENTS.map((item, i) => (
                   <a
@@ -380,7 +380,7 @@ function BathroomRemodelGuide() {
             {/* Section 1: Signs You Need a Bathroom Remodel */}
             <section id="signs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                1. Signs You Need a Bathroom Remodel
+                1. Signs you need a bathroom remodel
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Not sure if your bathroom needs a full remodel or just a few updates? Here are the
@@ -407,7 +407,7 @@ function BathroomRemodelGuide() {
             {/* Section 2: Bathroom Remodel Costs */}
             <section id="costs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                2. Bathroom Remodel Costs by Scope
+                2. Bathroom remodel costs by scope
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Costs vary significantly based on the scope of your project. Below is a comparison
@@ -453,7 +453,7 @@ function BathroomRemodelGuide() {
 
               {/* Pro Tip */}
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
-                <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
+                <p className="text-xs font-semibold text-accent mb-1">Pro tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Allocate 10–15% of your budget as a contingency fund. Bathroom remodels often
                   uncover hidden water damage or mold behind walls and under flooring that adds to
@@ -465,7 +465,7 @@ function BathroomRemodelGuide() {
             {/* Section 3: Best Bathroom Materials */}
             <section id="materials" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                3. Best Bathroom Materials
+                3. Best bathroom materials
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
                 Material selection drives both the look and the budget of your bathroom remodel.
@@ -543,7 +543,7 @@ function BathroomRemodelGuide() {
             {/* Section 4: Bathroom Remodel Process */}
             <section id="process" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                4. Bathroom Remodel Process: Step by Step
+                4. Bathroom remodel process: step by step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Understanding the process helps you plan for disruptions and set realistic
@@ -570,7 +570,7 @@ function BathroomRemodelGuide() {
             {/* Section 5: How to Choose a Contractor */}
             <section id="contractor" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                5. How to Choose a Bathroom Contractor
+                5. How to choose a bathroom contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 A bathroom remodel involves plumbing, electrical, and waterproofing, all areas where
@@ -592,7 +592,7 @@ function BathroomRemodelGuide() {
             {/* Section 6: Permits & Inspections */}
             <section id="permits" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                6. Permits & Inspections
+                6. Permits & inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Whether you need a permit depends on the scope of your bathroom remodel. Here's what
@@ -647,7 +647,7 @@ function BathroomRemodelGuide() {
             {/* Section 7: FAQ */}
             <section id="faq" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                7. Frequently Asked Questions
+                7. Frequently asked questions
               </h2>
               <div className="space-y-3">
                 {FAQ_ITEMS.map((faq, i) => (
@@ -673,7 +673,7 @@ function BathroomRemodelGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -698,7 +698,7 @@ function BathroomRemodelGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Calculate Your Bathroom Remodel Cost
+                    Calculate your bathroom remodel cost
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -707,7 +707,7 @@ function BathroomRemodelGuide() {
                 </p>
                 <a
                   href="/estimate?project=bathroom"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
                 >
                   Get My Estimate <ArrowRight className="h-4 w-4" />
                 </a>
@@ -715,7 +715,7 @@ function BathroomRemodelGuide() {
 
               {/* Related Guides */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Related Guides</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Related guides</h3>
                 <div className="space-y-3">
                   {RELATED_GUIDES.map((guide) => (
                     <a
@@ -735,7 +735,7 @@ function BathroomRemodelGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Need Help Reviewing Your Bathroom Quote?
+                    Need help reviewing your bathroom quote?
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -744,7 +744,7 @@ function BathroomRemodelGuide() {
                 </p>
                 <a
                   href="/quote-analyzer"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
                 >
                   Review My Quote <ArrowRight className="h-4 w-4" />
                 </a>
@@ -752,7 +752,7 @@ function BathroomRemodelGuide() {
 
               {/* Popular Tools */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Popular tools</h3>
                 <div className="space-y-3">
                   <a
                     href="/estimate?project=bathroom"

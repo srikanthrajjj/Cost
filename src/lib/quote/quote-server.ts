@@ -9,7 +9,7 @@ export const serverAnalyzeQuoteFull = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<QuoteAnalysisResult> => {
-    const apiKey = process.env.VITE_SK_API_KEY;
+    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
     if (!apiKey) throw new Error("API key not configured.");
     return analyzeQuoteFull(data.rawText, apiKey);
   });

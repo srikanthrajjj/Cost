@@ -44,14 +44,14 @@ export const Route = createFileRoute("/guides/window-replacement")({
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const TABLE_OF_CONTENTS = [
-  { id: "signs", label: "Signs You Need New Windows" },
-  { id: "costs", label: "Window Replacement Costs" },
-  { id: "materials", label: "Window Frame Materials" },
-  { id: "process", label: "Window Replacement Process" },
-  { id: "contractor", label: "How to Choose a Contractor" },
-  { id: "permits", label: "Permits & Inspections" },
-  { id: "faq", label: "Frequently Asked Questions" },
-  { id: "related", label: "Related Guides" },
+  { id: "signs", label: "Signs you need new windows" },
+  { id: "costs", label: "Window replacement costs" },
+  { id: "materials", label: "Window frame materials" },
+  { id: "process", label: "Window replacement process" },
+  { id: "contractor", label: "How to choose a contractor" },
+  { id: "permits", label: "Permits & inspections" },
+  { id: "faq", label: "Frequently asked questions" },
+  { id: "related", label: "Related guides" },
 ];
 
 const SCOPE_COSTS = [
@@ -95,7 +95,7 @@ const SIGNS_LIST = [
 const PROCESS_STEPS = [
   {
     step: "1",
-    title: "Measurement & Selection",
+    title: "Measurement & selection",
     desc: "A technician measures all window openings precisely. You choose frame material, glass type (double/triple pane, Low-E coating), and style (casement, double-hung, sliding). Custom orders take 3–6 weeks.",
   },
   {
@@ -105,7 +105,7 @@ const PROCESS_STEPS = [
   },
   {
     step: "3",
-    title: "Removal & Inspection",
+    title: "Removal & inspection",
     desc: "Old windows are removed and the rough opening is inspected for water damage, rot, or insulation issues. Any damaged framing is repaired before new window installation.",
   },
   {
@@ -115,7 +115,7 @@ const PROCESS_STEPS = [
   },
   {
     step: "5",
-    title: "Finishing & Sealing",
+    title: "Finishing & sealing",
     desc: "Interior and exterior trim is installed or replaced. Caulking and weatherstripping ensure a tight seal. Hardware is tested and screens are installed. Final cleanup and debris removal.",
   },
 ];
@@ -264,7 +264,7 @@ function WindowReplacementGuide() {
               WINDOWS GUIDE
             </span>
             <h1 className="font-display text-3xl sm:text-4xl md:text-[44px] font-extrabold text-ink leading-[1.1] tracking-tight">
-              Complete Guide to Window Replacement
+              Complete guide to window replacement
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
               Everything you need to know about window replacement costs, materials, timeline,
@@ -299,7 +299,7 @@ function WindowReplacementGuide() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
           <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
-            Key Takeaways
+            Key takeaways
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
@@ -353,7 +353,7 @@ function WindowReplacementGuide() {
           <div>
             {/* Table of Contents */}
             <div className="rounded-xl border border-border bg-white p-6 mb-10">
-              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of Contents</h2>
+              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of contents</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {TABLE_OF_CONTENTS.map((item, i) => (
                   <a
@@ -373,7 +373,7 @@ function WindowReplacementGuide() {
             {/* Section 1: Signs You Need New Windows */}
             <section id="signs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                1. Signs You Need New Windows
+                1. Signs you need new windows
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Not sure if your windows need replacement? Here are the most common signs that it's
@@ -400,7 +400,7 @@ function WindowReplacementGuide() {
             {/* Section 2: Window Replacement Costs */}
             <section id="costs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                2. Window Replacement Costs by Material
+                2. Window replacement costs by material
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Costs vary based on frame material, glass type, and window size. Below is a
@@ -446,7 +446,7 @@ function WindowReplacementGuide() {
 
               {/* Pro Tip */}
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
-                <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
+                <p className="text-xs font-semibold text-accent mb-1">Pro tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Ask about energy tax credits. ENERGY STAR certified windows may qualify for
                   federal tax credits of up to $600. Many states also offer additional rebates for
@@ -458,7 +458,7 @@ function WindowReplacementGuide() {
             {/* Section 3: Window Frame Materials */}
             <section id="materials" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                3. Window Frame Materials
+                3. Window frame materials
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
                 Frame material impacts cost, durability, maintenance, and energy efficiency. Here's
@@ -553,7 +553,7 @@ function WindowReplacementGuide() {
             {/* Section 4: Window Replacement Process */}
             <section id="process" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                4. Window Replacement Process: Step by Step
+                4. Window replacement process: step by step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Understanding the process helps you prepare your home and set realistic
@@ -580,7 +580,7 @@ function WindowReplacementGuide() {
             {/* Section 5: How to Choose a Contractor */}
             <section id="contractor" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                5. How to Choose a Window Contractor
+                5. How to choose a window contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Proper installation is critical for window performance and warranty coverage. Use
@@ -602,7 +602,7 @@ function WindowReplacementGuide() {
             {/* Section 6: Permits & Inspections */}
             <section id="permits" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                6. Permits & Inspections
+                6. Permits & inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Permit requirements for window replacement vary by municipality and scope. Here's
@@ -658,7 +658,7 @@ function WindowReplacementGuide() {
             {/* Section 7: FAQ */}
             <section id="faq" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                7. Frequently Asked Questions
+                7. Frequently asked questions
               </h2>
               <div className="space-y-3">
                 {FAQ_ITEMS.map((faq, i) => (
@@ -684,7 +684,7 @@ function WindowReplacementGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -709,7 +709,7 @@ function WindowReplacementGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Calculate Your Window Replacement Cost
+                    Calculate your window replacement cost
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -718,7 +718,7 @@ function WindowReplacementGuide() {
                 </p>
                 <a
                   href="/estimate?project=windows"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
                 >
                   Get My Estimate <ArrowRight className="h-4 w-4" />
                 </a>
@@ -726,7 +726,7 @@ function WindowReplacementGuide() {
 
               {/* Related Guides */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Related Guides</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Related guides</h3>
                 <div className="space-y-3">
                   {RELATED_GUIDES.map((guide) => (
                     <a
@@ -746,7 +746,7 @@ function WindowReplacementGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Need Help Reviewing Your Window Quote?
+                    Need help reviewing your window quote?
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -755,7 +755,7 @@ function WindowReplacementGuide() {
                 </p>
                 <a
                   href="/quote-analyzer"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
                 >
                   Review My Quote <ArrowRight className="h-4 w-4" />
                 </a>
@@ -763,7 +763,7 @@ function WindowReplacementGuide() {
 
               {/* Popular Tools */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Popular tools</h3>
                 <div className="space-y-3">
                   <a
                     href="/estimate?project=windows"

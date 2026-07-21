@@ -11,7 +11,7 @@ export function CityToolGrid({ city, state, categoryName, categoryId }: CityTool
   const tools = [
     {
       icon: Calculator,
-      title: `${categoryName} Cost Estimator`,
+      title: `${categoryName} cost estimator`,
       description: `Get an instant AI-powered estimate for ${categoryName.toLowerCase()} in ${city}, ${state} based on your home details and regional pricing data.`,
       href: `/estimate?project=${categoryId}`,
       cta: "Calculate Cost",
@@ -37,7 +37,7 @@ export function CityToolGrid({ city, state, categoryName, categoryId }: CityTool
       <div className="container-x">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-4 text-center">
-            Tools for Your {categoryName} Project in {city}
+            Tools for your {categoryName} project in {city}
           </h2>
           <p className="text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
             Everything you need to estimate, compare, and plan your project with confidence.

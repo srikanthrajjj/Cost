@@ -27,6 +27,7 @@ export interface PathOption {
   icon: string;
   estimatedTime: string;
   features: string[];
+  privacyNote?: string;
 }
 
 export interface ResultsDisplayConfig {
@@ -56,32 +57,33 @@ export interface EstimatorConfig {
 
 export const kitchenPathOptions: PathOption[] = [
   {
-    id: "ai",
-    title: "Smart Estimate with AI",
-    description:
-      "Upload photos of your kitchen and our AI will detect materials, dimensions, and condition automatically.",
-    icon: "camera",
-    estimatedTime: "2–3 minutes",
-    features: [
-      "Auto-detect cabinet type & countertops",
-      "Estimate kitchen size from photos",
-      "Fewer manual questions",
-      "AI-powered material recommendations",
-    ],
-  },
-  {
     id: "manual",
-    title: "Manual Estimate",
+    title: "Answer questions",
     description:
-      "Answer a few quick questions about your kitchen remodel to get a detailed cost estimate.",
+      "Best if you don't have photos handy, or already know your materials.",
     icon: "clipboard",
-    estimatedTime: "3–5 minutes",
+    estimatedTime: "",
     features: [
       "Step-by-step guided questions",
       "Visual card selections",
       "Instant live estimate updates",
       "No photos needed",
     ],
+  },
+  {
+    id: "ai",
+    title: "Upload photos (AI)",
+    description:
+      "Faster if you have clear photos of your kitchen.",
+    icon: "camera",
+    estimatedTime: "",
+    features: [
+      "Auto-detect cabinet type & countertops",
+      "Estimate kitchen size from photos",
+      "Fewer manual questions",
+      "AI-powered material recommendations",
+    ],
+    privacyNote: "Photos are only used to generate your estimate",
   },
 ];
 

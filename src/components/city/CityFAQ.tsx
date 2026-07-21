@@ -21,7 +21,7 @@ export function CityFAQ({ items, categoryName, city }: CityFAQProps) {
       <div className="container-x">
         <div className="max-w-3xl mx-auto">
           <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-4 text-center">
-            {categoryName} in {city}: Frequently Asked Questions
+            {categoryName} in {city}: frequently asked questions
           </h2>
           <p className="text-muted-foreground text-center mb-10">
             Common questions about pricing, permits, materials, and contractors.

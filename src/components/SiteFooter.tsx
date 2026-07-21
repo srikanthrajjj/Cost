@@ -10,7 +10,7 @@ export function SiteFooter() {
               <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
             </a>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs mb-5">
-              Accurate home renovation cost estimates, AI-powered quote analysis, and expert guides
+              Clear home renovation cost estimates, AI-powered quote analysis, and expert guides
               to help you make confident decisions.
             </p>
           </div>

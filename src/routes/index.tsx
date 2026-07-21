@@ -409,7 +409,7 @@ function QuickEstimate() {
                   <button
                     onClick={calculateEstimate}
                     disabled={!zipCode || !houseSize}
-                    className="w-full rounded-xl bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full rounded-lg bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Get My Free Estimate
                   </button>
@@ -619,7 +619,7 @@ function QuickEstimate() {
 
             {/* CTAs */}
             <div className="mt-8 space-y-3">
-              <button className="w-full rounded-xl bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition">
+              <button className="w-full rounded-lg bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition">
                 View Full Report →
               </button>
               <button
@@ -628,7 +628,7 @@ function QuickEstimate() {
                   setZipCode("");
                   setHouseSize("");
                 }}
-                className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
+                className="w-full rounded-lg border border-border py-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
               >
                 Start New Estimate
               </button>
@@ -809,7 +809,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
             />
             <button
               onClick={advance}
-              className="px-4 h-10 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent/90 transition"
+              className="px-4 h-10 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition"
             >
               Next
             </button>
@@ -826,7 +826,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
               />
               <button
                 onClick={advance}
-                className="px-4 h-10 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent/90 transition"
+                className="px-4 h-10 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition"
               >
                 Next
               </button>
@@ -920,7 +920,7 @@ function QuoteAnalysisSection() {
       {/* Header */}
       <div className="text-center mb-14">
         <h2 className="font-display text-3xl md:text-4xl lg:text-[42px] font-bold text-ink leading-tight max-w-3xl mx-auto">
-          Everything Your Contractor Quote Isn't Telling You
+          Everything your contractor quote isn't telling you
         </h2>
         <p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Our AI analyzes every line item, uncovers hidden costs, flags risks, compares market
@@ -931,17 +931,17 @@ function QuoteAnalysisSection() {
       {/* 6-column responsive grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Card 1 - AI-Powered Quote Analysis */}
-        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden">
-          <div className="flex-1 flex items-center justify-center mb-5">
+        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="h-[200px] flex items-center justify-center mb-5">
             <img
               src="/quote-ai.png"
               alt="Contractor quote with line items connected to AI analysis engine"
-              className="w-full max-w-[360px] h-auto object-contain rounded-lg"
+              className="w-full max-w-[360px] h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
             />
           </div>
-          <div>
+          <div className="mt-auto">
             <h3 className="font-display text-base font-bold text-ink mb-2">
-              AI-Powered Quote Analysis
+              AI-powered quote analysis
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Upload any contractor quote, and our AI instantly reads every line item, categorizes
@@ -951,43 +951,107 @@ function QuoteAnalysisSection() {
           </div>
         </div>
 
-        {/* Card 2 - Placeholder */}
-        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+        {/* Card 2 - Detect Red Flags */}
+        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="h-[200px] flex items-center justify-center mb-5">
+            <img
+              src="/red-flag.png"
+              alt="AI detecting red flags in a contractor quote"
+              className="w-full max-w-[280px] h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div className="mt-auto">
+            <h3 className="font-display text-base font-bold text-ink mb-2">
+              Detect red flags before they cost you
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Our AI scans every contractor quote to identify overpriced items, missing scope, vague
+              descriptions, hidden fees, permit omissions, and other costly risks.
+            </p>
           </div>
         </div>
 
-        {/* Card 3 - Placeholder */}
-        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+        {/* Card 3 - Save More. Spend Smarter. */}
+        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="h-[200px] flex items-center justify-center mb-5">
+            <img
+              src="/savings.png"
+              alt="AI identifying cost savings opportunities in a contractor quote"
+              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div className="mt-auto">
+            <h3 className="font-display text-base font-bold text-ink mb-2">
+              Save more. Spend smarter.
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Our AI identifies overpriced items, unnecessary add-ons, and optimization
+              opportunities, showing exactly where you can reduce costs and maximize your renovation
+              budget before signing.
+            </p>
           </div>
         </div>
 
-        {/* Card 4 - Placeholder */}
-        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+        {/* Card 4 - Contractor Quotes Are Hard to Understand */}
+        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="h-[200px] flex items-center justify-center mb-5">
+            <img
+              src="/why.png"
+              alt="Complex contractor quote with confusing jargon and hidden fees"
+              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div className="mt-auto">
+            <h3 className="font-display text-base font-bold text-ink mb-2">
+              Contractor quotes are hard to understand
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Technical jargon, hidden fees, vague descriptions, and inconsistent pricing make it
+              difficult to know what's included, what's missing, and whether you're getting a fair
+              deal.
+            </p>
           </div>
         </div>
 
-        {/* Card 5 - Placeholder */}
-        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+        {/* Card 5 - Compare Prices with Market Rates */}
+        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="h-[200px] flex items-center justify-center mb-5">
+            <img
+              src="/comparision.png"
+              alt="AI comparing contractor quote line items against market rates"
+              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div className="mt-auto">
+            <h3 className="font-display text-base font-bold text-ink mb-2">
+              Compare prices with market rates
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              See how every line item compares against current market pricing. Our AI benchmarks
+              your quote, highlights overpriced work, and shows where you have room to negotiate
+              with confidence.
+            </p>
           </div>
         </div>
 
-        {/* Card 6 - Placeholder */}
-        <div className="rounded-2xl border border-border bg-[#fafbfd] p-6 flex items-center justify-center min-h-[320px]">
-          <div className="text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 mx-auto mb-3" />
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+        {/* Card 6 - Download & Share Your AI Report */}
+        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="h-[200px] flex items-center justify-center mb-5">
+            <img
+              src="/share.png"
+              alt="Downloadable AI-generated quote analysis report"
+              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div className="mt-auto">
+            <h3 className="font-display text-base font-bold text-ink mb-2">
+              Download & share your AI report
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Receive a comprehensive AI-generated report with actionable recommendations, cost
+              insights, and red flags. Share it with your family, contractor, or insurance provider
+              to make renovation decisions with confidence.
+            </p>
           </div>
         </div>
       </div>
@@ -2634,13 +2698,13 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       localStorage.setItem("costreno_city", manualCity.trim());
                     }
                   }}
-                  className="w-full h-11 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition"
+                  className="w-full h-11 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition"
                 >
                   Save Location
                 </button>
                 <button
                   onClick={() => setShowLocationPrompt(false)}
-                  className="w-full h-11 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
+                  className="w-full h-11 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
                 >
                   Maybe Later
                 </button>
@@ -2805,7 +2869,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </p>
             <a
               href="/estimate"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
             >
               Get Estimate <ArrowRight className="h-3.5 w-3.5" />
             </a>
@@ -2836,9 +2900,42 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </p>
             <a
               href="/quote-analyzer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
             >
               Review a Quote <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
+
+          {/* Compare Quotes - Active */}
+          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
+            <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
+              <svg
+                className="w-6 h-6 text-accent"
+                viewBox="0 0 28 28"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M10 3H5a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-5" />
+                <polyline points="14 3 14 11 18 8 22 11 22 3" />
+                <line x1="3" y1="15" x2="25" y2="15" />
+                <line x1="10" y1="19" x2="14" y2="19" />
+                <line x1="14" y1="19" x2="14" y2="23" />
+                <line x1="14" y1="23" x2="18" y2="23" />
+              </svg>
+            </div>
+            <h3 className="font-display text-sm font-bold text-ink mb-1.5">Compare multiple quotes</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
+              Analyze and compare contractor quotes side by side to find the best value.
+            </p>
+            <a
+              href="/compare-quotes"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+            >
+              Compare Quotes <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
@@ -2973,36 +3070,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
 
         {/* Popular Projects */}
-        <div className="mt-12 text-center">
-          <h3 className="font-display text-sm font-bold text-ink mb-4">
-            Popular renovation projects
-          </h3>
-          <div className="flex flex-wrap justify-center gap-2">
-            {[
-              "Roof Replacement",
-              "Kitchen Remodel",
-              "Bathroom Remodel",
-              "HVAC",
-              "Windows",
-              "Flooring",
-              "Solar",
-            ].map((project) => (
-              <a
-                key={project}
-                href="/estimate"
-                className="px-4 py-2 rounded-full border border-border bg-white text-sm font-medium text-ink hover:border-accent/40 hover:text-accent transition"
-              >
-                {project}
-              </a>
-            ))}
-            <a
-              href="/estimate"
-              className="px-4 py-2 rounded-full border border-accent/30 bg-accent/5 text-sm font-semibold text-accent hover:bg-accent/10 transition inline-flex items-center gap-1"
-            >
-              View All <ArrowRight className="h-3.5 w-3.5" />
-            </a>
-          </div>
-        </div>
       </section>
 
       {/* FEATURED GUIDES */}
@@ -3027,44 +3094,50 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           {[
             {
               img: projRoof,
-              title: "How Much Does Roof Replacement Cost?",
+              title: "Roof replacement cost in 2026: complete pricing guide by roof type, size & state",
               tag: "Roofing",
-              read: "8 min read",
+              read: "15 min read",
+              href: "/guides/roof-replacement",
             },
             {
               img: cmpRoof,
-              title: "Roof Replacement Cost by State",
-              tag: "Roofing",
+              title: "Signs a contractor quote is inflated",
+              tag: "Quote Tips",
               read: "12 min read",
+              href: "/guides/inflated-quote-signs",
             },
             {
               img: cmpCounter,
               title: "Metal vs Asphalt Roof",
               tag: "Comparison",
               read: "6 min read",
+              href: "/guides/roof-replacement#cost-by-material",
             },
             {
               img: projKitchen,
               title: "Kitchen Remodel Cost by ZIP Code",
               tag: "Kitchen",
               read: "10 min read",
+              href: "/guides/kitchen-remodel",
             },
             {
               img: projBathroom,
               title: "Bathroom Remodel ROI",
               tag: "Bathroom",
               read: "5 min read",
+              href: "/guides/bathroom-remodel",
             },
             {
               img: projHvac,
               title: "Should You Replace or Repair Your HVAC?",
               tag: "HVAC",
               read: "7 min read",
+              href: "/guides/hvac-installation",
             },
           ].map((g) => (
             <a
               key={g.title}
-              href="#"
+              href={g.href}
               className="group block rounded-xl overflow-hidden border border-border bg-card hover:shadow-lg transition"
             >
               <div className="relative aspect-[16/10] overflow-hidden">

@@ -44,14 +44,14 @@ export const Route = createFileRoute("/guides/hvac-installation")({
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const TABLE_OF_CONTENTS = [
-  { id: "signs", label: "Signs You Need a New HVAC System" },
-  { id: "costs", label: "HVAC Installation Costs" },
-  { id: "materials", label: "HVAC System Types" },
-  { id: "process", label: "HVAC Installation Process" },
-  { id: "contractor", label: "How to Choose a Contractor" },
-  { id: "permits", label: "Permits & Inspections" },
-  { id: "faq", label: "Frequently Asked Questions" },
-  { id: "related", label: "Related Guides" },
+  { id: "signs", label: "Signs you need a new HVAC system" },
+  { id: "costs", label: "HVAC installation costs" },
+  { id: "materials", label: "HVAC system types" },
+  { id: "process", label: "HVAC installation process" },
+  { id: "contractor", label: "How to choose a contractor" },
+  { id: "permits", label: "Permits & inspections" },
+  { id: "faq", label: "Frequently asked questions" },
+  { id: "related", label: "Related guides" },
 ];
 
 const SCOPE_COSTS = [
@@ -95,17 +95,17 @@ const SIGNS_LIST = [
 const PROCESS_STEPS = [
   {
     step: "1",
-    title: "Assessment & Sizing",
+    title: "Assessment & sizing",
     desc: "A qualified technician performs a Manual J load calculation to determine the correct system size for your home based on square footage, insulation, windows, and climate zone. Oversizing or undersizing both cause problems.",
   },
   {
     step: "2",
-    title: "System Selection",
+    title: "System selection",
     desc: "Choose between central AC, heat pump, furnace, or a complete system based on your climate, existing infrastructure, and budget. Discuss SEER/AFUE ratings for energy efficiency.",
   },
   {
     step: "3",
-    title: "Permits & Scheduling",
+    title: "Permits & scheduling",
     desc: "Your contractor pulls mechanical permits required by your municipality. Installation is scheduled, typically 1–3 days depending on the system type and any ductwork modifications needed.",
   },
   {
@@ -115,7 +115,7 @@ const PROCESS_STEPS = [
   },
   {
     step: "5",
-    title: "Testing & Commissioning",
+    title: "Testing & commissioning",
     desc: "System is charged with refrigerant, airflow is measured at each register, thermostat operation is verified, and a final inspection is scheduled. You receive warranty documentation and maintenance instructions.",
   },
 ];
@@ -260,7 +260,7 @@ function HvacInstallationGuide() {
               HVAC GUIDE
             </span>
             <h1 className="font-display text-3xl sm:text-4xl md:text-[44px] font-extrabold text-ink leading-[1.1] tracking-tight">
-              Complete Guide to HVAC Installation
+              Complete guide to HVAC installation
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
               Everything you need to know about HVAC installation costs, system types, timeline,
@@ -295,7 +295,7 @@ function HvacInstallationGuide() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
           <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
-            Key Takeaways
+            Key takeaways
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
@@ -351,7 +351,7 @@ function HvacInstallationGuide() {
           <div>
             {/* Table of Contents */}
             <div className="rounded-xl border border-border bg-white p-6 mb-10">
-              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of Contents</h2>
+              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of contents</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {TABLE_OF_CONTENTS.map((item, i) => (
                   <a
@@ -371,7 +371,7 @@ function HvacInstallationGuide() {
             {/* Section 1: Signs You Need a New HVAC System */}
             <section id="signs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                1. Signs You Need a New HVAC System
+                1. Signs you need a new HVAC system
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Not sure if your HVAC system needs replacement or just a repair? Here are the most
@@ -398,7 +398,7 @@ function HvacInstallationGuide() {
             {/* Section 2: HVAC Installation Costs */}
             <section id="costs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                2. HVAC Installation Costs by System Type
+                2. HVAC installation costs by system type
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Costs vary based on the type of system and complexity of installation. Below is a
@@ -444,7 +444,7 @@ function HvacInstallationGuide() {
 
               {/* Pro Tip */}
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
-                <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
+                <p className="text-xs font-semibold text-accent mb-1">Pro tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Ask about available rebates and tax credits. Many utility companies offer rebates
                   for high-efficiency systems, and federal tax credits of up to $2,000 are available
@@ -456,7 +456,7 @@ function HvacInstallationGuide() {
             {/* Section 3: HVAC System Types */}
             <section id="materials" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                3. HVAC System Types
+                3. HVAC system types
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
                 Choosing the right system type depends on your climate, existing infrastructure, and
@@ -464,7 +464,7 @@ function HvacInstallationGuide() {
               </p>
               <div className="space-y-6">
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-lg font-bold text-ink mb-2">Central Air</h3>
+                  <h3 className="font-display text-lg font-bold text-ink mb-2">Central air</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                     The most common cooling system in American homes. Uses ductwork to distribute
                     cooled air throughout the house. Best for homes with existing ductwork. Modern
@@ -484,7 +484,7 @@ function HvacInstallationGuide() {
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-lg font-bold text-ink mb-2">Heat Pumps</h3>
+                  <h3 className="font-display text-lg font-bold text-ink mb-2">Heat pumps</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                     Heat pumps provide both heating and cooling in one system by transferring heat
                     rather than generating it. Highly efficient in moderate climates and
@@ -527,7 +527,7 @@ function HvacInstallationGuide() {
 
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">
-                    Ductless Mini-Splits
+                    Ductless mini-splits
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                     Individual wall-mounted units that provide heating and cooling without ductwork.
@@ -552,7 +552,7 @@ function HvacInstallationGuide() {
             {/* Section 4: HVAC Installation Process */}
             <section id="process" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                4. HVAC Installation Process: Step by Step
+                4. HVAC installation process: step by step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Understanding the process helps you prepare and ensures you get a quality
@@ -579,7 +579,7 @@ function HvacInstallationGuide() {
             {/* Section 5: How to Choose a Contractor */}
             <section id="contractor" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                5. How to Choose an HVAC Contractor
+                5. How to choose an HVAC contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 HVAC installation quality directly impacts system efficiency and lifespan. Use this
@@ -601,7 +601,7 @@ function HvacInstallationGuide() {
             {/* Section 6: Permits & Inspections */}
             <section id="permits" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                6. Permits & Inspections
+                6. Permits & inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 HVAC installations almost always require permits. Here's what you need to know:
@@ -656,7 +656,7 @@ function HvacInstallationGuide() {
             {/* Section 7: FAQ */}
             <section id="faq" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                7. Frequently Asked Questions
+                7. Frequently asked questions
               </h2>
               <div className="space-y-3">
                 {FAQ_ITEMS.map((faq, i) => (
@@ -682,7 +682,7 @@ function HvacInstallationGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -707,7 +707,7 @@ function HvacInstallationGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Calculate Your HVAC Installation Cost
+                    Calculate your HVAC installation cost
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -716,7 +716,7 @@ function HvacInstallationGuide() {
                 </p>
                 <a
                   href="/estimate?project=hvac"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
                 >
                   Get My Estimate <ArrowRight className="h-4 w-4" />
                 </a>
@@ -724,7 +724,7 @@ function HvacInstallationGuide() {
 
               {/* Related Guides */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Related Guides</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Related guides</h3>
                 <div className="space-y-3">
                   {RELATED_GUIDES.map((guide) => (
                     <a
@@ -744,7 +744,7 @@ function HvacInstallationGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Need Help Reviewing Your HVAC Quote?
+                    Need help reviewing your HVAC quote?
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -753,7 +753,7 @@ function HvacInstallationGuide() {
                 </p>
                 <a
                   href="/quote-analyzer"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
                 >
                   Review My Quote <ArrowRight className="h-4 w-4" />
                 </a>
@@ -761,7 +761,7 @@ function HvacInstallationGuide() {
 
               {/* Popular Tools */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Popular tools</h3>
                 <div className="space-y-3">
                   <a
                     href="/estimate?project=hvac"

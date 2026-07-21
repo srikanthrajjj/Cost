@@ -1,4 +1,6 @@
-// ─── AI Kitchen Analysis (client-side) ───────────────────────────────────────
+// ─── AI Kitchen Analysis (server-side) ───────────────────────────────────────
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import type { AIDetectionResult } from "./types";
 import { parseAIResponse } from "./ai-response-parser";
 
@@ -24,77 +26,85 @@ export type AnalyzeKitchenResult =
   | { success: true; data: AIDetectionResult }
   | { success: false; error: string; code: "timeout" | "api_error" | "parse_error" | "auth_error" };
 
-export async function analyzeKitchen(photos: string[]): Promise<AnalyzeKitchenResult> {
-  const apiKey = import.meta.env.VITE_SK_API_KEY;
-  if (!apiKey) {
-    return { success: false, error: "API key not configured.", code: "auth_error" };
-  }
-
-  const content = [
-    { type: "text" as const, text: AI_PROMPT },
-    ...photos.map((p) => ({ type: "image_url" as const, image_url: { url: p } })),
-  ];
-
-  const controller = new AbortController();
-  const tid = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
-    const res = await fetch(OPENROUTER_API_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://costreno.com",
-        "X-Title": "CostReno Kitchen Analyzer",
-      },
-      body: JSON.stringify({
-        model: VISION_MODEL,
-        messages: [{ role: "user", content }],
-        temperature: 0.2,
-        max_tokens: 1500,
-      }),
-    });
-    clearTimeout(tid);
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error("[analyzeKitchen] API error:", res.status, body);
-      return {
-        success: false,
-        error: "We couldn't analyze your photos. Try again or skip.",
-        code: "api_error",
-      };
+export const analyzeKitchen = createServerFn({ method: "POST" })
+  .validator(z.object({ photos: z.array(z.string().min(1)).min(1).max(6) }))
+  .handler(async ({ data }): Promise<AnalyzeKitchenResult> => {
+    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
+    if (!apiKey) {
+      return { success: false, error: "API key not configured.", code: "auth_error" };
     }
 
-    const data = await res.json().catch(() => null);
-    const msg = data?.choices?.[0]?.message?.content;
-    if (typeof msg !== "string" || !msg.trim()) {
-      console.error("[analyzeKitchen] No content in response:", JSON.stringify(data).slice(0, 500));
-      return { success: false, error: "Analysis failed. Please try again.", code: "parse_error" };
-    }
+    const content: Array<
+      { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }
+    > = [
+      { type: "text", text: AI_PROMPT },
+      ...data.photos.map((p) => ({
+        type: "image_url" as const,
+        image_url: {
+          url: p.startsWith("data:") ? p : `data:image/jpeg;base64,${p}`,
+        },
+      })),
+    ];
 
-    console.log("[analyzeKitchen] AI response:", msg.slice(0, 300));
-    const cleaned = msg
-      .replace(/^```(?:json)?\s*\n?/i, "")
-      .replace(/\n?```\s*$/i, "")
-      .trim();
-    const result = parseAIResponse(cleaned);
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    if (result.cabinetType.value === "unknown" && result.countertopMaterial.value === "unknown") {
-      return {
-        success: false,
-        error: "Couldn't detect kitchen details. Try again.",
-        code: "parse_error",
-      };
-    }
+    try {
+      const res = await fetch(OPENROUTER_API_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://costreno.com",
+          "X-Title": "CostReno Kitchen Analyzer",
+        },
+        body: JSON.stringify({
+          model: VISION_MODEL,
+          messages: [{ role: "user", content }],
+          temperature: 0.2,
+          max_tokens: 1500,
+        }),
+      });
+      clearTimeout(tid);
 
-    return { success: true, data: result };
-  } catch (e: any) {
-    clearTimeout(tid);
-    if (e?.name === "AbortError") {
-      return { success: false, error: "Analysis timed out. Try again.", code: "timeout" };
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error("[analyzeKitchen] API error:", res.status, body);
+        return {
+          success: false,
+          error: "We couldn't analyze your photos. Try again or skip.",
+          code: "api_error",
+        };
+      }
+
+      const responseData = await res.json().catch(() => null);
+      const msg = responseData?.choices?.[0]?.message?.content;
+      if (typeof msg !== "string" || !msg.trim()) {
+        console.error("[analyzeKitchen] No content in response");
+        return { success: false, error: "Analysis failed. Please try again.", code: "parse_error" };
+      }
+
+      const cleaned = msg
+        .replace(/^```(?:json)?\s*\n?/i, "")
+        .replace(/\n?```\s*$/i, "")
+        .trim();
+      const result = parseAIResponse(cleaned);
+
+      if (result.cabinetType.value === "unknown" && result.countertopMaterial.value === "unknown") {
+        return {
+          success: false,
+          error: "Couldn't detect kitchen details. Try again.",
+          code: "parse_error",
+        };
+      }
+
+      return { success: true, data: result };
+    } catch (e: unknown) {
+      clearTimeout(tid);
+      if (e instanceof Error && e.name === "AbortError") {
+        return { success: false, error: "Analysis timed out. Try again.", code: "timeout" };
+      }
+      return { success: false, error: "Analysis failed. Try again or skip.", code: "api_error" };
     }
-    return { success: false, error: "Analysis failed. Try again or skip.", code: "api_error" };
-  }
-}
+  });

@@ -103,7 +103,9 @@ export async function generateReport(
       </div>
     </div>
 
-    ${reportType === "estimate" ? `
+    ${
+      reportType === "estimate"
+        ? `
     <!-- Hero estimate -->
     <div class="hero">
       <div class="hero-label">${data.projectType || "Project"} Estimate</div>
@@ -116,7 +118,9 @@ export async function generateReport(
     ${detailsHtml ? `<div class="section"><div class="section-title">Project Details</div><table class="detail-table">${detailsHtml}</table></div>` : ""}
 
     <!-- Cost Breakdown -->
-    ${breakdownRows ? `
+    ${
+      breakdownRows
+        ? `
     <div class="section">
       <div class="section-title">Cost Breakdown</div>
       <table>
@@ -128,7 +132,9 @@ export async function generateReport(
           <td style="padding: 10px 14px; text-align: right;">100%</td>
         </tr></tfoot>
       </table>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
 
     <!-- Timeline & Permits -->
     <div class="section">
@@ -153,7 +159,8 @@ export async function generateReport(
         </ol>
       </div>
     </div>
-    ` : `
+    `
+        : `
     <!-- Quote Analysis Report -->
     <div class="hero">
       <div class="hero-label">Quote Health Score</div>
@@ -164,38 +171,54 @@ export async function generateReport(
 
     ${data.summary ? `<div class="section"><div class="section-title">Summary</div><p style="font-size: 13px; color: #374151;">${data.summary}</p></div>` : ""}
 
-    ${(data.redFlagsList || []).length > 0 ? `
+    ${
+      (data.redFlagsList || []).length > 0
+        ? `
     <div class="section">
       <div class="section-title" style="border-bottom-color: #dc2626;">⚠️ Red Flags</div>
       <ul style="padding-left: 18px; font-size: 13px;">
         ${(data.redFlagsList || []).map((f: any) => `<li style="margin-bottom: 8px; color: #991b1b;"><strong>${f.title || f}</strong>${f.explanation ? `<br><span style="color: #6b7280; font-size: 12px;">${f.explanation}</span>` : ""}</li>`).join("")}
       </ul>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
 
-    ${(data.missingScope || []).length > 0 ? `
+    ${
+      (data.missingScope || []).length > 0
+        ? `
     <div class="section">
       <div class="section-title" style="border-bottom-color: #d97706;">📋 Missing Scope Items</div>
       <ul style="padding-left: 18px; font-size: 13px;">
         ${(data.missingScope || []).map((m: any) => `<li style="margin-bottom: 6px;">${m.item || m.name || m}</li>`).join("")}
       </ul>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
 
-    ${(data.needsClarification || []).length > 0 ? `
+    ${
+      (data.needsClarification || []).length > 0
+        ? `
     <div class="section">
       <div class="section-title">❓ Needs Clarification</div>
       <ul style="padding-left: 18px; font-size: 13px;">
         ${(data.needsClarification || []).map((c: any) => `<li style="margin-bottom: 6px;">${c.item || c.name || c}</li>`).join("")}
       </ul>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
 
-    ${(data.lineItems || []).length > 0 ? `
+    ${
+      (data.lineItems || []).length > 0
+        ? `
     <div class="section">
       <div class="section-title">Line Items (${data.lineItems.length})</div>
       <table>
         <thead><tr><th>Item</th><th style="text-align: right;">Qty</th><th style="text-align: right;">Price</th></tr></thead>
         <tbody>${(data.lineItems || []).map((item: any) => `<tr><td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-size: 12px;">${item.name || item.description || "—"}</td><td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 12px;">${item.qty || item.quantity || "—"}</td><td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 12px;">${item.price || item.totalPrice ? "$" + Number(item.price || item.totalPrice).toLocaleString() : "—"}</td></tr>`).join("")}</tbody>
       </table>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
 
     <div class="section">
       <div class="section-title">Recommended Next Steps</div>
@@ -209,7 +232,8 @@ export async function generateReport(
         </ol>
       </div>
     </div>
-    `}
+    `
+    }
 
     <!-- Footer -->
     <div class="footer">
@@ -238,7 +262,10 @@ export async function submitEmailAndDownload(options: DownloadOptions): Promise<
   }
 
   try {
-    console.log("[PDF] Generating report with data:", { ...data, breakdown: data.breakdown?.length + " items" });
+    console.log("[PDF] Generating report with data:", {
+      ...data,
+      breakdown: data.breakdown?.length + " items",
+    });
     const blob = await generateReport(reportType, data);
     const html = await blob.text();
     console.log("[PDF] HTML length:", html.length);

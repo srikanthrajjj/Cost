@@ -17,12 +17,14 @@ import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CompareQuotesRouteImport } from './routes/compare-quotes'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
 import { Route as GuidesKitchenRemodelRouteImport } from './routes/guides/kitchen-remodel'
+import { Route as GuidesInflatedQuoteSignsRouteImport } from './routes/guides/inflated-quote-signs'
 import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
 import { Route as GuidesFlooringRouteImport } from './routes/guides/flooring'
 import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathroom-remodel'
@@ -68,6 +70,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompareQuotesRoute = CompareQuotesRouteImport.update({
+  id: '/compare-quotes',
+  path: '/compare-quotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -98,6 +105,12 @@ const GuidesKitchenRemodelRoute = GuidesKitchenRemodelRouteImport.update({
   path: '/guides/kitchen-remodel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesInflatedQuoteSignsRoute =
+  GuidesInflatedQuoteSignsRouteImport.update({
+    id: '/guides/inflated-quote-signs',
+    path: '/guides/inflated-quote-signs',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesHvacInstallationRoute = GuidesHvacInstallationRouteImport.update({
   id: '/guides/hvac-installation',
   path: '/guides/hvac-installation',
@@ -123,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/about': typeof AboutRoute
+  '/compare-quotes': typeof CompareQuotesRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
@@ -134,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
+  '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
@@ -143,6 +158,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/about': typeof AboutRoute
+  '/compare-quotes': typeof CompareQuotesRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
@@ -154,6 +170,7 @@ export interface FileRoutesByTo {
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
+  '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
@@ -164,6 +181,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/about': typeof AboutRoute
+  '/compare-quotes': typeof CompareQuotesRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
@@ -175,6 +193,7 @@ export interface FileRoutesById {
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
+  '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
@@ -186,6 +205,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$projectSlug'
     | '/about'
+    | '/compare-quotes'
     | '/contact'
     | '/disclaimer'
     | '/estimate'
@@ -197,6 +217,7 @@ export interface FileRouteTypes {
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
     | '/guides/hvac-installation'
+    | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
@@ -206,6 +227,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$projectSlug'
     | '/about'
+    | '/compare-quotes'
     | '/contact'
     | '/disclaimer'
     | '/estimate'
@@ -217,6 +239,7 @@ export interface FileRouteTypes {
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
     | '/guides/hvac-installation'
+    | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
@@ -226,6 +249,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$projectSlug'
     | '/about'
+    | '/compare-quotes'
     | '/contact'
     | '/disclaimer'
     | '/estimate'
@@ -237,6 +261,7 @@ export interface FileRouteTypes {
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
     | '/guides/hvac-installation'
+    | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
@@ -247,6 +272,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
   AboutRoute: typeof AboutRoute
+  CompareQuotesRoute: typeof CompareQuotesRoute
   ContactRoute: typeof ContactRoute
   DisclaimerRoute: typeof DisclaimerRoute
   EstimateRoute: typeof EstimateRoute
@@ -258,6 +284,7 @@ export interface RootRouteChildren {
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
   GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
+  GuidesInflatedQuoteSignsRoute: typeof GuidesInflatedQuoteSignsRoute
   GuidesKitchenRemodelRoute: typeof GuidesKitchenRemodelRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
@@ -322,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compare-quotes': {
+      id: '/compare-quotes'
+      path: '/compare-quotes'
+      fullPath: '/compare-quotes'
+      preLoaderRoute: typeof CompareQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -364,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesKitchenRemodelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/inflated-quote-signs': {
+      id: '/guides/inflated-quote-signs'
+      path: '/guides/inflated-quote-signs'
+      fullPath: '/guides/inflated-quote-signs'
+      preLoaderRoute: typeof GuidesInflatedQuoteSignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/hvac-installation': {
       id: '/guides/hvac-installation'
       path: '/guides/hvac-installation'
@@ -399,6 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectSlugRoute: ProjectSlugRoute,
   AboutRoute: AboutRoute,
+  CompareQuotesRoute: CompareQuotesRoute,
   ContactRoute: ContactRoute,
   DisclaimerRoute: DisclaimerRoute,
   EstimateRoute: EstimateRoute,
@@ -410,6 +452,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
   GuidesHvacInstallationRoute: GuidesHvacInstallationRoute,
+  GuidesInflatedQuoteSignsRoute: GuidesInflatedQuoteSignsRoute,
   GuidesKitchenRemodelRoute: GuidesKitchenRemodelRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,

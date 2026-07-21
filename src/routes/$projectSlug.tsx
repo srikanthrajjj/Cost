@@ -45,7 +45,7 @@ function ProjectLandingPage() {
           <p className="mt-3 text-muted-foreground">This project page doesn't exist.</p>
           <a
             href="/"
-            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white text-sm font-semibold"
+            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold"
           >
             Go Home
           </a>
@@ -199,7 +199,7 @@ function ProjectLandingPage() {
           <div className="mt-8 pt-6 border-t border-border text-center">
             <a
               href={`/estimate?project=${project.projectType}`}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
               Get Your Instant Estimate <ArrowRight className="h-4 w-4" />
             </a>
@@ -506,7 +506,7 @@ function ProjectLandingPage() {
           </p>
           <a
             href={`/estimate?project=${project.projectType}`}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
           >
             Get Instant Estimate. Free <ArrowRight className="h-4 w-4" />
           </a>

@@ -87,14 +87,14 @@ export function SiteNav({ active }: SiteNavProps) {
         <div className="flex items-center gap-3">
           <a
             href="#"
-            className="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
+            className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
           >
             Start Free
           </a>
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="inline-flex lg:hidden items-center justify-center rounded-md p-2 text-foreground hover:bg-muted transition"
+            className="inline-flex lg:hidden items-center justify-center rounded-lg p-2 text-foreground hover:bg-muted transition"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

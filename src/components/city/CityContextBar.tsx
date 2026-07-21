@@ -33,7 +33,7 @@ export function CityContextBar({
       <div className="container-x">
         <div className="max-w-5xl mx-auto">
           <h2 className="font-display text-2xl font-bold text-ink mb-8">
-            {categoryName} in {city}, {state}
+            {categoryName} in {city}, {stateAbbr}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white rounded-xl border border-border/60 p-5">

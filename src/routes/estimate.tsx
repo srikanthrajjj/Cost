@@ -22,6 +22,7 @@ import {
   DollarSign,
   CheckCircle2,
   HelpCircle,
+  Lock,
 } from "lucide-react";
 import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
@@ -426,39 +427,46 @@ function SelectGridQuestion({
       {q.choices!.map((c) => {
         const isSelected = value === c.value;
         return (
-          <button
-            key={c.value}
-            onClick={() => handleClick(c.value)}
-            className={`group flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200
-              ${
-                isSelected
-                  ? "border-accent bg-accent/[0.06] shadow-md shadow-accent/8"
-                  : "border-border bg-white hover:border-accent/40 hover:bg-muted/20 hover:shadow-sm"
-              } ${flash === c.value ? "scale-95" : "scale-100"}`}
-          >
-            <div
-              className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all
-              ${isSelected ? "bg-accent text-white" : "bg-muted text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent"}`}
+          <div key={c.value} className="flex flex-col">
+            <button
+              onClick={() => handleClick(c.value)}
+              className={`group flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200
+                ${
+                  isSelected
+                    ? "border-accent bg-accent/[0.06] shadow-md shadow-accent/8"
+                    : "border-border bg-white hover:border-accent/40 hover:bg-muted/20 hover:shadow-sm"
+                } ${flash === c.value ? "scale-95" : "scale-100"}`}
             >
-              {/* Use Lucide icon if mapped, else text icon fallback */}
-              {c.icon && !/\p{Emoji}/u.test(c.icon) ? (
-                <span className="text-base">{c.icon}</span>
-              ) : (
-                <span className="text-base leading-none">{c.icon}</span>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
               <div
-                className={`text-sm font-semibold leading-tight ${isSelected ? "text-accent" : "text-ink"}`}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all
+                ${isSelected ? "bg-accent text-white" : "bg-muted text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent"}`}
               >
-                {c.label}
+                {/* Use Lucide icon if mapped, else text icon fallback */}
+                {c.icon && !/\p{Emoji}/u.test(c.icon) ? (
+                  <span className="text-base">{c.icon}</span>
+                ) : (
+                  <span className="text-base leading-none">{c.icon}</span>
+                )}
               </div>
-              {c.desc && <div className="text-[11px] text-muted-foreground mt-0.5">{c.desc}</div>}
-            </div>
-            {isSelected && (
-              <Check className="h-4 w-4 text-accent shrink-0 animate-in zoom-in duration-150" />
+              <div className="min-w-0 flex-1">
+                <div
+                  className={`text-sm font-semibold leading-tight ${isSelected ? "text-accent" : "text-ink"}`}
+                >
+                  {c.label}
+                </div>
+                {c.desc && <div className="text-[11px] text-muted-foreground mt-0.5">{c.desc}</div>}
+              </div>
+              {isSelected && (
+                <Check className="h-4 w-4 text-accent shrink-0 animate-in zoom-in duration-150" />
+              )}
+            </button>
+            {c.value === "ai" && q.choices!.some((ch) => ch.value === "manual") && (
+              <p className="mt-1.5 ml-1 flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                <Lock className="h-2.5 w-2.5 shrink-0" />
+                Photos are only used to generate your estimate
+              </p>
             )}
-          </button>
+          </div>
         );
       })}
     </div>
@@ -1127,7 +1135,7 @@ function PhotoUploadQuestion({
         {/* Confirm button */}
         <button
           onClick={handleConfirm}
-          className="w-full rounded-xl bg-accent py-3.5 text-sm font-semibold text-white hover:bg-accent/90 transition"
+          className="w-full rounded-lg bg-accent py-3.5 text-sm font-semibold text-white hover:bg-accent/90 transition"
         >
           Continue with these selections →
         </button>
@@ -1159,10 +1167,10 @@ function PhotoUploadQuestion({
         className="hidden"
       />
       {previews.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 max-h-[160px] overflow-y-auto rounded-lg">
           {previews.map((src, i) => (
             <div key={i} className="aspect-square rounded-lg overflow-hidden border border-border">
-              <img src={src} alt={`Kitchen ${i + 1}`} className="w-full h-full object-cover" />
+              <img src={src} alt={`Kitchen photo ${i + 1}`} className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
@@ -1175,17 +1183,18 @@ function PhotoUploadQuestion({
           {error}
         </div>
       )}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 sticky bottom-4 bg-white/95 backdrop-blur-sm pt-3 pb-1 rounded-xl z-10">
         <button
           onClick={handleAnalyze}
           disabled={photos.length < 2 || isAnalyzing}
-          className="w-full rounded-xl bg-accent py-3 text-sm font-semibold text-white hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-busy={isAnalyzing}
+          className="w-full rounded-lg bg-accent py-3 text-sm font-semibold text-white hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isAnalyzing ? "Analyzing..." : "Analyze My Kitchen"}
         </button>
         <button
           onClick={handleSkip}
-          className="w-full rounded-xl border border-border py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 transition"
+          className="w-full rounded-lg border border-border py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 transition"
         >
           Skip — answer manually instead
         </button>
@@ -1485,13 +1494,13 @@ function FinalReport({
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={onRestart}
-          className="flex-1 py-3.5 rounded-xl border-2 border-border text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition"
+          className="flex-1 py-3.5 rounded-lg border-2 border-border text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition"
         >
           Start New Estimate
         </button>
         <a
           href="/"
-          className="flex-1 py-3.5 rounded-xl bg-accent text-white text-sm font-bold text-center hover:bg-accent/90 transition"
+          className="flex-1 py-3.5 rounded-lg bg-accent text-white text-sm font-bold text-center hover:bg-accent/90 transition"
         >
           Back to CostReno
         </a>
@@ -1813,7 +1822,7 @@ function EstimatorPage() {
                     {(stepIdx > 0 || questionIdx > 0) && (
                       <button
                         onClick={back}
-                        className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-border text-sm font-semibold text-muted-foreground hover:bg-muted/40 hover:border-border/80 transition"
+                        className="flex items-center gap-2 px-5 py-3 rounded-lg border-2 border-border text-sm font-semibold text-muted-foreground hover:bg-muted/40 hover:border-border/80 transition"
                       >
                         <ArrowLeft className="h-4 w-4" /> Back
                       </button>
@@ -1824,7 +1833,7 @@ function EstimatorPage() {
                       <button
                         onClick={advance}
                         disabled={!isAnswered(currentQuestion)}
-                        className="flex items-center gap-2 px-7 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-accent/20"
+                        className="flex items-center gap-2 px-7 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-accent/20"
                       >
                         {isLast ? "See My Estimate" : "Continue"} <ArrowRight className="h-4 w-4" />
                       </button>

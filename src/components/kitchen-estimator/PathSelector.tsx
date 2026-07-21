@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { Camera, ClipboardList, Clock, Check } from "lucide-react";
+import { Camera, ClipboardList, Check, Lock } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { kitchenPathOptions, type PathOption } from "@/lib/kitchen-estimator/config";
 
@@ -8,26 +8,22 @@ interface PathSelectorProps {
 }
 
 const iconMap: Record<string, React.ReactNode> = {
-  camera: <Camera className="h-8 w-8" aria-hidden="true" />,
-  clipboard: <ClipboardList className="h-8 w-8" aria-hidden="true" />,
+  camera: <Camera className="h-7 w-7" strokeWidth={1.8} aria-hidden="true" />,
+  clipboard: <ClipboardList className="h-7 w-7" strokeWidth={1.8} aria-hidden="true" />,
 };
 
 function PathCard({
   option,
   onSelect,
-  index,
-  total,
 }: {
   option: PathOption;
   onSelect: () => void;
-  index: number;
-  total: number;
 }) {
   return (
     <Card
       role="button"
       tabIndex={0}
-      aria-label={`Select ${option.title}: ${option.description}. Estimated time: ${option.estimatedTime}`}
+      aria-label={`Select ${option.title}: ${option.description}`}
       aria-describedby={`path-features-${option.id}`}
       onClick={onSelect}
       onKeyDown={(e) => {
@@ -36,22 +32,18 @@ function PathCard({
           onSelect();
         }
       }}
-      className="cursor-pointer border-2 border-primary/20 transition-all duration-200 hover:border-primary hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="cursor-pointer border-2 border-border transition-all duration-200 hover:border-accent/60 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <CardHeader className="pb-3">
-        <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/8 text-accent">
           {iconMap[option.icon]}
         </div>
-        <CardTitle className="font-display text-xl text-primary">{option.title}</CardTitle>
+        <CardTitle className="font-display text-lg text-ink">{option.title}</CardTitle>
         <CardDescription className="text-sm text-muted-foreground">
           {option.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="h-4 w-4" aria-hidden="true" />
-          <span>{option.estimatedTime}</span>
-        </div>
         <ul
           id={`path-features-${option.id}`}
           className="space-y-2"
@@ -59,11 +51,17 @@ function PathCard({
         >
           {option.features.map((feature) => (
             <li key={feature} className="flex items-start gap-2 text-sm">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-              <span>{feature}</span>
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" strokeWidth={2} aria-hidden="true" />
+              <span className="text-muted-foreground">{feature}</span>
             </li>
           ))}
         </ul>
+        {option.privacyNote && (
+          <div className="flex items-center gap-1.5 pt-2 border-t border-border/50">
+            <Lock className="h-3 w-3 text-muted-foreground/60 shrink-0" aria-hidden="true" />
+            <span className="text-[11px] text-muted-foreground/70">{option.privacyNote}</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -77,7 +75,6 @@ export function PathSelector({ onSelectPath }: PathSelectorProps) {
     if (!cards || cards.length === 0) return;
 
     const currentIndex = Array.from(cards).findIndex((card) => card === document.activeElement);
-
     let nextIndex: number | null = null;
 
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -98,7 +95,7 @@ export function PathSelector({ onSelectPath }: PathSelectorProps) {
       <div className="mb-8 text-center">
         <h2
           id="path-selector-heading"
-          className="font-display text-2xl font-bold text-primary sm:text-3xl"
+          className="font-display text-2xl font-bold text-ink sm:text-3xl"
         >
           How would you like to estimate your kitchen remodel?
         </h2>
@@ -111,13 +108,11 @@ export function PathSelector({ onSelectPath }: PathSelectorProps) {
         aria-label="Estimation path options"
         onKeyDown={handleKeyDown}
       >
-        {kitchenPathOptions.map((option, index) => (
+        {kitchenPathOptions.map((option) => (
           <PathCard
             key={option.id}
             option={option}
             onSelect={() => onSelectPath(option.id)}
-            index={index}
-            total={kitchenPathOptions.length}
           />
         ))}
       </div>

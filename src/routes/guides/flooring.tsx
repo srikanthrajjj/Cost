@@ -45,14 +45,14 @@ export const Route = createFileRoute("/guides/flooring")({
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const TABLE_OF_CONTENTS = [
-  { id: "signs", label: "Signs You Need New Flooring" },
-  { id: "costs", label: "Flooring Installation Costs" },
-  { id: "materials", label: "Best Flooring Materials" },
-  { id: "process", label: "Flooring Installation Process" },
-  { id: "contractor", label: "How to Choose a Contractor" },
-  { id: "permits", label: "Permits & Inspections" },
-  { id: "faq", label: "Frequently Asked Questions" },
-  { id: "related", label: "Related Guides" },
+  { id: "signs", label: "Signs you need new flooring" },
+  { id: "costs", label: "Flooring installation costs" },
+  { id: "materials", label: "Best flooring materials" },
+  { id: "process", label: "Flooring installation process" },
+  { id: "contractor", label: "How to choose a contractor" },
+  { id: "permits", label: "Permits & inspections" },
+  { id: "faq", label: "Frequently asked questions" },
+  { id: "related", label: "Related guides" },
 ];
 
 const SCOPE_COSTS = [
@@ -102,12 +102,12 @@ const SIGNS_LIST = [
 const PROCESS_STEPS = [
   {
     step: "1",
-    title: "Material Selection & Measurement",
+    title: "Material selection & measurement",
     desc: "Choose flooring type based on room usage, moisture exposure, and budget. Professional measurement determines exact square footage needed (typically add 10% for waste and cuts).",
   },
   {
     step: "2",
-    title: "Subfloor Preparation",
+    title: "Subfloor preparation",
     desc: "Existing flooring is removed. Subfloor is inspected, leveled, and repaired as needed. Moisture testing is performed for concrete slabs. Underlayment is installed where required.",
   },
   {
@@ -122,7 +122,7 @@ const PROCESS_STEPS = [
   },
   {
     step: "5",
-    title: "Finishing & Transitions",
+    title: "Finishing & transitions",
     desc: "Transition strips between rooms, baseboards, and quarter-round trim are installed. Any sanding and finishing for hardwood. Final cleanup and furniture move-back.",
   },
 ];
@@ -271,7 +271,7 @@ function FlooringGuide() {
               FLOORING GUIDE
             </span>
             <h1 className="font-display text-3xl sm:text-4xl md:text-[44px] font-extrabold text-ink leading-[1.1] tracking-tight">
-              Complete Guide to Flooring Installation
+              Complete guide to flooring installation
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
               Everything you need to know about flooring installation costs, materials, timeline,
@@ -306,7 +306,7 @@ function FlooringGuide() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-10">
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm">
           <h2 className="font-display text-lg font-bold text-ink mb-6 text-center">
-            Key Takeaways
+            Key takeaways
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
@@ -360,7 +360,7 @@ function FlooringGuide() {
           <div>
             {/* Table of Contents */}
             <div className="rounded-xl border border-border bg-white p-6 mb-10">
-              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of Contents</h2>
+              <h2 className="font-display text-lg font-bold text-ink mb-4">Table of contents</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {TABLE_OF_CONTENTS.map((item, i) => (
                   <a
@@ -380,7 +380,7 @@ function FlooringGuide() {
             {/* Section 1: Signs You Need New Flooring */}
             <section id="signs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                1. Signs You Need New Flooring
+                1. Signs you need new flooring
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Not sure if your floors need replacement or just a refresh? Here are the most common
@@ -407,7 +407,7 @@ function FlooringGuide() {
             {/* Section 2: Flooring Installation Costs */}
             <section id="costs" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                2. Flooring Installation Costs by Material
+                2. Flooring installation costs by material
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Costs vary significantly based on material choice and installation complexity. Below
@@ -453,7 +453,7 @@ function FlooringGuide() {
 
               {/* Pro Tip */}
               <div className="mt-5 p-4 rounded-xl bg-accent/5 border border-accent/20">
-                <p className="text-xs font-semibold text-accent mb-1">Pro Tip</p>
+                <p className="text-xs font-semibold text-accent mb-1">Pro tip</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Order 10% extra material to account for cuts, waste, and future repairs. Flooring
                   from the same dye lot is essential for color matching. Buy it all at once rather
@@ -465,7 +465,7 @@ function FlooringGuide() {
             {/* Section 3: Best Flooring Materials */}
             <section id="materials" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                3. Best Flooring Materials
+                3. Best flooring materials
               </h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
                 Each flooring material has strengths and ideal use cases. Here's what to know about
@@ -474,7 +474,7 @@ function FlooringGuide() {
               <div className="space-y-6">
                 <div className="rounded-xl border border-border bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink mb-2">
-                    Luxury Vinyl (LVP/LVT)
+                    Luxury vinyl (LVP/LVT)
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                     The fastest-growing flooring category. Luxury vinyl plank (LVP) is 100%
@@ -517,7 +517,7 @@ function FlooringGuide() {
                 </div>
 
                 <div className="rounded-xl border border-border bg-white p-5">
-                  <h3 className="font-display text-lg font-bold text-ink mb-2">Porcelain Tile</h3>
+                  <h3 className="font-display text-lg font-bold text-ink mb-2">Porcelain tile</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                     Virtually indestructible and completely waterproof. Available in endless styles
                     including wood-look, stone-look, and modern patterns. Ideal for bathrooms,
@@ -563,7 +563,7 @@ function FlooringGuide() {
             {/* Section 4: Flooring Installation Process */}
             <section id="process" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                4. Flooring Installation Process: Step by Step
+                4. Flooring installation process: step by step
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Understanding the process helps you prepare your home and set realistic
@@ -590,7 +590,7 @@ function FlooringGuide() {
             {/* Section 5: How to Choose a Contractor */}
             <section id="contractor" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                5. How to Choose a Flooring Contractor
+                5. How to choose a flooring contractor
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Quality installation is essential for flooring performance and longevity. Use this
@@ -612,7 +612,7 @@ function FlooringGuide() {
             {/* Section 6: Permits & Inspections */}
             <section id="permits" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                6. Permits & Inspections
+                6. Permits & inspections
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
                 Flooring installation rarely requires permits, but there are some exceptions. Here's
@@ -673,7 +673,7 @@ function FlooringGuide() {
             {/* Section 7: FAQ */}
             <section id="faq" className="mb-12">
               <h2 className="font-display text-2xl font-bold text-ink mb-5">
-                7. Frequently Asked Questions
+                7. Frequently asked questions
               </h2>
               <div className="space-y-3">
                 {FAQ_ITEMS.map((faq, i) => (
@@ -699,7 +699,7 @@ function FlooringGuide() {
 
             {/* Section 8: Related Guides */}
             <section id="related" className="mb-12">
-              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related Guides</h2>
+              <h2 className="font-display text-2xl font-bold text-ink mb-5">8. Related guides</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {RELATED_GUIDES.map((guide) => (
                   <a
@@ -724,7 +724,7 @@ function FlooringGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <DollarSign className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Calculate Your Flooring Installation Cost
+                    Calculate your flooring installation cost
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -733,7 +733,7 @@ function FlooringGuide() {
                 </p>
                 <a
                   href="/estimate?project=flooring"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
                 >
                   Get My Estimate <ArrowRight className="h-4 w-4" />
                 </a>
@@ -741,7 +741,7 @@ function FlooringGuide() {
 
               {/* Related Guides */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Related Guides</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Related guides</h3>
                 <div className="space-y-3">
                   {RELATED_GUIDES.map((guide) => (
                     <a
@@ -761,7 +761,7 @@ function FlooringGuide() {
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="h-5 w-5 text-accent" />
                   <h3 className="font-display text-base font-bold text-ink">
-                    Need Help Reviewing Your Flooring Quote?
+                    Need help reviewing your flooring quote?
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
@@ -770,7 +770,7 @@ function FlooringGuide() {
                 </p>
                 <a
                   href="/quote-analyzer"
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
+                  className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
                 >
                   Review My Quote <ArrowRight className="h-4 w-4" />
                 </a>
@@ -778,7 +778,7 @@ function FlooringGuide() {
 
               {/* Popular Tools */}
               <div className="rounded-2xl border border-border bg-white p-6">
-                <h3 className="font-display text-base font-bold text-ink mb-4">Popular Tools</h3>
+                <h3 className="font-display text-base font-bold text-ink mb-4">Popular tools</h3>
                 <div className="space-y-3">
                   <a
                     href="/estimate?project=flooring"
