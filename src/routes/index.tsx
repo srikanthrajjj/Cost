@@ -2927,7 +2927,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 <line x1="14" y1="23" x2="18" y2="23" />
               </svg>
             </div>
-            <h3 className="font-display text-sm font-bold text-ink mb-1.5">Compare multiple quotes</h3>
+            <h3 className="font-display text-sm font-bold text-ink mb-1.5">
+              Compare multiple quotes
+            </h3>
             <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
               Analyze and compare contractor quotes side by side to find the best value.
             </p>
@@ -2970,12 +2972,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               name: "Project Timeline",
               desc: "Get a clear step-by-step timeline from start to finish.",
               icon: '<rect x="3" y="5" width="22" height="20" rx="3" /><line x1="3" y1="11" x2="25" y2="11" /><line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" /><line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" /><circle cx="9" cy="17" r="1.5" /><circle cx="14" cy="17" r="1.5" /><circle cx="19" cy="17" r="1.5" />',
-            },
-            {
-              id: "permits",
-              name: "Permit Guide",
-              desc: "Know exactly which permits you need and how to get them.",
-              icon: '<path d="M6 3h11l5 5v17H6V3z" /><path d="M17 3v5h5" /><line x1="10" y1="12" x2="18" y2="12" /><line x1="10" y1="16" x2="18" y2="16" /><line x1="10" y1="20" x2="15" y2="20" />',
             },
           ].map((tool) => (
             <div
@@ -3094,7 +3090,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           {[
             {
               img: projRoof,
-              title: "Roof replacement cost in 2026: complete pricing guide by roof type, size & state",
+              title:
+                "Roof replacement cost in 2026: complete pricing guide by roof type, size & state",
               tag: "Roofing",
               read: "15 min read",
               href: "/guides/roof-replacement",
