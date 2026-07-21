@@ -12,6 +12,8 @@ import {
   Trash2,
   Sparkles,
   Zap,
+  ChevronDown,
+  Shield,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -44,6 +46,83 @@ export const Route = createFileRoute("/compare-quotes")({
       { name: "robots", content: "index, follow" },
     ],
     links: [{ rel: "canonical", href: "https://costreno.com/compare-quotes" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "How does the quote comparison tool work?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Upload two contractor quotes (PDF, JPG, or PNG). Our AI reads every line item from both quotes, compares pricing, identifies missing scope, detects red flags, and generates a side-by-side report with a composite score for each quote.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is the quote comparison tool free?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes, comparing two contractor quotes is completely free. No signup, no credit card, and no hidden fees. Upload both quotes and get results in under 60 seconds.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "How many quotes can I compare at once?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "You can compare exactly 2 quotes side by side. This gives you a focused comparison of pricing, scope, materials, and overall value between two contractors.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is my contractor quote kept private?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Absolutely. Your files are encrypted, never stored permanently, and never shared with contractors or third parties. We process your quotes securely and delete them after analysis.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "What does the comparison report include?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "The report includes composite scores for each quote, pricing comparison, missing scope detection, red flag identification, material comparison, market rate benchmarks, savings analysis, AI insights, and personalized questions to ask each contractor.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "What are common red flags when comparing contractor quotes?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Watch for: one quote missing items the other includes, significantly lower pricing that may indicate cut corners, vague material descriptions, missing permit costs, no warranty terms, and large differences in labor rates between the two quotes.",
+              },
+            },
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "CostReno Quote Comparison Tool",
+          url: "https://costreno.com/compare-quotes",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Any",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+          },
+          description:
+            "Free AI-powered tool to compare 2 contractor quotes side by side. Spot pricing differences, missing scope, and choose the best value.",
+        }),
+      },
+    ],
   }),
   component: CompareQuotesPage,
 });
@@ -499,6 +578,300 @@ function CompareQuotesPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* ═══ SEO CONTENT — only show when not analyzing ═══ */}
+        {state === "upload" && (
+          <>
+            {/* SEO: How It Works */}
+            <section className="mt-20 pt-12 border-t border-border">
+              <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+                How the Quote Comparison Tool Works
+              </h2>
+              <p className="text-sm text-muted-foreground text-center max-w-lg mx-auto mb-10">
+                Compare two contractor quotes in three simple steps and pick the best value.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    step: "1",
+                    title: "Upload Both Quotes",
+                    desc: "Upload a PDF, photo, or scan from each contractor. We support all major home improvement quote formats.",
+                  },
+                  {
+                    step: "2",
+                    title: "AI Compares Everything",
+                    desc: "Our AI reads every line item from both quotes, compares pricing against local market rates, and identifies missing scope and red flags.",
+                  },
+                  {
+                    step: "3",
+                    title: "Pick the Best Value",
+                    desc: "Get a side-by-side report with composite scores, pricing breakdowns, savings analysis, and smart questions to ask each contractor.",
+                  },
+                ].map((item) => (
+                  <div key={item.step} className="text-center">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 text-accent font-bold text-sm flex items-center justify-center mx-auto mb-3">
+                      {item.step}
+                    </div>
+                    <h3 className="text-sm font-bold text-ink mb-1.5">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* SEO: What You Get */}
+            <section className="mt-16 pt-12 border-t border-border">
+              <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+                What Your Comparison Report Includes
+              </h2>
+              <p className="text-xs text-muted-foreground text-center mb-8">
+                Every comparison gives you a complete picture of both quotes
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                {[
+                  {
+                    title: "Composite Scores",
+                    desc: "0-100 score for each quote based on pricing, scope completeness, and material quality",
+                  },
+                  {
+                    title: "Pricing Comparison",
+                    desc: "Line-by-line pricing breakdown showing which contractor charges more for each item",
+                  },
+                  {
+                    title: "Missing Scope Detection",
+                    desc: "Items one quote includes that the other omits, so nothing catches you off guard",
+                  },
+                  {
+                    title: "Red Flag Alerts",
+                    desc: "AI-powered detection of vague terms, missing permits, and suspicious pricing patterns",
+                  },
+                  {
+                    title: "Market Rate Benchmarks",
+                    desc: "How each quote compares to typical pricing in your area for this project type",
+                  },
+                  {
+                    title: "Savings Analysis",
+                    desc: "Clear breakdown of potential savings and where each contractor differs most",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="flex items-start gap-3 p-4 rounded-xl border border-border bg-white"
+                  >
+                    <CheckCircle2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-bold text-ink mb-0.5">{item.title}</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* SEO: Use Cases */}
+            <section className="mt-16 pt-12 border-t border-border">
+              <h2 className="font-display text-2xl font-bold text-ink text-center mb-8">
+                Compare Any Two Home Improvement Quotes
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  "Roofing Quotes",
+                  "Kitchen Remodel Bids",
+                  "Bathroom Renovation",
+                  "HVAC Proposals",
+                  "Window Installation",
+                  "Solar Panel Estimates",
+                  "Deck & Patio Bids",
+                  "Flooring Quotes",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-2 px-3 py-3 rounded-lg border border-border bg-white"
+                  >
+                    <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+                    <span className="text-xs font-medium text-ink">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* SEO: FAQ */}
+            <section className="mt-16 pt-12 border-t border-border">
+              <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-xs text-muted-foreground text-center mb-8">
+                Last updated: July 2026
+              </p>
+              <div className="max-w-2xl mx-auto space-y-3">
+                {[
+                  {
+                    q: "How does the quote comparison tool work?",
+                    a: "Upload two contractor quotes (PDF, JPG, or PNG). Our AI reads every line item from both quotes, compares pricing against local market rates, and generates a side-by-side report with composite scores, red flags, missing scope, and savings analysis.",
+                  },
+                  {
+                    q: "Is comparing quotes free?",
+                    a: "Yes, comparing two contractor quotes is completely free. No signup, no credit card, and no hidden fees. Upload both quotes and get results in under 60 seconds.",
+                  },
+                  {
+                    q: "How many quotes can I compare at once?",
+                    a: "You can compare exactly 2 quotes side by side. This gives you a focused comparison of pricing, scope, materials, and overall value between two contractors. If you have more than 2 quotes, run multiple comparisons.",
+                  },
+                  {
+                    q: "What file types are supported?",
+                    a: "We accept PDF, JPG, and PNG files up to 15 MB each. Take a photo of a paper quote, screenshot a digital one, or upload the original PDF from your contractor.",
+                  },
+                  {
+                    q: "Is my contractor quote kept private?",
+                    a: "Absolutely. Your files are encrypted, never stored permanently, and never shared with contractors or third parties. We process your quotes securely and delete them after analysis.",
+                  },
+                  {
+                    q: "What does the comparison report include?",
+                    a: "The report includes composite scores for each quote, line-by-line pricing comparison, missing scope detection, red flag identification, material quality assessment, market rate benchmarks, savings analysis, AI insights, and personalized questions to ask each contractor.",
+                  },
+                  {
+                    q: "What are common red flags when comparing quotes?",
+                    a: "Watch for: one quote missing items the other includes, significantly lower pricing that may indicate cut corners, vague material descriptions, missing permit costs, no warranty terms, and large differences in labor rates.",
+                  },
+                  {
+                    q: "Should I always choose the cheaper quote?",
+                    a: "Not necessarily. A lower price may mean missing scope, lower-quality materials, or no warranty. Our comparison tool helps you understand what you get for each price so you can choose the best overall value, not just the cheapest option.",
+                  },
+                ].map((faq) => (
+                  <details
+                    key={faq.q}
+                    className="group rounded-xl border border-border bg-white overflow-hidden"
+                  >
+                    <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/20 transition">
+                      <h3 className="text-sm font-semibold text-ink">{faq.q}</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-3" />
+                    </summary>
+                    <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                      {faq.a}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+
+            {/* SEO: People Also Ask */}
+            <section className="mt-16 pt-12 border-t border-border">
+              <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+                People Also Ask
+              </h2>
+              <p className="text-xs text-muted-foreground text-center mb-8">
+                Common questions homeowners have about contractor quotes
+              </p>
+              <div className="max-w-2xl mx-auto space-y-3">
+                {[
+                  {
+                    q: "How many contractor quotes should I get before hiring?",
+                    a: "Get at least 3 quotes for any home improvement project over $5,000. For major renovations ($50,000+), consider getting 4-5 quotes. This helps you understand the market rate, evaluate different approaches, and identify outliers.",
+                  },
+                  {
+                    q: "What should a contractor quote include?",
+                    a: "A complete contractor quote should include: itemized materials with brand/model, labor costs broken down by task, permit fees, demolition and disposal costs, project timeline with start/end dates, payment schedule, warranty terms, and insurance/licensing information.",
+                  },
+                  {
+                    q: "How do I know if my contractor quote is too high?",
+                    a: "Compare your quote against the typical range for your project type and location. Watch for vague line items, unusually high markups on materials, or labor rates significantly above the local average. Getting 2-3 competing quotes is the best way to benchmark pricing.",
+                  },
+                  {
+                    q: "What are common red flags in contractor quotes?",
+                    a: "Watch for: requesting more than 30% upfront payment, no written warranty, vague material descriptions (e.g., 'standard grade'), missing permit costs, no timeline specified, price significantly lower than competitors, and pressure to sign immediately.",
+                  },
+                  {
+                    q: "Can I use this before signing a contract?",
+                    a: "Yes. That's exactly when you should use it. Upload both quotes before signing to ensure you're getting fair pricing, complete scope, and proper materials specified. It's the smartest step before committing to a contractor.",
+                  },
+                  {
+                    q: "How much does a roof replacement cost in 2026?",
+                    a: "The average roof replacement costs between $8,600 and $24,700 in 2026, with most homeowners paying around $16,650. Costs vary significantly based on roofing material, roof size, pitch complexity, and your geographic location.",
+                  },
+                  {
+                    q: "How much does a kitchen remodel cost?",
+                    a: "A kitchen remodel typically costs between $25,000 and $75,000 in 2026, with the national average around $50,000. Minor cosmetic updates may cost $10,000-$15,000, while a full gut renovation with custom cabinets and appliances can exceed $100,000.",
+                  },
+                ].map((faq) => (
+                  <details
+                    key={faq.q}
+                    className="group rounded-xl border border-border bg-white overflow-hidden"
+                  >
+                    <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/20 transition">
+                      <h3 className="text-sm font-semibold text-ink">{faq.q}</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-3" />
+                    </summary>
+                    <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                      {faq.a}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+
+            {/* SEO: Long-tail keyword content */}
+            <section className="mt-16 pt-12 border-t border-border">
+              <div className="max-w-2xl mx-auto text-center">
+                <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                  The Smartest Way to Choose Between Contractor Quotes
+                </h2>
+                <p className="text-xs text-muted-foreground mb-6">Updated July 2026</p>
+                <div className="text-sm text-muted-foreground leading-relaxed space-y-4 text-left">
+                  <p>
+                    Receiving two contractor quotes for your home improvement project is a great
+                    start, but choosing between them isn't always straightforward. One quote might
+                    be lower on paper but miss critical items like permits, warranty, or proper
+                    material specifications. The other might be more expensive but include
+                    everything you need.
+                  </p>
+                  <p>
+                    CostReno's Quote Comparison Tool is purpose-built for homeowners who want to
+                    make confident decisions between competing bids. Unlike generic comparison
+                    tools, our AI is trained specifically on contractor quotes, building codes, and
+                    regional pricing data. It understands the real difference between value and
+                    cutting corners.
+                  </p>
+                  <p>
+                    Our comparison engine analyzes every line item from both quotes,
+                    cross-references pricing against local market rates, and flags scope gaps that
+                    could lead to expensive change orders. You'll see exactly where each contractor
+                    differs, what one includes that the other doesn't, and which quote offers the
+                    best overall value for your investment.
+                  </p>
+                  <p>
+                    Whether you're comparing roofing bids, kitchen remodel estimates, or HVAC
+                    replacement proposals, upload both quotes and let AI do the heavy lifting. Make
+                    confident decisions about the biggest investment in your home.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Final CTA */}
+            <div className="mt-16 pb-8 text-center">
+              <h2 className="font-display text-xl font-bold text-ink mb-2">
+                Ready to compare your quotes?
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Upload both quotes above and get a detailed comparison in seconds.
+              </p>
+              <div className="flex flex-wrap justify-center gap-6">
+                {[
+                  { icon: Zap, label: "Results in 60 seconds" },
+                  { icon: Shield, label: "100% private & secure" },
+                  { icon: CheckCircle2, label: "No signup required" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                      <item.icon className="h-3.5 w-3.5 text-accent" />
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </div>
 
