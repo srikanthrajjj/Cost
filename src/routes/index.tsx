@@ -58,7 +58,6 @@ import projSolar from "@/assets/proj-solar.jpg";
 import cmpRoof from "@/assets/cmp-roof.jpg";
 import cmpCounter from "@/assets/cmp-counter.jpg";
 import cmpHvac from "@/assets/cmp-hvac.jpg";
-import cmpWater from "@/assets/cmp-water.jpg";
 import blueprint from "@/assets/house-blueprint.jpg";
 
 export const Route = createFileRoute("/")({
@@ -210,7 +209,7 @@ const comparisons = [
   {
     img: cmpRoof,
     title: "Asphalt vs metal roofing",
-    desc: "Compare durability, cost, and lifespan",
+    desc: "Durability, cost, and lifespan trade-offs",
     href: "/guides/metal-vs-asphalt-roof",
   },
   {
@@ -226,10 +225,16 @@ const comparisons = [
     href: "/guides/hvac-installation",
   },
   {
-    img: cmpWater,
-    title: "Tank vs tankless water heaters",
-    desc: "Compare upfront cost and long-term operating trade-offs",
-    href: "/guides",
+    img: projWindows,
+    title: "Vinyl vs wood windows",
+    desc: "Frame materials, energy performance, and install cost drivers",
+    href: "/guides/window-replacement",
+  },
+  {
+    img: projKitchen,
+    title: "Hardwood vs LVP flooring",
+    desc: "Upfront cost, durability, and maintenance differences",
+    href: "/guides/flooring",
   },
 ];
 
@@ -3303,20 +3308,25 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       </section>
 
-      {/* COMPARISONS */}
+      {/* Guide comparisons (educational links, not interactive tools) */}
       <section className="container-x py-20">
-        <div className="flex items-end justify-between mb-6">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
-            Popular comparisons
-          </h2>
+        <div className="flex items-end justify-between mb-6 gap-4">
+          <div>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
+              Popular comparisons
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Short guides to help you weigh common material and project trade-offs.
+            </p>
+          </div>
           <a
-            href="/guides/metal-vs-asphalt-roof"
-            className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
+            href="/guides"
+            className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1 shrink-0"
           >
-            View all comparisons <ArrowRight className="h-3.5 w-3.5" />
+            Browse guides <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
           {comparisons.map((c) => (
             <a
               key={c.title}
@@ -3337,11 +3347,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 </span>
               </div>
               <div className="p-4">
-                <h3 className="font-display text-base font-bold text-ink">{c.title}</h3>
+                <h3 className="font-display text-base font-bold text-ink group-hover:text-primary transition">
+                  {c.title}
+                </h3>
                 <p className="mt-1 text-xs text-muted-foreground">{c.desc}</p>
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:underline">
-                  Compare now <ArrowRight className="h-3 w-3" />
-                </span>
               </div>
             </a>
           ))}
