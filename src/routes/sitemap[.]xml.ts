@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   getAllStateSlugs,
   getIndexableCityCategoryPairs,
-  SITE_ORIGIN,
 } from "@/lib/city-data";
 import { PROJECT_CONFIGS } from "@/lib/project-config";
+import { absoluteUrl } from "@/lib/seo";
 
 const STATIC_PATHS: { path: string; priority: string }[] = [
   { path: "/", priority: "1.0" },
@@ -63,16 +63,16 @@ export function buildSitemapXml(): string {
 
   const entries: string[] = [
     ...STATIC_PATHS.map(({ path, priority }) =>
-      urlEntry(`${SITE_ORIGIN}${path === "/" ? "" : path}`, priority, "weekly", lastmod),
+      urlEntry(absoluteUrl(path), priority, "weekly", lastmod),
     ),
     ...projectPaths.map((path) =>
-      urlEntry(`${SITE_ORIGIN}${path}`, "0.85", "weekly", lastmod),
+      urlEntry(absoluteUrl(path), "0.85", "weekly", lastmod),
     ),
     ...states.map((state) =>
-      urlEntry(`${SITE_ORIGIN}/locations/${state.stateSlug}`, "0.7", "weekly", lastmod),
+      urlEntry(absoluteUrl(`/locations/${state.stateSlug}`), "0.7", "weekly", lastmod),
     ),
     ...cityCategoryPairs.map(({ url }) =>
-      urlEntry(`${SITE_ORIGIN}${url}`, "0.75", "weekly", lastmod),
+      urlEntry(absoluteUrl(url), "0.75", "weekly", lastmod),
     ),
   ];
 

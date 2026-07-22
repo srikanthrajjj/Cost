@@ -4,6 +4,9 @@ import {
   CITY_CONTENT_LAST_REVIEWED,
   getCityEnrichment,
 } from "@/data/city-enrichments";
+import { SITE_ORIGIN } from "@/lib/seo";
+
+export { SITE_ORIGIN };
 
 export interface City {
   city: string;
@@ -63,7 +66,7 @@ export interface CityCategoryPage {
   isIndexable: boolean;
 }
 
-const SITE_ORIGIN = "https://costreno.com";
+import { SITE_ORIGIN } from "@/lib/seo";
 
 function parseMoneyRange(range: string): { low: number; high: number } | null {
   const matches = range.match(/\$[\d,]+/g);
@@ -287,5 +290,3 @@ export function getRelatedCategories(categoryId: string, citySlug?: string): Cat
   const rest = categories.filter((c) => !isCityPageIndexable(citySlug, c.id));
   return [...enriched, ...rest];
 }
-
-export { SITE_ORIGIN };

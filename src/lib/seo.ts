@@ -1,6 +1,7 @@
 /** Shared SEO constants for CostReno. */
 
-export const SITE_ORIGIN = "https://costreno.com";
+/** Preferred public host (Vercel redirects apex → www). */
+export const SITE_ORIGIN = "https://www.costreno.com";
 
 export const DEFAULT_OG_IMAGE =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200";
