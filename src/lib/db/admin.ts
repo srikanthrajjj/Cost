@@ -14,7 +14,7 @@ import {
 import { getAudienceId, getResendClient } from "@/lib/email/resend";
 
 /** Fallback so /admin works before ADMIN_SECRET is set in env. Override in production. */
-const DEFAULT_ADMIN_PASSWORD = "costreno-admin";
+const DEFAULT_ADMIN_PASSWORD = "test";
 
 function getAdminSecret(): string {
   const secret =
