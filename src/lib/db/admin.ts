@@ -9,22 +9,21 @@ import {
 } from "@/lib/db/store";
 import { getAudienceId, getResendClient } from "@/lib/email/resend";
 
-function getAdminSecret(): string | null {
+/** Fallback so /admin works before ADMIN_SECRET is set in env. Override in production. */
+const DEFAULT_ADMIN_PASSWORD = "costreno-admin";
+
+function getAdminSecret(): string {
   const secret =
     (typeof import.meta !== "undefined" && import.meta.env
       ? (import.meta.env as Record<string, string | undefined>).ADMIN_SECRET
       : undefined) ||
     process.env.ADMIN_SECRET ||
-    null;
-  return secret && secret.trim().length > 0 ? secret.trim() : null;
+    "";
+  return secret.trim().length > 0 ? secret.trim() : DEFAULT_ADMIN_PASSWORD;
 }
 
 function assertAdminPassword(password: string) {
-  const secret = getAdminSecret();
-  if (!secret) {
-    throw new Error("ADMIN_SECRET is not configured on the server.");
-  }
-  if (password !== secret) {
+  if (password !== getAdminSecret()) {
     throw new Error("Invalid admin password.");
   }
 }

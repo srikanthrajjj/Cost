@@ -114,8 +114,8 @@ function AdminPage() {
               <Shield className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="font-display text-lg font-bold text-ink">Admin</h1>
-              <p className="text-xs text-muted-foreground">CostReno internal dashboard</p>
+              <h1 className="font-display text-lg font-bold text-ink">Admin login</h1>
+              <p className="text-xs text-muted-foreground">Enter your password to continue</p>
             </div>
           </div>
           <form onSubmit={handleLogin} className="space-y-3">
