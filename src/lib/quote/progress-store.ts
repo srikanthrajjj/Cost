@@ -16,43 +16,76 @@ export interface QuoteFollowUpAction {
 }
 
 export function getQuoteProgressSignature(result: QuoteAnalysisResult): string {
-  const itemCount = result.extraction.materials.length + result.extraction.scopeItems.length;
+  const materials = result.extraction?.materials ?? [];
+  const scopeItems = result.extraction?.scopeItems ?? [];
+  const itemCount = materials.length + scopeItems.length;
   return [
-    result.extraction.projectType || "unknown-project",
-    result.extraction.contractor || "unknown-contractor",
-    result.extraction.totalPrice || 0,
-    result.analysis.summary.completenessScore,
+    result.extraction?.projectType || "unknown-project",
+    result.extraction?.contractor || "unknown-contractor",
+    result.extraction?.totalPrice || 0,
+    result.analysis?.summary?.completenessScore ?? 0,
     itemCount,
   ].join("|");
 }
 
+function slimResultForStorage(result: QuoteAnalysisResult): QuoteAnalysisResult {
+  // Keep enough to reopen the report, drop the long AI narrative to stay under localStorage limits.
+  return {
+    ...result,
+    report: "",
+  };
+}
+
 export function getSavedQuoteProgress(): SavedQuoteProgress | null {
   try {
+    if (typeof localStorage === "undefined") return null;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SavedQuoteProgress;
     if (!parsed?.result?.analysis || !parsed?.result?.extraction || !parsed.signature) {
       return null;
     }
-    return parsed;
+    return {
+      ...parsed,
+      completedChecklistIds: Array.isArray(parsed.completedChecklistIds)
+        ? parsed.completedChecklistIds
+        : [],
+    };
   } catch {
     return null;
   }
 }
 
 export function saveQuoteProgress(result: QuoteAnalysisResult): SavedQuoteProgress {
+  const previous = getSavedQuoteProgress();
+  const signature = getQuoteProgressSignature(result);
   const entry: SavedQuoteProgress = {
-    signature: getQuoteProgressSignature(result),
+    signature,
     savedAt: new Date().toISOString(),
-    result,
-    completedChecklistIds: [],
+    result: slimResultForStorage(result),
+    completedChecklistIds:
+      previous?.signature === signature ? previous.completedChecklistIds : [],
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
+
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
+    }
+  } catch (error) {
+    console.warn("[quote-progress] failed to persist analysis locally", error);
+  }
+
   return entry;
 }
 
 export function clearSavedQuoteProgress(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // ignore
+  }
 }
 
 export function updateSavedQuoteChecklist(signature: string, completedChecklistIds: string[]): void {
@@ -62,33 +95,42 @@ export function updateSavedQuoteChecklist(signature: string, completedChecklistI
     ...current,
     completedChecklistIds,
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    }
+  } catch (error) {
+    console.warn("[quote-progress] failed to persist checklist", error);
+  }
 }
 
 export function getQuoteFollowUpAction(saved: SavedQuoteProgress): QuoteFollowUpAction {
-  const { analysis } = saved.result;
+  const analysis = saved.result.analysis;
+  const redFlags = analysis.redFlags ?? [];
+  const missingScope = analysis.missingScope ?? [];
+  const needsClarification = analysis.needsClarification ?? [];
 
-  if (analysis.redFlags.length > 0) {
+  if (redFlags.length > 0) {
     return {
       tone: "urgent",
       title: "Review red flags before signing",
-      detail: `${analysis.redFlags.length} red flag${analysis.redFlags.length === 1 ? "" : "s"} still need attention.`,
+      detail: `${redFlags.length} red flag${redFlags.length === 1 ? "" : "s"} still need attention.`,
     };
   }
 
-  if (analysis.missingScope.length > 0) {
+  if (missingScope.length > 0) {
     return {
       tone: "review",
       title: "Ask about missing scope",
-      detail: `${analysis.missingScope.length} missing item${analysis.missingScope.length === 1 ? "" : "s"} should be clarified with the contractor.`,
+      detail: `${missingScope.length} missing item${missingScope.length === 1 ? "" : "s"} should be clarified with the contractor.`,
     };
   }
 
-  if (analysis.needsClarification.length > 0) {
+  if (needsClarification.length > 0) {
     return {
       tone: "review",
       title: "Follow up on unclear items",
-      detail: `${analysis.needsClarification.length} item${analysis.needsClarification.length === 1 ? "" : "s"} need more detail from the contractor.`,
+      detail: `${needsClarification.length} item${needsClarification.length === 1 ? "" : "s"} need more detail from the contractor.`,
     };
   }
 

@@ -51,6 +51,7 @@ import type { QuoteAnalysis } from "@/lib/quote/types";
 import { addComparisonQuote } from "@/lib/quote/comparison-store";
 import { QuoteComparisonTray } from "@/components/quote/QuoteComparisonTray";
 import { QuoteFeedbackSidebarCta } from "@/components/quote/QuoteFeedbackCard";
+import { SiteFooter } from "@/components/SiteFooter";
 
 function getHealthGrade(score: number): { label: string; color: string; bg: string } {
   if (score >= 85) return { label: "Excellent", color: "text-accent", bg: "bg-accent/10" };

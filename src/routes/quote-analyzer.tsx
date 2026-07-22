@@ -442,12 +442,11 @@ function QuoteAnalyzerPage() {
         setBatchProgress({ current: 1, total: 1, name: selectedFiles[0].name });
         batchRef.current = { current: 1, total: 1 };
         const analysis = await analyzeSingleFile(selectedFiles[0]);
-        const saved = saveQuoteProgress(analysis);
         clearStageTimers();
         setProcessingStage("reporting");
         setProcessingProgress(100);
         setResult(analysis);
-        setSavedProgress(saved);
+        setSavedProgress(saveQuoteProgress(analysis));
         setQuoteSlots([null, null, null]);
         setBatchProgress(null);
         setState("complete");
