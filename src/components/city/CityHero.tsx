@@ -29,14 +29,14 @@ export function CityHero({ categoryName, city, state, introParagraph }: CityHero
               href="/estimate"
               className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 text-base font-semibold text-accent-foreground shadow-sm hover:bg-accent/90 transition-all duration-200"
             >
-              Calculate Your Estimate
+              Calculate my estimate
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
             <a
               href="/quote-analyzer"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-8 py-4 text-base font-semibold text-foreground hover:bg-muted transition"
             >
-              Analyze a Quote
+              Analyze a quote
             </a>
           </div>
         </div>

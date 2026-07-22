@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MethodologyRouteImport } from './routes/methodology'
@@ -22,6 +24,8 @@ import { Route as CompareQuotesRouteImport } from './routes/compare-quotes'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LocationsIndexRouteImport } from './routes/locations/index'
+import { Route as LocationsStateRouteImport } from './routes/locations/$state'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
 import { Route as GuidesMetalVsAsphaltRoofRouteImport } from './routes/guides/metal-vs-asphalt-roof'
@@ -35,6 +39,16 @@ import { Route as StateCityCategoryRouteImport } from './routes/$state/$city/$ca
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
@@ -95,6 +109,16 @@ const ProjectSlugRoute = ProjectSlugRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsIndexRoute = LocationsIndexRouteImport.update({
+  id: '/locations/',
+  path: '/locations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsStateRoute = LocationsStateRouteImport.update({
+  id: '/locations/$state',
+  path: '/locations/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesWindowReplacementRoute = GuidesWindowReplacementRouteImport.update({
@@ -158,6 +182,8 @@ export interface FileRoutesByFullPath {
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -167,6 +193,8 @@ export interface FileRoutesByFullPath {
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
+  '/locations/$state': typeof LocationsStateRoute
+  '/locations/': typeof LocationsIndexRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
 }
 export interface FileRoutesByTo {
@@ -182,6 +210,8 @@ export interface FileRoutesByTo {
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -191,6 +221,8 @@ export interface FileRoutesByTo {
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
+  '/locations/$state': typeof LocationsStateRoute
+  '/locations': typeof LocationsIndexRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
 }
 export interface FileRoutesById {
@@ -207,6 +239,8 @@ export interface FileRoutesById {
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -216,6 +250,8 @@ export interface FileRoutesById {
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
+  '/locations/$state': typeof LocationsStateRoute
+  '/locations/': typeof LocationsIndexRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
 }
 export interface FileRouteTypes {
@@ -233,6 +269,8 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/privacy'
     | '/quote-analyzer'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -242,6 +280,8 @@ export interface FileRouteTypes {
     | '/guides/metal-vs-asphalt-roof'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
+    | '/locations/$state'
+    | '/locations/'
     | '/$state/$city/$category'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -257,6 +297,8 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/privacy'
     | '/quote-analyzer'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -266,6 +308,8 @@ export interface FileRouteTypes {
     | '/guides/metal-vs-asphalt-roof'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
+    | '/locations/$state'
+    | '/locations'
     | '/$state/$city/$category'
   id:
     | '__root__'
@@ -281,6 +325,8 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/privacy'
     | '/quote-analyzer'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -290,6 +336,8 @@ export interface FileRouteTypes {
     | '/guides/metal-vs-asphalt-roof'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
+    | '/locations/$state'
+    | '/locations/'
     | '/$state/$city/$category'
   fileRoutesById: FileRoutesById
 }
@@ -306,6 +354,8 @@ export interface RootRouteChildren {
   MethodologyRoute: typeof MethodologyRoute
   PrivacyRoute: typeof PrivacyRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
@@ -315,6 +365,8 @@ export interface RootRouteChildren {
   GuidesMetalVsAsphaltRoofRoute: typeof GuidesMetalVsAsphaltRoofRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
+  LocationsStateRoute: typeof LocationsStateRoute
+  LocationsIndexRoute: typeof LocationsIndexRoute
   StateCityCategoryRoute: typeof StateCityCategoryRoute
 }
 
@@ -325,6 +377,20 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quote-analyzer': {
@@ -411,6 +477,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/locations/': {
+      id: '/locations/'
+      path: '/locations'
+      fullPath: '/locations/'
+      preLoaderRoute: typeof LocationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/$state': {
+      id: '/locations/$state'
+      path: '/locations/$state'
+      fullPath: '/locations/$state'
+      preLoaderRoute: typeof LocationsStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/window-replacement': {
       id: '/guides/window-replacement'
       path: '/guides/window-replacement'
@@ -490,6 +570,8 @@ const rootRouteChildren: RootRouteChildren = {
   MethodologyRoute: MethodologyRoute,
   PrivacyRoute: PrivacyRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
@@ -499,6 +581,8 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesMetalVsAsphaltRoofRoute: GuidesMetalVsAsphaltRoofRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
+  LocationsStateRoute: LocationsStateRoute,
+  LocationsIndexRoute: LocationsIndexRoute,
   StateCityCategoryRoute: StateCityCategoryRoute,
 }
 export const routeTree = rootRouteImport

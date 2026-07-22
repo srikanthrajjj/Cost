@@ -15,7 +15,7 @@ export function CityMethodologyCallout({ methodologyNote }: CityMethodologyCallo
                 <FileText className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <h3 className="font-bold text-ink mb-2">How These Estimates Work</h3>
+                <h3 className="font-bold text-ink mb-2">How these estimates work</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                   {methodologyNote}
                 </p>

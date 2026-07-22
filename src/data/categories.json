@@ -6,33 +6,153 @@
     "icon": "Shield",
     "avgCost": "$11,500",
     "costRange": "$8,600 - $24,700",
-    "timeframe": "3 - 5 Days",
+    "timeframe": "3 - 5 days",
     "roi": "68%",
+    "estimateProjectType": "roof",
+    "guidePath": "/guides/roof-replacement",
     "seoTitle": "Roof replacement cost in {city}, {state} | CostReno",
-    "seoDescription": "Get the average cost of roof replacement in {city}, {state}. Compare local pricing, contractor quotes, and roofing materials with CostReno's AI-powered estimator.",
+    "seoDescription": "See typical roof replacement costs in {city}, {state}. Compare local labor rates, materials, and contractor quotes with CostReno.",
     "keywords": ["roof replacement", "roofing costs", "new roof", "roof repair", "shingles"],
+    "introTemplate": "Homeowners planning a roof replacement in {city}, {state} face pricing shaped by local labor rates ({laborLabel}), housing stock ({homeAgeShort}), and climate ({climateShort}). {regionalShort} CostReno helps you estimate a fair range for {city} before you compare contractor quotes.",
     "faq": [
       {
         "question": "How much does a roof replacement cost in {city}?",
-        "answer": "Roof replacement in {city} typically costs between $8,600 and $24,700 depending on your home size, roof pitch, and material choice. Local labor rates and permit requirements also influence the final price."
+        "answer": "Roof replacement in {city} typically falls between {costLow} and {costHigh}, depending on roof size, pitch, material, and tear-off needs. Local labor in {city} runs about {laborMultiplier}x the national baseline, so quotes can land higher or lower than national averages."
       },
       {
-        "question": "What roofing materials are best for {city}'s climate?",
-        "answer": "Given {city}'s hot summers and occasional hail events, impact-resistant asphalt shingles (Class 3 or 4) are a popular choice. Metal roofing is also gaining traction for its durability and energy efficiency in hot climates."
+        "question": "What roofing materials work best in {city}?",
+        "answer": "Material choice in {city} should reflect local climate: {climateNotes} Ask contractors which underlayment, ventilation, and impact or wind ratings are standard for {city} homes."
       },
       {
         "question": "Do I need a permit for roof replacement in {city}?",
-        "answer": "Yes, most municipalities require a permit for roof replacement. The cost is typically included in your contractor's quote, but it's important to verify that your contractor will obtain the necessary permits before work begins."
+        "answer": "Most {city} projects need a permit. Start with {permitOffice} for current requirements. Confirm your contractor pulls the permit and schedules inspections before work begins."
       },
       {
         "question": "How long does a roof replacement take in {city}?",
-        "answer": "Most roof replacements take 3 to 5 days, though complex roofs or larger homes may require additional time. Weather conditions in {city}, particularly summer heat, can also affect the timeline."
+        "answer": "Most replacements take 3 to 5 days. Weather, roof complexity, and crew availability in {city} can extend that timeline. Build a small contingency into your schedule."
       },
       {
-        "question": "Should I get multiple quotes for roof replacement in {city}?",
-        "answer": "Yes, we recommend getting at least 3 written quotes from licensed and insured contractors. This helps you understand fair market pricing and gives you leverage in negotiations."
+        "question": "Should I get multiple quotes in {city}?",
+        "answer": "Yes. Get at least three written quotes from licensed, insured contractors serving {city}. Use CostReno to check line items against local market ranges before you sign."
       }
     ],
-    "methodologyNote": "Cost estimates are based on regional pricing data, historical trends, and user-submitted quotes. Actual costs may vary based on your specific property, material selection, and contractor pricing."
+    "methodologyNote": "Cost ranges start from national project benchmarks, then adjust using {city}'s labor cost index and local housing context. They are planning estimates, not contractor bids."
+  },
+  {
+    "id": "kitchen-remodel",
+    "name": "Kitchen remodel",
+    "description": "Full or partial kitchen renovation",
+    "icon": "Utensils",
+    "avgCost": "$28,000",
+    "costRange": "$15,000 - $55,000",
+    "timeframe": "4 - 10 weeks",
+    "roi": "56%",
+    "estimateProjectType": "kitchen",
+    "guidePath": "/guides/kitchen-remodel",
+    "seoTitle": "Kitchen remodel cost in {city}, {state} | CostReno",
+    "seoDescription": "Estimate kitchen remodel costs in {city}, {state}. See local pricing factors, typical ranges, and how to evaluate contractor quotes.",
+    "keywords": ["kitchen remodel", "kitchen renovation cost", "kitchen remodel cost", "cabinet replacement"],
+    "introTemplate": "A kitchen remodel in {city}, {state} is priced by cabinetry, appliances, layout changes, and local labor ({laborLabel}). Many homes here date to {homeAgeShort}, which often means electrical or plumbing updates mid-project. {regionalShort} Use CostReno to set a realistic budget for {city} before you start collecting bids.",
+    "faq": [
+      {
+        "question": "How much does a kitchen remodel cost in {city}?",
+        "answer": "Kitchen remodels in {city} commonly range from {costLow} to {costHigh}. Cosmetic refreshes land lower; full gut renovations with layout changes land higher. Labor in {city} is about {laborMultiplier}x the national baseline."
+      },
+      {
+        "question": "What drives kitchen remodel prices in {city}?",
+        "answer": "Cabinets, countertops, appliances, and whether walls or plumbing move. Local housing stock ({homeAgeShort}) and contractor demand in {city} also move the final number."
+      },
+      {
+        "question": "Do I need permits for a kitchen remodel in {city}?",
+        "answer": "Electrical, plumbing, and structural changes usually require permits in {city}. Check with {permitOffice}. Cosmetic-only projects may need fewer approvals."
+      },
+      {
+        "question": "How long does a kitchen remodel take in {city}?",
+        "answer": "Most projects take 4 to 10 weeks. Custom cabinets, inspection timelines, and contractor backlog in {city} can stretch schedules."
+      },
+      {
+        "question": "How can I avoid overpaying for a kitchen remodel in {city}?",
+        "answer": "Define scope in writing, get multiple bids, and compare line items with CostReno against typical {city} pricing before you commit."
+      }
+    ],
+    "methodologyNote": "Kitchen cost ranges combine national remodel benchmarks with {city}'s labor index and housing context. Treat them as planning guidance, not fixed bids."
+  },
+  {
+    "id": "bathroom-remodel",
+    "name": "Bathroom remodel",
+    "description": "Full or partial bathroom renovation",
+    "icon": "Bath",
+    "avgCost": "$12,500",
+    "costRange": "$6,500 - $25,000",
+    "timeframe": "2 - 6 weeks",
+    "roi": "60%",
+    "estimateProjectType": "bathroom",
+    "guidePath": "/guides/bathroom-remodel",
+    "seoTitle": "Bathroom remodel cost in {city}, {state} | CostReno",
+    "seoDescription": "See bathroom remodel cost ranges in {city}, {state}. Understand local labor, permits, and how to compare contractor quotes.",
+    "keywords": ["bathroom remodel", "bathroom renovation cost", "shower remodel", "bathroom remodel cost"],
+    "introTemplate": "Bathroom remodel costs in {city}, {state} depend on fixture quality, waterproofing, and whether you keep the existing layout. Local labor runs {laborLabel}, and older housing stock ({homeAgeShort}) can surface hidden plumbing issues. {regionalShort} CostReno helps {city} homeowners estimate a fair range before hiring.",
+    "faq": [
+      {
+        "question": "How much does a bathroom remodel cost in {city}?",
+        "answer": "Typical bathroom remodels in {city} run {costLow} to {costHigh}. A refresh with new finishes costs less than a full gut with relocated plumbing. Local labor is about {laborMultiplier}x national average."
+      },
+      {
+        "question": "What affects bathroom remodel pricing in {city}?",
+        "answer": "Tile, shower systems, vanity quality, and plumbing moves. Climate and home age in {city} ({homeAgeShort}) can also influence waterproofing and venting choices."
+      },
+      {
+        "question": "Are permits required for bathroom remodels in {city}?",
+        "answer": "Plumbing and electrical changes usually need permits. Contact {permitOffice} for {city} requirements before work starts."
+      },
+      {
+        "question": "How long does a bathroom remodel take in {city}?",
+        "answer": "Most projects finish in 2 to 6 weeks. Custom tile, inspection waits, and contractor availability in {city} can add time."
+      },
+      {
+        "question": "Should I remodel one bathroom or several in {city}?",
+        "answer": "Start with the highest-use bath unless you are preparing to sell. Compare bids carefully. Labor and material pricing in {city} can vary widely between contractors."
+      }
+    ],
+    "methodologyNote": "Bathroom ranges use national remodel data adjusted by {city}'s labor cost index. Use them to sanity-check quotes, not as a final contract price."
+  },
+  {
+    "id": "hvac-installation",
+    "name": "HVAC installation",
+    "description": "New HVAC system installation or replacement",
+    "icon": "Wind",
+    "avgCost": "$7,500",
+    "costRange": "$4,500 - $14,000",
+    "timeframe": "1 - 3 days",
+    "roi": "71%",
+    "estimateProjectType": "hvac",
+    "guidePath": "/guides/hvac-installation",
+    "seoTitle": "HVAC installation cost in {city}, {state} | CostReno",
+    "seoDescription": "Estimate HVAC installation and replacement costs in {city}, {state}. Compare system sizes, local labor, and contractor quotes.",
+    "keywords": ["HVAC installation", "AC replacement cost", "furnace replacement", "HVAC cost"],
+    "introTemplate": "HVAC installation costs in {city}, {state} track system size, efficiency rating, ductwork condition, and local climate load ({climateShort}). Labor here is {laborLabel}. {regionalShort} CostReno helps you estimate a fair HVAC budget for {city} homes before you book installs.",
+    "faq": [
+      {
+        "question": "How much does HVAC installation cost in {city}?",
+        "answer": "HVAC replacement in {city} often ranges from {costLow} to {costHigh}, depending on tonnage, SEER rating, and whether ducts need repair. Local labor is about {laborMultiplier}x the national baseline."
+      },
+      {
+        "question": "What size HVAC system do homes in {city} need?",
+        "answer": "Sizing depends on square footage, insulation, and climate. In {city}, climate conditions matter: {climateNotes} A Manual J load calculation is the reliable way to size equipment."
+      },
+      {
+        "question": "Do I need a permit for HVAC work in {city}?",
+        "answer": "Most new installs and major replacements require permits and inspections. Check with {permitOffice} for {city} rules."
+      },
+      {
+        "question": "How long does HVAC installation take in {city}?",
+        "answer": "Straightforward replacements often take 1 to 3 days. Duct redesigns, electrical upgrades, or permitting delays in {city} can take longer."
+      },
+      {
+        "question": "How do I compare HVAC quotes in {city}?",
+        "answer": "Compare equipment model numbers, warranty terms, ductwork scope, and labor. Use CostReno to check whether a {city} quote sits in a realistic market range."
+      }
+    ],
+    "methodologyNote": "HVAC ranges combine national install benchmarks with {city}'s labor index and climate context. Final pricing depends on equipment and duct conditions."
   }
 ]

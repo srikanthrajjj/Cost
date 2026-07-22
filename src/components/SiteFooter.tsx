@@ -143,18 +143,23 @@ export function SiteFooter() {
             </h3>
             <ul className="space-y-2.5">
               <li>
-                <a href="/about" className="text-sm text-white/70 hover:text-accent transition">
-                  About Us
+                <a href="/locations" className="text-sm text-white/70 hover:text-accent transition">
+                  Costs by city
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-white/70 hover:text-accent transition">
+                <a href="/about" className="text-sm text-white/70 hover:text-accent transition">
+                  About us
+                </a>
+              </li>
+              <li>
+                <a href="/contact" className="text-sm text-white/70 hover:text-accent transition">
                   Contact
                 </a>
               </li>
               <li>
                 <a href="/privacy" className="text-sm text-white/70 hover:text-accent transition">
-                  Privacy Policy
+                  Privacy policy
                 </a>
               </li>
               <li>
@@ -167,11 +172,11 @@ export function SiteFooter() {
               </li>
               <li>
                 <a href="/terms" className="text-sm text-white/70 hover:text-accent transition">
-                  Terms of Service
+                  Terms of service
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-white/70 hover:text-accent transition">
+                <a href="/sitemap.xml" className="text-sm text-white/70 hover:text-accent transition">
                   Sitemap
                 </a>
               </li>

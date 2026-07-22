@@ -17,7 +17,7 @@ dist-ssr
 *.local
 
 # Local JSON data store (dev fallback when DATABASE_URL is unset)
-data/
+/data/
 
 # Wrangler / Cloudflare
 .wrangler/
