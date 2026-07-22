@@ -27,7 +27,11 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1 lg:col-span-2">
             <a href="/" className="inline-block mb-4">
-              <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
+              <img
+                src="/logo-white.png"
+                alt="CostReno"
+                className="h-8 w-auto"
+              />
             </a>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs mb-5">
               Clear home renovation cost estimates, AI-powered quote analysis, and expert guides to

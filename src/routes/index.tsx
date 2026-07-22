@@ -58,8 +58,6 @@ import projSolar from "@/assets/proj-solar.jpg";
 import cmpRoof from "@/assets/cmp-roof.jpg";
 import cmpCounter from "@/assets/cmp-counter.jpg";
 import cmpHvac from "@/assets/cmp-hvac.jpg";
-import blueprint from "@/assets/house-blueprint.jpg";
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -3094,39 +3092,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         {/* Popular Projects */}
       </section>
 
-      {/* FEATURED GUIDES */}
-      <section className="container-x py-16 border-t border-border">
-        <div className="rounded-2xl border border-border bg-white p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <h2 className="font-display text-2xl font-bold text-ink">Local renovation costs</h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-xl">
-              Browse city pages for roof, kitchen, bathroom, and HVAC pricing context across major
-              U.S. markets.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="/locations"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              Costs by city <ArrowRight className="h-4 w-4" />
-            </a>
-            <a
-              href="/methodology"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-ink hover:bg-muted"
-            >
-              Our methodology
-            </a>
-            <a
-              href="/compare-quotes"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-ink hover:bg-muted"
-            >
-              Compare quotes
-            </a>
-          </div>
-        </div>
-      </section>
-
       <section className="container-x py-20">
         <div className="flex items-end justify-between mb-6">
           <div>
@@ -3354,50 +3319,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </div>
             </a>
           ))}
-        </div>
-      </section>
-
-      {/* NEWSLETTER */}
-      <section className="container-x py-20">
-        <div className="rounded-2xl border border-border bg-card p-6 md:p-8 grid md:grid-cols-[auto_1fr_auto] gap-8 items-center">
-          <img
-            src={blueprint}
-            alt="House blueprint"
-            width={1024}
-            height={1024}
-            loading="lazy"
-            className="h-32 w-40 object-contain"
-          />
-          <div>
-            <h3 className="font-display text-xl md:text-2xl font-bold text-ink">
-              Stay Informed. Plan Smarter.
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Get expert tips, cost trends, and project checklists straight to your inbox.
-            </p>
-            <form className="mt-4 flex gap-2 max-w-md">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button className="rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90">
-                Subscribe Free
-              </button>
-            </form>
-          </div>
-          <div className="flex md:flex-col gap-6 md:gap-4 text-center md:text-left md:border-l md:border-border md:pl-8">
-            {[
-              ["8+", "Guides published"],
-              ["Weekly", "Cost updates"],
-              ["Free", "Core tools"],
-            ].map(([k, v]) => (
-              <div key={v}>
-                <div className="font-display text-lg font-bold text-ink">{k}</div>
-                <div className="text-xs text-muted-foreground">{v}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
