@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -48,11 +47,6 @@ import { Route as StateCityCategoryRouteImport } from './routes/$state/$city/$ca
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -239,7 +233,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -276,7 +269,6 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -314,7 +306,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
@@ -353,7 +344,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/quote-analyzer'
     | '/robots.txt'
-    | '/sitemap.xml'
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -390,7 +380,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/quote-analyzer'
     | '/robots.txt'
-    | '/sitemap.xml'
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -427,7 +416,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/quote-analyzer'
     | '/robots.txt'
-    | '/sitemap.xml'
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
@@ -465,7 +453,6 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
@@ -497,13 +484,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -753,7 +733,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
