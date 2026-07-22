@@ -1108,11 +1108,15 @@ function Landing() {
       widgetDone?: boolean;
     }[]
   >([]);
+  const [messageFeedback, setMessageFeedback] = useState<Record<number, "up" | "down">>({});
   const [attachments, setAttachments] = useState<
     { name: string; type: string; size: number; file?: File }[]
   >([]);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatPanelRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [isProcessingQuote, setIsProcessingQuote] = useState(false);
@@ -1132,6 +1136,58 @@ function Landing() {
       quoteAbortControllerRef.current?.abort();
     };
   }, []);
+
+  const closeChat = () => {
+    setChatOpen(false);
+    setIsFullScreen(false);
+  };
+
+  // Dialog a11y: Escape, scroll lock, focus trap, restore focus
+  useEffect(() => {
+    if (!chatOpen) return;
+
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusTimer = window.setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 50);
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeChat();
+        return;
+      }
+      if (e.key !== "Tab" || !chatPanelRef.current) return;
+
+      const focusable = Array.from(
+        chatPanelRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled") && el.getClientRects().length > 0);
+
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocusRef.current?.focus?.();
+    };
+  }, [chatOpen]);
 
   const DEBUG_QUOTE_ANALYSIS = import.meta.env.DEV;
 
@@ -1379,6 +1435,36 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     }
   };
 
+  const sendChatPrompt = async (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    const newMessages = [{ role: "user" as const, text: q }];
+    setChatMessages(newMessages);
+    setChatInput("");
+    setSearchQuery("");
+    setShowSuggestions(false);
+    setIsAiTyping(true);
+    setTimeout(scrollToBottom, 50);
+    const aiResponse = await getAIResponse(newMessages);
+    setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
+    setIsAiTyping(false);
+    setTimeout(scrollToBottom, 50);
+  };
+
+  const openChat = (opts?: { query?: string; send?: boolean }) => {
+    const query = (opts?.query ?? searchQuery).trim();
+    setChatOpen(true);
+    setShowSuggestions(false);
+    if (opts?.send && query) {
+      void sendChatPrompt(query);
+      return;
+    }
+    if (query) {
+      setChatInput(query);
+      setSearchQuery("");
+    }
+  };
+
   const STAGE_MESSAGES: Record<QuotePipelineStage | "reading", string> = {
     reading: "Reading your document...",
     extracting: "Extracting materials and line items...",
@@ -1430,6 +1516,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
     setChatMessages(newMessages);
     setChatInput("");
+    setSearchQuery("");
     setAttachments([]);
     setTimeout(scrollToBottom, 50);
 
@@ -2061,12 +2148,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 </div>
                 <span className="text-xs font-bold text-ink">Ask CostReno AI</span>
               </div>
-              <div
-                className="relative rounded-xl bg-white border-2 border-accent/30 shadow-lg shadow-accent/5 overflow-hidden hover:border-accent/50 transition-colors cursor-pointer"
-                onClick={() => setChatOpen(true)}
-              >
+              <div className="relative rounded-xl bg-white border-2 border-accent/30 shadow-lg shadow-accent/5 overflow-hidden hover:border-accent/50 transition-colors">
                 <div className="flex items-center gap-3 px-4 py-3">
-                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <MessageCircle className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden />
                   <div className="relative flex-1 min-w-0">
                     <input
                       type="text"
@@ -2075,49 +2159,29 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                         setSearchQuery(e.target.value);
                         setShowSuggestions(true);
                       }}
-                      onFocus={() => setChatOpen(true)}
-                      onBlur={() => {}}
-                      onKeyDown={async (e) => {
+                      onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          const query = searchQuery.trim();
-                          setChatOpen(true);
-                          setShowSuggestions(false);
-                          if (query) {
-                            const newMessages = [{ role: "user" as const, text: query }];
-                            setChatMessages(newMessages);
-                            setChatInput("");
-                            setSearchQuery("");
-                            setIsAiTyping(true);
-                            const aiResponse = await getAIResponse(newMessages);
-                            setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
-                            setIsAiTyping(false);
-                          }
+                          e.preventDefault();
+                          openChat({ send: Boolean(searchQuery.trim()) });
                         }
                       }}
+                      aria-label="Ask CostReno AI about renovation costs"
                       className="w-full bg-transparent text-sm outline-none text-ink"
                     />
                     {searchQuery.length === 0 && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-muted-foreground whitespace-nowrap overflow-hidden max-w-full">
-                        {displayTerm}
+                      <span
+                        className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-muted-foreground whitespace-nowrap overflow-hidden max-w-full"
+                        aria-hidden
+                      >
+                        {displayTerm || "Ask about costs, quotes, or materials..."}
                         <span className="animate-pulse">|</span>
                       </span>
                     )}
                   </div>
                   <button
-                    onClick={async () => {
-                      const query = searchQuery.trim();
-                      setChatOpen(true);
-                      if (query) {
-                        const newMessages = [{ role: "user" as const, text: query }];
-                        setChatMessages(newMessages);
-                        setChatInput("");
-                        setSearchQuery("");
-                        setIsAiTyping(true);
-                        const aiResponse = await getAIResponse(newMessages);
-                        setChatMessages([...newMessages, { role: "ai", text: aiResponse }]);
-                        setIsAiTyping(false);
-                      }
-                    }}
+                    type="button"
+                    onClick={() => openChat({ send: Boolean(searchQuery.trim()) })}
+                    aria-label={searchQuery.trim() ? "Send message" : "Open chat"}
                     className="flex items-center justify-center w-9 h-9 rounded-lg bg-accent text-white hover:bg-accent/90 transition shrink-0"
                   >
                     <Send className="h-4 w-4" />
@@ -2159,24 +2223,28 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center ${isFullScreen ? "!items-stretch !justify-stretch" : ""}`}
         >
           {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setChatOpen(false)}
-          />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeChat} />
 
           {/* Chat Panel */}
           <div
+            ref={chatPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="chat-dialog-title"
             className={`relative flex flex-col bg-white shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden ${
               isFullScreen
                 ? "w-full h-full sm:w-full sm:h-full"
-                : "w-full sm:w-[720px] sm:mx-4 h-[90vh] sm:h-[85vh] sm:rounded-2xl rounded-t-2xl"
+                : "w-full sm:w-[720px] sm:mx-4 h-[min(90vh,100dvh)] sm:h-[85vh] sm:rounded-2xl rounded-t-2xl"
             }`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 bg-[#082A4B]">
               <div className="flex items-center gap-2.5">
-                <span className="font-display text-lg font-extrabold text-white tracking-wide">
-                  COST<span className="text-accent">RENO</span>
+                <span
+                  id="chat-dialog-title"
+                  className="font-display text-lg font-extrabold text-white tracking-wide"
+                >
+                  CostReno
                 </span>
                 <span className="px-1.5 py-0.5 rounded bg-accent text-white text-[9px] font-bold tracking-wider">
                   AI
@@ -2184,7 +2252,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </div>
               <div className="flex items-center gap-1">
                 <button
+                  type="button"
                   onClick={() => setIsFullScreen(!isFullScreen)}
+                  aria-label={isFullScreen ? "Exit full screen" : "Enter full screen"}
                   className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition"
                 >
                   {isFullScreen ? (
@@ -2194,7 +2264,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                   )}
                 </button>
                 <button
-                  onClick={() => setChatOpen(false)}
+                  type="button"
+                  onClick={closeChat}
+                  aria-label="Close chat"
                   className="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition"
                 >
                   <X className="h-4 w-4 text-white/80" />
@@ -2208,20 +2280,17 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             >
               <div className={`mx-auto space-y-5 ${isFullScreen ? "max-w-xl" : ""}`}>
                 {chatMessages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center h-full py-6">
-                    {/* Welcome text */}
+                  <div className="flex flex-col justify-center py-4">
                     <h2 className="text-xl font-extrabold text-ink text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
-                      Save thousands on your next renovation.
+                      Ask about renovation costs
                     </h2>
-                    <p className="text-sm text-muted-foreground mt-2 text-center max-w-sm leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
-                      Our AI analyzes live local data to give you real costs, catch overpriced
-                      quotes, and guide you step-by-step.
+                    <p className="text-sm text-muted-foreground mt-2 text-center max-w-sm mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150">
+                      Get local cost guidance, quote checks, and next steps in plain language.
                     </p>
 
-                    {/* Questions - staggered animation */}
-                    <div className="mt-6 w-full max-w-sm space-y-2">
+                    <div className="mt-6 w-full max-w-sm mx-auto space-y-2">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold px-1 animate-in fade-in duration-500 delay-300">
-                        Ask me anything
+                        Try asking
                       </p>
                       {[
                         { q: "How much should a roof replacement cost?", delay: "delay-[400ms]" },
@@ -2232,30 +2301,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       ].map(({ q, delay }) => (
                         <button
                           key={q}
-                          onClick={async () => {
-                            const isEstimateQ = /how much|cost|estimate|price/i.test(q);
-                            if (isEstimateQ) {
-                              setChatMessages([
-                                { role: "user", text: q },
-                                {
-                                  role: "widget",
-                                  text: "",
-                                  widgetType: "estimator",
-                                  widgetDone: false,
-                                },
-                              ]);
-                              setTimeout(scrollToBottom, 50);
-                              return;
-                            }
-                            const newMessages = [{ role: "user" as const, text: q }];
-                            setChatMessages(newMessages);
-                            setIsAiTyping(true);
-                            setTimeout(scrollToBottom, 50);
-                            const aiResponse = await getAIResponse(newMessages);
-                            setChatMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
-                            setIsAiTyping(false);
-                            setTimeout(scrollToBottom, 50);
-                          }}
+                          type="button"
+                          onClick={() => void sendChatPrompt(q)}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-background hover:border-accent/40 hover:bg-accent/5 transition text-left group animate-in fade-in slide-in-from-bottom-3 duration-500 ${delay}`}
                         >
                           <MessageCircle className="h-4 w-4 text-accent shrink-0" />
@@ -2265,39 +2312,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-accent shrink-0 transition" />
                         </button>
                       ))}
-                    </div>
-
-                    {/* Active Tools */}
-                    <div className="mt-5 w-full max-w-sm animate-in fade-in duration-500 delay-[900ms]">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-2 px-1">
-                        Active Tools
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <a
-                          href="/estimate"
-                          className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
-                            <Calculator className="h-3.5 w-3.5 text-accent" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-ink">Cost Estimator</p>
-                            <p className="text-[10px] text-accent font-medium">Live</p>
-                          </div>
-                        </a>
-                        <a
-                          href="/quote-analyzer"
-                          className="flex items-center gap-2.5 p-3 rounded-xl border border-accent/30 bg-accent/5 hover:bg-accent/10 transition"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
-                            <Search className="h-3.5 w-3.5 text-accent" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-ink">Quote Review</p>
-                            <p className="text-[10px] text-accent font-medium">Live</p>
-                          </div>
-                        </a>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -2396,7 +2410,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       </div>
                     ) : msg.role === "widget" && msg.widgetType === "estimator" ? (
                       <div className="flex items-start gap-2.5 w-full max-w-[90%]">
-                        <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 MT-0.5">
+                        <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 mt-0.5">
                           <Bot className="h-4 w-4 text-white" />
                         </div>
                         <div className="flex-1">
@@ -2412,7 +2426,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                       </div>
                     ) : (
                       <div className="flex items-start gap-2.5 max-w-[85%]">
-                        <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 MT-0.5">
+                        <div className="w-7 h-7 rounded-lg bg-[#082A4B] flex items-center justify-center shrink-0 mt-0.5">
                           <Bot className="h-4 w-4 text-white" />
                         </div>
                         <div>
@@ -2423,10 +2437,44 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             <div className="mt-2">{renderDebugPanel(quoteDebugInfo)}</div>
                           )}
                           <div className="flex items-center gap-3 mt-2">
-                            <button className="text-muted-foreground/40 hover:text-accent transition">
+                            <button
+                              type="button"
+                              aria-label="Helpful response"
+                              aria-pressed={messageFeedback[i] === "up"}
+                              onClick={() =>
+                                setMessageFeedback((prev) => {
+                                  const next = { ...prev };
+                                  if (next[i] === "up") delete next[i];
+                                  else next[i] = "up";
+                                  return next;
+                                })
+                              }
+                              className={`transition ${
+                                messageFeedback[i] === "up"
+                                  ? "text-accent"
+                                  : "text-muted-foreground/40 hover:text-accent"
+                              }`}
+                            >
                               <ThumbsUp className="h-3.5 w-3.5" />
                             </button>
-                            <button className="text-muted-foreground/40 hover:text-destructive transition">
+                            <button
+                              type="button"
+                              aria-label="Unhelpful response"
+                              aria-pressed={messageFeedback[i] === "down"}
+                              onClick={() =>
+                                setMessageFeedback((prev) => {
+                                  const next = { ...prev };
+                                  if (next[i] === "down") delete next[i];
+                                  else next[i] = "down";
+                                  return next;
+                                })
+                              }
+                              className={`transition ${
+                                messageFeedback[i] === "down"
+                                  ? "text-destructive"
+                                  : "text-muted-foreground/40 hover:text-destructive"
+                              }`}
+                            >
                               <ThumbsDown className="h-3.5 w-3.5" />
                             </button>
                           </div>
@@ -2513,7 +2561,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
             {/* Input */}
             <div
-              className={`border-t border-border/50 ${isFullScreen ? "px-5 py-4 max-w-xl mx-auto w-full" : "px-4 pb-4 pt-2"}`}
+              className={`border-t border-border/50 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${isFullScreen ? "px-5 pt-4 max-w-xl mx-auto w-full" : "px-4 pt-2"}`}
             >
               {/* Attachments preview */}
               {attachmentError && (
@@ -2583,8 +2631,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                         {/* Remove button */}
                         <button
+                          type="button"
                           onClick={() => setAttachments(attachments.filter((_, idx) => idx !== i))}
-                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-muted-foreground/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-destructive"
+                          aria-label={`Remove ${file.name}`}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-muted-foreground/80 text-white flex items-center justify-center transition hover:bg-destructive"
                         >
                           <XIcon className="h-3 w-3" />
                         </button>
@@ -2595,8 +2645,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               )}
               <div className="flex items-center gap-2 rounded-xl border border-border bg-background p-2 focus-within:ring-2 focus-within:ring-accent/30 transition">
                 <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center transition shrink-0 text-muted-foreground hover:text-accent"
+                  aria-label="Attach file"
                   title="Attach file (JPG, PNG, PDF)"
                 >
                   <Paperclip className="h-4 w-4" />
@@ -2639,9 +2691,13 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                   className="hidden"
                 />
                 <input
+                  ref={chatInputRef}
                   type="text"
                   value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
+                  onChange={(e) => {
+                    setChatInput(e.target.value);
+                    setSearchQuery(e.target.value);
+                  }}
                   onKeyDown={async (e) => {
                     if (
                       e.key === "Enter" &&
@@ -2652,22 +2708,24 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                     }
                   }}
                   placeholder="Ask me anything about costs, materials, insurance, plans..."
-                  className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground/60"
+                  className="flex-1 bg-transparent text-sm outline-none px-2 text-ink placeholder:text-muted-foreground"
                   disabled={isProcessingQuote}
                 />
                 <button
+                  type="button"
                   onClick={async () => {
                     if ((chatInput.trim() || attachments.length > 0) && !isProcessingQuote) {
                       await handleSendMessage();
                     }
                   }}
+                  aria-label="Send message"
                   className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center text-white hover:bg-accent/90 transition shrink-0 disabled:opacity-50"
                   disabled={(!chatInput.trim() && attachments.length === 0) || isProcessingQuote}
                 >
                   <Send className="h-4 w-4" />
                 </button>
               </div>
-              <p className="text-center text-[10px] text-muted-foreground/50 mt-2">
+              <p className="text-center text-[10px] text-muted-foreground mt-2">
                 CostReno AI may produce inaccurate information. Verify important details.
               </p>
             </div>
@@ -2760,47 +2818,32 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           </div>
 
           <div className="relative">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 overflow-x-auto pb-6 hide-scrollbar">
-              {projects.map((p, idx) => {
-                const isDisabled = idx >= 3; // Disable cards 4, 5, 6 (indices 3, 4, 5)
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-auto pb-6 hide-scrollbar">
+              {projects.slice(0, 3).map((p) => {
                 return (
                   <a
                     key={p.name}
-                    href={isDisabled ? "#" : "#"}
-                    onClick={(e) => isDisabled && e.preventDefault()}
-                    className={`group relative min-w-[280px] md:min-w-auto flex flex-col rounded-[18px] border border-[#E7EAF0] bg-white overflow-hidden shadow-sm ${
-                      !isDisabled
-                        ? "hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover:border-accent/30 cursor-pointer"
-                        : "cursor-not-allowed"
-                    }`}
+                    href="/estimate"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      sessionStorage.setItem("costreno_preselected_project", p.projectType);
+                      window.location.href = "/estimate";
+                    }}
+                    className="group relative min-w-[280px] md:min-w-auto flex flex-col rounded-[18px] border border-[#E7EAF0] bg-white overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover:border-accent/30 cursor-pointer"
                   >
                     <div className="relative aspect-[16/10] overflow-hidden rounded-t-[18px]">
                       <img
                         src={p.img}
                         alt={p.name}
                         loading="lazy"
-                        className={`h-full w-full object-cover transition-transform duration-700 ${
-                          !isDisabled ? "group-hover:scale-110" : ""
-                        }`}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
-                      {isDisabled && (
-                        <div className="absolute inset-0 bg-black/15 flex items-center justify-center">
-                          <span className="px-3 py-1.5 rounded-full bg-white/95 text-[12px] font-bold text-primary shadow-lg">
-                            Coming Soon
-                          </span>
-                        </div>
-                      )}
-                      {!isDisabled && (
-                        <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
-                          {p.time}
-                        </span>
-                      )}
+                      <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold">
+                        {p.time}
+                      </span>
                     </div>
 
-                    <div
-                      className={`relative flex-1 p-5 ${isDisabled ? "pointer-events-none opacity-60" : ""}`}
-                    >
+                    <div className="relative flex-1 p-5">
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <h3 className="text-sm font-bold text-ink line-clamp-2 pr-2">{p.name}</h3>
                       </div>
@@ -2817,23 +2860,19 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
                         <div className="pt-3 border-t border-border/30">
                           <button
-                            disabled={isDisabled}
-                            onClick={() => {
-                              if (!isDisabled) {
-                                sessionStorage.setItem(
-                                  "costreno_preselected_project",
-                                  p.projectType,
-                                );
-                                window.location.href = "/estimate";
-                              }
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              sessionStorage.setItem(
+                                "costreno_preselected_project",
+                                p.projectType,
+                              );
+                              window.location.href = "/estimate";
                             }}
-                            className={`w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold ${
-                              isDisabled
-                                ? "bg-muted/50 border-muted text-muted-foreground cursor-not-allowed"
-                                : "text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
-                            }`}
+                            className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
                           >
-                            {isDisabled ? "Coming Soon" : `Estimate my ${p.projectType}`}
+                            Estimate my {p.projectType}
                           </button>
                         </div>
                       </div>
@@ -2864,8 +2903,8 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           </p>
         </div>
 
-        {/* Unified Tools Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Unified Tools Grid — live tools only */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
           {/* Cost Estimator - Active */}
           <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
@@ -2895,7 +2934,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               href="/estimate"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
             >
-              Get Estimate <ArrowRight className="h-3.5 w-3.5" />
+              Get estimate <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
@@ -2926,7 +2965,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               href="/quote-analyzer"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
             >
-              Review a Quote <ArrowRight className="h-3.5 w-3.5" />
+              Review a quote <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
@@ -2961,74 +3000,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               href="/compare-quotes"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
             >
-              Compare Quotes <ArrowRight className="h-3.5 w-3.5" />
+              Compare quotes <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
-
-          {/* Coming Soon Tools */}
-          {[
-            {
-              id: "insurance",
-              name: "Insurance Checker",
-              desc: "Find out what's covered and maximize your insurance benefits.",
-              icon: '<path d="M14 3L5 7v7c0 5.5 3.9 10.7 9 12 5.1-1.3 9-6.5 9-12V7L14 3z" /><path d="M10 14l3 3 5-5" strokeWidth="2" />',
-            },
-            {
-              id: "materials",
-              name: "Material Compare",
-              desc: "Compare materials side-by-side on cost, durability, and lifespan.",
-              icon: '<path d="M14 3L3 9l11 6 11-6-11-6z" /><path d="M3 14l11 6 11-6" /><path d="M3 19l11 6 11-6" />',
-            },
-            {
-              id: "budget",
-              name: "Budget Planner",
-              desc: "Plan your budget and explore options from start to finish.",
-              icon: '<circle cx="14" cy="14" r="10" /><path d="M14 14L14 4" strokeWidth="2" /><path d="M14 14 A10 10 0 0 1 22.7 19" strokeWidth="2.5" /><circle cx="14" cy="14" r="2.5" />',
-            },
-            {
-              id: "roi",
-              name: "ROI Calculator",
-              desc: "See the return on your investment and increase home value.",
-              icon: '<polyline points="3,22 9,16 14,19 21,9 25,5" /><polyline points="21,5 25,5 25,9" strokeWidth="2" />',
-            },
-            {
-              id: "timeline",
-              name: "Project Timeline",
-              desc: "Get a clear step-by-step timeline from start to finish.",
-              icon: '<rect x="3" y="5" width="22" height="20" rx="3" /><line x1="3" y1="11" x2="25" y2="11" /><line x1="9" y1="3" x2="9" y2="8" strokeWidth="2" /><line x1="19" y1="3" x2="19" y2="8" strokeWidth="2" /><circle cx="9" cy="17" r="1.5" /><circle cx="14" cy="17" r="1.5" /><circle cx="19" cy="17" r="1.5" />',
-            },
-          ].map((tool) => (
-            <div
-              key={tool.id}
-              className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 overflow-hidden transition-all duration-300"
-              style={{ opacity: 0.75 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4 group-hover:bg-accent/10 transition-colors duration-300">
-                  <svg
-                    className="w-6 h-6 text-muted-foreground group-hover:text-accent transition-colors duration-300"
-                    viewBox="0 0 28 28"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    dangerouslySetInnerHTML={{ __html: tool.icon }}
-                  />
-                </div>
-                <h3 className="font-display text-sm font-bold text-ink mb-1.5">{tool.name}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
-                  {tool.desc}
-                </p>
-                <div className="pt-3 border-t border-border/30 mt-auto">
-                  <p className="text-xs text-accent font-semibold text-center leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    We're crafting something smart here. Stay tuned.
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -3069,7 +3043,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             {
               num: "4",
               title: "Make a confident decision",
-              desc: "Use expert recommendations, material comparisons, and ROI analysis to make the best choice for your home. Coming soon.",
+              desc: "Use clear cost ranges, quote findings, and practical next steps to choose what fits your home and budget.",
             },
           ].map((step, i) => (
             <div
