@@ -1,17 +1,23 @@
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 import { getDb, getStorageMode } from "./client";
-import { comparisonReports, quoteFeedback, quoteUploads } from "./schema";
+import { comparisonReports, pageVisits, quoteFeedback, quoteUploads } from "./schema";
 import {
+  fileCountPageVisits,
   fileCountQuoteFeedback,
   fileCountQuoteUploads,
+  fileCountUniqueVisitors,
   fileGetComparisonReport,
+  fileListPageVisits,
   fileListQuoteFeedback,
   fileListQuoteUploads,
   fileSaveComparisonReport,
+  fileSavePageVisit,
   fileSaveQuoteFeedback,
   fileSaveQuoteUpload,
+  fileTopVisitLocations,
   fileUpdateQuoteUpload,
   type StoredComparisonReport,
+  type StoredPageVisit,
   type StoredQuoteFeedback,
   type StoredQuoteUpload,
 } from "./file-store";
@@ -321,6 +327,117 @@ export async function getComparisonReport(id: string): Promise<StoredComparisonR
     };
   }
   return fileGetComparisonReport(id);
+}
+
+export type SavePageVisitInput = {
+  path: string;
+  sessionId: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  countryCode?: string;
+  referrer?: string;
+};
+
+export async function savePageVisit(input: SavePageVisitInput): Promise<{
+  id: string;
+  storage: "postgres" | "file";
+}> {
+  const id = newId("visit");
+  const createdAt = new Date();
+  const row: StoredPageVisit = {
+    id,
+    createdAt: createdAt.toISOString(),
+    path: input.path.slice(0, 300),
+    sessionId: input.sessionId.slice(0, 80),
+    city: input.city?.slice(0, 80) || null,
+    region: input.region?.slice(0, 80) || null,
+    country: input.country?.slice(0, 80) || null,
+    countryCode: input.countryCode?.slice(0, 8) || null,
+    referrer: input.referrer?.slice(0, 400) || null,
+  };
+
+  const db = getDb();
+  if (db) {
+    await db.insert(pageVisits).values({
+      id: row.id,
+      createdAt,
+      path: row.path,
+      sessionId: row.sessionId,
+      city: row.city,
+      region: row.region,
+      country: row.country,
+      countryCode: row.countryCode,
+      referrer: row.referrer,
+    });
+    return { id, storage: "postgres" };
+  }
+
+  await fileSavePageVisit(row);
+  return { id, storage: "file" };
+}
+
+export async function listStoredPageVisits(limit = 50): Promise<StoredPageVisit[]> {
+  const db = getDb();
+  if (db) {
+    const rows = await db.select().from(pageVisits).orderBy(desc(pageVisits.createdAt)).limit(limit);
+    return rows.map((r) => ({
+      id: r.id,
+      createdAt: r.createdAt.toISOString(),
+      path: r.path,
+      sessionId: r.sessionId,
+      city: r.city,
+      region: r.region,
+      country: r.country,
+      countryCode: r.countryCode,
+      referrer: r.referrer,
+    }));
+  }
+  return fileListPageVisits(limit);
+}
+
+export async function countStoredPageVisits(): Promise<number> {
+  const db = getDb();
+  if (db) {
+    const rows = await db.select({ value: count() }).from(pageVisits);
+    return Number(rows[0]?.value ?? 0);
+  }
+  return fileCountPageVisits();
+}
+
+export async function countStoredUniqueVisitors(): Promise<number> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({ value: sql<number>`count(distinct ${pageVisits.sessionId})` })
+      .from(pageVisits);
+    return Number(rows[0]?.value ?? 0);
+  }
+  return fileCountUniqueVisitors();
+}
+
+export async function topStoredVisitLocations(limit = 8): Promise<{ label: string; count: number }[]> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({
+        city: pageVisits.city,
+        country: pageVisits.country,
+        value: count(),
+      })
+      .from(pageVisits)
+      .groupBy(pageVisits.city, pageVisits.country)
+      .orderBy(desc(count()))
+      .limit(limit);
+
+    return rows.map((r) => {
+      const city = r.city?.trim();
+      const country = r.country?.trim();
+      const label = city && country ? `${city}, ${country}` : country || city || "Unknown";
+      return { label, count: Number(r.value ?? 0) };
+    });
+  }
+  return fileTopVisitLocations(limit);
 }
 
 export { getStorageMode };

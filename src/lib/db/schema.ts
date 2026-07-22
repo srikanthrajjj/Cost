@@ -48,6 +48,20 @@ export const comparisonReports = pgTable("comparison_reports", {
   expiresAt: timestamp("expires_at", { withTimezone: true }),
 });
 
+/** Anonymous page visits for lightweight admin analytics (no IP stored) */
+export const pageVisits = pgTable("page_visits", {
+  id: text("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  path: text("path").notNull(),
+  sessionId: text("session_id").notNull(),
+  city: text("city"),
+  region: text("region"),
+  country: text("country"),
+  countryCode: text("country_code"),
+  referrer: text("referrer"),
+});
+
 export type QuoteUploadRow = typeof quoteUploads.$inferSelect;
 export type QuoteFeedbackRow = typeof quoteFeedback.$inferSelect;
 export type ComparisonReportRow = typeof comparisonReports.$inferSelect;
+export type PageVisitRow = typeof pageVisits.$inferSelect;

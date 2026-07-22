@@ -2,14 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   BarChart3,
+  Eye,
   FileText,
   Loader2,
   Lock,
   LogOut,
   Mail,
+  MapPin,
   MessageSquare,
   RefreshCw,
   Shield,
+  Users,
 } from "lucide-react";
 import { getAdminDashboardStats, verifyAdminPassword } from "@/lib/db/admin";
 
@@ -200,7 +203,19 @@ function AdminPage() {
           </p>
         )}
 
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <MetricCard
+            icon={Users}
+            label="Unique visitors"
+            value={stats?.uniqueVisitors}
+            loading={isLoadingStats && !stats}
+          />
+          <MetricCard
+            icon={Eye}
+            label="Page views"
+            value={stats?.pageViews}
+            loading={isLoadingStats && !stats}
+          />
           <MetricCard
             icon={FileText}
             label="Quotes processed"
@@ -220,6 +235,66 @@ function AdminPage() {
             loading={isLoadingStats && !stats}
             footnote={stats?.waitlistError ?? undefined}
           />
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="text-sm font-bold text-ink mb-4 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-accent" />
+              Top locations
+            </h2>
+            {!stats?.topLocations?.length ? (
+              <p className="text-sm text-muted-foreground">
+                No visitor locations yet. Counts start after deploy.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {stats.topLocations.map((loc) => (
+                  <li
+                    key={loc.label}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/70 px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium text-ink truncate">{loc.label}</span>
+                    <span className="text-xs font-semibold text-muted-foreground shrink-0">
+                      {loc.count.toLocaleString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="text-sm font-bold text-ink mb-4">Recent visits</h2>
+            {!stats?.recentVisits?.length ? (
+              <p className="text-sm text-muted-foreground">No visits recorded yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {stats.recentVisits.map((v) => {
+                  const place =
+                    v.city && v.country
+                      ? `${v.city}, ${v.country}`
+                      : v.country || v.city || "Unknown location";
+                  return (
+                    <li
+                      key={v.id}
+                      className="rounded-xl border border-border/70 px-3 py-2.5 text-sm"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-ink truncate">{v.path}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{place}</p>
+                        </div>
+                        <span className="text-[11px] text-muted-foreground shrink-0">
+                          {formatDate(v.createdAt)}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">

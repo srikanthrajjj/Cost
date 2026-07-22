@@ -1,11 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
+  countStoredPageVisits,
   countStoredQuoteFeedback,
   countStoredQuoteUploads,
+  countStoredUniqueVisitors,
   getStorageMode,
+  listStoredPageVisits,
   listStoredQuoteFeedback,
   listStoredQuoteUploads,
+  topStoredVisitLocations,
 } from "@/lib/db/store";
 import { getAudienceId, getResendClient } from "@/lib/email/resend";
 
@@ -153,14 +157,27 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
     assertAdminPassword(data.password);
     const recentLimit = data.recentLimit ?? 8;
 
-    const [quotesProcessed, feedbackReceived, waitlist, recentQuotes, recentFeedback] =
-      await Promise.all([
-        countStoredQuoteUploads(),
-        countStoredQuoteFeedback(),
-        countWaitlistEmails(),
-        listStoredQuoteUploads(recentLimit),
-        listStoredQuoteFeedback(recentLimit),
-      ]);
+    const [
+      quotesProcessed,
+      feedbackReceived,
+      waitlist,
+      recentQuotes,
+      recentFeedback,
+      pageViews,
+      uniqueVisitors,
+      topLocations,
+      recentVisits,
+    ] = await Promise.all([
+      countStoredQuoteUploads(),
+      countStoredQuoteFeedback(),
+      countWaitlistEmails(),
+      listStoredQuoteUploads(recentLimit),
+      listStoredQuoteFeedback(recentLimit),
+      countStoredPageVisits(),
+      countStoredUniqueVisitors(),
+      topStoredVisitLocations(8),
+      listStoredPageVisits(recentLimit),
+    ]);
 
     return {
       storage: getStorageMode(),
@@ -168,6 +185,10 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       feedbackReceived,
       waitlistEmails: waitlist.count,
       waitlistError: waitlist.error,
+      pageViews,
+      uniqueVisitors,
+      topLocations,
+      recentVisits,
       recentQuotes: recentQuotes.map(({ rawText, analysisSummary, ...rest }) => ({
         ...rest,
         rawTextChars: rawText.length,

@@ -1,5 +1,5 @@
 export { getDb, getDatabaseUrl, getStorageMode } from "./client";
-export { quoteUploads, quoteFeedback, comparisonReports } from "./schema";
+export { quoteUploads, quoteFeedback, comparisonReports, pageVisits } from "./schema";
 export {
   saveQuoteUpload,
   saveQuoteFeedback,
@@ -7,4 +7,6 @@ export {
   getComparisonReport,
   listStoredQuoteUploads,
   listStoredQuoteFeedback,
+  savePageVisit,
+  listStoredPageVisits,
 } from "./store";

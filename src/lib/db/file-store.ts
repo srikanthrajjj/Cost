@@ -35,12 +35,6 @@ export interface StoredQuoteFeedback {
   completenessScore?: number | null;
 }
 
-interface FileStoreShape {
-  quoteUploads: StoredQuoteUpload[];
-  quoteFeedback: StoredQuoteFeedback[];
-  comparisonReports: StoredComparisonReport[];
-}
-
 export interface StoredComparisonReport {
   id: string;
   createdAt: string;
@@ -52,10 +46,30 @@ export interface StoredComparisonReport {
   expiresAt?: string | null;
 }
 
+export interface StoredPageVisit {
+  id: string;
+  createdAt: string;
+  path: string;
+  sessionId: string;
+  city?: string | null;
+  region?: string | null;
+  country?: string | null;
+  countryCode?: string | null;
+  referrer?: string | null;
+}
+
+interface FileStoreShape {
+  quoteUploads: StoredQuoteUpload[];
+  quoteFeedback: StoredQuoteFeedback[];
+  comparisonReports: StoredComparisonReport[];
+  pageVisits: StoredPageVisit[];
+}
+
 const EMPTY_STORE: FileStoreShape = {
   quoteUploads: [],
   quoteFeedback: [],
   comparisonReports: [],
+  pageVisits: [],
 };
 
 function storePath() {
@@ -72,6 +86,7 @@ async function ensureStore(): Promise<FileStoreShape> {
       quoteUploads: Array.isArray(parsed.quoteUploads) ? parsed.quoteUploads : [],
       quoteFeedback: Array.isArray(parsed.quoteFeedback) ? parsed.quoteFeedback : [],
       comparisonReports: Array.isArray(parsed.comparisonReports) ? parsed.comparisonReports : [],
+      pageVisits: Array.isArray(parsed.pageVisits) ? parsed.pageVisits : [],
     };
   } catch {
     await writeFile(file, JSON.stringify(EMPTY_STORE, null, 2), "utf8");
@@ -80,6 +95,7 @@ async function ensureStore(): Promise<FileStoreShape> {
       quoteUploads: [],
       quoteFeedback: [],
       comparisonReports: [],
+      pageVisits: [],
     };
   }
 }
@@ -161,4 +177,44 @@ export async function fileGetComparisonReport(
 ): Promise<StoredComparisonReport | null> {
   const store = await ensureStore();
   return store.comparisonReports.find((r) => r.id === id) ?? null;
+}
+
+export async function fileSavePageVisit(row: StoredPageVisit): Promise<StoredPageVisit> {
+  const store = await ensureStore();
+  store.pageVisits.unshift(row);
+  store.pageVisits = store.pageVisits.slice(0, 5000);
+  await writeStore(store);
+  return row;
+}
+
+export async function fileListPageVisits(limit = 50): Promise<StoredPageVisit[]> {
+  const store = await ensureStore();
+  return store.pageVisits.slice(0, limit);
+}
+
+export async function fileCountPageVisits(): Promise<number> {
+  const store = await ensureStore();
+  return store.pageVisits.length;
+}
+
+export async function fileCountUniqueVisitors(): Promise<number> {
+  const store = await ensureStore();
+  return new Set(store.pageVisits.map((v) => v.sessionId).filter(Boolean)).size;
+}
+
+export async function fileTopVisitLocations(limit = 8): Promise<
+  { label: string; count: number }[]
+> {
+  const store = await ensureStore();
+  const counts = new Map<string, number>();
+  for (const visit of store.pageVisits) {
+    const city = visit.city?.trim();
+    const country = visit.country?.trim();
+    const label = city && country ? `${city}, ${country}` : country || city || "Unknown";
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
