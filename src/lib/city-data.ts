@@ -66,8 +66,6 @@ export interface CityCategoryPage {
   isIndexable: boolean;
 }
 
-import { SITE_ORIGIN } from "@/lib/seo";
-
 function parseMoneyRange(range: string): { low: number; high: number } | null {
   const matches = range.match(/\$[\d,]+/g);
   if (!matches || matches.length < 2) return null;
