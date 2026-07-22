@@ -26,23 +26,25 @@ import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
 import { QuoteComparisonView } from "@/components/quote/QuoteComparisonView";
 import { extractTextFromFile } from "@/lib/file-processor";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 
 export const Route = createFileRoute("/compare-quotes")({
   head: () => ({
     meta: [
-      { title: "Compare 2 Contractor Quotes Side by Side — CostReno" },
+      { title: "Compare two contractor quotes side by side | CostReno" },
       {
         name: "description",
         content:
-          "Upload 2 contractor quotes and compare them side by side. Spot pricing differences, missing scope, and choose the best value. Free, no signup.",
+          "Upload two contractor quotes and compare pricing, scope, and red flags side by side. Free tool to help you choose with clearer information.",
       },
-      { property: "og:title", content: "Compare 2 Contractor Quotes Side by Side — CostReno" },
+      { property: "og:title", content: "Compare two contractor quotes side by side | CostReno" },
       {
         property: "og:description",
         content:
-          "Upload 2 contractor quotes. Find the best value, spot missing items, and choose with confidence.",
+          "Compare two contractor quotes side by side. Spot pricing and scope differences before you hire.",
       },
       { property: "og:url", content: "https://costreno.com/compare-quotes" },
+      { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
     links: [{ rel: "canonical", href: "https://costreno.com/compare-quotes" }],
@@ -119,7 +121,7 @@ export const Route = createFileRoute("/compare-quotes")({
             priceCurrency: "USD",
           },
           description:
-            "Free AI-powered tool to compare 2 contractor quotes side by side. Spot pricing differences, missing scope, and choose the best value.",
+            "Free AI-powered tool to compare two contractor quotes side by side. Spot pricing differences, missing scope, and unclear terms.",
         }),
       },
     ],

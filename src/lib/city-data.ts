@@ -1,5 +1,9 @@
 import citiesData from "@/data/cities.json";
 import categoriesData from "@/data/categories.json";
+import {
+  CITY_CONTENT_LAST_REVIEWED,
+  getCityEnrichment,
+} from "@/data/city-enrichments";
 
 export interface City {
   city: string;
@@ -52,6 +56,11 @@ export interface CityCategoryPage {
   costRange: { low: number; high: number; label: string };
   faq: CategoryFaq[];
   methodologyNote: string;
+  localFactors: string[];
+  lastReviewed: string;
+  isEnriched: boolean;
+  /** Hand-enriched pages only. Thin template pages stay live but are noindexed. */
+  isIndexable: boolean;
 }
 
 const SITE_ORIGIN = "https://costreno.com";
@@ -177,6 +186,8 @@ export function buildTemplateValues(city: City, category: Category): Record<stri
 }
 
 export function getCityIntro(city: City, category: Category): string {
+  const enrichment = getCityEnrichment(city.slug, category.id);
+  if (enrichment?.intro?.trim()) return enrichment.intro;
   const stored = city.introParagraphs?.[category.id];
   if (stored?.trim()) return stored;
   const values = buildTemplateValues(city, category);
@@ -196,6 +207,8 @@ export function getCityPage(citySlug: string, categoryId: string): CityCategoryP
   const category = getCategoryById(categoryId);
   if (!city || !category) return null;
 
+  const enrichment = getCityEnrichment(city.slug, category.id);
+  const isEnriched = Boolean(enrichment);
   const values = buildTemplateValues(city, category);
   return {
     city,
@@ -207,7 +220,15 @@ export function getCityPage(citySlug: string, categoryId: string): CityCategoryP
     costRange: getAdjustedCostRange(category, city),
     faq: getCityFaqs(city, category),
     methodologyNote: fillTemplate(category.methodologyNote, values),
+    localFactors: enrichment?.localFactors ?? [],
+    lastReviewed: enrichment?.lastReviewed ?? CITY_CONTENT_LAST_REVIEWED,
+    isEnriched,
+    isIndexable: isEnriched,
   };
+}
+
+export function isCityPageIndexable(citySlug: string, categoryId: string): boolean {
+  return Boolean(getCityEnrichment(citySlug, categoryId));
 }
 
 export function getAllCityCategoryPairs(): { city: City; category: Category; url: string }[] {
@@ -224,12 +245,30 @@ export function getAllCityCategoryPairs(): { city: City; category: Category; url
   return pairs;
 }
 
-export function getRelatedCities(city: City, limit = 4): City[] {
+/** Sitemap and crawl should only include hand-enriched city pages. */
+export function getIndexableCityCategoryPairs(): {
+  city: City;
+  category: Category;
+  url: string;
+}[] {
+  return getAllCityCategoryPairs().filter(({ city, category }) =>
+    isCityPageIndexable(city.slug, category.id),
+  );
+}
+
+export function getRelatedCities(city: City, categoryId?: string, limit = 4): City[] {
+  const preferIndexable = (candidates: City[]) => {
+    if (!categoryId) return candidates;
+    const enriched = candidates.filter((c) => isCityPageIndexable(c.slug, categoryId));
+    const rest = candidates.filter((c) => !isCityPageIndexable(c.slug, categoryId));
+    return [...enriched, ...rest];
+  };
+
   const sameState = getAllCities().filter(
     (c) => c.stateSlug === city.stateSlug && c.slug !== city.slug,
   );
   if (sameState.length >= limit) {
-    return sameState.slice(0, limit);
+    return preferIndexable(sameState).slice(0, limit);
   }
   const others = getAllCities()
     .filter((c) => c.slug !== city.slug && c.stateSlug !== city.stateSlug)
@@ -238,11 +277,15 @@ export function getRelatedCities(city: City, limit = 4): City[] {
         Math.abs(a.laborCostMultiplier - city.laborCostMultiplier) -
         Math.abs(b.laborCostMultiplier - city.laborCostMultiplier),
     );
-  return [...sameState, ...others].slice(0, limit);
+  return preferIndexable([...sameState, ...others]).slice(0, limit);
 }
 
-export function getRelatedCategories(categoryId: string): Category[] {
-  return getAllCategories().filter((c) => c.id !== categoryId);
+export function getRelatedCategories(categoryId: string, citySlug?: string): Category[] {
+  const categories = getAllCategories().filter((c) => c.id !== categoryId);
+  if (!citySlug) return categories;
+  const enriched = categories.filter((c) => isCityPageIndexable(citySlug, c.id));
+  const rest = categories.filter((c) => !isCityPageIndexable(citySlug, c.id));
+  return [...enriched, ...rest];
 }
 
 export { SITE_ORIGIN };

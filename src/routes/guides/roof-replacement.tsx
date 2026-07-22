@@ -204,7 +204,8 @@ const RELATED_GUIDES = [
   },
   { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "/Window.svg" },
   { title: "Bathroom Remodel Guide", href: "/bathroom-remodel-cost", icon: "/Bathtub.svg" },
-  { title: "Solar Panel Installation", href: "/solar-installation-cost", icon: "/Solar Panel.svg" },
+  { title: "Metal vs asphalt roof", href: "/guides/metal-vs-asphalt-roof", icon: "/House.svg" },
+  { title: "Signs a quote is inflated", href: "/guides/inflated-quote-signs", icon: "/House.svg" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────

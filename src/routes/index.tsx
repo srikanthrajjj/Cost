@@ -48,7 +48,6 @@ import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { SiteNav } from "@/components/SiteNav";
 import { TrustBar } from "@/components/TrustBar";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
 import projKitchen from "@/assets/proj-kitchen.jpg";
@@ -66,28 +65,35 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
+        title: "CostReno | Know what your renovation should cost before you hire",
+      },
+      {
+        name: "description",
+        content:
+          "Free renovation cost estimates and AI contractor quote analysis. Spot missing scope, check pricing context, and plan roof, kitchen, bathroom, and HVAC projects with clearer numbers.",
+      },
+      {
+        property: "og:title",
+        content: "CostReno | Know what your renovation should cost before you hire",
+      },
+      {
+        property: "og:description",
+        content:
+          "Estimate renovation costs, analyze contractor quotes, and compare bids with tools built for homeowners.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://costreno.com/" },
+      {
         property: "og:image",
         content: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
       },
+      { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://costreno.com/" }],
   }),
   component: Landing,
 });
 
-const trend = [
-  { v: 20 },
-  { v: 24 },
-  { v: 22 },
-  { v: 28 },
-  { v: 26 },
-  { v: 32 },
-  { v: 30 },
-  { v: 36 },
-  { v: 34 },
-  { v: 42 },
-  { v: 40 },
-  { v: 48 },
-];
 const projects = [
   {
     img: projRoof,
@@ -160,7 +166,7 @@ const steps = [
   {
     icon: Search,
     title: "Choose your project",
-    desc: "Select from 100+ home improvement projects",
+    desc: "Select from major home improvement projects",
   },
   {
     icon: Calculator,
@@ -201,27 +207,35 @@ const trust = [
   },
 ];
 const comparisons = [
-  { img: cmpRoof, title: "Asphalt vs Metal Roofing", desc: "Compare durability, cost, and ROI" },
+  {
+    img: cmpRoof,
+    title: "Asphalt vs metal roofing",
+    desc: "Compare durability, cost, and lifespan",
+    href: "/guides/metal-vs-asphalt-roof",
+  },
   {
     img: cmpCounter,
-    title: "Quartz vs Granite Countertops",
-    desc: "See which is best for your kitchen",
+    title: "Quartz vs granite countertops",
+    desc: "Cost, maintenance, and durability trade-offs",
+    href: "/guides/quartz-vs-granite-countertops",
   },
   {
     img: cmpHvac,
-    title: "Repair vs Replace HVAC",
-    desc: "Which option saves you more in the long run?",
+    title: "Repair vs replace HVAC",
+    desc: "When repair still makes sense vs a full system swap",
+    href: "/guides/hvac-installation",
   },
   {
     img: cmpWater,
-    title: "Tank vs Tankless Water Heaters",
-    desc: "Compare upfront costs and long-term savings",
+    title: "Tank vs tankless water heaters",
+    desc: "Compare upfront cost and long-term operating trade-offs",
+    href: "/guides",
   },
 ];
 
 function Logo() {
   return (
-    <a href="#" className="flex items-center gap-2">
+    <a href="/" className="flex items-center gap-2">
       <img src="/logo.svg" alt="CostReno" style={{ height: "41px", width: "auto" }} />
     </a>
   );
@@ -1170,7 +1184,7 @@ CostReno Platform Tools & Sections:
 - AI Quote Analyzer: upload or paste a contractor quote → detect overcharges, red flags
 - Material Comparator: compare 2+ materials side-by-side (cost, durability, ROI, maintenance)
 - Insurance Coverage Guide: explain what homeowners insurance covers for renovations
-- Project Guides & Advice: 100+ step-by-step guides for every home project
+- Project Guides & Advice: Step-by-step guides for common home projects
 - Renovation Plan Generator: create a phased, budgeted renovation roadmap
 - Contractor Checklist: vetting questions and red-flag warnings before hiring
 - ROI Calculator: estimate resale value increase per project
@@ -2031,10 +2045,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
             {/* Subtitle */}
             <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              <strong className="text-ink">Stop overpaying.</strong> Our AI tools powered by live
-              local data have saved homeowners{" "}
-              <strong className="text-accent">$2.3M on inflated quotes</strong>. Get real pricing,
-              spot red flags, and renovate with confidence.
+              <strong className="text-ink">Stop guessing on contractor pricing.</strong> CostReno
+              helps you estimate local renovation costs, analyze quotes for missing scope, and plan
+              with clearer numbers before you hire.
             </p>
 
             {/* AI Chat Input - Inside hero left column */}
@@ -2111,16 +2124,16 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               {/* Trust stats - inside input container */}
               <div className="grid grid-cols-3 gap-2 mt-2.5 text-xs text-center">
                 <span>
-                  <strong className="text-ink font-bold">50K+</strong>{" "}
-                  <span className="text-muted-foreground">estimates</span>
+                  <strong className="text-ink font-bold">ZIP</strong>{" "}
+                  <span className="text-muted-foreground">pricing</span>
                 </span>
                 <span>
-                  <strong className="text-ink font-bold">$2.3M</strong>{" "}
-                  <span className="text-muted-foreground">saved</span>
+                  <strong className="text-ink font-bold">AI</strong>{" "}
+                  <span className="text-muted-foreground">quote checks</span>
                 </span>
                 <span>
-                  <strong className="text-ink font-bold">100%</strong>{" "}
-                  <span className="text-muted-foreground">free</span>
+                  <strong className="text-ink font-bold">Free</strong>{" "}
+                  <span className="text-muted-foreground">to start</span>
                 </span>
               </div>
             </div>
@@ -2736,7 +2749,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </p>
             </div>
             <a
-              href="#"
+              href="/estimate"
               className="hidden md:inline-flex items-center gap-1.5 px-5 py-2.5 rounded-md border border-border text-sm font-semibold text-primary hover:bg-primary/5 transition"
             >
               View all projects <ArrowRight className="h-3.5 w-3.5" />
@@ -3077,6 +3090,38 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* FEATURED GUIDES */}
+      <section className="container-x py-16 border-t border-border">
+        <div className="rounded-2xl border border-border bg-white p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-ink">Local renovation costs</h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl">
+              Browse city pages for roof, kitchen, bathroom, and HVAC pricing context across major
+              U.S. markets.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="/locations"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              Costs by city <ArrowRight className="h-4 w-4" />
+            </a>
+            <a
+              href="/methodology"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-ink hover:bg-muted"
+            >
+              Our methodology
+            </a>
+            <a
+              href="/compare-quotes"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-ink hover:bg-muted"
+            >
+              Compare quotes
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section className="container-x py-20">
         <div className="flex items-end justify-between mb-6">
           <div>
@@ -3088,7 +3133,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </p>
           </div>
           <a
-            href="#"
+            href="/guides"
             className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
           >
             View all guides <ArrowRight className="h-3.5 w-3.5" />
@@ -3175,10 +3220,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         {/* Trust Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
           {[
-            { value: "50K+", label: "Estimates Generated" },
-            { value: "4.9/5", label: "Average Rating" },
-            { value: "$2.3M", label: "Saved by Homeowners" },
-            { value: "100%", label: "Free & Private" },
+            { value: "32", label: "U.S. cities covered" },
+            { value: "Free", label: "Core tools" },
+            { value: "ZIP", label: "Local pricing context" },
+            { value: "AI", label: "Quote review tools" },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -3265,7 +3310,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             Popular comparisons
           </h2>
           <a
-            href="#"
+            href="/guides/metal-vs-asphalt-roof"
             className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
           >
             View all comparisons <ArrowRight className="h-3.5 w-3.5" />
@@ -3273,9 +3318,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
           {comparisons.map((c) => (
-            <article
+            <a
               key={c.title}
-              className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition"
+              href={c.href}
+              className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition block"
             >
               <div className="relative aspect-[4/3] overflow-hidden">
                 <img
@@ -3293,14 +3339,11 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               <div className="p-4">
                 <h3 className="font-display text-base font-bold text-ink">{c.title}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{c.desc}</p>
-                <a
-                  href="#"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                >
-                  Compare Now <ArrowRight className="h-3 w-3" />
-                </a>
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:underline">
+                  Compare now <ArrowRight className="h-3 w-3" />
+                </span>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </section>
@@ -3336,9 +3379,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           </div>
           <div className="flex md:flex-col gap-6 md:gap-4 text-center md:text-left md:border-l md:border-border md:pl-8">
             {[
-              ["100+", "Guides & Articles"],
-              ["Weekly", "Cost Updates"],
-              ["Free", "Forever"],
+              ["8+", "Guides published"],
+              ["Weekly", "Cost updates"],
+              ["Free", "Core tools"],
             ].map(([k, v]) => (
               <div key={v}>
                 <div className="font-display text-lg font-bold text-ink">{k}</div>

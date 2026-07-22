@@ -40,8 +40,16 @@ export function SiteFooter() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-4">Tools</h3>
             <ul className="space-y-2.5">
               <li>
+                <a
+                  href="/compare-quotes"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Compare quotes
+                </a>
+              </li>
+              <li>
                 <a href="/estimate" className="text-sm text-white/70 hover:text-accent transition">
-                  Cost Estimator
+                  Cost estimator
                 </a>
               </li>
               <li>
@@ -49,7 +57,7 @@ export function SiteFooter() {
                   href="/quote-analyzer"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
-                  Quote Analyzer
+                  Quote analyzer
                 </a>
               </li>
               <li>
@@ -57,23 +65,23 @@ export function SiteFooter() {
                   href="/kitchen-remodel-cost"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
-                  Kitchen Estimator
+                  Kitchen remodel cost
                 </a>
               </li>
               <li>
                 <a
-                  href="/estimate?project=roof"
+                  href="/roof-replacement-cost"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
-                  Roof Estimator
+                  Roof replacement cost
                 </a>
               </li>
               <li>
                 <a
-                  href="/estimate?project=bathroom"
+                  href="/bathroom-remodel-cost"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
-                  Bathroom Estimator
+                  Bathroom remodel cost
                 </a>
               </li>
             </ul>
@@ -86,11 +94,45 @@ export function SiteFooter() {
             </h3>
             <ul className="space-y-2.5">
               <li>
+                <a href="/guides" className="text-sm text-white/70 hover:text-accent transition">
+                  All guides
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/topics/quotes"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Contractor quotes
+                </a>
+              </li>
+              <li>
+                <a href="/topics/roof" className="text-sm text-white/70 hover:text-accent transition">
+                  Roof costs
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/topics/kitchen"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Kitchen costs
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/guides/how-to-read-a-contractor-quote"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  How to read a quote
+                </a>
+              </li>
+              <li>
                 <a
                   href="/guides/roof-replacement"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
-                  Roof Replacement
+                  Roof replacement
                 </a>
               </li>
               <li>
@@ -98,39 +140,7 @@ export function SiteFooter() {
                   href="/guides/kitchen-remodel"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
-                  Kitchen Remodel
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/bathroom-remodel"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Bathroom Remodel
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/hvac-installation"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  HVAC Installation
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/window-replacement"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Window Replacement
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/flooring"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Flooring
+                  Kitchen remodel
                 </a>
               </li>
             </ul>
@@ -142,6 +152,11 @@ export function SiteFooter() {
               Company
             </h3>
             <ul className="space-y-2.5">
+              <li>
+                <a href="/methodology" className="text-sm text-white/70 hover:text-accent transition">
+                  Methodology
+                </a>
+              </li>
               <li>
                 <a href="/locations" className="text-sm text-white/70 hover:text-accent transition">
                   Costs by city

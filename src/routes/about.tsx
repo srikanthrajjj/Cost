@@ -34,21 +34,24 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
   head: () => ({
     meta: [
-      { title: "About CostReno — Our Mission to Make Renovation Pricing Transparent" },
+      { title: "About CostReno | Clear renovation pricing for homeowners" },
       {
         name: "description",
         content:
-          "Learn how CostReno helps homeowners make smarter renovation decisions with AI-powered cost estimates, quote analysis, and transparent pricing data.",
+          "Learn how CostReno helps homeowners estimate renovation costs, analyze contractor quotes, and make clearer hiring decisions.",
       },
-      { property: "og:title", content: "About CostReno — Smarter Renovation Decisions" },
+      { property: "og:title", content: "About CostReno | Clear renovation pricing for homeowners" },
       {
         property: "og:description",
         content:
-          "CostReno combines AI with construction pricing data to help homeowners estimate costs, compare quotes, and renovate with confidence.",
+          "CostReno combines local pricing context with AI quote analysis to help homeowners plan renovations with clearer information.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://costreno.com/about" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://costreno.com/about" }],
   }),
 });
 
@@ -162,10 +165,52 @@ function AboutPage() {
       {/* Stats Section — Animated Counters */}
       <section className="container-x py-16 md:py-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-          <AnimatedCounter end={100} suffix="+" label="Renovation Calculators" />
-          <AnimatedCounter end={50} suffix="K+" label="Estimates Generated" />
-          <AnimatedCounter end={200} suffix="+" label="Cities Covered" />
-          <AnimatedCounter end={98} suffix="%" label="User Satisfaction" />
+          <AnimatedCounter end={6} suffix="" label="Core project estimators" />
+          <AnimatedCounter end={11} suffix="+" label="Published guides" />
+          <AnimatedCounter end={32} suffix="" label="Cities with local pages" />
+          <AnimatedCounter end={6} suffix="" label="City project categories" />
+        </div>
+      </section>
+
+      {/* Editorial standards */}
+      <section className="container-x pb-16 md:pb-20">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-border/60 bg-white p-6 md:p-8">
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-ink mb-4">
+            Editorial standards
+          </h2>
+          <p className="text-muted-foreground text-base leading-relaxed mb-4">
+            CostReno content is written for homeowners who need clear, honest renovation guidance.
+            We separate user input, AI inference, and deterministic calculations, and we avoid
+            claims we cannot support with evidence.
+          </p>
+          <ul className="space-y-2 text-sm text-muted-foreground leading-relaxed list-disc pl-5">
+            <li>
+              Cost ranges are estimates based on our{" "}
+              <a href="/methodology" className="text-primary underline underline-offset-2 hover:no-underline">
+                methodology
+              </a>
+              , not contractor bids or guarantees.
+            </li>
+            <li>
+              City pages include local context where we have reviewed the market. Pages without
+              enrichment use general regional guidance, are labeled accordingly, and are kept out of
+              our sitemap until reviewed.
+            </li>
+            <li>
+              Guides and topic hubs are updated when pricing patterns or scope advice change. We
+              prefer primary public sources for labor and material trends.
+            </li>
+            <li>
+              We do not invent pricing, material IDs, or contractor credentials. When confidence is
+              low, we say so.
+            </li>
+          </ul>
+          <p className="mt-5 text-sm">
+            <a href="/contact" className="font-semibold text-primary hover:underline">
+              Suggest a correction
+            </a>
+            <span className="text-muted-foreground"> or ask about our data approach.</span>
+          </p>
         </div>
       </section>
 

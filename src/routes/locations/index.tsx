@@ -7,6 +7,7 @@ import {
   getAllCities,
   getAllStateSlugs,
   getCityCategoryUrl,
+  isCityPageIndexable,
 } from "@/lib/city-data";
 
 export const Route = createFileRoute("/locations/")({
@@ -19,16 +20,20 @@ export const Route = createFileRoute("/locations/")({
       {
         name: "description",
         content:
-          "Browse local roof, kitchen, bathroom, and HVAC cost pages for major U.S. cities. Compare regional pricing factors before you hire.",
+          "Browse local roof, kitchen, bathroom, HVAC, window, and flooring cost pages for major U.S. cities. Locally reviewed pages are prioritized for search.",
       },
       { name: "robots", content: "index, follow" },
       { property: "og:title", content: "Home renovation costs by city | CostReno" },
       {
         property: "og:description",
         content:
-          "Browse local roof, kitchen, bathroom, and HVAC cost pages for major U.S. cities.",
+          "Browse local renovation cost pages across major U.S. cities for roof, kitchen, bathroom, HVAC, windows, and flooring.",
       },
       { property: "og:url", content: "https://costreno.com/locations" },
+      {
+        property: "og:image",
+        content: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
+      },
     ],
     links: [{ rel: "canonical", href: "https://costreno.com/locations" }],
   }),
@@ -42,7 +47,7 @@ function LocationsIndexPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteNav />
+      <SiteNav active="locations" />
       <main>
         <section className="py-16 md:py-20 border-b border-border/60">
           <div className="container-x max-w-4xl">
@@ -54,9 +59,10 @@ function LocationsIndexPage() {
               Home renovation costs by city
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Explore local cost pages for roof replacement, kitchen remodel, bathroom remodel, and
-              HVAC installation across {cities.length} U.S. cities. Each page includes regional
-              labor context, FAQs, and tools to estimate or analyze quotes.
+              Explore local cost pages for roof, kitchen, bathroom, HVAC, windows, and flooring
+              across {cities.length} U.S. cities. Locally reviewed pages include market-specific
+              factors and appear in our sitemap. Other pages stay available for planning with
+              general regional guidance.
             </p>
           </div>
         </section>
@@ -92,16 +98,24 @@ function LocationsIndexPage() {
                     {city.city}, {city.stateAbbr}
                   </h3>
                   <ul className="space-y-1.5">
-                    {categories.map((category) => (
-                      <li key={category.id}>
-                        <a
-                          href={getCityCategoryUrl(city, category.id)}
-                          className="text-sm text-primary hover:underline"
-                        >
-                          {category.name} cost
-                        </a>
-                      </li>
-                    ))}
+                    {categories.map((category) => {
+                      const reviewed = isCityPageIndexable(city.slug, category.id);
+                      return (
+                        <li key={category.id}>
+                          <a
+                            href={getCityCategoryUrl(city, category.id)}
+                            className="text-sm text-primary hover:underline inline-flex items-center gap-2"
+                          >
+                            {category.name} cost
+                            {reviewed && (
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                Reviewed
+                              </span>
+                            )}
+                          </a>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}

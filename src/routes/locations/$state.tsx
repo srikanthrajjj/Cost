@@ -6,6 +6,7 @@ import {
   getAllStateSlugs,
   getCitiesByStateSlug,
   getCityCategoryUrl,
+  isCityPageIndexable,
 } from "@/lib/city-data";
 
 export const Route = createFileRoute("/locations/$state")({
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/locations/$state")({
     const stateMeta = getAllStateSlugs().find((s) => s.stateSlug === params.state);
     if (!stateMeta) return { meta: [{ title: "Page not found | CostReno" }] };
     const title = `Home renovation costs in ${stateMeta.state} | CostReno`;
-    const description = `Local roof, kitchen, bathroom, and HVAC cost pages for cities in ${stateMeta.state}. Compare regional pricing factors with CostReno.`;
+    const description = `Local roof, kitchen, bathroom, HVAC, window, and flooring cost pages for cities in ${stateMeta.state}. Locally reviewed pages are prioritized for search.`;
     return {
       meta: [
         { title },
@@ -67,8 +68,9 @@ function StateLocationsPage() {
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
               City-level cost guides for {cities.length} location
-              {cities.length === 1 ? "" : "s"} in {stateMeta.state}. Each page covers local labor
-              context, FAQs, and planning tools.
+              {cities.length === 1 ? "" : "s"} in {stateMeta.state}, covering roof, kitchen,
+              bathroom, HVAC, windows, and flooring. Locally reviewed pages include market-specific
+              factors.
             </p>
           </div>
         </section>
@@ -87,16 +89,24 @@ function StateLocationsPage() {
                   {city.regionalNotes}
                 </p>
                 <ul className="grid sm:grid-cols-2 gap-2">
-                  {categories.map((category) => (
-                    <li key={category.id}>
-                      <a
-                        href={getCityCategoryUrl(city, category.id)}
-                        className="text-sm text-primary hover:underline"
-                      >
-                        {category.name} cost in {city.city}
-                      </a>
-                    </li>
-                  ))}
+                  {categories.map((category) => {
+                    const reviewed = isCityPageIndexable(city.slug, category.id);
+                    return (
+                      <li key={category.id}>
+                        <a
+                          href={getCityCategoryUrl(city, category.id)}
+                          className="text-sm text-primary hover:underline inline-flex items-center gap-2"
+                        >
+                          {category.name} cost in {city.city}
+                          {reviewed && (
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                              Reviewed
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </article>
             ))}

@@ -20,19 +20,22 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
   head: () => ({
     meta: [
-      { title: "Contact Us — CostReno Support & Feedback" },
+      { title: "Contact CostReno | Support and feedback" },
       {
         name: "description",
         content:
-          "Get in touch with the CostReno team. Questions about estimates, quote analysis, or feature requests — we're here to help.",
+          "Contact the CostReno team about estimates, quote analysis, feedback, or partnership questions.",
       },
-      { property: "og:title", content: "Contact CostReno — We're Here to Help" },
+      { property: "og:title", content: "Contact CostReno | Support and feedback" },
       {
         property: "og:description",
-        content: "Reach out to our team for support, feedback, or partnership inquiries.",
+        content: "Reach the CostReno team for support, feedback, or partnership inquiries.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://costreno.com/contact" },
+      { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://costreno.com/contact" }],
   }),
 });
 

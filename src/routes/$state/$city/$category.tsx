@@ -8,6 +8,7 @@ import { CityToolGrid } from "@/components/city/CityToolGrid";
 import { CityFAQ } from "@/components/city/CityFAQ";
 import { CityMethodologyCallout } from "@/components/city/CityMethodologyCallout";
 import { CityRelatedLinks } from "@/components/city/CityRelatedLinks";
+import { CityLocalFactors } from "@/components/city/CityLocalFactors";
 import { TrustBar } from "@/components/TrustBar";
 import {
   getAbsoluteCityCategoryUrl,
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/$state/$city/$category")({
           property: "og:url",
           content: getAbsoluteCityCategoryUrl(page.city, page.category.id),
         },
-        { name: "robots", content: "index, follow" },
+        { name: "robots", content: page.isIndexable ? "index, follow" : "noindex, follow" },
       ],
       links: [
         {
@@ -81,9 +82,10 @@ function CityCategoryPage() {
     );
   }
 
-  const { city, category, intro, faq, costRange, methodologyNote } = page;
-  const relatedCities = getRelatedCities(city);
-  const relatedCategories = getRelatedCategories(category.id);
+  const { city, category, intro, faq, costRange, methodologyNote, localFactors, lastReviewed, isEnriched } =
+    page;
+  const relatedCities = getRelatedCities(city, category.id);
+  const relatedCategories = getRelatedCategories(category.id, city.slug);
   const absoluteUrl = getAbsoluteCityCategoryUrl(city, category.id);
 
   const webPageSchema = {
@@ -203,6 +205,13 @@ function CityCategoryPage() {
           timeframe={category.timeframe}
           roi={category.roi}
           medianHomeValue={city.medianHomeValue}
+        />
+        <CityLocalFactors
+          city={city.city}
+          categoryName={category.name}
+          factors={localFactors}
+          lastReviewed={lastReviewed}
+          isEnriched={isEnriched}
         />
         <CityContextBar
           city={city.city}

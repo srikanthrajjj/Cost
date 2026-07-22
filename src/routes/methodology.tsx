@@ -7,13 +7,22 @@ export const Route = createFileRoute("/methodology")({
   component: MethodologyPage,
   head: () => ({
     meta: [
-      { title: "Our methodology — CostReno" },
+      { title: "Our methodology | CostReno" },
       {
         name: "description",
         content:
-          "How CostReno calculates home renovation cost estimates. Learn about our data sources, regional adjustments, and AI pricing engine.",
+          "How CostReno calculates home renovation cost estimates. Learn about our data sources, regional adjustments, and pricing approach.",
       },
+      { property: "og:title", content: "Our methodology | CostReno" },
+      {
+        property: "og:description",
+        content:
+          "See how CostReno builds renovation cost estimates from regional data and transparent assumptions.",
+      },
+      { property: "og:url", content: "https://costreno.com/methodology" },
+      { name: "robots", content: "index, follow" },
     ],
+    links: [{ rel: "canonical", href: "https://costreno.com/methodology" }],
   }),
 });
 
@@ -51,12 +60,41 @@ function MethodologyPage() {
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
-                    <strong className="text-ink">Bureau of Labor Statistics (BLS)</strong> metro-level
-                    wage data for construction occupations, updated monthly.
+                    <strong className="text-ink">Bureau of Labor Statistics (BLS)</strong>{" "}
+                    <a
+                      href="https://www.bls.gov/oes/current/oessrcma.htm"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-2 hover:no-underline"
+                    >
+                      metro-level wage data
+                    </a>{" "}
+                    for construction occupations, published periodically by the U.S. Department of
+                    Labor.
                   </li>
                   <li>
-                    <strong className="text-ink">Published supplier indices</strong> for materials
-                    like lumber, roofing, concrete, copper, and other commodities.
+                    <strong className="text-ink">Producer Price Index (PPI)</strong>{" "}
+                    <a
+                      href="https://www.bls.gov/ppi/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-2 hover:no-underline"
+                    >
+                      material price trends
+                    </a>{" "}
+                    for construction inputs such as lumber, roofing, concrete, and metals.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Census Building Permits Survey</strong>{" "}
+                    <a
+                      href="https://www.census.gov/construction/bps/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-2 hover:no-underline"
+                    >
+                      residential permit activity
+                    </a>{" "}
+                    that helps contextualize local construction demand.
                   </li>
                   <li>
                     <strong className="text-ink">Industry cost databases</strong> from construction
@@ -71,6 +109,10 @@ function MethodologyPage() {
                     municipalities across the US.
                   </li>
                 </ul>
+                <p className="text-xs text-muted-foreground/90 pt-1">
+                  Outbound links point to primary public sources. CostReno does not claim affiliation
+                  with BLS or the U.S. Census Bureau. Estimates remain ranges, not bids.
+                </p>
               </div>
             </section>
 

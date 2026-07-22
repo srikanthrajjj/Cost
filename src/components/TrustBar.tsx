@@ -73,10 +73,8 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
 
             {/* Center hub */}
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="w-[120px] h-[120px] rounded-full border-[3px] border-accent/25 bg-[#082A4B] flex flex-col items-center justify-center shadow-xl shadow-accent/10 relative">
-                {/* Outer glow ring */}
-                <div className="absolute inset-[-8px] rounded-full border border-accent/10" />
-                <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="#03A44D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-[120px] h-[120px] rounded-full border border-black/50 bg-white flex flex-col items-center justify-center relative">
+                <svg className="w-10 h-10 text-[#082A4B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9.5 2a3.5 3.5 0 0 0-3.4 4.4A3.5 3.5 0 0 0 4 10a3.5 3.5 0 0 0 1.8 3.1A3.5 3.5 0 0 0 8 17h1v4h6v-4h1a3.5 3.5 0 0 0 2.2-3.9A3.5 3.5 0 0 0 20 10a3.5 3.5 0 0 0-2.1-3.6A3.5 3.5 0 0 0 14.5 2a3.5 3.5 0 0 0-2.5 1 3.5 3.5 0 0 0-2.5-1z" />
                   <path d="M12 2v8" />
                   <path d="M8 10h8" />

@@ -15,7 +15,6 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MethodologyRouteImport } from './routes/methodology'
-import { Route as KitchenRemodelCostRouteImport } from './routes/kitchen-remodel-cost'
 import { Route as InsuranceClaimsRouteImport } from './routes/insurance-claims'
 import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
@@ -25,13 +24,22 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LocationsIndexRouteImport } from './routes/locations/index'
+import { Route as GuidesIndexRouteImport } from './routes/guides/index'
+import { Route as TopicsWindowsRouteImport } from './routes/topics/windows'
+import { Route as TopicsRoofRouteImport } from './routes/topics/roof'
+import { Route as TopicsQuotesRouteImport } from './routes/topics/quotes'
+import { Route as TopicsKitchenRouteImport } from './routes/topics/kitchen'
+import { Route as TopicsFlooringRouteImport } from './routes/topics/flooring'
 import { Route as LocationsStateRouteImport } from './routes/locations/$state'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
+import { Route as GuidesQuestionsBeforeSigningRouteImport } from './routes/guides/questions-before-signing'
+import { Route as GuidesQuartzVsGraniteCountertopsRouteImport } from './routes/guides/quartz-vs-granite-countertops'
 import { Route as GuidesMetalVsAsphaltRoofRouteImport } from './routes/guides/metal-vs-asphalt-roof'
 import { Route as GuidesKitchenRemodelRouteImport } from './routes/guides/kitchen-remodel'
 import { Route as GuidesInflatedQuoteSignsRouteImport } from './routes/guides/inflated-quote-signs'
 import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
+import { Route as GuidesHowToReadAContractorQuoteRouteImport } from './routes/guides/how-to-read-a-contractor-quote'
 import { Route as GuidesFlooringRouteImport } from './routes/guides/flooring'
 import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathroom-remodel'
 import { Route as StateCityCategoryRouteImport } from './routes/$state/$city/$category'
@@ -64,11 +72,6 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const MethodologyRoute = MethodologyRouteImport.update({
   id: '/methodology',
   path: '/methodology',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KitchenRemodelCostRoute = KitchenRemodelCostRouteImport.update({
-  id: '/kitchen-remodel-cost',
-  path: '/kitchen-remodel-cost',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsuranceClaimsRoute = InsuranceClaimsRouteImport.update({
@@ -116,6 +119,36 @@ const LocationsIndexRoute = LocationsIndexRouteImport.update({
   path: '/locations/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesIndexRoute = GuidesIndexRouteImport.update({
+  id: '/guides/',
+  path: '/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsWindowsRoute = TopicsWindowsRouteImport.update({
+  id: '/topics/windows',
+  path: '/topics/windows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsRoofRoute = TopicsRoofRouteImport.update({
+  id: '/topics/roof',
+  path: '/topics/roof',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsQuotesRoute = TopicsQuotesRouteImport.update({
+  id: '/topics/quotes',
+  path: '/topics/quotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsKitchenRoute = TopicsKitchenRouteImport.update({
+  id: '/topics/kitchen',
+  path: '/topics/kitchen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsFlooringRoute = TopicsFlooringRouteImport.update({
+  id: '/topics/flooring',
+  path: '/topics/flooring',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LocationsStateRoute = LocationsStateRouteImport.update({
   id: '/locations/$state',
   path: '/locations/$state',
@@ -131,6 +164,18 @@ const GuidesRoofReplacementRoute = GuidesRoofReplacementRouteImport.update({
   path: '/guides/roof-replacement',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesQuestionsBeforeSigningRoute =
+  GuidesQuestionsBeforeSigningRouteImport.update({
+    id: '/guides/questions-before-signing',
+    path: '/guides/questions-before-signing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesQuartzVsGraniteCountertopsRoute =
+  GuidesQuartzVsGraniteCountertopsRouteImport.update({
+    id: '/guides/quartz-vs-granite-countertops',
+    path: '/guides/quartz-vs-granite-countertops',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesMetalVsAsphaltRoofRoute =
   GuidesMetalVsAsphaltRoofRouteImport.update({
     id: '/guides/metal-vs-asphalt-roof',
@@ -153,6 +198,12 @@ const GuidesHvacInstallationRoute = GuidesHvacInstallationRouteImport.update({
   path: '/guides/hvac-installation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesHowToReadAContractorQuoteRoute =
+  GuidesHowToReadAContractorQuoteRouteImport.update({
+    id: '/guides/how-to-read-a-contractor-quote',
+    path: '/guides/how-to-read-a-contractor-quote',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesFlooringRoute = GuidesFlooringRouteImport.update({
   id: '/guides/flooring',
   path: '/guides/flooring',
@@ -178,7 +229,6 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
   '/insurance-claims': typeof InsuranceClaimsRoute
-  '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
@@ -187,13 +237,22 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
+  '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
+  '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
+  '/topics/flooring': typeof TopicsFlooringRoute
+  '/topics/kitchen': typeof TopicsKitchenRoute
+  '/topics/quotes': typeof TopicsQuotesRoute
+  '/topics/roof': typeof TopicsRoofRoute
+  '/topics/windows': typeof TopicsWindowsRoute
+  '/guides/': typeof GuidesIndexRoute
   '/locations/': typeof LocationsIndexRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
 }
@@ -206,7 +265,6 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
   '/insurance-claims': typeof InsuranceClaimsRoute
-  '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
@@ -215,13 +273,22 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
+  '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
+  '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
+  '/topics/flooring': typeof TopicsFlooringRoute
+  '/topics/kitchen': typeof TopicsKitchenRoute
+  '/topics/quotes': typeof TopicsQuotesRoute
+  '/topics/roof': typeof TopicsRoofRoute
+  '/topics/windows': typeof TopicsWindowsRoute
+  '/guides': typeof GuidesIndexRoute
   '/locations': typeof LocationsIndexRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
 }
@@ -235,7 +302,6 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/estimate': typeof EstimateRoute
   '/insurance-claims': typeof InsuranceClaimsRoute
-  '/kitchen-remodel-cost': typeof KitchenRemodelCostRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
@@ -244,13 +310,22 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
+  '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
+  '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
+  '/topics/flooring': typeof TopicsFlooringRoute
+  '/topics/kitchen': typeof TopicsKitchenRoute
+  '/topics/quotes': typeof TopicsQuotesRoute
+  '/topics/roof': typeof TopicsRoofRoute
+  '/topics/windows': typeof TopicsWindowsRoute
+  '/guides/': typeof GuidesIndexRoute
   '/locations/': typeof LocationsIndexRoute
   '/$state/$city/$category': typeof StateCityCategoryRoute
 }
@@ -265,7 +340,6 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/estimate'
     | '/insurance-claims'
-    | '/kitchen-remodel-cost'
     | '/methodology'
     | '/privacy'
     | '/quote-analyzer'
@@ -274,13 +348,22 @@ export interface FileRouteTypes {
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
+    | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
     | '/guides/metal-vs-asphalt-roof'
+    | '/guides/quartz-vs-granite-countertops'
+    | '/guides/questions-before-signing'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/locations/$state'
+    | '/topics/flooring'
+    | '/topics/kitchen'
+    | '/topics/quotes'
+    | '/topics/roof'
+    | '/topics/windows'
+    | '/guides/'
     | '/locations/'
     | '/$state/$city/$category'
   fileRoutesByTo: FileRoutesByTo
@@ -293,7 +376,6 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/estimate'
     | '/insurance-claims'
-    | '/kitchen-remodel-cost'
     | '/methodology'
     | '/privacy'
     | '/quote-analyzer'
@@ -302,13 +384,22 @@ export interface FileRouteTypes {
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
+    | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
     | '/guides/metal-vs-asphalt-roof'
+    | '/guides/quartz-vs-granite-countertops'
+    | '/guides/questions-before-signing'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/locations/$state'
+    | '/topics/flooring'
+    | '/topics/kitchen'
+    | '/topics/quotes'
+    | '/topics/roof'
+    | '/topics/windows'
+    | '/guides'
     | '/locations'
     | '/$state/$city/$category'
   id:
@@ -321,7 +412,6 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/estimate'
     | '/insurance-claims'
-    | '/kitchen-remodel-cost'
     | '/methodology'
     | '/privacy'
     | '/quote-analyzer'
@@ -330,13 +420,22 @@ export interface FileRouteTypes {
     | '/terms'
     | '/guides/bathroom-remodel'
     | '/guides/flooring'
+    | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
     | '/guides/kitchen-remodel'
     | '/guides/metal-vs-asphalt-roof'
+    | '/guides/quartz-vs-granite-countertops'
+    | '/guides/questions-before-signing'
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/locations/$state'
+    | '/topics/flooring'
+    | '/topics/kitchen'
+    | '/topics/quotes'
+    | '/topics/roof'
+    | '/topics/windows'
+    | '/guides/'
     | '/locations/'
     | '/$state/$city/$category'
   fileRoutesById: FileRoutesById
@@ -350,7 +449,6 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   EstimateRoute: typeof EstimateRoute
   InsuranceClaimsRoute: typeof InsuranceClaimsRoute
-  KitchenRemodelCostRoute: typeof KitchenRemodelCostRoute
   MethodologyRoute: typeof MethodologyRoute
   PrivacyRoute: typeof PrivacyRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
@@ -359,13 +457,22 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
+  GuidesHowToReadAContractorQuoteRoute: typeof GuidesHowToReadAContractorQuoteRoute
   GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
   GuidesInflatedQuoteSignsRoute: typeof GuidesInflatedQuoteSignsRoute
   GuidesKitchenRemodelRoute: typeof GuidesKitchenRemodelRoute
   GuidesMetalVsAsphaltRoofRoute: typeof GuidesMetalVsAsphaltRoofRoute
+  GuidesQuartzVsGraniteCountertopsRoute: typeof GuidesQuartzVsGraniteCountertopsRoute
+  GuidesQuestionsBeforeSigningRoute: typeof GuidesQuestionsBeforeSigningRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
   LocationsStateRoute: typeof LocationsStateRoute
+  TopicsFlooringRoute: typeof TopicsFlooringRoute
+  TopicsKitchenRoute: typeof TopicsKitchenRoute
+  TopicsQuotesRoute: typeof TopicsQuotesRoute
+  TopicsRoofRoute: typeof TopicsRoofRoute
+  TopicsWindowsRoute: typeof TopicsWindowsRoute
+  GuidesIndexRoute: typeof GuidesIndexRoute
   LocationsIndexRoute: typeof LocationsIndexRoute
   StateCityCategoryRoute: typeof StateCityCategoryRoute
 }
@@ -412,13 +519,6 @@ declare module '@tanstack/react-router' {
       path: '/methodology'
       fullPath: '/methodology'
       preLoaderRoute: typeof MethodologyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kitchen-remodel-cost': {
-      id: '/kitchen-remodel-cost'
-      path: '/kitchen-remodel-cost'
-      fullPath: '/kitchen-remodel-cost'
-      preLoaderRoute: typeof KitchenRemodelCostRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insurance-claims': {
@@ -484,6 +584,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/': {
+      id: '/guides/'
+      path: '/guides'
+      fullPath: '/guides/'
+      preLoaderRoute: typeof GuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/windows': {
+      id: '/topics/windows'
+      path: '/topics/windows'
+      fullPath: '/topics/windows'
+      preLoaderRoute: typeof TopicsWindowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/roof': {
+      id: '/topics/roof'
+      path: '/topics/roof'
+      fullPath: '/topics/roof'
+      preLoaderRoute: typeof TopicsRoofRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/quotes': {
+      id: '/topics/quotes'
+      path: '/topics/quotes'
+      fullPath: '/topics/quotes'
+      preLoaderRoute: typeof TopicsQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/kitchen': {
+      id: '/topics/kitchen'
+      path: '/topics/kitchen'
+      fullPath: '/topics/kitchen'
+      preLoaderRoute: typeof TopicsKitchenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/flooring': {
+      id: '/topics/flooring'
+      path: '/topics/flooring'
+      fullPath: '/topics/flooring'
+      preLoaderRoute: typeof TopicsFlooringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/locations/$state': {
       id: '/locations/$state'
       path: '/locations/$state'
@@ -503,6 +645,20 @@ declare module '@tanstack/react-router' {
       path: '/guides/roof-replacement'
       fullPath: '/guides/roof-replacement'
       preLoaderRoute: typeof GuidesRoofReplacementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/questions-before-signing': {
+      id: '/guides/questions-before-signing'
+      path: '/guides/questions-before-signing'
+      fullPath: '/guides/questions-before-signing'
+      preLoaderRoute: typeof GuidesQuestionsBeforeSigningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/quartz-vs-granite-countertops': {
+      id: '/guides/quartz-vs-granite-countertops'
+      path: '/guides/quartz-vs-granite-countertops'
+      fullPath: '/guides/quartz-vs-granite-countertops'
+      preLoaderRoute: typeof GuidesQuartzVsGraniteCountertopsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/metal-vs-asphalt-roof': {
@@ -531,6 +687,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/hvac-installation'
       fullPath: '/guides/hvac-installation'
       preLoaderRoute: typeof GuidesHvacInstallationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/how-to-read-a-contractor-quote': {
+      id: '/guides/how-to-read-a-contractor-quote'
+      path: '/guides/how-to-read-a-contractor-quote'
+      fullPath: '/guides/how-to-read-a-contractor-quote'
+      preLoaderRoute: typeof GuidesHowToReadAContractorQuoteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/flooring': {
@@ -566,7 +729,6 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   EstimateRoute: EstimateRoute,
   InsuranceClaimsRoute: InsuranceClaimsRoute,
-  KitchenRemodelCostRoute: KitchenRemodelCostRoute,
   MethodologyRoute: MethodologyRoute,
   PrivacyRoute: PrivacyRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
@@ -575,13 +737,22 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
+  GuidesHowToReadAContractorQuoteRoute: GuidesHowToReadAContractorQuoteRoute,
   GuidesHvacInstallationRoute: GuidesHvacInstallationRoute,
   GuidesInflatedQuoteSignsRoute: GuidesInflatedQuoteSignsRoute,
   GuidesKitchenRemodelRoute: GuidesKitchenRemodelRoute,
   GuidesMetalVsAsphaltRoofRoute: GuidesMetalVsAsphaltRoofRoute,
+  GuidesQuartzVsGraniteCountertopsRoute: GuidesQuartzVsGraniteCountertopsRoute,
+  GuidesQuestionsBeforeSigningRoute: GuidesQuestionsBeforeSigningRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
   LocationsStateRoute: LocationsStateRoute,
+  TopicsFlooringRoute: TopicsFlooringRoute,
+  TopicsKitchenRoute: TopicsKitchenRoute,
+  TopicsQuotesRoute: TopicsQuotesRoute,
+  TopicsRoofRoute: TopicsRoofRoute,
+  TopicsWindowsRoute: TopicsWindowsRoute,
+  GuidesIndexRoute: GuidesIndexRoute,
   LocationsIndexRoute: LocationsIndexRoute,
   StateCityCategoryRoute: StateCityCategoryRoute,
 }

@@ -105,17 +105,11 @@ function ProjectLandingPage() {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Service",
-              name: `${project.name} Cost Estimator`,
+              name: `${project.name} cost estimator`,
               description: project.seoDescription,
               provider: { "@type": "Organization", name: "CostReno", url: "https://costreno.com" },
               areaServed: { "@type": "Country", name: "United States" },
               priceRange: project.costRange,
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.9",
-                reviewCount: "1247",
-                bestRating: "5",
-              },
             }),
           }}
         />

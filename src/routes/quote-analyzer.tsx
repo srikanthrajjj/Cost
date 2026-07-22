@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import {
   Upload,
   FileText,
@@ -8,83 +8,73 @@ import {
   CheckCircle2,
   HelpCircle,
   ChevronDown,
-  ChevronRight,
-  Download,
-  Share2,
   MessageCircle,
   Sparkles,
   X,
-  Send,
-  TrendingUp,
   Clock,
   DollarSign,
   Search,
-  BarChart3,
   ArrowRight,
-  Check,
-  Info,
-  Wrench,
-  Bot,
-  Paperclip,
-  Eye,
   Zap,
-  Star,
   Lock,
   GitCompare,
-  Monitor,
 } from "lucide-react";
-import {
-  estimateRoofingMarketPrice,
-  isPriceComparisonReliable,
-} from "@/knowledge/roofing/market-rates";
-import { looksLikeMisparsedLineTotal } from "@/lib/quote/extractor";
 import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
-import { OpenRouterError, friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
+import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
-import { serverChatWithKnowledge } from "@/lib/chat-server";
-import { submitEmailAndDownload } from "@/lib/download-utils";
-import { EmailDownloadModal } from "@/components/EmailDownloadModal";
-import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import type { ChatMessage } from "@/lib/chat-with-knowledge";
-import type { QuoteAnalysis } from "@/lib/quote/types";
-import { addComparisonQuote, getComparisonQuotes } from "@/lib/quote/comparison-store";
-import { QuoteComparisonTray } from "@/components/quote/QuoteComparisonTray";
-import { QuoteComparisonView } from "@/components/quote/QuoteComparisonView";
-import { QuoteFeedbackCard, QuoteFeedbackMobileCta, QuoteFeedbackSidebarCta } from "@/components/quote/QuoteFeedbackCard";
+import {
+  addComparisonQuote,
+  clearComparisonQuotes,
+} from "@/lib/quote/comparison-store";
+import { QuoteFeedbackCard, QuoteFeedbackMobileCta } from "@/components/quote/QuoteFeedbackCard";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+
+const QuoteComparisonView = lazy(() =>
+  import("@/components/quote/QuoteComparisonView").then((m) => ({
+    default: m.QuoteComparisonView,
+  })),
+);
+
+const CompleteView = lazy(() =>
+  import("@/components/quote/QuoteAnalyzerComplete").then((m) => ({
+    default: m.CompleteView,
+  })),
+);
 
 export const Route = createFileRoute("/quote-analyzer")({
   head: () => ({
     meta: [
-      { title: "Free AI Contractor Quote Analyzer | Review Bids in Seconds — CostReno" },
+      { title: "Free AI contractor quote analyzer | CostReno" },
       {
         name: "description",
         content:
-          "Upload your contractor quote and get an instant AI-powered expert review. Spot overpricing, missing scope, red flags, and hidden costs in under 30 seconds. Free, no signup required.",
+          "Upload one contractor quote and get an AI review for missing scope, unclear line items, and pricing red flags. Free, no signup required.",
       },
       {
         name: "keywords",
         content:
-          "contractor quote analyzer, quote review tool, contractor estimate checker, home improvement quote analysis, roofing quote review, renovation quote comparison, AI quote analyzer, contractor bid review, how much does a roof replacement cost, kitchen remodel cost, contractor quote red flags",
+          "contractor quote analyzer, AI quote analyzer, contractor estimate checker, roofing quote review, renovation quote analysis, contractor bid review, quote red flags",
       },
       {
         property: "og:title",
-        content: "Free AI Contractor Quote Analyzer | Review Bids in Seconds — CostReno",
+        content: "Free AI contractor quote analyzer | CostReno",
       },
       {
         property: "og:description",
         content:
-          "Upload your contractor quote and get an instant expert review. Spot overpricing, missing items, and red flags in seconds. Free.",
+          "Analyze one contractor quote for missing items, vague scope, and pricing red flags in seconds.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://costreno.com/quote-analyzer" },
+      { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Free AI Contractor Quote Analyzer — CostReno" },
+      { name: "twitter:title", content: "Free AI contractor quote analyzer | CostReno" },
       {
         name: "twitter:description",
         content:
-          "Upload your contractor quote and get instant AI analysis. Spot overpricing and missing scope in seconds.",
+          "Upload one contractor quote and get an instant AI review for missing scope and red flags.",
       },
       { name: "robots", content: "index, follow" },
     ],
@@ -101,7 +91,7 @@ export const Route = createFileRoute("/quote-analyzer")({
               name: "How does the contractor quote analyzer work?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Upload a photo or PDF of your contractor quote. Our AI reads every line item, cross-references it against local pricing databases and building codes, then generates a detailed report highlighting overpriced items, missing scope, and red flags.",
+                text: "Upload a photo or PDF of one contractor quote. Our AI reads line items, checks them against local pricing context and common scope requirements, then highlights missing items, unclear language, and red flags.",
               },
             },
             {
@@ -109,7 +99,7 @@ export const Route = createFileRoute("/quote-analyzer")({
               name: "Is the quote analyzer free to use?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Yes, the quote analyzer is completely free. No signup, no credit card, and no hidden fees. Upload your quote and get results in under 30 seconds.",
+                text: "Yes. The quote analyzer is free to use with no signup required for a standard review.",
               },
             },
             {
@@ -117,39 +107,23 @@ export const Route = createFileRoute("/quote-analyzer")({
               name: "What types of contractor quotes can I analyze?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "You can analyze any home improvement contractor quote including roofing, kitchen remodeling, bathroom renovation, HVAC installation, window replacement, solar panels, painting, flooring, deck/patio, plumbing, and electrical work.",
+                text: "You can analyze home improvement quotes such as roofing, kitchen remodeling, bathroom renovation, HVAC, windows, flooring, and related projects.",
               },
             },
             {
               "@type": "Question",
-              name: "Is my contractor quote kept private and secure?",
+              name: "Is my contractor quote kept private?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Absolutely. Your files are encrypted, never stored permanently, and never shared with contractors or third parties. We process your quote securely and delete it after analysis.",
+                text: "Your files are processed for analysis and are not shared with contractors. Use CostReno only for quotes you are authorized to review.",
               },
             },
             {
               "@type": "Question",
-              name: "How much does a roof replacement cost in 2026?",
+              name: "How is this different from compare quotes?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "The average roof replacement costs between $8,600 and $24,700 in 2026, with most homeowners paying around $16,650. Costs vary by material, roof size, pitch, and location. Use our Cost Estimator for a personalized estimate.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "How much does a kitchen remodel cost?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "A kitchen remodel typically costs between $25,000 and $75,000 in 2026, with the national average around $50,000. The final cost depends on size, materials, layout changes, and your location.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "What red flags should I look for in a contractor quote?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "Common red flags include: vague material specifications, no permit costs listed, large upfront payment demands (over 30%), no warranty terms, missing scope items like cleanup and disposal, no timeline, and prices significantly below market rate.",
+                text: "Quote analyzer reviews one bid in depth. If you already have two quotes, use the compare quotes tool for a side-by-side report.",
               },
             },
             {
@@ -157,7 +131,7 @@ export const Route = createFileRoute("/quote-analyzer")({
               name: "How many contractor quotes should I get before hiring?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Experts recommend getting at least 3 quotes for any home improvement project. This helps you understand the market rate, compare scope and materials, and identify outliers. Upload all your quotes to CostReno for side-by-side analysis.",
+                text: "Getting at least three written quotes helps you understand market range and scope differences. Analyze each quote individually, then compare your strongest options side by side.",
               },
             },
           ],
@@ -168,7 +142,7 @@ export const Route = createFileRoute("/quote-analyzer")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: "CostReno AI Quote Analyzer",
+          name: "CostReno AI quote analyzer",
           url: "https://costreno.com/quote-analyzer",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
@@ -178,13 +152,7 @@ export const Route = createFileRoute("/quote-analyzer")({
             priceCurrency: "USD",
           },
           description:
-            "Free AI-powered contractor quote analysis tool. Upload any home improvement quote to identify overpricing, missing scope, and red flags instantly.",
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: "4.9",
-            ratingCount: "2847",
-            bestRating: "5",
-          },
+            "Free AI-powered tool to analyze one contractor quote for missing scope, pricing red flags, and unclear line items.",
         }),
       },
     ],
@@ -233,13 +201,6 @@ const STAGE_PROGRESS_CEILING: Record<string, number> = {
   reporting: 95,
 };
 
-function getHealthGrade(score: number): { label: string; color: string; bg: string } {
-  if (score >= 85) return { label: "Excellent", color: "text-accent", bg: "bg-accent/10" };
-  if (score >= 70) return { label: "Good", color: "text-blue-600", bg: "bg-blue-50" };
-  if (score >= 50) return { label: "Needs Attention", color: "text-amber-600", bg: "bg-amber-50" };
-  return { label: "High Risk", color: "text-red-600", bg: "bg-red-50" };
-}
-
 // ─── Main Page Component ──────────────────────────────────────────────────────
 function QuoteAnalyzerPage() {
   const [state, setState] = useState<AnalysisState>("idle");
@@ -261,9 +222,48 @@ function QuoteAnalyzerPage() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [batchProgress, setBatchProgress] = useState<{
+    current: number;
+    total: number;
+    name: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const stageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const MAX_QUOTE_FILES = 5;
+  const MAX_FILE_BYTES = 15 * 1024 * 1024;
+
+  const addSelectedFiles = useCallback((incoming: FileList | File[]) => {
+    const allowed = Array.from(incoming).filter((file) => {
+      const name = file.name.toLowerCase();
+      const okType =
+        file.type === "application/pdf" ||
+        file.type.startsWith("image/") ||
+        name.endsWith(".pdf") ||
+        name.endsWith(".jpg") ||
+        name.endsWith(".jpeg") ||
+        name.endsWith(".png");
+      return okType && file.size > 0 && file.size <= MAX_FILE_BYTES;
+    });
+
+    if (allowed.length === 0) {
+      setError("Please choose PDF, JPG, or PNG files under 15MB.");
+      return;
+    }
+
+    setSelectedFiles((prev) => {
+      const next = [...prev];
+      for (const file of allowed) {
+        if (next.length >= MAX_QUOTE_FILES) break;
+        const duplicate = next.some((f) => f.name === file.name && f.size === file.size);
+        if (!duplicate) next.push(file);
+      }
+      return next;
+    });
+    setError("");
+  }, []);
 
   const clearStageTimers = () => {
     stageTimersRef.current.forEach(clearTimeout);
@@ -318,7 +318,42 @@ function QuoteAnalyzerPage() {
     return () => clearTimeout(timeout);
   }, [error]);
 
-  const handleFileUpload = async (file: File) => {
+  const analyzeSingleFile = async (file: File): Promise<QuoteAnalysisResult> => {
+    const { extractTextFromFile } = await import("@/lib/file-processor");
+    const extracted = await extractTextFromFile(file);
+
+    if (extracted.text.length < 10) {
+      throw new Error(
+        `Could not extract text from ${file.name}. Try a different PDF or a clearer photo.`,
+      );
+    }
+
+    setProcessingStage("extracting");
+    setProcessingProgress((p) => Math.max(p, 12));
+
+    const combinedText = `Analyze this contractor quote:\n\n${extracted.text}`;
+
+    clearStageTimers();
+    stageTimersRef.current = [
+      setTimeout(() => setProcessingStage("matching"), 6000),
+      setTimeout(() => setProcessingStage("analyzing"), 14000),
+      setTimeout(() => setProcessingStage("reporting"), 28000),
+    ];
+
+    return serverAnalyzeQuoteFull({
+      data: {
+        rawText: combinedText,
+        fileName: file.name,
+        fileType: file.type || undefined,
+        fileSize: file.size,
+        source: "quote-analyzer",
+      },
+    });
+  };
+
+  const handleAnalyzeSelected = async () => {
+    if (selectedFiles.length === 0) return;
+
     clearStageTimers();
     setState("processing");
     setError("");
@@ -327,55 +362,67 @@ function QuoteAnalyzerPage() {
     setProcessingStage("reading");
     setFeedbackOpen(false);
     setFeedbackSubmitted(false);
+    setShowCompare(false);
+    setCompareIds([]);
+    setBatchProgress(null);
 
     try {
-      const { extractTextFromFile } = await import("@/lib/file-processor");
-      const extracted = await extractTextFromFile(file);
-
-      if (extracted.text.length < 10) {
-        setError(
-          "Could not extract text from this file. Try a different PDF or paste text directly.",
-        );
-        setState("error");
+      if (selectedFiles.length === 1) {
+        setBatchProgress({ current: 1, total: 1, name: selectedFiles[0].name });
+        const analysis = await analyzeSingleFile(selectedFiles[0]);
+        clearStageTimers();
+        setProcessingStage("reporting");
+        setProcessingProgress(100);
+        setResult(analysis);
+        setSelectedFiles([]);
+        setBatchProgress(null);
+        setState("complete");
         return;
       }
 
-      // Server pipeline runs extracting → matching → analyzing → reporting.
-      // createServerFn can't stream onStageChange, so simulate stage advances
-      // while the request is in flight so the UI keeps moving.
-      setProcessingStage("extracting");
-      setProcessingProgress((p) => Math.max(p, 12));
+      clearComparisonQuotes();
+      const savedIds: string[] = [];
+      let lastAnalysis: QuoteAnalysisResult | null = null;
 
-      const combinedText = `Analyze this contractor quote:\n\n${extracted.text}`;
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        setBatchProgress({
+          current: i + 1,
+          total: selectedFiles.length,
+          name: file.name,
+        });
+        setProcessingStage("reading");
+        setProcessingProgress(Math.round((i / selectedFiles.length) * 100));
 
-      stageTimersRef.current = [
-        setTimeout(() => setProcessingStage("matching"), 6000),
-        setTimeout(() => setProcessingStage("analyzing"), 14000),
-        setTimeout(() => setProcessingStage("reporting"), 28000),
-      ];
+        const analysis = await analyzeSingleFile(file);
+        const saved = addComparisonQuote(analysis);
+        savedIds.push(saved.id);
+        lastAnalysis = analysis;
 
-      const analysis = await serverAnalyzeQuoteFull({
-        data: {
-          rawText: combinedText,
-          fileName: file.name,
-          fileType: file.type || undefined,
-          fileSize: file.size,
-          source: "quote-analyzer",
-        },
-      });
+        setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
+      }
 
       clearStageTimers();
       setProcessingStage("reporting");
       setProcessingProgress(100);
-      setResult(analysis);
+      setResult(lastAnalysis);
+      setSelectedFiles([]);
+      setBatchProgress(null);
+      setCompareIds(savedIds);
+      setShowCompare(true);
       setState("complete");
     } catch (err) {
       clearStageTimers();
+      setBatchProgress(null);
       setError(friendlyOpenRouterMessage(err));
       setState("error");
     } finally {
       abortRef.current = null;
     }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Cancel not supported in server function mode
@@ -389,6 +436,10 @@ function QuoteAnalyzerPage() {
     setProcessingProgress(0);
     setProcessingStage("reading");
     setActiveTab("overview");
+    setSelectedFiles([]);
+    setBatchProgress(null);
+    setShowCompare(false);
+    setCompareIds([]);
   };
 
   const handleEmailSubmit = async (email: string) => {
@@ -469,12 +520,16 @@ function QuoteAnalyzerPage() {
                 </span>
               </div>
               <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
-                Get an Expert Review of Your Contractor Quote{" "}
-                <span className="text-accent">in Seconds</span>
+                Get an expert review of your contractor quote{" "}
+                <span className="text-accent">in seconds</span>
               </h1>
               <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-                Upload your quote and uncover what's included, what's missing, and what could cost
-                you more.
+                Upload one quote to check what's included, what's missing, and what looks unclear.
+                Have two bids already?{" "}
+                <a href="/compare-quotes" className="text-primary font-semibold hover:underline">
+                  Compare them side by side
+                </a>
+                .
               </p>
               {/* Trust indicators */}
               <div className="mt-8 flex flex-wrap gap-5">
@@ -496,44 +551,115 @@ function QuoteAnalyzerPage() {
             {/* Right - Upload Card */}
             <div>
               <div
-                className="rounded-2xl border-2 border-dashed border-border hover:border-accent/60 bg-white p-8 text-left transition-all cursor-pointer group shadow-sm"
-                onClick={() => fileInputRef.current?.click()}
+                className="rounded-2xl border-2 border-dashed border-border hover:border-primary/40 bg-white p-6 sm:p-8 text-left transition-all shadow-sm"
                 onDragOver={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
-                  const file = e.dataTransfer.files[0];
-                  if (file) handleFileUpload(file);
+                  if (e.dataTransfer.files?.length) {
+                    addSelectedFiles(e.dataTransfer.files);
+                  }
                 }}
               >
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
+                  multiple
                   className="hidden"
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
+                    if (e.target.files?.length) {
+                      addSelectedFiles(e.target.files);
+                    }
                     e.target.value = "";
                   }}
                 />
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition">
-                    <Upload className="h-7 w-7 text-accent" />
+
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Upload className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-ink">Upload Your Quote</p>
+                    <p className="text-lg font-bold text-ink">Upload your quote</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Drag & drop your file here or click to choose
+                      Analyze one quote in depth. You can also add more files if needed.
                     </p>
                   </div>
-                  <button className="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20">
-                    <FileText className="h-4 w-4" /> Choose File
-                  </button>
-                  <p className="text-xs text-muted-foreground">PDF, JPG, PNG • Max 15MB</p>
+
+                  <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+                    >
+                      <FileText className="h-4 w-4" />
+                      {selectedFiles.length === 0 ? "Choose files" : "Add more files"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">PDF, JPG, PNG · Max 15MB each</p>
                 </div>
+
+                {selectedFiles.length > 0 && (
+                  <div className="mt-5 pt-5 border-t border-border">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-semibold text-ink">
+                        {selectedFiles.length} quote{selectedFiles.length === 1 ? "" : "s"} selected
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFiles([])}
+                        className="text-xs text-muted-foreground hover:text-ink transition"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                    <ul className="space-y-2 mb-4">
+                      {selectedFiles.map((file, index) => (
+                        <li
+                          key={`${file.name}-${file.size}-${index}`}
+                          className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2"
+                        >
+                          <FileText className="h-4 w-4 text-primary shrink-0" />
+                          <div className="min-w-0 flex-1 text-left">
+                            <p className="text-xs font-medium text-ink truncate">{file.name}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {(file.size / (1024 * 1024)).toFixed(1)} MB
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeSelectedFile(index)}
+                            className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center shrink-0"
+                            aria-label={`Remove ${file.name}`}
+                          >
+                            <X className="h-3.5 w-3.5 text-muted-foreground" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      type="button"
+                      onClick={handleAnalyzeSelected}
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {selectedFiles.length === 1
+                        ? "Analyze quote"
+                        : `Analyze and compare ${selectedFiles.length} quotes`}
+                    </button>
+                    {selectedFiles.length >= 2 && (
+                      <p className="mt-2 text-[11px] text-muted-foreground text-center">
+                        Prefer a dedicated side-by-side report?{" "}
+                        <a href="/compare-quotes" className="text-primary hover:underline">
+                          Use compare quotes
+                        </a>
+                        .
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -639,13 +765,16 @@ function QuoteAnalyzerPage() {
           {/* Bottom CTA */}
           <div className="mt-16 text-center">
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setTimeout(() => fileInputRef.current?.click(), 350);
+              }}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
-              <Upload className="h-4 w-4" /> Upload Your Quote Now
+              <Upload className="h-4 w-4" /> Upload quote(s) now
             </button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Free. No signup. Results in seconds.
+              Free. No signup. Analyze one quote or compare several.
             </p>
           </div>
 
@@ -661,8 +790,8 @@ function QuoteAnalyzerPage() {
               {[
                 {
                   step: "1",
-                  title: "Upload Your Quote",
-                  desc: "Upload a PDF, photo, or scan of any contractor quote, estimate, or bid. We support roofing, kitchen, bathroom, HVAC, and more.",
+                  title: "Upload your quote(s)",
+                  desc: "Upload one PDF or photo for a full review, or select up to 5 quotes to compare side by side. Roofing, kitchen, bathroom, HVAC, and more.",
                 },
                 {
                   step: "2",
@@ -867,13 +996,16 @@ function QuoteAnalyzerPage() {
           {/* Final CTA */}
           <div className="mt-16 pb-8 text-center">
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setTimeout(() => fileInputRef.current?.click(), 350);
+              }}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
-              <Upload className="h-4 w-4" /> Analyze Your Quote. Free
+              <Upload className="h-4 w-4" /> Analyze your quote. Free
             </button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Trusted by thousands of homeowners. Results in seconds.
+              Trusted by thousands of homeowners. One quote or several.
             </p>
           </div>
         </div>
@@ -889,7 +1021,7 @@ function QuoteAnalyzerPage() {
 
     return (
       <div className="min-h-screen bg-[#f7f8fa]">
-        <Header />
+        <SiteNav active="quote" />
         <div className="max-w-md mx-auto px-4 py-20 text-center">
           {/* Circular progress bar */}
           <div className="w-24 h-24 mx-auto mb-8 relative">
@@ -919,9 +1051,14 @@ function QuoteAnalyzerPage() {
 
           {/* Stage text with time estimate */}
           <div className="text-center mb-4">
+            {batchProgress && batchProgress.total > 1 && (
+              <p className="text-xs font-semibold text-primary mb-2">
+                Quote {batchProgress.current} of {batchProgress.total}: {batchProgress.name}
+              </p>
+            )}
             <h2
               className="font-display text-xl font-bold text-ink animate-in fade-in duration-300"
-              key={processingStage}
+              key={`${processingStage}-${batchProgress?.current ?? 0}`}
             >
               {processingStage === "reading" && "Reading your document..."}
               {processingStage === "extracting" && "Pulling out every line item..."}
@@ -930,11 +1067,17 @@ function QuoteAnalyzerPage() {
               {processingStage === "reporting" && "Building your personalized report..."}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {processingStage === "reading" && "Estimated: 10-15 seconds"}
-              {processingStage === "extracting" && "Estimated: 15-20 seconds"}
-              {processingStage === "matching" && "Estimated: 20-30 seconds"}
-              {processingStage === "analyzing" && "Estimated: 30-45 seconds"}
-              {processingStage === "reporting" && "Almost done..."}
+              {batchProgress && batchProgress.total > 1
+                ? "Analyzing each quote in order. This may take a few minutes."
+                : processingStage === "reading"
+                  ? "Estimated: 10-15 seconds"
+                  : processingStage === "extracting"
+                    ? "Estimated: 15-20 seconds"
+                    : processingStage === "matching"
+                      ? "Estimated: 20-30 seconds"
+                      : processingStage === "analyzing"
+                        ? "Estimated: 30-45 seconds"
+                        : "Almost done..."}
             </p>
           </div>
 
@@ -1017,13 +1160,21 @@ function QuoteAnalyzerPage() {
   // ─── COMPLETE STATE ──────────────────────────────────────────────────────────
   if (showCompare) {
     return (
-      <QuoteComparisonView
-        selectedIds={compareIds}
-        onBack={() => {
-          setShowCompare(false);
-          setCompareIds([]);
-        }}
-      />
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center text-sm text-muted-foreground">
+            Loading comparison...
+          </div>
+        }
+      >
+        <QuoteComparisonView
+          selectedIds={compareIds}
+          onBack={() => {
+            setShowCompare(false);
+            setCompareIds([]);
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -1035,26 +1186,34 @@ function QuoteAnalyzerPage() {
 
   return (
     <>
-      <CompleteView
-        result={result!}
-        reset={reset}
-        chatOpen={chatOpen}
-        setChatOpen={setChatOpen}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        expandedCards={expandedCards}
-        setExpandedCards={setExpandedCards}
-        selectedRow={selectedRow}
-        setSelectedRow={setSelectedRow}
-        expandedRow={expandedRow}
-        setExpandedRow={setExpandedRow}
-        onCompare={(ids: string[]) => {
-          setCompareIds(ids);
-          setShowCompare(true);
-        }}
-        feedbackSubmitted={feedbackSubmitted}
-        onOpenFeedback={() => setFeedbackOpen(true)}
-      />
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center text-sm text-muted-foreground">
+            Loading your report...
+          </div>
+        }
+      >
+        <CompleteView
+          result={result!}
+          reset={reset}
+          chatOpen={chatOpen}
+          setChatOpen={setChatOpen}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          expandedCards={expandedCards}
+          setExpandedCards={setExpandedCards}
+          selectedRow={selectedRow}
+          setSelectedRow={setSelectedRow}
+          expandedRow={expandedRow}
+          setExpandedRow={setExpandedRow}
+          onCompare={(ids: string[]) => {
+            setCompareIds(ids);
+            setShowCompare(true);
+          }}
+          feedbackSubmitted={feedbackSubmitted}
+          onOpenFeedback={() => setFeedbackOpen(true)}
+        />
+      </Suspense>
       {!feedbackOpen && (
         <QuoteFeedbackMobileCta
           onOpen={() => setFeedbackOpen(true)}
@@ -1074,1867 +1233,5 @@ function QuoteAnalyzerPage() {
         onSubmitted={() => setFeedbackSubmitted(true)}
       />
     </>
-  );
-}
-
-// ─── Complete View (Report Page) ──────────────────────────────────────────────
-function CompleteView({
-  result,
-  reset,
-  chatOpen,
-  setChatOpen,
-  activeTab,
-  setActiveTab,
-  expandedCards,
-  setExpandedCards,
-  selectedRow,
-  setSelectedRow,
-  expandedRow,
-  setExpandedRow,
-  onCompare,
-  feedbackSubmitted,
-  onOpenFeedback,
-}: {
-  result: QuoteAnalysisResult;
-  reset: () => void;
-  chatOpen: boolean;
-  setChatOpen: (v: boolean) => void;
-  activeTab: string;
-  setActiveTab: (v: any) => void;
-  expandedCards: Set<string>;
-  setExpandedCards: (v: Set<string>) => void;
-  selectedRow: number | null;
-  setSelectedRow: (v: number | null) => void;
-  expandedRow: number | null;
-  setExpandedRow: (v: number | null) => void;
-  onCompare: (ids: string[]) => void;
-  feedbackSubmitted: boolean;
-  onOpenFeedback: () => void;
-}) {
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
-
-  const handleEmailSubmit = async (email: string) => {
-    if (!result || !result.analysis) {
-      throw new Error("No analysis data available");
-    }
-    setIsDownloading(true);
-    try {
-      const { analysis, extraction } = result;
-
-      // Subscribe to newsletter (fire and forget)
-      subscribeToNewsletter({ data: { email, source: "quote-download" } }).catch(() => {});
-
-      const summaryText = `Completeness Score: ${analysis.summary.completenessScore}% | ${analysis.summary.matchedItems} items matched | ${analysis.summary.unmatchedItems} items unmatched | Total: ${analysis.summary.totalItems} items`;
-
-      // Use the same unit-aware market rates + reliability guards as the dashboard
-      const lineItemsWithMarket = [
-        ...extraction.materials.map((item) => {
-          const vendorPrice = item.totalPrice || 0;
-          const marketPrice = estimateRoofingMarketPrice(item.name, item.quantity, item.unit);
-          const marketComparable = isPriceComparisonReliable(vendorPrice, marketPrice);
-          return {
-            name: item.name,
-            quantity: item.quantity,
-            qty: item.quantity,
-            unit: item.unit,
-            price: vendorPrice,
-            totalPrice: vendorPrice,
-            marketPrice: marketComparable ? marketPrice : 0,
-            marketComparable,
-          };
-        }),
-        ...extraction.scopeItems.map((item) => {
-          const vendorPrice = item.totalPrice || 0;
-          const marketPrice = estimateRoofingMarketPrice(item.name, item.quantity, item.unit);
-          const marketComparable = isPriceComparisonReliable(vendorPrice, marketPrice);
-          return {
-            name: item.name,
-            quantity: item.quantity,
-            qty: item.quantity,
-            unit: item.unit,
-            price: vendorPrice,
-            totalPrice: vendorPrice,
-            marketPrice: marketComparable ? marketPrice : 0,
-            marketComparable,
-          };
-        }),
-      ];
-
-      await submitEmailAndDownload({
-        filename: `quote-analysis-${new Date().getTime()}.html`,
-        email,
-        reportType: "analysis",
-        data: {
-          score: analysis.summary.completenessScore,
-          matchedItems: analysis.summary.matchedItems,
-          unmatchedItems: analysis.summary.unmatchedItems,
-          totalItems: analysis.summary.totalItems,
-          missingItems: analysis.missingScope.length,
-          clarificationItems: analysis.needsClarification.length,
-          redFlags: analysis.redFlags.length,
-          contractor: extraction.contractor,
-          totalPrice: extraction.totalPrice,
-          projectType: extraction.projectType,
-          missingScope: analysis.missingScope,
-          needsClarification: analysis.needsClarification,
-          redFlagsList: analysis.redFlags,
-          lineItems: lineItemsWithMarket,
-          presentItems: analysis.presentItems,
-          summary: summaryText,
-          recommendations: analysis.recommendations,
-          questionsToAsk: analysis.questionsToAsk,
-          buildingCodes: analysis.buildingCodes,
-        },
-      });
-    } catch (error) {
-      console.error("Download failed:", error);
-      throw error;
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const analysis = result.analysis;
-  const extraction = result.extraction;
-  const score = analysis.summary.completenessScore;
-  const grade = getHealthGrade(score);
-  const totalLineItems = extraction.materials.length + extraction.scopeItems.length;
-  const analyzedDate = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-  const analyzedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const parseMarketPrice = (costString?: string): number => {
-    if (!costString) return 0;
-    const numbers = costString.match(/\$[\d,.]+/g);
-    if (!numbers || numbers.length === 0) return 0;
-    const values = numbers.map((n) => Number(n.replace(/[$,]/g, "")));
-    return values.reduce((a, b) => a + b, 0) / values.length;
-  };
-  const getMarketPrice = (name: string, qty: number, unit: string): number => {
-    // Prefer unit-level market rates only when qty/unit are compatible
-    const fromRates = estimateRoofingMarketPrice(name, qty, unit);
-    if (fromRates > 0) return fromRates;
-
-    const matchedMaterial = result.matchedMaterials.find(
-      (x) => x.original.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (matchedMaterial?.knowledge?.cost) {
-      const cost = matchedMaterial.knowledge.cost;
-      // Skip project-level totals (e.g. "$8,000 – $18,000") for line-item comparison
-      if (/\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) {
-        const mid = parseMarketPrice(cost);
-        if (mid > 0 && qty > 0) return mid * qty;
-      }
-    }
-
-    const matchedScope = result.matchedScopeItems.find(
-      (x) => x.original.name.toLowerCase() === name.toLowerCase(),
-    );
-    if (matchedScope?.knowledge?.typicalCost) {
-      const cost = matchedScope.knowledge.typicalCost;
-      const mid = parseMarketPrice(cost);
-      if (mid > 0 && qty > 0 && /\/\s*(lf|sq|sq\s*ft|each|square)/i.test(cost)) {
-        return mid * qty;
-      }
-    }
-
-    return 0;
-  };
-  const scopeRows = [
-    ...extraction.materials.map((m) => {
-      const priceUnreliable = looksLikeMisparsedLineTotal(m.totalPrice, m.quantity, m.unitPrice);
-      const marketPrice = getMarketPrice(m.name, m.quantity, m.unit);
-      return {
-        name: m.name,
-        qty: m.quantity,
-        unit: m.unit,
-        unitPrice: m.unitPrice,
-        price: priceUnreliable ? 0 : m.totalPrice,
-        rawPrice: m.totalPrice,
-        priceUnreliable,
-        marketPrice,
-        marketComparable: !priceUnreliable && isPriceComparisonReliable(m.totalPrice, marketPrice),
-      };
-    }),
-    ...extraction.scopeItems.map((s) => {
-      const unitPrice = s.unitPrice ?? 0;
-      const priceUnreliable = looksLikeMisparsedLineTotal(s.totalPrice, s.quantity, unitPrice);
-      const marketPrice = getMarketPrice(s.name, s.quantity, s.unit);
-      return {
-        name: s.name,
-        qty: s.quantity,
-        unit: s.unit,
-        unitPrice,
-        price: priceUnreliable ? 0 : s.totalPrice,
-        rawPrice: s.totalPrice,
-        priceUnreliable,
-        marketPrice,
-        marketComparable: !priceUnreliable && isPriceComparisonReliable(s.totalPrice, marketPrice),
-      };
-    }),
-  ];
-  const getPriceRecommendation = (row: (typeof scopeRows)[number]) => {
-    if (row.priceUnreliable) {
-      return { label: "Verify price", className: "bg-amber-50 text-amber-600" };
-    }
-    if (row.price <= 0) {
-      return { label: "—", className: "bg-muted text-muted-foreground" };
-    }
-    if (row.marketComparable && row.marketPrice > 0) {
-      if (row.price > row.marketPrice * 1.35) {
-        return { label: "Review carefully", className: "bg-red-50 text-red-600" };
-      }
-      if (row.price > row.marketPrice * 1.15) {
-        return { label: "Worth negotiating", className: "bg-amber-50 text-amber-600" };
-      }
-      return { label: "Good value", className: "bg-green-50 text-green-600" };
-    }
-    // No reliable market comparison: do not invent a value judgment
-    return { label: "—", className: "bg-muted text-muted-foreground" };
-  };
-  const getStatus = (name: string) => {
-    if (
-      analysis.needsClarification.some(
-        (i) =>
-          i.matchedAs?.toLowerCase() === name.toLowerCase() ||
-          i.name.toLowerCase() === name.toLowerCase(),
-      )
-    )
-      return "clarification";
-    if (
-      analysis.presentItems.some(
-        (i) =>
-          i.matchedAs?.toLowerCase() === name.toLowerCase() ||
-          i.name.toLowerCase() === name.toLowerCase(),
-      )
-    )
-      return "included";
-    return "unmatched";
-  };
-  const navItems = [
-    { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "explorer", label: "Missing Items", icon: AlertTriangle },
-    { id: "questions", label: "Smart Questions", icon: MessageCircle },
-    { id: "timeline", label: "Recommendations", icon: Sparkles },
-  ];
-
-  return (
-    <div className="min-h-screen bg-[#f8f9fb]">
-      <header className="border-b border-border bg-white sticky top-0 z-40">
-        <div className="flex items-center justify-between px-6 h-14">
-          <div className="flex items-center gap-3">
-            <a href="/">
-              <img src="/logo.svg" alt="CostReno" style={{ height: "28px" }} />
-            </a>
-            <div className="hidden sm:flex items-center gap-2 ml-4 pl-4 border-l border-border">
-              <CheckCircle2 className="h-4 w-4 text-accent" />
-              <span className="text-sm font-bold text-ink">Quote Analysis Ready</span>
-              <span className="text-xs text-muted-foreground">
-                · {totalLineItems} items · {analyzedDate}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowEmailModal(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50"
-            >
-              <Download className="h-3.5 w-3.5" /> Download Report
-            </button>
-            <button onClick={() => setShowShareModal(true)} className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50">
-              <Share2 className="h-3.5 w-3.5" /> Share Report
-            </button>
-            <button
-              onClick={() => addComparisonQuote(result)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-accent text-accent text-xs font-semibold hover:bg-accent/5"
-            >
-              <GitCompare className="h-3.5 w-3.5" /> Save to compare
-            </button>
-            <QuoteComparisonTray onCompare={onCompare} />
-            <button
-              onClick={reset}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#082A4B] text-white text-xs font-semibold"
-            >
-              <Upload className="h-3.5 w-3.5" /> New Analysis
-            </button>
-          </div>
-        </div>
-      </header>
-      <div className="flex">
-        <aside className="hidden lg:flex flex-col w-56 border-r border-border bg-white h-[calc(100vh-56px)] sticky top-14">
-          <div className="px-4 py-4 border-b border-border">
-            <p className="text-[10px] text-muted-foreground">Report for</p>
-            <p className="text-xs font-bold text-ink mt-0.5 truncate">
-              {extraction.contractor || "Quote.pdf"}
-            </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Uploaded just now</p>
-          </div>
-          <nav className="flex-1 px-2 py-3 space-y-0.5">
-            {navItems.map((item) => {
-              const I = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition ${activeTab === item.id ? "bg-[#082A4B] text-white font-semibold" : "text-muted-foreground hover:bg-muted/50"}`}
-                >
-                  <I className="h-4 w-4" /> {item.label}
-                </button>
-              );
-            })}
-          </nav>
-          <div className="px-3 pb-4 mt-auto">
-            <QuoteFeedbackSidebarCta
-              onOpen={onOpenFeedback}
-              submitted={feedbackSubmitted}
-            />
-            <div className="rounded-xl border-2 border-accent bg-gradient-to-b from-accent/5 to-accent/15 p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <span className="text-xs font-bold text-accent">CostReno AI</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mb-2.5">
-                Get instant answers about your quote
-              </p>
-              <button
-                onClick={() => setChatOpen(true)}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
-              >
-                <MessageCircle className="h-3.5 w-3.5" /> Ask AI
-              </button>
-            </div>
-          </div>
-        </aside>
-        <main className="flex-1 min-w-0 flex">
-          {/* Middle: Main content */}
-          <div className="flex-1 min-w-0 px-5 lg:px-8 py-8">
-            {/* Score cards — always visible */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8 sticky top-14 z-10 bg-[#f8f9fb] py-4 -mx-5 px-5">
-              <div className="rounded-xl border border-border bg-white p-4">
-                <p className="text-[10px] text-muted-foreground font-medium mb-2">
-                  Quote Health Score
-                </p>
-                <div className="flex items-end gap-1">
-                  <span
-                    className="text-3xl font-display font-bold"
-                    style={{
-                      color:
-                        score >= 85
-                          ? "#03A44D"
-                          : score >= 70
-                            ? "#3b82f6"
-                            : score >= 50
-                              ? "#d97706"
-                              : "#dc2626",
-                    }}
-                  >
-                    {score}
-                  </span>
-                  <span className="text-sm text-muted-foreground mb-1">/100</span>
-                </div>
-                <span
-                  className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${grade.bg} ${grade.color}`}
-                >
-                  {grade.label}
-                </span>
-              </div>
-              <div className="rounded-xl border border-border bg-white p-4">
-                <div className="flex items-center gap-1 mb-2">
-                  <p className="text-[10px] text-muted-foreground font-medium">Included</p>
-                  <CheckCircle2 className="h-3 w-3 text-accent" />
-                </div>
-                <p className="text-3xl font-display font-bold text-accent">
-                  {analysis.presentItems.length}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {totalLineItems > 0
-                    ? Math.round((analysis.presentItems.length / totalLineItems) * 100)
-                    : 0}
-                  % of items
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-white p-4">
-                <p className="text-[10px] text-muted-foreground font-medium mb-2">
-                  Needs Clarification
-                </p>
-                <p className="text-3xl font-display font-bold text-amber-500">
-                  {analysis.needsClarification.length}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {totalLineItems > 0
-                    ? Math.round((analysis.needsClarification.length / totalLineItems) * 100)
-                    : 0}
-                  % of items
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-white p-4">
-                <div className="flex items-center gap-1 mb-2">
-                  <p className="text-[10px] text-muted-foreground font-medium">Missing</p>
-                  <AlertTriangle className="h-3 w-3 text-red-500" />
-                </div>
-                <p className="text-3xl font-display font-bold text-red-500">
-                  {analysis.missingScope.length}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {analysis.missingScope.length > 0 ? "Review" : "0%"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-white p-4">
-                <p className="text-[10px] text-muted-foreground font-medium mb-2">Red Flags</p>
-                <p
-                  className={`text-3xl font-display font-bold ${analysis.redFlags.length > 0 ? "text-red-500" : "text-accent"}`}
-                >
-                  {analysis.redFlags.length}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {analysis.redFlags.length === 0 ? "Great!" : "Review"}
-                </p>
-              </div>
-            </div>
-            {/* Tab-specific content */}
-            {activeTab === "overview" && (
-              <div className="mb-8">
-                <h2 className="text-base font-bold text-ink mb-1">Scope Review</h2>
-                <p className="text-xs text-muted-foreground mb-4">
-                  A detailed review of each line item in your quote.
-                </p>
-                {/* Quick Filters */}
-                <div className="hidden sm:flex flex-wrap gap-2 mb-4">
-                  {["Missing", "Red Flags"].map((filter) => (
-                    <button
-                      key={filter}
-                      type="button"
-                      onClick={() =>
-                        setActiveTab(filter === "Missing" ? "explorer" : "overview")
-                      }
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition border border-border hover:bg-muted/50 text-muted-foreground"
-                    >
-                      {filter}
-                    </button>
-                  ))}
-                </div>
-                <div className="rounded-xl border border-border bg-white overflow-hidden">
-                  {/* Desktop Table View */}
-                  <table className="hidden sm:table w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/20">
-                        <th className="px-4 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase w-6"></th>
-                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Line item
-                        </th>
-                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Qty
-                        </th>
-                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Price
-                        </th>
-                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Current market price
-                        </th>
-                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          Status
-                        </th>
-                        <th className="px-3 py-3 text-left text-[10px] font-semibold text-muted-foreground uppercase">
-                          AI recommendation
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {scopeRows.map((row, i) => {
-                        const st = getStatus(row.name);
-                        const recommendation = getPriceRecommendation(row);
-                        const showMarket = row.marketPrice > 0 && row.marketComparable;
-                        return (
-                          <>
-                            <tr key={i} className={`border-b border-border/50 hover:bg-muted/10 ${row.priceUnreliable ? "bg-amber-50/20" : row.price > 10000 ? "bg-red-50/20" : row.price > 5000 ? "bg-amber-50/20" : ""}`}>
-                              <td className="px-4 py-4 text-muted-foreground cursor-pointer" onClick={() => setExpandedRow(expandedRow === i ? null : i)}>
-                                {expandedRow === i ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                              </td>
-                              <td className="px-3 py-4">
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}
-                                  >
-                                    {st === "included" ? (
-                                      <Check className="h-3 w-3 text-accent" />
-                                    ) : st === "clarification" ? (
-                                      <HelpCircle className="h-3 w-3 text-amber-500" />
-                                    ) : (
-                                      <Info className="h-3 w-3 text-muted-foreground" />
-                                    )}
-                                  </div>
-                                  <span className="font-medium text-ink">{row.name}</span>
-                                </div>
-                              </td>
-                              <td className="px-3 py-4 text-muted-foreground text-xs">
-                                {row.qty > 0 ? `${row.qty} ${row.unit}` : "—"}
-                              </td>
-                              <td className="px-3 py-4">
-                                {row.price > 0 ? (
-                                  <span className={`text-xs font-medium ${
-                                    row.price > 10000 ? "text-red-600" : row.price > 5000 ? "text-amber-600" : "text-ink"
-                                  }`}>
-                                    ${row.price.toLocaleString()}
-                                  </span>
-                                ) : row.priceUnreliable && row.rawPrice > 0 ? (
-                                  <span className="text-xs font-medium text-amber-600" title="Extracted amount looks like a unit rate or fragment, not a line total">
-                                    Unclear
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground text-xs">—</span>
-                                )}
-                              </td>
-                              <td className="px-3 py-4">
-                                {showMarket ? (
-                                  <span
-                                    className={`text-xs font-medium ${
-                                      row.price > row.marketPrice * 1.15
-                                        ? "text-amber-600"
-                                        : row.price < row.marketPrice * 0.85
-                                          ? "text-accent"
-                                          : "text-ink"
-                                    }`}
-                                  >
-                                    ${Math.round(row.marketPrice).toLocaleString()}
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground text-xs">—</span>
-                                )}
-                              </td>
-                              <td className="px-3 py-4">
-                                {st === "included" && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">
-                                    Included
-                                  </span>
-                                )}
-                                {st === "clarification" && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
-                                    Needs clarification
-                                  </span>
-                                )}
-                                {st === "unmatched" && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
-                                    —
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-3 py-4">
-                                {st === "included" && (
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${recommendation.className}`}>
-                                    {recommendation.label}
-                                  </span>
-                                )}
-                                {st === "clarification" && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
-                                    Ask contractor
-                                  </span>
-                                )}
-                                {st === "unmatched" && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
-                                    —
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                            {expandedRow === i && (
-                              <tr className={`border-b border-border/50 ${row.priceUnreliable ? "bg-amber-50/30" : row.price > 10000 ? "bg-red-50/30" : row.price > 5000 ? "bg-amber-50/30" : "bg-muted/30"}`}>
-                                <td colSpan={7} className="px-4 py-4">
-                                  <div className="space-y-3">
-                                    <div className="flex items-start gap-2">
-                                      <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Why it matters:</span>
-                                      <p className="text-xs text-muted-foreground">
-                                        {st === "included" ? "This item is included in your quote and contributes to the total cost." : st === "clarification" ? "This item needs clarification to ensure it meets your requirements." : "This item was not matched to standard scope items."}
-                                      </p>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                      <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Price analysis:</span>
-                                      <p className="text-xs text-muted-foreground">
-                                        {row.priceUnreliable
-                                          ? `The extracted amount ($${row.rawPrice.toLocaleString()}) looks like a unit rate, line number, or incomplete fragment rather than a full line total. Ask your contractor to confirm the extended price for this item.`
-                                          : showMarket
-                                            ? row.price > row.marketPrice * 1.15
-                                              ? `Vendor price is above the current market average of $${Math.round(row.marketPrice).toLocaleString()}. Consider negotiating or comparing with other quotes.`
-                                              : row.price < row.marketPrice * 0.85
-                                                ? `Vendor price is below the current market average of $${Math.round(row.marketPrice).toLocaleString()}. Verify scope and material quality are complete.`
-                                                : `Vendor price is close to the current market average of $${Math.round(row.marketPrice).toLocaleString()}.`
-                                            : row.price > 0
-                                              ? "Not enough reliable quantity or unit data to compare this line against market rates yet."
-                                              : "No line total was found for this item in the quote."}
-                                      </p>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                      <span className="text-[10px] font-bold text-muted-foreground shrink-0 mt-0.5">Recommendation:</span>
-                                      <p className="text-xs text-muted-foreground">
-                                        {row.priceUnreliable
-                                          ? "Do not treat this line as a bargain or overcharge until the contractor confirms the total."
-                                          : st === "included" && row.price > 0
-                                            ? recommendation.label === "Review carefully"
-                                              ? "Review carefully with your contractor. Ask for itemized details."
-                                              : recommendation.label === "Worth negotiating"
-                                                ? "Consider negotiating or comparing with other quotes."
-                                                : recommendation.label === "Good value"
-                                                  ? "This appears to be a fair price for this item."
-                                                  : "Confirm quantity and unit pricing with your contractor before drawing conclusions."
-                                            : st === "clarification"
-                                              ? "Ask your contractor for specific details about this item."
-                                              : "Verify if this item is necessary for your project."}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  
-                  {/* Mobile Card View */}
-                  <div className="sm:hidden space-y-3">
-                    {scopeRows.slice(0, 5).map((row, i) => {
-                      const st = getStatus(row.name);
-                      const recommendation = getPriceRecommendation(row);
-                      return (
-                        <div key={i} className={`rounded-xl border p-4 ${row.priceUnreliable ? "border-amber-200 bg-amber-50/20" : row.price > 10000 ? "border-red-200 bg-red-50/20" : row.price > 5000 ? "border-amber-200 bg-amber-50/20" : "border-border bg-white"}`}>
-                          <div className="flex items-start gap-3">
-                            <div
-                              className={`w-6 h-6 rounded flex items-center justify-center shrink-0 mt-0.5 ${st === "included" ? "bg-accent/10" : st === "clarification" ? "bg-amber-50" : "bg-muted"}`}
-                            >
-                              {st === "included" ? (
-                                <Check className="h-3 w-3 text-accent" />
-                              ) : st === "clarification" ? (
-                                <HelpCircle className="h-3 w-3 text-amber-500" />
-                              ) : (
-                                <Info className="h-3 w-3 text-muted-foreground" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-ink">{row.name}</p>
-                              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                                {row.price > 0 && (
-                                  <span className={`text-sm font-bold ${
-                                    row.price > 10000 ? "text-red-600" : row.price > 5000 ? "text-amber-600" : "text-ink"
-                                  }`}>
-                                    ${row.price.toLocaleString()}
-                                  </span>
-                                )}
-                                {row.priceUnreliable && (
-                                  <span className="text-xs font-medium text-amber-600">Price unclear</span>
-                                )}
-                                {row.marketComparable && row.marketPrice > 0 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    Market: ${Math.round(row.marketPrice).toLocaleString()}
-                                  </span>
-                                )}
-                                <span className={`text-[10px] font-medium ${
-                                  st === "included" ? "text-accent" : st === "clarification" ? "text-amber-600" : "text-muted-foreground"
-                                }`}>
-                                  {st === "included" ? "Included" : st === "clarification" ? "Needs clarification" : "—"}
-                                </span>
-                                {st === "included" && recommendation.label !== "—" && (
-                                  <span className={`text-[10px] font-bold ${recommendation.className.includes("amber") ? "text-amber-600" : recommendation.className.includes("red") ? "text-red-600" : recommendation.className.includes("green") ? "text-green-600" : "text-muted-foreground"}`}>
-                                    {recommendation.label}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    
-                    {/* Desktop CTA for Mobile */}
-                    <div className="rounded-xl border-2 border-accent/30 bg-gradient-to-b from-accent/5 to-accent/10 p-5 text-center">
-                      <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
-                        <Monitor className="h-6 w-6 text-accent" />
-                      </div>
-                      <h3 className="text-sm font-bold text-ink mb-1">View Full Report</h3>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        For detailed line item analysis, expandable rows, and AI recommendations, please view this report on a desktop computer.
-                      </p>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold">
-                        <Monitor className="h-3.5 w-3.5" /> Desktop Required
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {analysis.missingScope.length > 0 && <div className="mt-3 text-center"></div>}
-              </div>
-            )}
-            {/* ═══ TAB: Missing Items ═══ */}
-            {activeTab === "explorer" && (
-              <div>
-                <h2 className="text-base font-bold text-ink mb-1">Missing Items</h2>
-                <p className="text-xs text-muted-foreground mb-6">
-                  Important items not found in your contractor's quote.
-                </p>
-                {analysis.missingScope.length === 0 ? (
-                  <div className="rounded-xl border border-border bg-white p-8 text-center">
-                    <CheckCircle2 className="h-10 w-10 text-accent mx-auto mb-3" />
-                    <p className="text-sm font-bold text-ink">No missing items detected</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Your quote covers all required scope items.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {analysis.missingScope.map((item, i) => (
-                      <div key={i} className="rounded-xl border border-border bg-white p-5">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
-                              <AlertTriangle className="h-4 w-4 text-red-500" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-ink">
-                                {item.title.replace("Missing: ", "")}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                                {item.explanation}
-                              </p>
-                              <p className="text-xs text-red-700 mt-2 font-medium">
-                                → {item.recommendation}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-500 shrink-0">
-                            Missing
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {analysis.needsClarification.length > 0 && (
-                  <div className="mt-8">
-                    <h3 className="text-sm font-bold text-ink mb-3">Needs Clarification</h3>
-                    <div className="space-y-3">
-                      {analysis.needsClarification.map((item, i) => (
-                        <div
-                          key={i}
-                          className="rounded-xl border border-amber-100 bg-amber-50/30 p-4"
-                        >
-                          <p className="text-sm font-bold text-ink">{item.name}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Found as: "{item.matchedAs}"
-                          </p>
-                          <p className="text-sm text-amber-800 mt-2">{item.question}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {/* ═══ TAB: Smart Questions ═══ */}
-            {activeTab === "questions" && (
-              <div>
-                <h2 className="text-base font-bold text-ink mb-1">Smart Questions</h2>
-                <p className="text-xs text-muted-foreground mb-6">
-                  Ask these questions before signing your contract.
-                </p>
-                <div className="space-y-3">
-                  {analysis.questionsToAsk.map((q, i) => (
-                    <div
-                      key={i}
-                      className="rounded-xl border border-border bg-white p-4 flex items-start gap-3"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-[#082A4B]/5 flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-[#082A4B]">{i + 1}</span>
-                      </div>
-                      <p className="text-sm text-ink leading-relaxed">{q}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* ═══ TAB: Recommendations ═══ */}
-            {activeTab === "timeline" && (
-              <div>
-                <h2 className="text-base font-bold text-ink mb-1">Recommendations</h2>
-                <p className="text-xs text-muted-foreground mb-6">
-                  Expert guidance based on your quote analysis.
-                </p>
-                <div className="space-y-4">
-                  {analysis.recommendations.map((rec, i) => (
-                    <div
-                      key={i}
-                      className="rounded-xl border border-border bg-white p-4 flex items-start gap-3"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <Sparkles className="h-3.5 w-3.5 text-accent" />
-                      </div>
-                      <p className="text-sm text-ink leading-relaxed">{rec}</p>
-                    </div>
-                  ))}
-                </div>
-                {analysis.buildingCodes.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-sm font-bold text-ink mb-3">Building Code Requirements</h3>
-                    <div className="space-y-3">
-                      {analysis.buildingCodes.map((code, i) => (
-                        <div key={i} className="rounded-xl border border-border bg-white p-4">
-                          <p className="text-sm font-semibold text-ink">
-                            {code.title.replace("Building Code: ", "")}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">{code.explanation}</p>
-                          {code.inspectionRequired && (
-                            <span className="mt-2 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-600">
-                              Inspection Required
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right sidebar: Insights cards - always visible */}
-          <aside className="hidden xl:block w-[300px] shrink-0 border-l border-border bg-white p-4 h-[calc(100vh-56px)] sticky top-14 overflow-y-auto space-y-4">
-            <div
-              className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition"
-              onClick={() => setActiveTab("explorer")}
-            >
-              <h3 className="text-sm font-bold text-ink mb-1">
-                Missing Items ({analysis.missingScope.length})
-              </h3>
-              <p className="text-[10px] text-muted-foreground mb-3">
-                Items not found in your quote.
-              </p>
-              {analysis.missingScope.length === 0 ? (
-                <p className="text-xs text-accent font-medium">None. Great!</p>
-              ) : (
-                <div className="space-y-2">
-                  {analysis.missingScope.slice(0, 4).map((item, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-ink">
-                          {item.title.replace("Missing: ", "")}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground truncate">
-                          {item.explanation}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <button className="mt-3 text-xs font-semibold text-accent hover:underline">
-                View All →
-              </button>
-            </div>
-            <div
-              className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition"
-              onClick={() => setActiveTab("overview")}
-            >
-              <h3 className="text-sm font-bold text-ink mb-1">Pricing Insights</h3>
-              <p className="text-xl font-display font-bold text-ink">
-                {extraction.totalPrice > 0 ? `$${extraction.totalPrice.toLocaleString()}` : "—"}
-              </p>
-              <p className="text-[10px] text-muted-foreground">Total Quote Amount</p>
-              {extraction.totalPrice > 0 && (
-                <div className="mt-2 pt-2 border-t border-border">
-                  <p className="text-[10px] text-muted-foreground">Typical Range</p>
-                  <p className="text-xs font-bold text-ink">
-                    ${Math.round(extraction.totalPrice * 0.88).toLocaleString()} – $
-                    {Math.round(extraction.totalPrice * 1.12).toLocaleString()}
-                  </p>
-                  <span className="mt-1 inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-accent/10 text-accent">
-                    Fair Price
-                  </span>
-                </div>
-              )}
-            </div>
-            <div
-              className="rounded-xl border border-border p-4 cursor-pointer hover:border-accent/40 transition"
-              onClick={() => setActiveTab("questions")}
-            >
-              <h3 className="text-sm font-bold text-ink mb-1">Smart Questions</h3>
-              <p className="text-[10px] text-muted-foreground mb-2">Ask your contractor:</p>
-              <div className="space-y-2">
-                {analysis.questionsToAsk.slice(0, 3).map((q, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-[9px] text-muted-foreground mt-0.5 shrink-0">
-                      {i + 1}.
-                    </span>
-                    <p className="text-[11px] text-ink leading-relaxed">
-                      {q.length > 80 ? q.substring(0, 80) + "..." : q}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <button className="mt-3 text-xs font-semibold text-accent hover:underline">
-                View All →
-              </button>
-            </div>
-            {/* AI Analyst - Hero selling point */}
-            <div className="rounded-xl border-2 border-accent/40 bg-gradient-to-b from-accent/5 to-accent/10 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <span className="text-xs font-bold text-accent">AI Analyst</span>
-              </div>
-              <p className="text-xs font-semibold text-ink mb-1">Ask anything about your quote</p>
-              <p className="text-[10px] text-muted-foreground mb-3">
-                Get negotiation scripts, cost comparisons, and red flag explanations instantly.
-              </p>
-              <button
-                onClick={() => setChatOpen(true)}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
-              >
-                <MessageCircle className="h-3.5 w-3.5" /> Ask CostReno AI
-              </button>
-            </div>
-          </aside>
-        </main>
-      </div>
-      {chatOpen && (
-        <AIChatPanel
-          analysis={analysis}
-          extraction={extraction}
-          onClose={() => setChatOpen(false)}
-        />
-      )}
-      <EmailDownloadModal
-        isOpen={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
-        onSubmit={handleEmailSubmit}
-        reportName="Quote Analysis Report"
-        isLoading={isDownloading}
-      />
-      {/* Share Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-ink">Share Report</h3>
-              <button onClick={() => setShowShareModal(false)} className="text-muted-foreground hover:text-ink">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Share this quote analysis with friends, family, or contractors via WhatsApp, email, or any messaging app.
-            </p>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={`${window.location.origin}/quote-analyzer`}
-                  className="flex-1 px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground bg-muted/30"
-                />
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/quote-analyzer`);
-                  }}
-                  className="px-3 py-2 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90"
-                >
-                  Copy
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`Check out this quote analysis: ${window.location.origin}/quote-analyzer`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-semibold hover:bg-green-600"
-                >
-                  <Share2 className="h-3.5 w-3.5" /> WhatsApp
-                </a>
-                <a
-                  href={`mailto:?subject=Quote Analysis Report&body=${encodeURIComponent(`Check out this quote analysis: ${window.location.origin}/quote-analyzer`)}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600"
-                >
-                  <Share2 className="h-3.5 w-3.5" /> Email
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {!chatOpen && (
-        <button
-          onClick={() => setChatOpen(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/30 flex items-center justify-center text-white hover:scale-105 transition-transform z-40 lg:hidden"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </button>
-      )}
-      <SiteFooter />
-    </div>
-  );
-}
-
-// ─── Header ───────────────────────────────────────────────────────────────────
-function Header({ onNewQuote }: { onNewQuote?: () => void }) {
-  return <SiteNav active="quote" />;
-}
-
-// ─── Overview Tab ─────────────────────────────────────────────────────────────
-function OverviewTab({
-  analysis,
-  extraction,
-}: {
-  analysis: QuoteAnalysis;
-  extraction: QuoteAnalysisResult["extraction"];
-}) {
-  const cards = [
-    {
-      label: "Included",
-      count: analysis.presentItems.length,
-      icon: CheckCircle2,
-      color: "text-accent",
-      bg: "bg-accent/10",
-    },
-    {
-      label: "Clarification",
-      count: analysis.needsClarification.length,
-      icon: HelpCircle,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
-    },
-    {
-      label: "Missing",
-      count: analysis.missingScope.length,
-      icon: AlertTriangle,
-      color: "text-red-500",
-      bg: "bg-red-50",
-    },
-    {
-      label: "Red Flags",
-      count: analysis.redFlags.length,
-      icon: Shield,
-      color: analysis.redFlags.length > 0 ? "text-red-500" : "text-accent",
-      bg: analysis.redFlags.length > 0 ? "bg-red-50" : "bg-accent/10",
-    },
-  ];
-
-  return (
-    <div className="space-y-8 max-w-4xl">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {cards.map((c) => (
-          <div key={c.label} className="rounded-xl border border-border bg-white p-5">
-            <div className={`w-9 h-9 rounded-lg ${c.bg} flex items-center justify-center mb-3`}>
-              <c.icon className={`h-4.5 w-4.5 ${c.color}`} />
-            </div>
-            <p className="text-2xl font-display font-bold text-ink">{c.count}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{c.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Present Items */}
-      <div className="rounded-xl border border-border bg-white p-6">
-        <h3 className="text-sm font-bold text-ink flex items-center gap-2 mb-4">
-          <CheckCircle2 className="h-4 w-4 text-accent" /> What's Included
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {analysis.presentItems.map((item, i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/5">
-              <Check className="h-3.5 w-3.5 text-accent shrink-0" />
-              <span className="text-sm text-ink">{item.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Needs Clarification */}
-      {analysis.needsClarification.length > 0 && (
-        <div className="rounded-xl border border-border bg-white p-6">
-          <h3 className="text-sm font-bold text-ink flex items-center gap-2 mb-4">
-            <HelpCircle className="h-4 w-4 text-amber-500" /> Needs Clarification
-          </h3>
-          <div className="space-y-3">
-            {analysis.needsClarification.map((item, i) => (
-              <div key={i} className="p-4 rounded-lg border border-amber-100 bg-amber-50/50">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-amber-600 text-xs font-bold">⚠</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">{item.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Found as: "{item.matchedAs}"
-                    </p>
-                    <p className="text-sm text-amber-800 mt-2">{item.question}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Missing Items */}
-      {analysis.missingScope.length > 0 && (
-        <div className="rounded-xl border border-border bg-white p-6">
-          <h3 className="text-sm font-bold text-ink flex items-center gap-2 mb-4">
-            <AlertTriangle className="h-4 w-4 text-red-500" /> Missing From Quote
-          </h3>
-          <div className="space-y-3">
-            {analysis.missingScope.map((item, i) => (
-              <div key={i} className="p-4 rounded-lg border border-red-100 bg-red-50/50">
-                <p className="text-sm font-semibold text-ink">
-                  {item.title.replace("Missing: ", "")}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{item.explanation}</p>
-                <p className="text-xs text-red-700 mt-2 font-medium">→ {item.recommendation}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Red Flags */}
-      <div className="rounded-xl border border-border bg-white p-6">
-        <h3 className="text-sm font-bold text-ink flex items-center gap-2 mb-4">
-          <Shield className="h-4 w-4 text-[#082A4B]" /> Red Flags
-        </h3>
-        {analysis.redFlags.length === 0 ? (
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-accent/5">
-            <CheckCircle2 className="h-5 w-5 text-accent" />
-            <p className="text-sm text-ink">No red flags detected in this quote.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {analysis.redFlags.map((flag, i) => (
-              <div key={i} className="p-4 rounded-lg border border-red-100 bg-red-50/50">
-                <p className="text-sm font-semibold text-red-700">{flag.title}</p>
-                <div className="mt-2 space-y-1.5">
-                  <div className="flex items-start gap-2">
-                    <span className="text-[10px] font-bold text-red-600 shrink-0 mt-0.5">Why flagged:</span>
-                    <p className="text-xs text-red-600">{flag.explanation}</p>
-                  </div>
-                  {flag.recommendation && (
-                    <div className="flex items-start gap-2">
-                      <span className="text-[10px] font-bold text-red-600 shrink-0 mt-0.5">What to do:</span>
-                      <p className="text-xs text-red-700 font-medium">{flag.recommendation}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Recommendations */}
-      {analysis.recommendations.length > 0 && (
-        <div className="rounded-xl border border-border bg-white p-6">
-          <h3 className="text-sm font-bold text-ink flex items-center gap-2 mb-4">
-            <Sparkles className="h-4 w-4 text-accent" /> Expert Recommendations
-          </h3>
-          <div className="space-y-2">
-            {analysis.recommendations.map((rec, i) => (
-              <div key={i} className="flex items-start gap-2.5 text-sm text-ink/80">
-                <ArrowRight className="h-3.5 w-3.5 text-accent mt-1 shrink-0" />
-                <span>{rec}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Scope Review Tab ─────────────────────────────────────────────────────────
-function ScopeReviewTab({
-  analysis,
-  expandedCards,
-  setExpandedCards,
-  onAskAI,
-}: {
-  analysis: QuoteAnalysis;
-  expandedCards: Set<string>;
-  setExpandedCards: (s: Set<string>) => void;
-  onAskAI: () => void;
-}) {
-  const allItems: ScopeCard[] = [
-    ...analysis.presentItems.map((i) => ({
-      name: i.name,
-      status: "present" as const,
-      matchedAs: i.matchedAs,
-    })),
-    ...analysis.needsClarification.map((i) => ({
-      name: i.name,
-      status: "clarification" as const,
-      matchedAs: i.matchedAs,
-      question: i.question,
-    })),
-    ...analysis.missingScope.map((i) => ({
-      name: i.title.replace("Missing: ", ""),
-      status: "missing" as const,
-      description: i.explanation,
-      recommendation: i.recommendation,
-    })),
-  ];
-
-  const toggle = (name: string) => {
-    const next = new Set(expandedCards);
-    if (next.has(name)) next.delete(name);
-    else next.add(name);
-    setExpandedCards(next);
-  };
-
-  const statusBadge = (status: string) => {
-    if (status === "present")
-      return (
-        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">
-          ✅ Present
-        </span>
-      );
-    if (status === "clarification")
-      return (
-        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
-          ⚠ Clarify
-        </span>
-      );
-    return (
-      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-500">
-        ❌ Missing
-      </span>
-    );
-  };
-
-  return (
-    <div className="max-w-3xl space-y-3">
-      <p className="text-sm text-muted-foreground mb-4">
-        {allItems.length} scope items reviewed. Click to expand.
-      </p>
-      {allItems.map((item) => {
-        const isOpen = expandedCards.has(item.name);
-        return (
-          <div
-            key={item.name}
-            className="rounded-xl border border-border bg-white overflow-hidden transition-shadow hover:shadow-sm"
-          >
-            <button
-              onClick={() => toggle(item.name)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left"
-            >
-              <div className="flex items-center gap-3">
-                {statusBadge(item.status)}
-                <span className="text-sm font-semibold text-ink">{item.name}</span>
-              </div>
-              <ChevronDown
-                className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {isOpen && (
-              <div className="px-5 pb-4 pt-0 border-t border-border/50 animate-in fade-in duration-200">
-                {item.matchedAs && item.matchedAs !== item.name && (
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Found in quote as: "{item.matchedAs}"
-                  </p>
-                )}
-                {item.question && <p className="text-sm text-amber-700 mb-2">{item.question}</p>}
-                {item.description && <p className="text-sm text-ink/70 mb-2">{item.description}</p>}
-                {item.recommendation && (
-                  <p className="text-sm text-red-700 mb-2">→ {item.recommendation}</p>
-                )}
-                <button
-                  onClick={onAskAI}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:underline"
-                >
-                  <MessageCircle className="h-3 w-3" /> Ask AI about this
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Quote Explorer Tab ───────────────────────────────────────────────────────
-function QuoteExplorerTab({
-  extraction,
-  analysis,
-  selectedRow,
-  setSelectedRow,
-}: {
-  extraction: QuoteAnalysisResult["extraction"];
-  analysis: QuoteAnalysis;
-  selectedRow: number | null;
-  setSelectedRow: (r: number | null) => void;
-}) {
-  const allItems = [
-    ...extraction.materials.map((m) => ({
-      name: m.name,
-      qty: m.quantity,
-      unit: m.unit,
-      price: m.totalPrice,
-      type: "material" as const,
-    })),
-    ...extraction.scopeItems.map((s) => ({
-      name: s.name,
-      qty: s.quantity,
-      unit: s.unit,
-      price: s.totalPrice,
-      type: "scope" as const,
-    })),
-  ];
-
-  const getStatus = (name: string) => {
-    if (
-      analysis.presentItems.some(
-        (i) =>
-          i.matchedAs?.toLowerCase() === name.toLowerCase() ||
-          i.name.toLowerCase() === name.toLowerCase(),
-      )
-    )
-      return "matched";
-    if (analysis.needsClarification.some((i) => i.matchedAs?.toLowerCase() === name.toLowerCase()))
-      return "clarify";
-    return "unmatched";
-  };
-
-  return (
-    <div className="max-w-5xl">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">
-          {allItems.length} line items extracted from quote
-        </p>
-        {extraction.totalPrice > 0 && (
-          <span className="text-sm font-bold text-ink">
-            Total: ${extraction.totalPrice.toLocaleString()}
-          </span>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
-                  Item
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
-                  Qty
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
-                  Price
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {allItems.map((item, i) => {
-                const status = getStatus(item.name);
-                return (
-                  <tr
-                    key={i}
-                    onClick={() => setSelectedRow(selectedRow === i ? null : i)}
-                    className={`border-b border-border/50 cursor-pointer transition ${selectedRow === i ? "bg-accent/5" : "hover:bg-muted/20"}`}
-                  >
-                    <td className="px-4 py-3 font-medium text-ink">{item.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {item.qty > 0 ? `${item.qty} ${item.unit}` : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-ink">
-                      {item.price > 0 ? `$${item.price.toLocaleString()}` : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {status === "matched" && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">
-                          Matched
-                        </span>
-                      )}
-                      {status === "clarify" && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">
-                          Clarify
-                        </span>
-                      )}
-                      {status === "unmatched" && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
-                          Unmatched
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Detail panel */}
-      {selectedRow !== null && allItems[selectedRow] && (
-        <div className="mt-4 rounded-xl border border-border bg-white p-5 animate-in slide-in-from-bottom-2 duration-200">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-bold text-ink">{allItems[selectedRow].name}</h4>
-            <button
-              onClick={() => setSelectedRow(null)}
-              className="text-muted-foreground hover:text-ink"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-2.5 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground">Type</span>
-              <br />
-              <span className="font-medium text-ink">{allItems[selectedRow].type}</span>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground">Quantity</span>
-              <br />
-              <span className="font-medium text-ink">
-                {allItems[selectedRow].qty || "—"} {allItems[selectedRow].unit}
-              </span>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground">Price</span>
-              <br />
-              <span className="font-medium text-ink">
-                {allItems[selectedRow].price > 0
-                  ? `$${allItems[selectedRow].price.toLocaleString()}`
-                  : "—"}
-              </span>
-            </div>
-            <div className="p-2.5 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground">Status</span>
-              <br />
-              <span className="font-medium text-ink capitalize">
-                {getStatus(allItems[selectedRow].name)}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Questions Tab ────────────────────────────────────────────────────────────
-function QuestionsTab({ analysis }: { analysis: QuoteAnalysis }) {
-  const [openCat, setOpenCat] = useState<string | null>(null);
-
-  // Group questions by category keywords
-  const categorize = (q: string): string => {
-    const ql = q.toLowerCase();
-    if (ql.includes("warranty") || ql.includes("guarantee")) return "Warranty";
-    if (ql.includes("flash") || ql.includes("penetration")) return "Flashing";
-    if (ql.includes("vent") || ql.includes("soffit") || ql.includes("ridge")) return "Ventilation";
-    if (ql.includes("material") || ql.includes("shingle") || ql.includes("underlayment"))
-      return "Materials";
-    if (ql.includes("permit") || ql.includes("inspection") || ql.includes("code"))
-      return "Permits & Codes";
-    if (
-      ql.includes("install") ||
-      ql.includes("weather") ||
-      ql.includes("protect") ||
-      ql.includes("timeline")
-    )
-      return "Installation";
-    return "General";
-  };
-
-  const grouped: Record<string, string[]> = {};
-  for (const q of analysis.questionsToAsk) {
-    const cat = categorize(q);
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(q);
-  }
-
-  const categoryIcons: Record<string, typeof Shield> = {
-    Warranty: Shield,
-    Flashing: Wrench,
-    Ventilation: TrendingUp,
-    Materials: Star,
-    "Permits & Codes": FileText,
-    Installation: Clock,
-    General: HelpCircle,
-  };
-
-  return (
-    <div className="max-w-3xl space-y-3">
-      <p className="text-sm text-muted-foreground mb-4">
-        {analysis.questionsToAsk.length} questions organized by category. Ask these before signing.
-      </p>
-      {Object.entries(grouped).map(([cat, questions]) => {
-        const Icon = categoryIcons[cat] ?? HelpCircle;
-        const isOpen = openCat === cat;
-        return (
-          <div key={cat} className="rounded-xl border border-border bg-white overflow-hidden">
-            <button
-              onClick={() => setOpenCat(isOpen ? null : cat)}
-              className="w-full flex items-center justify-between px-5 py-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#082A4B]/5 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-[#082A4B]" />
-                </div>
-                <span className="text-sm font-semibold text-ink">{cat}</span>
-                <span className="text-xs text-muted-foreground">{questions.length} questions</span>
-              </div>
-              <ChevronDown
-                className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {isOpen && (
-              <div className="px-5 pb-4 space-y-2.5 border-t border-border/50 pt-3 animate-in fade-in duration-200">
-                {questions.map((q, i) => (
-                  <div key={i} className="flex items-start gap-2.5 text-sm text-ink/80">
-                    <span className="w-5 h-5 rounded-full bg-accent/10 text-accent text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <span>{q}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Timeline Tab ─────────────────────────────────────────────────────────────
-function TimelineTab({ analysis }: { analysis: QuoteAnalysis }) {
-  const [checked, setChecked] = useState<Set<string>>(new Set());
-  const toggle = (id: string) => {
-    const next = new Set(checked);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setChecked(next);
-  };
-
-  const phases = [
-    {
-      title: "Before Signing",
-      icon: FileText,
-      tasks: [
-        { id: "q1", label: "Get clarification on all ⚠ items" },
-        { id: "q2", label: "Ask all contractor questions" },
-        { id: "q3", label: "Confirm permit responsibility" },
-        { id: "q4", label: "Get workmanship warranty in writing" },
-        { id: "q5", label: "Verify contractor license & insurance" },
-        { id: "q6", label: "Compare with at least 2 other quotes" },
-      ],
-    },
-    {
-      title: "During Installation",
-      icon: Wrench,
-      tasks: [
-        { id: "d1", label: "Document existing condition with photos" },
-        { id: "d2", label: "Confirm deck inspection after tear-off" },
-        { id: "d3", label: "Verify weather protection if work spans multiple days" },
-        { id: "d4", label: "Check materials match what was quoted" },
-        { id: "d5", label: "Request progress photos at each phase" },
-      ],
-    },
-    {
-      title: "After Completion",
-      icon: CheckCircle2,
-      tasks: [
-        { id: "a1", label: "Walk through final inspection with contractor" },
-        { id: "a2", label: "Obtain warranty documentation" },
-        { id: "a3", label: "File permit close-out if applicable" },
-        { id: "a4", label: "Notify insurance of completed work" },
-        { id: "a5", label: "Save all receipts and documentation" },
-      ],
-    },
-  ];
-
-  return (
-    <div className="max-w-3xl space-y-6">
-      {phases.map((phase) => {
-        const Icon = phase.icon;
-        const done = phase.tasks.filter((t) => checked.has(t.id)).length;
-        return (
-          <div key={phase.title} className="rounded-xl border border-border bg-white p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-[#082A4B]/5 flex items-center justify-center">
-                <Icon className="h-4.5 w-4.5 text-[#082A4B]" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-ink">{phase.title}</h3>
-                <p className="text-[10px] text-muted-foreground">
-                  {done}/{phase.tasks.length} completed
-                </p>
-              </div>
-              {/* Progress bar */}
-              <div className="flex-1 h-1.5 rounded-full bg-border ml-4">
-                <div
-                  className="h-full rounded-full bg-accent transition-all"
-                  style={{ width: `${(done / phase.tasks.length) * 100}%` }}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              {phase.tasks.map((task) => (
-                <label
-                  key={task.id}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition ${checked.has(task.id) ? "bg-accent/5" : "hover:bg-muted/30"}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked.has(task.id)}
-                    onChange={() => toggle(task.id)}
-                    className="w-4 h-4 rounded border-border text-accent focus:ring-accent"
-                  />
-                  <span
-                    className={`text-sm ${checked.has(task.id) ? "line-through text-muted-foreground" : "text-ink"}`}
-                  >
-                    {task.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Format AI Response ───────────────────────────────────────────────────────
-function formatAIResponse(text: string): string {
-  // Remove [ACTION:...] tags
-  let html = text.replace(/\[ACTION:[^\]]*\]/g, "");
-  // Convert ### headings
-  html = html.replace(/^### (.+)$/gm, '<p class="font-bold text-ink mt-2 mb-1">$1</p>');
-  // Convert **bold**
-  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  // Convert bullet points (- item)
-  html = html.replace(
-    /^- (.+)$/gm,
-    '<li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0"></span><span>$1</span></li>',
-  );
-  // Wrap consecutive <li> in <ul>
-  html = html.replace(/((?:<li[^>]*>.*?<\/li>\s*)+)/g, '<ul class="space-y-1.5">$1</ul>');
-  // Convert 💡 Pro Tip lines
-  html = html.replace(
-    /💡\s*(?:Pro Tip:?)?\s*(.+)/g,
-    '<div class="mt-2 p-2 rounded-lg bg-accent/10 text-xs"><span class="text-accent font-bold">💡 Pro Tip:</span> $1</div>',
-  );
-  // Convert newlines to paragraphs (but not inside lists)
-  html = html.replace(/\n{2,}/g, '</p><p class="mt-2">');
-  html = html.replace(/\n/g, "<br/>");
-  // Clean up --- dividers
-  html = html.replace(/---/g, '<hr class="border-border my-2"/>');
-  return html;
-}
-
-// ─── AI Chat Panel ────────────────────────────────────────────────────────────
-function AIChatPanel({
-  analysis,
-  extraction,
-  onClose,
-}: {
-  analysis: QuoteAnalysis;
-  extraction: QuoteAnalysisResult["extraction"];
-  onClose: () => void;
-}) {
-  const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => endRef.current?.scrollIntoView({ behavior: "smooth" });
-
-  const suggestions = [
-    "Is this price fair for my area?",
-    "Explain the missing items",
-    "What should I negotiate?",
-    "Generate a contractor email",
-    "Explain the building codes",
-    "Compare with industry average",
-  ];
-
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
-    const userMsg = { role: "user" as const, text: text.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setInput("");
-    setIsTyping(true);
-    setTimeout(scrollToBottom, 50);
-
-    try {
-      // Build a concise context summary to prepend to the user's actual question
-      const contextSummary = [
-        `Project: ${extraction.projectType} quote`,
-        extraction.contractor ? `Contractor: ${extraction.contractor}` : "",
-        `Score: ${analysis.summary.completenessScore}%`,
-        `Included: ${analysis.presentItems.map((i) => i.name).join(", ")}`,
-        analysis.needsClarification.length > 0
-          ? `Needs clarification: ${analysis.needsClarification.map((i) => i.name).join(", ")}`
-          : "",
-        analysis.missingScope.length > 0
-          ? `Missing: ${analysis.missingScope.map((i) => i.title.replace("Missing: ", "")).join(", ")}`
-          : "",
-        extraction.totalPrice > 0 ? `Total price: $${extraction.totalPrice.toLocaleString()}` : "",
-        analysis.redFlags.length > 0
-          ? `Red flags: ${analysis.redFlags.map((f) => f.title).join(", ")}`
-          : "No red flags",
-      ]
-        .filter(Boolean)
-        .join(". ");
-
-      // Convert conversation history to ChatMessage format
-      // First message includes context, subsequent messages are just the conversation
-      const chatMsgs: ChatMessage[] = newMessages.map((m, idx) => ({
-        role: m.role === "ai" ? ("assistant" as const) : ("user" as const),
-        content:
-          idx === 0 && newMessages.length === 1
-            ? `[Quote Analysis Context: ${contextSummary}]\n\nIMPORTANT: Keep your response concise — 3-5 bullet points max. No long explanations. Be direct and actionable.\n\nMy question: ${m.text}`
-            : m.text,
-      }));
-
-      // If this is not the first message, prepend context as first exchange
-      if (newMessages.length > 1) {
-        chatMsgs.unshift(
-          {
-            role: "user",
-            content: `I just analyzed a contractor quote. Here's the summary: ${contextSummary}. IMPORTANT: Keep all responses concise — 3-5 bullet points max, no walls of text.`,
-          },
-          {
-            role: "assistant",
-            content: "Got it. I'll keep responses short and actionable. Ask away.",
-          },
-        );
-      }
-
-      const projectType = extraction.projectType as any;
-      const response = await serverChatWithKnowledge({
-        data: { messages: chatMsgs, userProjectType: projectType || undefined },
-      });
-      setMessages((prev) => [...prev, { role: "ai", text: response }]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "Sorry, I encountered an error. Please try again." },
-      ]);
-    } finally {
-      setIsTyping(false);
-      setTimeout(scrollToBottom, 50);
-    }
-  };
-
-  return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] z-50 flex flex-col animate-in slide-in-from-right duration-300">
-      {/* Backdrop on mobile only */}
-      <div className="absolute inset-0 bg-black/40 sm:hidden" onClick={onClose} />
-
-      <div className="relative ml-auto w-full sm:w-[420px] h-full bg-white shadow-2xl border-l border-border flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 bg-[#082A4B] shrink-0">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" />
-            <span className="text-sm font-bold text-white">CostReno AI</span>
-            <span className="px-1.5 py-0.5 rounded bg-accent/30 text-[9px] text-white font-bold uppercase">
-              Quote Context
-            </span>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center transition"
-          >
-            <X className="h-4 w-4 text-white" />
-          </button>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {messages.length === 0 && (
-            <div className="flex flex-col py-4">
-              <h3 className="text-base font-bold text-ink mb-1">Ask about your quote</h3>
-              <p className="text-xs text-muted-foreground mb-4">
-                Get concise answers about pricing, missing scope, and red flags.
-              </p>
-              <div className="space-y-2">
-                {suggestions.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => sendMessage(s)}
-                    className="w-full flex items-center gap-3 text-left px-4 py-2.5 rounded-xl border border-border hover:border-accent/40 hover:bg-accent/5 text-sm text-ink transition group"
-                  >
-                    <MessageCircle className="h-3.5 w-3.5 text-accent shrink-0" />
-                    <span className="flex-1 text-xs">{s}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-accent text-white rounded-br-md"
-                    : "bg-muted text-ink rounded-bl-md"
-                }`}
-              >
-                {msg.role === "user" ? (
-                  msg.text
-                ) : (
-                  <div
-                    className="space-y-2"
-                    dangerouslySetInnerHTML={{ __html: formatAIResponse(msg.text) }}
-                  />
-                )}
-              </div>
-            </div>
-          ))}
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-muted">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:0ms]" />
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:150ms]" />
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
-              </div>
-            </div>
-          )}
-          <div ref={endRef} />
-        </div>
-
-        {/* Input */}
-        <div className="border-t border-border px-4 py-3">
-          <div className="flex items-center gap-2 rounded-xl border border-border p-2 focus-within:ring-2 focus-within:ring-accent/30">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && input.trim()) sendMessage(input);
-              }}
-              placeholder="Ask about your quote..."
-              className="flex-1 bg-transparent text-sm outline-none px-2 text-ink"
-            />
-            <button
-              onClick={() => sendMessage(input)}
-              disabled={!input.trim()}
-              className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white hover:bg-accent/90 disabled:opacity-50 transition"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

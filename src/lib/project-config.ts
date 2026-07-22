@@ -27,10 +27,10 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     projectType: "roof",
     name: "Roof Replacement",
     image: "https://images.unsplash.com/photo-1632759145351-1d592919f522?w=800&q=80",
-    seoTitle: "Roof Replacement Cost 2026 — Average Prices & Estimates | CostReno",
+    seoTitle: "Roof replacement cost in 2026 | Average prices and estimates | CostReno",
     seoDescription:
-      "How much does a roof replacement cost in 2026? Average cost is $16,650. Get local estimates by ZIP code, compare materials, and review contractor quotes free.",
-    h1: "How Much Does a Roof Replacement Cost in 2026?",
+      "How much does a roof replacement cost in 2026? Average cost is about $16,650. Get local estimates by ZIP code, compare materials, and review contractor quotes.",
+    h1: "How much does a roof replacement cost in 2026?",
     intro:
       "A roof replacement is one of the most significant investments a homeowner can make. Whether you're dealing with storm damage, aging shingles, or upgrading to a more durable material, understanding the true cost helps you plan and budget effectively. CostReno provides accurate, location-based estimates using current labor and material pricing data.",
     avgCost: "$16,650",
@@ -104,10 +104,10 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     projectType: "kitchen",
     name: "Kitchen Remodel",
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-    seoTitle: "Kitchen Remodel Cost 2026 — Average Prices & Budget Guide | CostReno",
+    seoTitle: "Kitchen remodel cost in 2026 | Average prices and budget guide | CostReno",
     seoDescription:
-      "How much does a kitchen remodel cost in 2026? Average cost is $50,000. Get personalized estimates, compare materials, and plan your renovation budget.",
-    h1: "How Much Does a Kitchen Remodel Cost in 2026?",
+      "How much does a kitchen remodel cost in 2026? Average cost is about $50,000. Get personalized estimates, compare materials, and plan your renovation budget.",
+    h1: "How much does a kitchen remodel cost in 2026?",
     intro:
       "A kitchen remodel is the most popular home renovation project and typically delivers the highest return on investment. From minor cosmetic updates to full gut renovations, costs vary widely based on scope, materials, and your local market. CostReno helps you understand exactly what to expect before you hire.",
     avgCost: "$50,000",
@@ -182,10 +182,10 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     projectType: "bathroom",
     name: "Bathroom Remodel",
     image: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80",
-    seoTitle: "Bathroom Remodel Cost 2026 — Average Prices & Estimates | CostReno",
+    seoTitle: "Bathroom remodel cost in 2026 | Average prices and estimates | CostReno",
     seoDescription:
       "How much does a bathroom remodel cost in 2026? Average cost is $19,000. Get instant estimates, compare fixtures, and plan your renovation.",
-    h1: "How Much Does a Bathroom Remodel Cost in 2026?",
+    h1: "How much does a bathroom remodel cost in 2026?",
     intro:
       "A bathroom remodel can transform one of the most-used rooms in your home. Whether you're updating a guest bath or completely renovating a master bathroom, understanding costs upfront helps you avoid budget surprises. CostReno provides personalized estimates based on your specific project details and location.",
     avgCost: "$19,000",
@@ -256,10 +256,10 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     projectType: "windows",
     name: "Window Replacement",
     image: "https://images.unsplash.com/photo-1604014237800-1c9102c219da?w=800&q=80",
-    seoTitle: "Window Replacement Cost 2026 — Prices Per Window & Estimates | CostReno",
+    seoTitle: "Window replacement cost in 2026 | Prices per window and estimates | CostReno",
     seoDescription:
       "How much does window replacement cost in 2026? Average total cost is $12,500. Get estimates per window, compare brands, and find local installers.",
-    h1: "How Much Does Window Replacement Cost in 2026?",
+    h1: "How much does window replacement cost in 2026?",
     intro:
       "Replacing old windows improves energy efficiency, comfort, and curb appeal. Whether you're upgrading single-pane windows or replacing damaged frames, costs depend on window type, material, and installation complexity. Get an accurate estimate for your home with CostReno.",
     avgCost: "$12,500",
@@ -324,10 +324,10 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     projectType: "flooring",
     name: "Flooring Installation",
     image: "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=800&q=80",
-    seoTitle: "Flooring Installation Cost 2026 — Prices Per Sq Ft & Estimates | CostReno",
+    seoTitle: "Flooring installation cost in 2026 | Prices per sq ft and estimates | CostReno",
     seoDescription:
       "How much does new flooring cost in 2026? Average cost is $7,500. Compare hardwood, tile, LVP, and carpet prices per square foot.",
-    h1: "How Much Does New Flooring Cost in 2026?",
+    h1: "How much does new flooring cost in 2026?",
     intro:
       "New flooring transforms the look and feel of your entire home. From luxury vinyl plank to hardwood, costs vary significantly by material, room size, and installation method. CostReno helps you compare options and get accurate estimates for your specific project.",
     avgCost: "$7,500",
@@ -392,10 +392,10 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     projectType: "hvac",
     name: "HVAC Installation",
     image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&q=80",
-    seoTitle: "HVAC Installation Cost 2026 — Replacement Prices & Estimates | CostReno",
+    seoTitle: "HVAC installation cost in 2026 | Replacement prices and estimates | CostReno",
     seoDescription:
       "How much does HVAC replacement cost in 2026? Average cost is $8,250. Compare central air, heat pumps, and furnace prices with local estimates.",
-    h1: "How Much Does HVAC Replacement Cost in 2026?",
+    h1: "How much does HVAC replacement cost in 2026?",
     intro:
       "Your HVAC system is essential for year-round comfort. Whether you need a full system replacement or an upgrade to a more efficient unit, understanding costs helps you make the right choice. CostReno provides estimates based on your home size, climate zone, and system preferences.",
     avgCost: "$8,250",

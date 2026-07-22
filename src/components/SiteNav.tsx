@@ -3,35 +3,30 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const GUIDE_LINKS = [
+  { name: "All guides", href: "/guides" },
+  { name: "Quote guides", href: "/topics/quotes" },
+  { name: "Roof costs", href: "/topics/roof" },
+  { name: "Kitchen costs", href: "/topics/kitchen" },
+  { name: "Window costs", href: "/topics/windows" },
+  { name: "Flooring costs", href: "/topics/flooring" },
   { name: "Roofing", href: "/guides/roof-replacement" },
   { name: "Kitchen", href: "/guides/kitchen-remodel" },
-  { name: "Bathroom", href: "/guides/bathroom-remodel" },
-  { name: "HVAC", href: "/guides/hvac-installation" },
-  { name: "Windows", href: "/guides/window-replacement" },
-  { name: "Flooring", href: "/guides/flooring" },
-  { name: "Solar", href: "#" },
-  { name: "Foundation", href: "#" },
 ];
 
 const QUOTE_LINKS = [
-  { name: "Analyze quote", href: "/quote-analyzer" },
-  { name: "Compare multiple quotes", href: "/compare-quotes" },
+  { name: "Analyze a quote", href: "/quote-analyzer" },
+  { name: "Compare quotes", href: "/compare-quotes" },
+  { name: "How to read a quote", href: "/guides/how-to-read-a-contractor-quote" },
 ];
 
 interface SiteNavProps {
-  active?: "estimator" | "quote" | "guides";
+  active?: "estimator" | "quote" | "guides" | "locations";
 }
 
 export function SiteNav({ active }: SiteNavProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [guidesOpen, setGuidesOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-
-  const linkClass = (isActive?: boolean) =>
-    cn(
-      "hover:text-foreground transition-colors whitespace-nowrap",
-      isActive && active === "guides" ? "text-accent" : "",
-    );
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
@@ -40,7 +35,6 @@ export function SiteNav({ active }: SiteNavProps) {
           <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />
         </a>
 
-        {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-7 text-sm font-extrabold text-foreground absolute left-1/2 -translate-x-1/2">
           <a
             href="/estimate"
@@ -49,7 +43,7 @@ export function SiteNav({ active }: SiteNavProps) {
               active === "estimator" && "text-accent",
             )}
           >
-            Cost Estimator
+            Cost estimator
           </a>
           <div className="relative group">
             <button
@@ -58,7 +52,7 @@ export function SiteNav({ active }: SiteNavProps) {
                 active === "quote" && "text-accent",
               )}
             >
-              Quote Review
+              Quote tools
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
             </button>
             <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
@@ -76,10 +70,13 @@ export function SiteNav({ active }: SiteNavProps) {
             </div>
           </div>
           <a
-            href="/insurance-claims"
-            className="hover:text-foreground transition-colors whitespace-nowrap"
+            href="/locations"
+            className={cn(
+              "hover:text-foreground transition-colors whitespace-nowrap",
+              active === "locations" && "text-accent",
+            )}
           >
-            Insurance Claims
+            Costs by city
           </a>
           <div className="relative group">
             <button
@@ -88,7 +85,7 @@ export function SiteNav({ active }: SiteNavProps) {
                 active === "guides" && "text-accent",
               )}
             >
-              Renovation Guides
+              Guides
               <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:rotate-180" />
             </button>
             <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
@@ -107,13 +104,12 @@ export function SiteNav({ active }: SiteNavProps) {
           </div>
         </nav>
 
-        {/* Right side */}
         <div className="flex items-center gap-3">
           <a
             href="/estimate"
             className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
           >
-            Start Free
+            Start free
           </a>
           <button
             type="button"
@@ -126,86 +122,51 @@ export function SiteNav({ active }: SiteNavProps) {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
-        <div className="lg:hidden border-t border-border/60 bg-background">
-          <nav className="container-x flex flex-col gap-1 py-4 text-sm font-extrabold text-foreground">
-            <a
-              href="/estimate"
-              onClick={() => setMenuOpen(false)}
-              className={cn(
-                "rounded-lg px-3 py-2.5 transition-colors",
-                active === "estimator" ? "text-accent bg-accent/5" : "hover:bg-muted",
-              )}
-            >
-              Cost Estimator
-            </a>
-            <div>
-              <button
-                type="button"
-                onClick={() => setQuoteOpen(!quoteOpen)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors",
-                  active === "quote" ? "text-accent bg-accent/5" : "hover:bg-muted",
-                )}
-              >
-                Quote Review
-                <ChevronDown
-                  className={cn("h-3.5 w-3.5 transition-transform", quoteOpen && "rotate-180")}
-                />
-              </button>
-              {quoteOpen && (
-                <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-border pl-3">
-                  {QUOTE_LINKS.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-muted transition-colors"
-                    >
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-              )}
+        <div className="lg:hidden border-t border-border bg-background px-4 py-4 space-y-3">
+          <a href="/estimate" className="block text-sm font-semibold text-ink">
+            Cost estimator
+          </a>
+          <button
+            type="button"
+            onClick={() => setQuoteOpen(!quoteOpen)}
+            className="flex w-full items-center justify-between text-sm font-semibold text-ink"
+          >
+            Quote tools
+            <ChevronDown className={cn("h-4 w-4 transition", quoteOpen && "rotate-180")} />
+          </button>
+          {quoteOpen && (
+            <div className="pl-3 space-y-2">
+              {QUOTE_LINKS.map((item) => (
+                <a key={item.href} href={item.href} className="block text-sm text-muted-foreground">
+                  {item.name}
+                </a>
+              ))}
             </div>
-            <a
-              href="/insurance-claims"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-lg px-3 py-2.5 hover:bg-muted transition-colors"
-            >
-              Insurance Claims
-            </a>
-            <div>
-              <button
-                type="button"
-                onClick={() => setGuidesOpen(!guidesOpen)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors",
-                  active === "guides" ? "text-accent bg-accent/5" : "hover:bg-muted",
-                )}
-              >
-                Renovation Guides
-                <ChevronDown
-                  className={cn("h-3.5 w-3.5 transition-transform", guidesOpen && "rotate-180")}
-                />
-              </button>
-              {guidesOpen && (
-                <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-border pl-3">
-                  {GUIDE_LINKS.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-muted transition-colors"
-                    >
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
-              )}
+          )}
+          <a href="/locations" className="block text-sm font-semibold text-ink">
+            Costs by city
+          </a>
+          <a href="/methodology" className="block text-sm font-semibold text-ink">
+            Methodology
+          </a>
+          <button
+            type="button"
+            onClick={() => setGuidesOpen(!guidesOpen)}
+            className="flex w-full items-center justify-between text-sm font-semibold text-ink"
+          >
+            Guides
+            <ChevronDown className={cn("h-4 w-4 transition", guidesOpen && "rotate-180")} />
+          </button>
+          {guidesOpen && (
+            <div className="pl-3 space-y-2">
+              {GUIDE_LINKS.map((item) => (
+                <a key={item.href} href={item.href} className="block text-sm text-muted-foreground">
+                  {item.name}
+                </a>
+              ))}
             </div>
-          </nav>
+          )}
         </div>
       )}
     </header>

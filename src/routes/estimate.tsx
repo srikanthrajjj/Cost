@@ -44,7 +44,25 @@ export const Route = createFileRoute("/estimate")({
   validateSearch: (search: Record<string, unknown>) => ({
     project: (search.project as string) || undefined,
   }),
-  head: () => ({ meta: [{ title: "Cost Estimator — CostReno" }] }),
+  head: () => ({
+    meta: [
+      { title: "Home renovation cost estimator | CostReno" },
+      {
+        name: "description",
+        content:
+          "Get a ZIP-based home renovation cost estimate for roof, kitchen, bathroom, HVAC, and more. Free planning tool with no signup required.",
+      },
+      { property: "og:title", content: "Home renovation cost estimator | CostReno" },
+      {
+        property: "og:description",
+        content:
+          "Estimate renovation costs with local pricing context before you request contractor quotes.",
+      },
+      { property: "og:url", content: "https://costreno.com/estimate" },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://costreno.com/estimate" }],
+  }),
   component: EstimatorPage,
 });
 

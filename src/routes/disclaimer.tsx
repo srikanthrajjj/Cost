@@ -5,6 +5,18 @@ import { FileText } from "lucide-react";
 
 export const Route = createFileRoute("/disclaimer")({
   component: DisclaimerPage,
+  head: () => ({
+    meta: [
+      { title: "Disclaimer | CostReno" },
+      {
+        name: "description",
+        content:
+          "Important limitations of CostReno estimates and quote analysis. Planning guidance is not a contractor bid or legal advice.",
+      },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://costreno.com/disclaimer" }],
+  }),
 });
 
 function DisclaimerPage() {

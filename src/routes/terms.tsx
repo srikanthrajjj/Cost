@@ -5,6 +5,17 @@ import { FileText } from "lucide-react";
 
 export const Route = createFileRoute("/terms")({
   component: TermsPage,
+  head: () => ({
+    meta: [
+      { title: "Terms of service | CostReno" },
+      {
+        name: "description",
+        content: "Read the CostReno terms of service for using our website and tools.",
+      },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://costreno.com/terms" }],
+  }),
 });
 
 function TermsPage() {

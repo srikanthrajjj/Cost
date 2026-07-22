@@ -1,29 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  getAllCityCategoryPairs,
   getAllStateSlugs,
+  getIndexableCityCategoryPairs,
   SITE_ORIGIN,
 } from "@/lib/city-data";
+import { PROJECT_CONFIGS } from "@/lib/project-config";
 
-const STATIC_PATHS = [
-  "/",
-  "/estimate",
-  "/quote-analyzer",
-  "/compare-quotes",
-  "/methodology",
-  "/about",
-  "/contact",
-  "/locations",
-  "/guides/roof-replacement",
-  "/guides/kitchen-remodel",
-  "/guides/bathroom-remodel",
-  "/guides/hvac-installation",
-  "/guides/window-replacement",
-  "/guides/flooring",
-  "/guides/metal-vs-asphalt-roof",
-  "/guides/inflated-quote-signs",
-  "/kitchen-remodel-cost",
-  "/roof-replacement-cost",
+const STATIC_PATHS: { path: string; priority: string }[] = [
+  { path: "/", priority: "1.0" },
+  { path: "/estimate", priority: "0.9" },
+  { path: "/quote-analyzer", priority: "0.9" },
+  { path: "/compare-quotes", priority: "0.9" },
+  { path: "/methodology", priority: "0.6" },
+  { path: "/about", priority: "0.5" },
+  { path: "/contact", priority: "0.5" },
+  { path: "/locations", priority: "0.8" },
+  { path: "/guides", priority: "0.8" },
+  { path: "/topics/quotes", priority: "0.8" },
+  { path: "/topics/roof", priority: "0.8" },
+  { path: "/topics/kitchen", priority: "0.8" },
+  { path: "/topics/windows", priority: "0.75" },
+  { path: "/topics/flooring", priority: "0.75" },
+  { path: "/guides/how-to-read-a-contractor-quote", priority: "0.85" },
+  { path: "/guides/questions-before-signing", priority: "0.85" },
+  { path: "/guides/quartz-vs-granite-countertops", priority: "0.8" },
+  { path: "/guides/roof-replacement", priority: "0.8" },
+  { path: "/guides/kitchen-remodel", priority: "0.8" },
+  { path: "/guides/bathroom-remodel", priority: "0.8" },
+  { path: "/guides/hvac-installation", priority: "0.8" },
+  { path: "/guides/window-replacement", priority: "0.7" },
+  { path: "/guides/flooring", priority: "0.7" },
+  { path: "/guides/metal-vs-asphalt-roof", priority: "0.7" },
+  { path: "/guides/inflated-quote-signs", priority: "0.8" },
+  { path: "/privacy", priority: "0.3" },
+  { path: "/terms", priority: "0.3" },
+  { path: "/disclaimer", priority: "0.3" },
 ];
 
 function escapeXml(value: string): string {
@@ -35,26 +46,34 @@ function escapeXml(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function urlEntry(loc: string, priority: string, changefreq: string): string {
+function urlEntry(loc: string, priority: string, changefreq: string, lastmod: string): string {
   return `  <url>
     <loc>${escapeXml(loc)}</loc>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
   </url>`;
 }
 
 export function buildSitemapXml(): string {
-  const cityCategoryPairs = getAllCityCategoryPairs();
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const cityCategoryPairs = getIndexableCityCategoryPairs();
   const states = getAllStateSlugs();
+  const projectPaths = PROJECT_CONFIGS.map((p) => `/${p.slug}`);
 
   const entries: string[] = [
-    ...STATIC_PATHS.map((path) =>
-      urlEntry(`${SITE_ORIGIN}${path === "/" ? "" : path}`, path === "/" ? "1.0" : "0.8", "weekly"),
+    ...STATIC_PATHS.map(({ path, priority }) =>
+      urlEntry(`${SITE_ORIGIN}${path === "/" ? "" : path}`, priority, "weekly", lastmod),
+    ),
+    ...projectPaths.map((path) =>
+      urlEntry(`${SITE_ORIGIN}${path}`, "0.85", "weekly", lastmod),
     ),
     ...states.map((state) =>
-      urlEntry(`${SITE_ORIGIN}/locations/${state.stateSlug}`, "0.7", "weekly"),
+      urlEntry(`${SITE_ORIGIN}/locations/${state.stateSlug}`, "0.7", "weekly", lastmod),
     ),
-    ...cityCategoryPairs.map(({ url }) => urlEntry(`${SITE_ORIGIN}${url}`, "0.7", "weekly")),
+    ...cityCategoryPairs.map(({ url }) =>
+      urlEntry(`${SITE_ORIGIN}${url}`, "0.75", "weekly", lastmod),
+    ),
   ];
 
   return `<?xml version="1.0" encoding="UTF-8"?>

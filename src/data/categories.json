@@ -154,5 +154,83 @@
       }
     ],
     "methodologyNote": "HVAC ranges combine national install benchmarks with {city}'s labor index and climate context. Final pricing depends on equipment and duct conditions."
+  },
+  {
+    "id": "window-replacement",
+    "name": "Window replacement",
+    "description": "Full or partial window replacement",
+    "icon": "AppWindow",
+    "avgCost": "$12,500",
+    "costRange": "$6,000 - $21,000",
+    "timeframe": "1 - 3 days",
+    "roi": "72%",
+    "estimateProjectType": "windows",
+    "guidePath": "/guides/window-replacement",
+    "seoTitle": "Window replacement cost in {city}, {state} | CostReno",
+    "seoDescription": "Estimate window replacement costs in {city}, {state}. Compare local labor, energy upgrades, and contractor quotes with CostReno.",
+    "keywords": ["window replacement", "window replacement cost", "new windows", "energy efficient windows"],
+    "introTemplate": "Window replacement in {city}, {state} is priced by window count, frame material, glass package, and local labor ({laborLabel}). Housing stock ({homeAgeShort}) and climate ({climateShort}) affect whether energy upgrades or custom sizes are common. {regionalShort} CostReno helps {city} homeowners estimate a fair window budget before comparing installers.",
+    "faq": [
+      {
+        "question": "How much does window replacement cost in {city}?",
+        "answer": "Window replacement in {city} typically ranges from {costLow} to {costHigh}, depending on how many windows you replace, vinyl vs wood or fiberglass frames, and glass options. Local labor is about {laborMultiplier}x the national baseline."
+      },
+      {
+        "question": "What window materials work best in {city}?",
+        "answer": "Material choice in {city} should match climate and maintenance goals: {climateNotes} Vinyl is common for value. Fiberglass and wood can cost more but may fit older homes better."
+      },
+      {
+        "question": "Do I need a permit for window replacement in {city}?",
+        "answer": "Many {city} replacements need permits when sizes change or structural framing is involved. Check with {permitOffice} and confirm your installer handles inspections."
+      },
+      {
+        "question": "How long does window replacement take in {city}?",
+        "answer": "Most projects finish in 1 to 3 days for standard openings. Custom sizes, lead times, and scheduling in {city} can extend the timeline."
+      },
+      {
+        "question": "How should I compare window quotes in {city}?",
+        "answer": "Compare window count, brand or series, glass package, disposal, trim work, and warranty terms. Use CostReno to check whether a {city} quote sits in a realistic range."
+      }
+    ],
+    "methodologyNote": "Window cost ranges use national install benchmarks adjusted by {city}'s labor index and housing context. Treat them as planning estimates, not contractor bids."
+  },
+  {
+    "id": "flooring",
+    "name": "Flooring installation",
+    "description": "New flooring installation or replacement",
+    "icon": "Layers",
+    "avgCost": "$7,500",
+    "costRange": "$3,000 - $15,000",
+    "timeframe": "2 - 5 days",
+    "roi": "70%",
+    "estimateProjectType": "flooring",
+    "guidePath": "/guides/flooring",
+    "seoTitle": "Flooring cost in {city}, {state} | CostReno",
+    "seoDescription": "See flooring installation costs in {city}, {state}. Compare hardwood, LVP, tile, and local labor factors before you hire.",
+    "keywords": ["flooring cost", "hardwood flooring", "LVP flooring", "flooring installation"],
+    "introTemplate": "Flooring projects in {city}, {state} are driven by material choice, square footage, subfloor condition, and local labor ({laborLabel}). Older homes ({homeAgeShort}) often need prep work that changes the final number. {regionalShort} CostReno helps {city} homeowners estimate a realistic flooring range before comparing quotes.",
+    "faq": [
+      {
+        "question": "How much does new flooring cost in {city}?",
+        "answer": "Flooring installation in {city} commonly falls between {costLow} and {costHigh}, depending on material, room size, and prep needs. Local labor is about {laborMultiplier}x the national baseline."
+      },
+      {
+        "question": "What flooring options are popular in {city}?",
+        "answer": "Homeowners in {city} often choose LVP for durability and value, hardwood for resale appeal, or tile for wet areas. Climate and home age ({homeAgeShort}) influence moisture prep and material choice."
+      },
+      {
+        "question": "Do I need a permit for flooring work in {city}?",
+        "answer": "Most finish flooring installs do not need a permit in {city}, but structural subfloor repairs might. Confirm with {permitOffice} if your project includes structural work."
+      },
+      {
+        "question": "How long does flooring installation take in {city}?",
+        "answer": "Most projects take 2 to 5 days after materials arrive. Removal of old flooring, leveling, and moisture mitigation in {city} homes can add time."
+      },
+      {
+        "question": "How can I avoid overpaying for flooring in {city}?",
+        "answer": "Get square footage measured the same way on every bid, specify material grade, and ask what prep is included. Use CostReno to sanity-check {city} pricing before you sign."
+      }
+    ],
+    "methodologyNote": "Flooring ranges combine national material and install benchmarks with {city}'s labor index. Final cost depends on material grade and subfloor conditions."
   }
 ]

@@ -5,6 +5,18 @@ import { FileText } from "lucide-react";
 
 export const Route = createFileRoute("/privacy")({
   component: PrivacyPage,
+  head: () => ({
+    meta: [
+      { title: "Privacy policy | CostReno" },
+      {
+        name: "description",
+        content:
+          "Read the CostReno privacy policy to understand what information we collect and how it is used.",
+      },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://costreno.com/privacy" }],
+  }),
 });
 
 function PrivacyPage() {

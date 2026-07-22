@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { DEFAULT_OG_IMAGE } from "../lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -77,20 +78,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CostReno — Clear Costs, Smarter Renovations" },
+      { title: "CostReno | Home renovation cost estimates and quote analysis" },
       {
         name: "description",
         content:
-          "Clear home improvement estimates, expert guidance, and data-driven insights. 100+ interactive calculators updated weekly.",
+          "Get clear home renovation cost estimates, analyze contractor quotes with AI, and compare bids with local pricing context. Free tools for homeowners.",
       },
       { name: "author", content: "CostReno" },
-      { property: "og:title", content: "CostReno — Real home improvement costs" },
+      {
+        property: "og:title",
+        content: "CostReno | Home renovation cost estimates and quote analysis",
+      },
       {
         property: "og:description",
         content:
-          "Plan any home improvement project with confidence. 100+ calculators, local pricing data, trusted by 1M+ homeowners.",
+          "Plan renovations with ZIP-based estimates, AI quote analysis, and practical guides. Built for homeowners who want clear pricing before they hire.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://costreno.com/" },
+      {
+        property: "og:image",
+        content: DEFAULT_OG_IMAGE,
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@CostReno" },
     ],
@@ -99,12 +108,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "canonical", href: "https://costreno.com/" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+    ],
+    scripts: [
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap",
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "CostReno",
+          url: "https://costreno.com",
+          logo: "https://costreno.com/logo.svg",
+          description:
+            "CostReno helps homeowners estimate renovation costs and analyze contractor quotes with clear, data-informed tools.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "CostReno",
+          url: "https://costreno.com",
+          description:
+            "Home renovation cost estimates, AI contractor quote analysis, and project guides.",
+          publisher: {
+            "@type": "Organization",
+            name: "CostReno",
+            url: "https://costreno.com",
+          },
+        }),
       },
     ],
   }),
