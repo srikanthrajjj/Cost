@@ -11,6 +11,7 @@ export interface StoredQuoteUpload {
   projectType?: string | null;
   contractor?: string | null;
   totalPrice?: number | null;
+  actualPaid?: number | null;
   completenessScore?: number | null;
   lineItemCount?: number | null;
   missingCount?: number | null;
@@ -27,6 +28,7 @@ export interface StoredQuoteFeedback {
   accuracy?: string | null;
   understandable?: string | null;
   useAgain?: string | null;
+  amountPaid?: number | null;
   comment?: string | null;
   projectType?: string | null;
   contractor?: string | null;
@@ -94,6 +96,21 @@ export async function fileSaveQuoteUpload(
   const store = await ensureStore();
   store.quoteUploads.unshift(row);
   // Keep local file from growing without bound during development
+  store.quoteUploads = store.quoteUploads.slice(0, 500);
+  await writeStore(store);
+  return row;
+}
+
+export async function fileUpdateQuoteUpload(
+  row: StoredQuoteUpload,
+): Promise<StoredQuoteUpload> {
+  const store = await ensureStore();
+  const index = store.quoteUploads.findIndex((entry) => entry.id === row.id);
+  if (index === -1) {
+    store.quoteUploads.unshift(row);
+  } else {
+    store.quoteUploads[index] = row;
+  }
   store.quoteUploads = store.quoteUploads.slice(0, 500);
   await writeStore(store);
   return row;

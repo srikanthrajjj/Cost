@@ -43,6 +43,10 @@ import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import { serverChatWithKnowledge } from "@/lib/chat-server";
+import {
+  getSavedQuoteProgress,
+  updateSavedQuoteChecklist,
+} from "@/lib/quote/progress-store";
 import type { QuoteAnalysis } from "@/lib/quote/types";
 import { addComparisonQuote } from "@/lib/quote/comparison-store";
 import { QuoteComparisonTray } from "@/components/quote/QuoteComparisonTray";
@@ -59,6 +63,7 @@ function getHealthGrade(score: number): { label: string; color: string; bg: stri
 
 export function CompleteView({
   result,
+  progressSignature,
   reset,
   chatOpen,
   setChatOpen,
@@ -75,6 +80,7 @@ export function CompleteView({
   onOpenFeedback,
 }: {
   result: QuoteAnalysisResult;
+  progressSignature?: string;
   reset: () => void;
   chatOpen: boolean;
   setChatOpen: (v: boolean) => void;
@@ -875,6 +881,13 @@ export function CompleteView({
                     </div>
                   </div>
                 )}
+                <div className="mt-8">
+                  <h3 className="text-sm font-bold text-ink mb-1">Follow-up checklist</h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Saved locally so you can come back later without logging in.
+                  </p>
+                  <TimelineTab progressSignature={progressSignature} />
+                </div>
               </div>
             )}
           </div>
@@ -1584,8 +1597,28 @@ function QuestionsTab({ analysis }: { analysis: QuoteAnalysis }) {
 }
 
 // ─── Timeline Tab ─────────────────────────────────────────────────────────────
-function TimelineTab({ analysis }: { analysis: QuoteAnalysis }) {
+function TimelineTab({
+  progressSignature,
+}: {
+  progressSignature?: string;
+}) {
   const [checked, setChecked] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!progressSignature) return;
+    const saved = getSavedQuoteProgress();
+    if (!saved || saved.signature !== progressSignature) {
+      setChecked(new Set());
+      return;
+    }
+    setChecked(new Set(saved.completedChecklistIds));
+  }, [progressSignature]);
+
+  useEffect(() => {
+    if (!progressSignature) return;
+    updateSavedQuoteChecklist(progressSignature, Array.from(checked));
+  }, [checked, progressSignature]);
+
   const toggle = (id: string) => {
     const next = new Set(checked);
     if (next.has(id)) next.delete(id);

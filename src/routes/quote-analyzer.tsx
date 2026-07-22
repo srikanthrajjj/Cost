@@ -29,6 +29,13 @@ import {
   addComparisonQuote,
   clearComparisonQuotes,
 } from "@/lib/quote/comparison-store";
+import {
+  clearSavedQuoteProgress,
+  getQuoteFollowUpAction,
+  getSavedQuoteProgress,
+  saveQuoteProgress,
+  type SavedQuoteProgress,
+} from "@/lib/quote/progress-store";
 import { QuoteFeedbackCard, QuoteFeedbackMobileCta } from "@/components/quote/QuoteFeedbackCard";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 
@@ -241,6 +248,7 @@ function QuoteAnalyzerPage() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [quoteSlots, setQuoteSlots] = useState<(File | null)[]>([null, null, null]);
   const [activeSlot, setActiveSlot] = useState<number>(0);
+  const [savedProgress, setSavedProgress] = useState<SavedQuoteProgress | null>(null);
   const [batchProgress, setBatchProgress] = useState<{
     current: number;
     total: number;
@@ -322,11 +330,18 @@ function QuoteAnalyzerPage() {
   // Load analysis from sessionStorage if available (from chat flow)
   useEffect(() => {
     try {
+      const lastSaved = getSavedQuoteProgress();
+      if (lastSaved) {
+        setSavedProgress(lastSaved);
+      }
+
       const stored = sessionStorage.getItem("costreno_quote_analysis");
       if (stored) {
         const parsed = JSON.parse(stored) as QuoteAnalysisResult;
         if (parsed && parsed.analysis && parsed.extraction) {
+          const saved = saveQuoteProgress(parsed);
           setResult(parsed);
+          setSavedProgress(saved);
           setState("complete");
           sessionStorage.removeItem("costreno_quote_analysis");
         }
@@ -427,10 +442,12 @@ function QuoteAnalyzerPage() {
         setBatchProgress({ current: 1, total: 1, name: selectedFiles[0].name });
         batchRef.current = { current: 1, total: 1 };
         const analysis = await analyzeSingleFile(selectedFiles[0]);
+        const saved = saveQuoteProgress(analysis);
         clearStageTimers();
         setProcessingStage("reporting");
         setProcessingProgress(100);
         setResult(analysis);
+        setSavedProgress(saved);
         setQuoteSlots([null, null, null]);
         setBatchProgress(null);
         setState("complete");
@@ -464,7 +481,11 @@ function QuoteAnalyzerPage() {
       clearStageTimers();
       setProcessingStage("reporting");
       setProcessingProgress(100);
-      setResult(lastAnalysis);
+      if (lastAnalysis) {
+        const saved = saveQuoteProgress(lastAnalysis);
+        setSavedProgress(saved);
+        setResult(lastAnalysis);
+      }
       setQuoteSlots([null, null, null]);
       setBatchProgress(null);
       setCompareIds(savedIds);
@@ -487,6 +508,7 @@ function QuoteAnalyzerPage() {
 
   const reset = () => {
     clearStageTimers();
+    setSavedProgress(getSavedQuoteProgress());
     setState("idle");
     setResult(null);
     setError("");
@@ -497,6 +519,25 @@ function QuoteAnalyzerPage() {
     setBatchProgress(null);
     setShowCompare(false);
     setCompareIds([]);
+  };
+
+  const handleResumeSavedProgress = () => {
+    const latest = getSavedQuoteProgress();
+    if (!latest) return;
+    clearStageTimers();
+    setSavedProgress(latest);
+    setResult(latest.result);
+    setState("complete");
+    setError("");
+    setProcessingProgress(0);
+    setProcessingStage("reading");
+    setActiveTab("overview");
+    setSelectedRow(null);
+    setExpandedRow(null);
+    setShowCompare(false);
+    setCompareIds([]);
+    setQuoteSlots([null, null, null]);
+    setBatchProgress(null);
   };
 
   const handleEmailSubmit = async (email: string) => {
@@ -539,6 +580,18 @@ function QuoteAnalyzerPage() {
 
   // ─── IDLE STATE: Upload Interface ───────────────────────────────────────────
   if (state === "idle" || state === "error") {
+    const lastAnalysis = savedProgress?.result.analysis ?? null;
+    const lastExtraction = savedProgress?.result.extraction ?? null;
+    const followUp = savedProgress ? getQuoteFollowUpAction(savedProgress) : null;
+    const savedAtLabel = savedProgress
+      ? new Date(savedProgress.savedAt).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : "";
+
     return (
       <div className="min-h-screen bg-[#f7f8fa]">
         {/* Error Toast */}
@@ -566,6 +619,92 @@ function QuoteAnalyzerPage() {
         <SiteNav active="quote" />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 md:py-16">
+          {savedProgress && lastAnalysis && lastExtraction && followUp && (
+            <div className="max-w-4xl mx-auto mb-6 rounded-2xl border border-primary/10 bg-white p-5 shadow-sm">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1">
+                    <Clock className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-[11px] font-semibold text-primary">Welcome back</span>
+                  </div>
+                  <h2 className="mt-3 text-xl font-bold text-ink">Your last quote analysis is saved</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {lastExtraction.contractor || "Your contractor quote"} ·{" "}
+                    {lastExtraction.projectType || "Project quote"} · Score{" "}
+                    {lastAnalysis.summary.completenessScore}/100
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">Last updated {savedAtLabel}</p>
+                </div>
+
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={handleResumeSavedProgress}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/95 transition"
+                  >
+                    Open last analysis
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearSavedQuoteProgress();
+                      setSavedProgress(null);
+                    }}
+                    className="inline-flex items-center justify-center rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-ink hover:bg-muted transition"
+                  >
+                    Clear saved progress
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                <div className="rounded-xl border border-border bg-muted/20 p-3">
+                  <p className="text-[10px] font-medium text-muted-foreground">Missing items</p>
+                  <p className="mt-1 text-lg font-bold text-ink">{lastAnalysis.missingScope.length}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/20 p-3">
+                  <p className="text-[10px] font-medium text-muted-foreground">Needs clarification</p>
+                  <p className="mt-1 text-lg font-bold text-ink">
+                    {lastAnalysis.needsClarification.length}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/20 p-3">
+                  <p className="text-[10px] font-medium text-muted-foreground">Red flags</p>
+                  <p className="mt-1 text-lg font-bold text-ink">{lastAnalysis.redFlags.length}</p>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/20 p-3">
+                  <p className="text-[10px] font-medium text-muted-foreground">Checklist saved</p>
+                  <p className="mt-1 text-lg font-bold text-ink">
+                    {savedProgress.completedChecklistIds.length}
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`mt-4 flex items-start gap-3 rounded-xl border p-4 ${
+                  followUp.tone === "urgent"
+                    ? "border-red-200 bg-red-50/60"
+                    : followUp.tone === "review"
+                      ? "border-amber-200 bg-amber-50/60"
+                      : "border-accent/20 bg-accent/5"
+                }`}
+              >
+                {followUp.tone === "urgent" ? (
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+                ) : followUp.tone === "review" ? (
+                  <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                ) : (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                )}
+                <div>
+                  <p className="text-sm font-semibold text-ink">{followUp.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{followUp.detail}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Hero */}
           <div className="max-w-3xl mx-auto text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-4">
@@ -1352,6 +1491,7 @@ function QuoteAnalyzerPage() {
       >
         <CompleteView
           result={result!}
+          progressSignature={savedProgress?.signature}
           reset={reset}
           chatOpen={chatOpen}
           setChatOpen={setChatOpen}

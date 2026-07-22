@@ -8,6 +8,7 @@ import {
   fileSaveComparisonReport,
   fileSaveQuoteFeedback,
   fileSaveQuoteUpload,
+  fileUpdateQuoteUpload,
   type StoredComparisonReport,
   type StoredQuoteFeedback,
   type StoredQuoteUpload,
@@ -23,6 +24,7 @@ export type SaveQuoteUploadInput = {
   projectType?: string;
   contractor?: string;
   totalPrice?: number;
+  actualPaid?: number;
   completenessScore?: number;
   lineItemCount?: number;
   missingCount?: number;
@@ -37,6 +39,7 @@ export type SaveQuoteFeedbackInput = {
   accuracy?: string;
   understandable?: string;
   useAgain?: string;
+  amountPaid?: number;
   comment?: string;
   projectType?: string;
   contractor?: string;
@@ -78,6 +81,7 @@ export async function saveQuoteUpload(input: SaveQuoteUploadInput): Promise<{
     projectType: input.projectType ?? null,
     contractor: input.contractor ?? null,
     totalPrice: input.totalPrice ?? null,
+    actualPaid: input.actualPaid ?? null,
     completenessScore: input.completenessScore ?? null,
     lineItemCount: input.lineItemCount ?? null,
     missingCount: input.missingCount ?? null,
@@ -99,6 +103,7 @@ export async function saveQuoteUpload(input: SaveQuoteUploadInput): Promise<{
       projectType: row.projectType,
       contractor: row.contractor,
       totalPrice: row.totalPrice,
+      actualPaid: row.actualPaid,
       completenessScore: row.completenessScore,
       lineItemCount: row.lineItemCount,
       missingCount: row.missingCount,
@@ -114,6 +119,28 @@ export async function saveQuoteUpload(input: SaveQuoteUploadInput): Promise<{
   return { id, storage: "file" };
 }
 
+async function updateQuoteUploadActualPaid(
+  quoteUploadId: string,
+  amountPaid: number,
+): Promise<void> {
+  const db = getDb();
+  if (db) {
+    await db
+      .update(quoteUploads)
+      .set({ actualPaid: amountPaid })
+      .where(eq(quoteUploads.id, quoteUploadId));
+    return;
+  }
+
+  const uploads = await fileListQuoteUploads(500);
+  const match = uploads.find((row) => row.id === quoteUploadId);
+  if (!match) return;
+  await fileUpdateQuoteUpload({
+    ...match,
+    actualPaid: amountPaid,
+  });
+}
+
 export async function saveQuoteFeedback(input: SaveQuoteFeedbackInput): Promise<{
   id: string;
   storage: "postgres" | "file";
@@ -127,6 +154,7 @@ export async function saveQuoteFeedback(input: SaveQuoteFeedbackInput): Promise<
     accuracy: input.accuracy ?? null,
     understandable: input.understandable ?? null,
     useAgain: input.useAgain ?? null,
+    amountPaid: input.amountPaid ?? null,
     comment: input.comment?.trim() || null,
     projectType: input.projectType ?? null,
     contractor: input.contractor ?? null,
@@ -142,15 +170,22 @@ export async function saveQuoteFeedback(input: SaveQuoteFeedbackInput): Promise<
       accuracy: row.accuracy,
       understandable: row.understandable,
       useAgain: row.useAgain,
+      amountPaid: row.amountPaid,
       comment: row.comment,
       projectType: row.projectType,
       contractor: row.contractor,
       completenessScore: row.completenessScore,
     });
+    if (row.quoteUploadId && typeof row.amountPaid === "number") {
+      await updateQuoteUploadActualPaid(row.quoteUploadId, row.amountPaid);
+    }
     return { id, storage: "postgres" };
   }
 
   await fileSaveQuoteFeedback(row);
+  if (row.quoteUploadId && typeof row.amountPaid === "number") {
+    await updateQuoteUploadActualPaid(row.quoteUploadId, row.amountPaid);
+  }
   return { id, storage: "file" };
 }
 
@@ -168,6 +203,7 @@ export async function listStoredQuoteUploads(limit = 50): Promise<StoredQuoteUpl
       projectType: r.projectType,
       contractor: r.contractor,
       totalPrice: r.totalPrice,
+      actualPaid: r.actualPaid,
       completenessScore: r.completenessScore,
       lineItemCount: r.lineItemCount,
       missingCount: r.missingCount,
@@ -195,6 +231,7 @@ export async function listStoredQuoteFeedback(limit = 50): Promise<StoredQuoteFe
       accuracy: r.accuracy,
       understandable: r.understandable,
       useAgain: r.useAgain,
+      amountPaid: r.amountPaid,
       comment: r.comment,
       projectType: r.projectType,
       contractor: r.contractor,

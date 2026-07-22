@@ -7,6 +7,7 @@ const feedbackSchema = z.object({
   accuracy: z.enum(["accurate", "somewhat", "not_accurate"]).optional(),
   understandable: z.enum(["yes", "somewhat", "no"]).optional(),
   useAgain: z.enum(["yes", "maybe", "no"]).optional(),
+  amountPaid: z.number().nonnegative().max(10_000_000).optional(),
   comment: z.string().max(1000).optional(),
   projectType: z.string().optional(),
   contractor: z.string().optional(),
@@ -38,6 +39,7 @@ export const submitQuoteFeedback = createServerFn({ method: "POST" })
       Boolean(data.accuracy) ||
       Boolean(data.understandable) ||
       Boolean(data.useAgain) ||
+      typeof data.amountPaid === "number" ||
       Boolean(data.comment?.trim());
 
     if (!answered) {
@@ -48,6 +50,7 @@ export const submitQuoteFeedback = createServerFn({ method: "POST" })
       accuracy: labelAccuracy(data.accuracy),
       understandable: labelYesSomewhatNo(data.understandable),
       useAgain: labelYesSomewhatNo(data.useAgain),
+      amountPaid: data.amountPaid ?? null,
       comment: data.comment?.trim() || "",
       projectType: data.projectType || "",
       contractor: data.contractor || "",
@@ -63,6 +66,7 @@ export const submitQuoteFeedback = createServerFn({ method: "POST" })
         accuracy: data.accuracy,
         understandable: data.understandable,
         useAgain: data.useAgain,
+        amountPaid: data.amountPaid,
         comment: data.comment,
         projectType: data.projectType,
         contractor: data.contractor,
@@ -96,6 +100,7 @@ export const submitQuoteFeedback = createServerFn({ method: "POST" })
     <p><strong>Accurate?</strong> ${summary.accuracy}</p>
     <p><strong>Easy to understand?</strong> ${summary.understandable}</p>
     <p><strong>Would use again?</strong> ${summary.useAgain}</p>
+    <p><strong>Amount paid:</strong> ${summary.amountPaid !== null ? `$${Number(summary.amountPaid).toLocaleString()}` : "Skipped"}</p>
     ${summary.comment ? `<p><strong>Comment:</strong> ${summary.comment}</p>` : ""}
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;" />
     <p style="font-size:12px;color:#6b7280;">
@@ -103,6 +108,7 @@ export const submitQuoteFeedback = createServerFn({ method: "POST" })
       Quote upload ID: ${summary.quoteUploadId || "—"}<br />
       Project type: ${summary.projectType || "—"}<br />
       Contractor: ${summary.contractor || "—"}<br />
+      Amount paid: ${summary.amountPaid !== null ? `$${Number(summary.amountPaid).toLocaleString()}` : "—"}<br />
       Completeness score: ${summary.completenessScore ?? "—"}<br />
       Received: ${summary.receivedAt}
     </p>

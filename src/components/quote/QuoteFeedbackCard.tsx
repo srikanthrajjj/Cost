@@ -158,6 +158,7 @@ export function QuoteFeedbackCard({
   const [accuracy, setAccuracy] = useState<Accuracy | "">("");
   const [understandable, setUnderstandable] = useState<Understandable | "">("");
   const [useAgain, setUseAgain] = useState<UseAgain | "">("");
+  const [amountPaid, setAmountPaid] = useState("");
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [justSubmitted, setJustSubmitted] = useState(false);
@@ -215,11 +216,26 @@ export function QuoteFeedbackCard({
     };
   }, [open, onOpenChange]);
 
-  const canSubmit = Boolean(accuracy || understandable || useAgain || comment.trim());
+  const parsedAmountPaid =
+    amountPaid.trim() === ""
+      ? undefined
+      : Number(amountPaid.replace(/[$,\s]/g, ""));
+
+  const amountPaidIsValid =
+    parsedAmountPaid === undefined ||
+    (Number.isFinite(parsedAmountPaid) && parsedAmountPaid >= 0 && parsedAmountPaid <= 10_000_000);
+
+  const canSubmit = Boolean(
+    accuracy || understandable || useAgain || comment.trim() || parsedAmountPaid !== undefined,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit || submitting) return;
+    if (!amountPaidIsValid) {
+      setError("Please enter a valid amount paid.");
+      return;
+    }
     setSubmitting(true);
     setError("");
     try {
@@ -228,6 +244,7 @@ export function QuoteFeedbackCard({
           accuracy: accuracy || undefined,
           understandable: understandable || undefined,
           useAgain: useAgain || undefined,
+          amountPaid: parsedAmountPaid,
           comment: comment.trim() || undefined,
           projectType,
           contractor,
@@ -357,6 +374,27 @@ export function QuoteFeedbackCard({
                 </OptionPill>
               </div>
             </fieldset>
+
+            <div>
+              <label
+                htmlFor="quote-feedback-amount-paid"
+                className="text-xs font-semibold text-ink mb-2 block"
+              >
+                How much did you end up paying?
+                <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
+              </label>
+              <input
+                id="quote-feedback-amount-paid"
+                inputMode="decimal"
+                value={amountPaid}
+                onChange={(e) => setAmountPaid(e.target.value)}
+                placeholder="Example: 14250"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-[#082A4B]/30"
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                This helps us compare quoted totals with real homeowner outcomes.
+              </p>
+            </div>
 
             <div>
               <label
