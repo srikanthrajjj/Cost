@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
   getAllStateSlugs,
   getIndexableCityCategoryPairs,
@@ -55,6 +54,7 @@ function urlEntry(loc: string, priority: string, changefreq: string, lastmod: st
   </url>`;
 }
 
+/** Build the XML sitemap. Prefer regenerating public/sitemap.xml before deploy. */
 export function buildSitemapXml(): string {
   const lastmod = new Date().toISOString().slice(0, 10);
   const cityCategoryPairs = getIndexableCityCategoryPairs();
@@ -81,17 +81,3 @@ export function buildSitemapXml(): string {
 ${entries.join("\n")}
 </urlset>`;
 }
-
-export const Route = createFileRoute("/sitemap.xml")({
-  server: {
-    handlers: {
-      GET: async () =>
-        new Response(buildSitemapXml(), {
-          headers: {
-            "Content-Type": "application/xml; charset=utf-8",
-            "Cache-Control": "public, max-age=3600",
-          },
-        }),
-    },
-  },
-});
