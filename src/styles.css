@@ -155,3 +155,51 @@
 .animate-pulse-glow {
   animation: pulse-glow 2.5s ease-in-out infinite;
 }
+
+@keyframes progress-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes progress-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes progress-sweep {
+  0% {
+    stroke-dashoffset: 40;
+  }
+  100% {
+    stroke-dashoffset: -220;
+  }
+}
+
+.animate-progress-orbit {
+  animation: progress-orbit 8s linear infinite;
+}
+
+.animate-progress-breathe {
+  animation: progress-breathe 2.2s ease-in-out infinite;
+}
+
+.animate-progress-sweep {
+  animation: progress-sweep 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-progress-orbit,
+  .animate-progress-breathe,
+  .animate-progress-sweep,
+  .animate-pulse-glow {
+    animation: none !important;
+  }
+}

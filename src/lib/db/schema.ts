@@ -34,5 +34,18 @@ export const quoteFeedback = pgTable("quote_feedback", {
   completenessScore: real("completeness_score"),
 });
 
+/** Shareable multi-quote comparison snapshots (unlisted links) */
+export const comparisonReports = pgTable("comparison_reports", {
+  id: text("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  snapshot: jsonb("snapshot").notNull(),
+  quoteCount: integer("quote_count").notNull(),
+  projectType: text("project_type"),
+  recommendedContractor: text("recommended_contractor"),
+  source: text("source").default("quote-comparison"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+});
+
 export type QuoteUploadRow = typeof quoteUploads.$inferSelect;
 export type QuoteFeedbackRow = typeof quoteFeedback.$inferSelect;
+export type ComparisonReportRow = typeof comparisonReports.$inferSelect;

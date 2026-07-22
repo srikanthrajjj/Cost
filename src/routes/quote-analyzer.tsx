@@ -18,6 +18,7 @@ import {
   Zap,
   Lock,
   GitCompare,
+  Trophy,
 } from "lucide-react";
 import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
 import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
@@ -46,35 +47,38 @@ const CompleteView = lazy(() =>
 export const Route = createFileRoute("/quote-analyzer")({
   head: () => ({
     meta: [
-      { title: "Free AI contractor quote analyzer | CostReno" },
+      { title: "Compare contractor quotes (up to 3) | CostReno" },
       {
         name: "description",
         content:
-          "Upload one contractor quote and get an AI review for missing scope, unclear line items, and pricing red flags. Free, no signup required.",
+          "Upload up to 3 contractor quotes and get a simple side-by-side review. See which bid looks strongest on price, completeness, and red flags. Free, no signup.",
       },
       {
         name: "keywords",
         content:
-          "contractor quote analyzer, AI quote analyzer, contractor estimate checker, roofing quote review, renovation quote analysis, contractor bid review, quote red flags",
+          "compare contractor quotes, quote analyzer, contractor bid comparison, roofing quote review, renovation quote analysis, side by side quote comparison",
       },
       {
         property: "og:title",
-        content: "Free AI contractor quote analyzer | CostReno",
+        content: "Compare contractor quotes (up to 3) | CostReno",
       },
       {
         property: "og:description",
         content:
-          "Analyze one contractor quote for missing items, vague scope, and pricing red flags in seconds.",
+          "Upload 1 to 3 contractor quotes. Get a clear recommendation with price, missing scope, and red-flag checks.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://costreno.com/quote-analyzer" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Free AI contractor quote analyzer | CostReno" },
+      {
+        name: "twitter:title",
+        content: "Compare contractor quotes (up to 3) | CostReno",
+      },
       {
         name: "twitter:description",
         content:
-          "Upload one contractor quote and get an instant AI review for missing scope and red flags.",
+          "Upload up to 3 bids and see which quote looks strongest before you hire.",
       },
       { name: "robots", content: "index, follow" },
     ],
@@ -88,10 +92,18 @@ export const Route = createFileRoute("/quote-analyzer")({
           mainEntity: [
             {
               "@type": "Question",
+              name: "How many quotes can I compare?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "You can upload up to 3 contractor quotes at once. One quote gets a detailed review. Two or three quotes get a side-by-side comparison with a clear recommendation.",
+              },
+            },
+            {
+              "@type": "Question",
               name: "How does the contractor quote analyzer work?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Upload a photo or PDF of one contractor quote. Our AI reads line items, checks them against local pricing context and common scope requirements, then highlights missing items, unclear language, and red flags.",
+                text: "Upload PDF or photo quotes. Our AI reads line items, checks common scope gaps and pricing red flags, then shows a simple summary you can use before hiring.",
               },
             },
             {
@@ -99,7 +111,7 @@ export const Route = createFileRoute("/quote-analyzer")({
               name: "Is the quote analyzer free to use?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Yes. The quote analyzer is free to use with no signup required for a standard review.",
+                text: "Yes. It is free to use with no signup required for a standard review.",
               },
             },
             {
@@ -120,18 +132,10 @@ export const Route = createFileRoute("/quote-analyzer")({
             },
             {
               "@type": "Question",
-              name: "How is this different from compare quotes?",
+              name: "Why compare three quotes?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Quote analyzer reviews one bid in depth. If you already have two quotes, use the compare quotes tool for a side-by-side report.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "How many contractor quotes should I get before hiring?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "Getting at least three written quotes helps you understand market range and scope differences. Analyze each quote individually, then compare your strongest options side by side.",
+                text: "Three written quotes help you see market range and scope differences. CostReno highlights the strongest option based on completeness, risk signals, and price context.",
               },
             },
           ],
@@ -142,7 +146,7 @@ export const Route = createFileRoute("/quote-analyzer")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
-          name: "CostReno AI quote analyzer",
+          name: "CostReno quote analyzer",
           url: "https://costreno.com/quote-analyzer",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
@@ -152,7 +156,7 @@ export const Route = createFileRoute("/quote-analyzer")({
             priceCurrency: "USD",
           },
           description:
-            "Free AI-powered tool to analyze one contractor quote for missing scope, pricing red flags, and unclear line items.",
+            "Free AI tool to review one contractor quote or compare up to three bids side by side.",
         }),
       },
     ],
@@ -201,6 +205,19 @@ const STAGE_PROGRESS_CEILING: Record<string, number> = {
   reporting: 95,
 };
 
+/** Map a 0-100 stage percent into overall progress across N quotes. */
+function mapStageToOverall(
+  stagePercent: number,
+  batchCurrent: number,
+  batchTotal: number,
+): number {
+  const total = Math.max(1, batchTotal);
+  const current = Math.min(Math.max(1, batchCurrent), total);
+  const span = 100 / total;
+  const base = (current - 1) * span;
+  return Math.min(99.5, Math.round((base + (stagePercent / 100) * span) * 10) / 10);
+}
+
 // ─── Main Page Component ──────────────────────────────────────────────────────
 function QuoteAnalyzerPage() {
   const [state, setState] = useState<AnalysisState>("idle");
@@ -222,7 +239,8 @@ function QuoteAnalyzerPage() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [quoteSlots, setQuoteSlots] = useState<(File | null)[]>([null, null, null]);
+  const [activeSlot, setActiveSlot] = useState<number>(0);
   const [batchProgress, setBatchProgress] = useState<{
     current: number;
     total: number;
@@ -231,39 +249,70 @@ function QuoteAnalyzerPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const stageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const batchRef = useRef({ current: 1, total: 1 });
 
-  const MAX_QUOTE_FILES = 5;
+  const MAX_QUOTE_SLOTS = 3;
   const MAX_FILE_BYTES = 15 * 1024 * 1024;
+  const selectedFiles = quoteSlots.filter((f): f is File => Boolean(f));
+  const filledCount = selectedFiles.length;
 
-  const addSelectedFiles = useCallback((incoming: FileList | File[]) => {
-    const allowed = Array.from(incoming).filter((file) => {
-      const name = file.name.toLowerCase();
-      const okType =
-        file.type === "application/pdf" ||
-        file.type.startsWith("image/") ||
-        name.endsWith(".pdf") ||
-        name.endsWith(".jpg") ||
-        name.endsWith(".jpeg") ||
-        name.endsWith(".png");
-      return okType && file.size > 0 && file.size <= MAX_FILE_BYTES;
-    });
+  const isAllowedFile = (file: File) => {
+    const name = file.name.toLowerCase();
+    const okType =
+      file.type === "application/pdf" ||
+      file.type.startsWith("image/") ||
+      name.endsWith(".pdf") ||
+      name.endsWith(".jpg") ||
+      name.endsWith(".jpeg") ||
+      name.endsWith(".png");
+    return okType && file.size > 0 && file.size <= MAX_FILE_BYTES;
+  };
 
-    if (allowed.length === 0) {
-      setError("Please choose PDF, JPG, or PNG files under 15MB.");
-      return;
-    }
-
-    setSelectedFiles((prev) => {
+  const setSlotFile = useCallback((slotIndex: number, file: File | null) => {
+    setQuoteSlots((prev) => {
       const next = [...prev];
-      for (const file of allowed) {
-        if (next.length >= MAX_QUOTE_FILES) break;
-        const duplicate = next.some((f) => f.name === file.name && f.size === file.size);
-        if (!duplicate) next.push(file);
-      }
+      next[slotIndex] = file;
       return next;
     });
     setError("");
   }, []);
+
+  const addFilesToSlots = useCallback(
+    (incoming: FileList | File[], startSlot?: number) => {
+      const allowed = Array.from(incoming).filter(isAllowedFile);
+      if (allowed.length === 0) {
+        setError("Please choose PDF, JPG, or PNG files under 15MB.");
+        return;
+      }
+
+      setQuoteSlots((prev) => {
+        const next = [...prev];
+        let fileIdx = 0;
+
+        if (typeof startSlot === "number" && startSlot >= 0 && startSlot < MAX_QUOTE_SLOTS) {
+          if (!next[startSlot] && allowed[fileIdx]) {
+            next[startSlot] = allowed[fileIdx++];
+          } else if (allowed[fileIdx]) {
+            next[startSlot] = allowed[fileIdx++];
+          }
+        }
+
+        for (let slot = 0; slot < MAX_QUOTE_SLOTS && fileIdx < allowed.length; slot++) {
+          if (!next[slot]) {
+            next[slot] = allowed[fileIdx++];
+          }
+        }
+        return next;
+      });
+      setError("");
+    },
+    [],
+  );
+
+  const openSlotPicker = (slotIndex: number) => {
+    setActiveSlot(slotIndex);
+    fileInputRef.current?.click();
+  };
 
   const clearStageTimers = () => {
     stageTimersRef.current.forEach(clearTimeout);
@@ -294,19 +343,22 @@ function QuoteAnalyzerPage() {
     return () => clearInterval(interval);
   }, [state]);
 
-  // Gradually advance the circular progress toward the current stage ceiling
+  // Gradually advance overall progress toward the current stage ceiling (batched across quotes)
   useEffect(() => {
     if (state !== "processing") return;
 
     const interval = setInterval(() => {
+      const { current, total } = batchRef.current;
+      const stageCeiling = STAGE_PROGRESS_CEILING[processingStage] ?? 95;
+      const overallCeiling = mapStageToOverall(stageCeiling, current, total);
+
       setProcessingProgress((prev) => {
-        const ceiling = STAGE_PROGRESS_CEILING[processingStage] ?? 95;
-        if (prev >= ceiling) return prev;
-        const remaining = ceiling - prev;
-        const increment = Math.max(0.2, remaining * 0.05);
-        return Math.min(ceiling, Math.round((prev + increment) * 10) / 10);
+        if (prev >= overallCeiling) return prev;
+        const remaining = overallCeiling - prev;
+        const increment = Math.max(0.15, remaining * 0.06);
+        return Math.min(overallCeiling, Math.round((prev + increment) * 10) / 10);
       });
-    }, 150);
+    }, 120);
 
     return () => clearInterval(interval);
   }, [state, processingStage]);
@@ -329,7 +381,10 @@ function QuoteAnalyzerPage() {
     }
 
     setProcessingStage("extracting");
-    setProcessingProgress((p) => Math.max(p, 12));
+    setProcessingProgress((p) => {
+      const floor = mapStageToOverall(12, batchRef.current.current, batchRef.current.total);
+      return Math.max(p, floor);
+    });
 
     const combinedText = `Analyze this contractor quote:\n\n${extracted.text}`;
 
@@ -365,16 +420,18 @@ function QuoteAnalyzerPage() {
     setShowCompare(false);
     setCompareIds([]);
     setBatchProgress(null);
+    batchRef.current = { current: 1, total: selectedFiles.length };
 
     try {
       if (selectedFiles.length === 1) {
         setBatchProgress({ current: 1, total: 1, name: selectedFiles[0].name });
+        batchRef.current = { current: 1, total: 1 };
         const analysis = await analyzeSingleFile(selectedFiles[0]);
         clearStageTimers();
         setProcessingStage("reporting");
         setProcessingProgress(100);
         setResult(analysis);
-        setSelectedFiles([]);
+        setQuoteSlots([null, null, null]);
         setBatchProgress(null);
         setState("complete");
         return;
@@ -383,30 +440,32 @@ function QuoteAnalyzerPage() {
       clearComparisonQuotes();
       const savedIds: string[] = [];
       let lastAnalysis: QuoteAnalysisResult | null = null;
+      const total = selectedFiles.length;
 
-      for (let i = 0; i < selectedFiles.length; i++) {
+      for (let i = 0; i < total; i++) {
         const file = selectedFiles[i];
+        batchRef.current = { current: i + 1, total };
         setBatchProgress({
           current: i + 1,
-          total: selectedFiles.length,
+          total,
           name: file.name,
         });
         setProcessingStage("reading");
-        setProcessingProgress(Math.round((i / selectedFiles.length) * 100));
+        setProcessingProgress(mapStageToOverall(0, i + 1, total));
 
         const analysis = await analyzeSingleFile(file);
         const saved = addComparisonQuote(analysis);
         savedIds.push(saved.id);
         lastAnalysis = analysis;
 
-        setProcessingProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
+        setProcessingProgress(mapStageToOverall(100, i + 1, total));
       }
 
       clearStageTimers();
       setProcessingStage("reporting");
       setProcessingProgress(100);
       setResult(lastAnalysis);
-      setSelectedFiles([]);
+      setQuoteSlots([null, null, null]);
       setBatchProgress(null);
       setCompareIds(savedIds);
       setShowCompare(true);
@@ -421,9 +480,7 @@ function QuoteAnalyzerPage() {
     }
   };
 
-  const removeSelectedFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+  const clearAllSlots = () => setQuoteSlots([null, null, null]);
 
   // Cancel not supported in server function mode
   const handleCancel = () => {};
@@ -436,7 +493,7 @@ function QuoteAnalyzerPage() {
     setProcessingProgress(0);
     setProcessingStage("reading");
     setActiveTab("overview");
-    setSelectedFiles([]);
+    setQuoteSlots([null, null, null]);
     setBatchProgress(null);
     setShowCompare(false);
     setCompareIds([]);
@@ -509,187 +566,236 @@ function QuoteAnalyzerPage() {
         <SiteNav active="quote" />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 md:py-16">
-          {/* Hero - Side by side layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-            {/* Left - Text */}
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-4">
-                <Clock className="h-3 w-3 text-accent" />
-                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
-                  Updated July 2026 · Pricing Data Refreshed Monthly
-                </span>
-              </div>
-              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
-                Get an expert review of your contractor quote{" "}
-                <span className="text-accent">in seconds</span>
-              </h1>
-              <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-                Upload one quote to check what's included, what's missing, and what looks unclear.
-                Have two bids already?{" "}
-                <a href="/compare-quotes" className="text-primary font-semibold hover:underline">
-                  Compare them side by side
-                </a>
-                .
-              </p>
-              {/* Trust indicators */}
-              <div className="mt-8 flex flex-wrap gap-5">
-                {[
-                  { icon: Zap, label: "Results in 30 seconds" },
-                  { icon: Lock, label: "100% private & secure" },
-                  { icon: CheckCircle2, label: "No signup required" },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                      <item.icon className="h-3.5 w-3.5 text-accent" />
-                    </div>
-                    <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+          {/* Hero */}
+          <div className="max-w-3xl mx-auto text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-4">
+              <GitCompare className="h-3 w-3 text-accent" />
+              <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                Compare up to 3 quotes
+              </span>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink leading-[1.1] tracking-tight">
+              Which contractor quote should you pick?
+            </h1>
+            <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+              Add your bids below. We check price, missing items, and red flags, then show a plain
+              English recommendation. One quote works too if you only have a single bid.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-5">
+              {[
+                { icon: Zap, label: "About 30 seconds per quote" },
+                { icon: Lock, label: "Private and secure" },
+                { icon: CheckCircle2, label: "No signup required" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                    <item.icon className="h-3.5 w-3.5 text-accent" />
                   </div>
-                ))}
+                  <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 3-slot uploader */}
+          <div className="rounded-2xl border border-border bg-white p-5 sm:p-8 shadow-sm">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.length) {
+                  addFilesToSlots(e.target.files, activeSlot);
+                }
+                e.target.value = "";
+              }}
+            />
+
+            <div className="flex items-center justify-between gap-3 mb-5">
+              <div className="text-left">
+                <p className="text-sm font-bold text-ink">Your quotes</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  PDF, JPG, or PNG · Max 15MB each · Up to 3 bids
+                </p>
               </div>
+              {filledCount > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllSlots}
+                  className="text-xs text-muted-foreground hover:text-ink transition"
+                >
+                  Clear all
+                </button>
+              )}
             </div>
 
-            {/* Right - Upload Card */}
-            <div>
-              <div
-                className="rounded-2xl border-2 border-dashed border-border hover:border-primary/40 bg-white p-6 sm:p-8 text-left transition-all shadow-sm"
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (e.dataTransfer.files?.length) {
-                    addSelectedFiles(e.dataTransfer.files);
-                  }
-                }}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files?.length) {
-                      addSelectedFiles(e.target.files);
-                    }
-                    e.target.value = "";
-                  }}
-                />
-
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Upload className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-ink">Upload your quote</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Analyze one quote in depth. You can also add more files if needed.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-center gap-2 mt-1">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
-                    >
-                      <FileText className="h-4 w-4" />
-                      {selectedFiles.length === 0 ? "Choose files" : "Add more files"}
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">PDF, JPG, PNG · Max 15MB each</p>
-                </div>
-
-                {selectedFiles.length > 0 && (
-                  <div className="mt-5 pt-5 border-t border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {quoteSlots.map((file, index) => {
+                const label = `Quote ${index + 1}`;
+                const hint =
+                  index === 0 ? "Required to start" : index === 1 ? "Add to compare" : "Best practice";
+                return (
+                  <div
+                    key={label}
+                    className={`rounded-xl border-2 border-dashed p-4 min-h-[168px] flex flex-col transition ${
+                      file
+                        ? "border-primary/30 bg-primary/[0.03]"
+                        : "border-border hover:border-primary/40 bg-muted/20"
+                    }`}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (e.dataTransfer.files?.length) {
+                        addFilesToSlots(e.dataTransfer.files, index);
+                      }
+                    }}
+                  >
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-semibold text-ink">
-                        {selectedFiles.length} quote{selectedFiles.length === 1 ? "" : "s"} selected
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFiles([])}
-                        className="text-xs text-muted-foreground hover:text-ink transition"
-                      >
-                        Clear all
-                      </button>
+                      <div>
+                        <p className="text-sm font-bold text-ink">{label}</p>
+                        <p className="text-[10px] text-muted-foreground">{hint}</p>
+                      </div>
+                      {file ? (
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Empty
+                        </span>
+                      )}
                     </div>
-                    <ul className="space-y-2 mb-4">
-                      {selectedFiles.map((file, index) => (
-                        <li
-                          key={`${file.name}-${file.size}-${index}`}
-                          className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2"
-                        >
-                          <FileText className="h-4 w-4 text-primary shrink-0" />
-                          <div className="min-w-0 flex-1 text-left">
+
+                    {file ? (
+                      <div className="mt-auto space-y-3">
+                        <div className="flex items-start gap-2">
+                          <FileText className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <div className="min-w-0">
                             <p className="text-xs font-medium text-ink truncate">{file.name}</p>
                             <p className="text-[10px] text-muted-foreground">
                               {(file.size / (1024 * 1024)).toFixed(1)} MB
                             </p>
                           </div>
+                        </div>
+                        <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={() => removeSelectedFile(index)}
-                            className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center shrink-0"
-                            aria-label={`Remove ${file.name}`}
+                            onClick={() => openSlotPicker(index)}
+                            className="flex-1 rounded-lg border border-border bg-white px-2 py-2 text-xs font-semibold text-ink hover:bg-muted transition"
                           >
-                            <X className="h-3.5 w-3.5 text-muted-foreground" />
+                            Replace
                           </button>
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      type="button"
-                      onClick={handleAnalyzeSelected}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      {selectedFiles.length === 1
-                        ? "Analyze quote"
-                        : `Analyze and compare ${selectedFiles.length} quotes`}
-                    </button>
-                    {selectedFiles.length >= 2 && (
-                      <p className="mt-2 text-[11px] text-muted-foreground text-center">
-                        Prefer a dedicated side-by-side report?{" "}
-                        <a href="/compare-quotes" className="text-primary hover:underline">
-                          Use compare quotes
-                        </a>
-                        .
-                      </p>
+                          <button
+                            type="button"
+                            onClick={() => setSlotFile(index, null)}
+                            className="rounded-lg border border-border bg-white px-2 py-2 text-xs font-semibold text-muted-foreground hover:text-ink hover:bg-muted transition"
+                            aria-label={`Remove ${label}`}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openSlotPicker(index)}
+                        className="mt-auto w-full rounded-lg border border-border bg-white px-3 py-3 text-sm font-semibold text-ink hover:border-primary/40 hover:bg-white transition"
+                      >
+                        <span className="inline-flex items-center justify-center gap-2">
+                          <Upload className="h-4 w-4 text-primary" />
+                          Add quote
+                        </span>
+                      </button>
                     )}
                   </div>
-                )}
-              </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                onClick={handleAnalyzeSelected}
+                disabled={filledCount === 0}
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-accent"
+              >
+                <Sparkles className="h-4 w-4" />
+                {filledCount === 0
+                  ? "Add at least one quote"
+                  : filledCount === 1
+                    ? "Review this quote"
+                    : `Compare my ${filledCount} quotes`}
+              </button>
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                {filledCount < 2
+                  ? "Tip: add a second and third quote for a clearer recommendation."
+                  : filledCount === 2
+                    ? "Nice. Add a third quote if you have one. Three bids give the clearest picture."
+                    : "Great. We'll rank all three and explain which looks strongest."}
+              </p>
             </div>
           </div>
 
-          {/* What You'll Get - Clean cards */}
+          {/* How compare works */}
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                step: "1",
+                title: "Add your bids",
+                desc: "Drop Quote 1, 2, and 3 into the slots. One file is enough to start.",
+              },
+              {
+                step: "2",
+                title: "We review each quote",
+                desc: "AI checks line items, missing scope, warranties, permits, and red flags.",
+              },
+              {
+                step: "3",
+                title: "See the easy answer",
+                desc: "Get a recommended quote plus a simple scorecard you can understand in seconds.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="rounded-xl border border-border bg-white p-5">
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center mb-3">
+                  {item.step}
+                </div>
+                <p className="text-sm font-bold text-ink">{item.title}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* What you'll get */}
           <div className="mt-16 pt-12 border-t border-border">
             <h2 className="font-display text-2xl font-bold text-ink text-center mb-8">
-              What You'll Get
+              What you'll get
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 {
-                  icon: Search,
-                  title: "Scope Analysis",
-                  desc: "See what's included and what's missing",
+                  icon: Trophy,
+                  title: "Clear recommendation",
+                  desc: "See which quote looks strongest overall",
                 },
                 {
                   icon: DollarSign,
-                  title: "Price Check",
-                  desc: "Flag overpriced or underpriced items",
+                  title: "Price context",
+                  desc: "Spot bids that look high or unusually low",
                 },
                 {
                   icon: AlertTriangle,
-                  title: "Red Flags",
-                  desc: "Spot risky terms and vague language",
+                  title: "Red flags",
+                  desc: "Catch vague terms and risky gaps",
                 },
                 {
-                  icon: MessageCircle,
-                  title: "AI Q&A",
-                  desc: "Ask questions about your specific quote",
+                  icon: Search,
+                  title: "Missing scope",
+                  desc: "Find items that should usually be included",
                 },
               ].map((item) => (
                 <div
@@ -767,41 +873,41 @@ function QuoteAnalyzerPage() {
             <button
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
-                setTimeout(() => fileInputRef.current?.click(), 350);
+                setTimeout(() => openSlotPicker(filledCount < 3 ? filledCount : 0), 350);
               }}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
             >
-              <Upload className="h-4 w-4" /> Upload quote(s) now
+              <Upload className="h-4 w-4" /> Add your quotes
             </button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Free. No signup. Analyze one quote or compare several.
+              Free. No signup. Review one quote or compare up to three.
             </p>
           </div>
 
           {/* SEO: How It Works Section */}
           <section className="mt-20 pt-12 border-t border-border">
             <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
-              How the Contractor Quote Analyzer Works
+              How the quote analyzer works
             </h2>
             <p className="text-sm text-muted-foreground text-center max-w-lg mx-auto mb-10">
-              Three simple steps to review any contractor estimate, bid, or proposal.
+              Built for homeowners who want a clear answer before they hire.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
                   step: "1",
-                  title: "Upload your quote(s)",
-                  desc: "Upload one PDF or photo for a full review, or select up to 5 quotes to compare side by side. Roofing, kitchen, bathroom, HVAC, and more.",
+                  title: "Upload up to 3 quotes",
+                  desc: "Add Quote 1, Quote 2, and Quote 3 as PDF or photos. One file is enough for a single review.",
                 },
                 {
                   step: "2",
-                  title: "AI Analyzes Every Line",
-                  desc: "Our AI engine reads every line item, cross-references local pricing data, checks building codes, and identifies missing scope.",
+                  title: "AI reviews every line",
+                  desc: "We check line items, missing scope, warranties, permits, and common red flags.",
                 },
                 {
                   step: "3",
-                  title: "Get Your Expert Report",
-                  desc: "Receive a detailed report with a health score, red flags, pricing analysis, missing items, and questions to ask your contractor.",
+                  title: "Get a plain English answer",
+                  desc: "See which bid looks strongest, why, and what questions to ask before you sign.",
                 },
               ].map((item) => (
                 <div key={item.step} className="text-center">
@@ -853,32 +959,32 @@ function QuoteAnalyzerPage() {
             <div className="max-w-2xl mx-auto space-y-3">
               {[
                 {
+                  q: "How many quotes can I compare at once?",
+                  a: "Up to 3. Add Quote 1, Quote 2, and Quote 3 in the slots. One quote gets a detailed review. Two or three quotes get a side-by-side recommendation.",
+                },
+                {
                   q: "How does the contractor quote analyzer work?",
-                  a: "Simply upload a photo or PDF of your contractor quote. Our AI reads every line item, cross-references it against local pricing databases and building codes, then generates a detailed report highlighting overpriced items, missing scope, and red flags.",
+                  a: "Upload a PDF or photo of each bid. Our AI reads line items, looks for missing scope and red flags, then shows a simple summary you can use before hiring.",
                 },
                 {
                   q: "Is this free to use?",
-                  a: "Yes, the quote analyzer is completely free. No signup, no credit card, and no hidden fees. Upload your quote and get results in under 30 seconds.",
+                  a: "Yes. No signup and no credit card are required for a standard review.",
                 },
                 {
                   q: "What types of quotes can I analyze?",
-                  a: "You can analyze any home improvement contractor quote including roofing, kitchen remodeling, bathroom renovation, HVAC installation, window replacement, solar panels, painting, flooring, deck/patio, plumbing, and electrical work.",
+                  a: "Home improvement bids such as roofing, kitchen, bathroom, HVAC, windows, flooring, and related projects.",
                 },
                 {
                   q: "Is my contractor quote kept private?",
-                  a: "Absolutely. Your files are encrypted, never stored permanently, and never shared with contractors or third parties. We process your quote securely and delete it after analysis.",
+                  a: "Your files are processed for analysis and are not shared with contractors. Only upload quotes you are authorized to review.",
                 },
                 {
-                  q: "How accurate is the AI analysis?",
-                  a: "Our AI is trained on thousands of real contractor quotes and cross-references current local pricing data. It identifies missing scope items, overpriced line items, and code compliance issues with strong clarity. However, we always recommend getting multiple quotes.",
-                },
-                {
-                  q: "What should I do if red flags are found?",
-                  a: "If our analysis identifies red flags, use the detailed questions and negotiation points we provide to discuss with your contractor. Ask for clarification on vague items, request itemized breakdowns, and compare with other quotes.",
+                  q: "What if I only have one quote?",
+                  a: "Upload Quote 1 only and choose Review this quote. You still get missing-scope and red-flag checks. Add more bids later for a clearer comparison.",
                 },
                 {
                   q: "Can I use this before signing a contract?",
-                  a: "Yes. That's exactly when you should use it. Upload your quote before signing to ensure you're getting fair pricing, complete scope, and proper materials specified. It's the smartest step before committing to a contractor.",
+                  a: "Yes. That is the best time. Review or compare bids before you sign so you can ask clearer questions and avoid incomplete scope.",
                 },
               ].map((faq) => (
                 <details
@@ -1018,44 +1124,108 @@ function QuoteAnalyzerPage() {
   if (state === "processing") {
     const stageKeys = Object.keys(STAGE_LABELS) as (QuotePipelineStage | "reading")[];
     const currentIdx = stageKeys.indexOf(processingStage as any);
+    const pct = Math.min(processingProgress, 100);
+    const radius = 46;
+    const circumference = 2 * Math.PI * radius;
+    const dashOffset = circumference - (pct / 100) * circumference;
+    const completedQuotes = Math.max(0, (batchProgress?.current ?? 1) - 1);
+    const tipAngle = (pct / 100) * 360 - 90;
+    const tipX = 56 + radius * Math.cos((tipAngle * Math.PI) / 180);
+    const tipY = 56 + radius * Math.sin((tipAngle * Math.PI) / 180);
 
     return (
       <div className="min-h-screen bg-[#f7f8fa]">
         <SiteNav active="quote" />
         <div className="max-w-md mx-auto px-4 py-20 text-center">
-          {/* Circular progress bar */}
-          <div className="w-24 h-24 mx-auto mb-8 relative">
-            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 96 96">
-              {/* Background circle */}
-              <circle cx="48" cy="48" r="44" fill="none" stroke="#e5e7eb" strokeWidth="4" />
-              {/* Progress circle */}
+          <div className="relative w-36 h-36 mx-auto mb-8">
+            <div className="absolute inset-3 rounded-full bg-accent/10 animate-progress-breathe" />
+            <div className="absolute inset-0 rounded-full animate-pulse-glow" />
+
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 112 112">
+              <defs>
+                <linearGradient id="qaProgressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#03A44D" />
+                  <stop offset="55%" stopColor="#1bbf66" />
+                  <stop offset="100%" stopColor="#082A4B" />
+                </linearGradient>
+                <filter id="qaProgressGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="2.2" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <circle cx="56" cy="56" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="7" />
+
               <circle
-                cx="48"
-                cy="48"
-                r="44"
+                cx="56"
+                cy="56"
+                r={radius}
+                fill="none"
+                stroke="url(#qaProgressGrad)"
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={dashOffset}
+                transform="rotate(-90 56 56)"
+                filter="url(#qaProgressGlow)"
+                className="transition-[stroke-dashoffset] duration-300 ease-out"
+              />
+
+              <circle
+                cx="56"
+                cy="56"
+                r={radius}
+                fill="none"
+                stroke="rgba(255,255,255,0.55)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray="18 240"
+                transform="rotate(-90 56 56)"
+                className="animate-progress-sweep pointer-events-none"
+                style={{ opacity: pct > 2 && pct < 99 ? 1 : 0 }}
+              />
+
+              {pct > 1 && pct < 99.5 && (
+                <circle
+                  cx={tipX}
+                  cy={tipY}
+                  r="5"
+                  fill="#03A44D"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  className="transition-all duration-300 ease-out"
+                />
+              )}
+            </svg>
+
+            <svg
+              className="absolute inset-0 w-full h-full animate-progress-orbit pointer-events-none"
+              viewBox="0 0 112 112"
+              aria-hidden
+            >
+              <circle
+                cx="56"
+                cy="56"
+                r="52"
                 fill="none"
                 stroke="#03A44D"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeDasharray={`${(Math.min(processingProgress, 100) / 100) * 276} 276`}
-                className="transition-[stroke-dasharray] duration-300 ease-out"
+                strokeOpacity="0.28"
+                strokeWidth="1.5"
+                strokeDasharray="3 9"
               />
             </svg>
-            {/* Progress percentage */}
+
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold text-ink">
-                {Math.round(processingProgress)}%
+              <span className="text-3xl font-bold text-ink tabular-nums tracking-tight">
+                {Math.round(pct)}%
               </span>
             </div>
           </div>
 
-          {/* Stage text with time estimate */}
           <div className="text-center mb-4">
-            {batchProgress && batchProgress.total > 1 && (
-              <p className="text-xs font-semibold text-primary mb-2">
-                Quote {batchProgress.current} of {batchProgress.total}: {batchProgress.name}
-              </p>
-            )}
             <h2
               className="font-display text-xl font-bold text-ink animate-in fade-in duration-300"
               key={`${processingStage}-${batchProgress?.current ?? 0}`}
@@ -1066,55 +1236,42 @@ function QuoteAnalyzerPage() {
               {processingStage === "analyzing" && "Checking for missing scope & red flags..."}
               {processingStage === "reporting" && "Building your personalized report..."}
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {batchProgress && batchProgress.total > 1
-                ? "Analyzing each quote in order. This may take a few minutes."
-                : processingStage === "reading"
-                  ? "Estimated: 10-15 seconds"
-                  : processingStage === "extracting"
-                    ? "Estimated: 15-20 seconds"
-                    : processingStage === "matching"
-                      ? "Estimated: 20-30 seconds"
-                      : processingStage === "analyzing"
-                        ? "Estimated: 30-45 seconds"
-                        : "Almost done..."}
-            </p>
+            {batchProgress?.name && (
+              <p className="text-sm text-muted-foreground mt-2 truncate max-w-sm mx-auto">
+                {batchProgress.name}
+              </p>
+            )}
           </div>
 
-          {/* Live findings - progressive reveals */}
           <div className="mt-6 space-y-2 text-left">
-            {currentIdx >= 0 && (
+            {(completedQuotes > 0 || currentIdx >= 0) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">Document received. Extracting text</span>
+                <span className="text-xs text-ink">Document received</span>
               </div>
             )}
-            {currentIdx >= 1 && (
+            {(completedQuotes > 0 || currentIdx >= 1) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">
-                  Extracting line items from your quote
-                </span>
+                <span className="text-xs text-ink">Extracting line items</span>
               </div>
             )}
-            {currentIdx >= 2 && (
+            {(completedQuotes > 0 || currentIdx >= 2) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">
-                  Cross-referencing with local pricing database
-                </span>
+                <span className="text-xs text-ink">Checking local market rates</span>
               </div>
             )}
-            {currentIdx >= 3 && (
+            {(completedQuotes > 0 || currentIdx >= 3) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-amber-200 bg-amber-50/50 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                <span className="text-xs text-ink">Flagged potential issues. Verifying now</span>
+                <span className="text-xs text-ink">Reviewing red flags</span>
               </div>
             )}
-            {currentIdx >= 4 && (
+            {(completedQuotes > 0 || currentIdx >= 4) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">Report ready. Compiling results</span>
+                <span className="text-xs text-ink">Preparing your report</span>
               </div>
             )}
           </div>

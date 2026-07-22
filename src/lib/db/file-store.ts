@@ -36,11 +36,24 @@ export interface StoredQuoteFeedback {
 interface FileStoreShape {
   quoteUploads: StoredQuoteUpload[];
   quoteFeedback: StoredQuoteFeedback[];
+  comparisonReports: StoredComparisonReport[];
+}
+
+export interface StoredComparisonReport {
+  id: string;
+  createdAt: string;
+  snapshot: unknown;
+  quoteCount: number;
+  projectType?: string | null;
+  recommendedContractor?: string | null;
+  source?: string | null;
+  expiresAt?: string | null;
 }
 
 const EMPTY_STORE: FileStoreShape = {
   quoteUploads: [],
   quoteFeedback: [],
+  comparisonReports: [],
 };
 
 function storePath() {
@@ -56,10 +69,16 @@ async function ensureStore(): Promise<FileStoreShape> {
     return {
       quoteUploads: Array.isArray(parsed.quoteUploads) ? parsed.quoteUploads : [],
       quoteFeedback: Array.isArray(parsed.quoteFeedback) ? parsed.quoteFeedback : [],
+      comparisonReports: Array.isArray(parsed.comparisonReports) ? parsed.comparisonReports : [],
     };
   } catch {
     await writeFile(file, JSON.stringify(EMPTY_STORE, null, 2), "utf8");
-    return { ...EMPTY_STORE, quoteUploads: [], quoteFeedback: [] };
+    return {
+      ...EMPTY_STORE,
+      quoteUploads: [],
+      quoteFeedback: [],
+      comparisonReports: [],
+    };
   }
 }
 
@@ -98,4 +117,21 @@ export async function fileListQuoteUploads(limit = 50): Promise<StoredQuoteUploa
 export async function fileListQuoteFeedback(limit = 50): Promise<StoredQuoteFeedback[]> {
   const store = await ensureStore();
   return store.quoteFeedback.slice(0, limit);
+}
+
+export async function fileSaveComparisonReport(
+  row: StoredComparisonReport,
+): Promise<StoredComparisonReport> {
+  const store = await ensureStore();
+  store.comparisonReports.unshift(row);
+  store.comparisonReports = store.comparisonReports.slice(0, 300);
+  await writeStore(store);
+  return row;
+}
+
+export async function fileGetComparisonReport(
+  id: string,
+): Promise<StoredComparisonReport | null> {
+  const store = await ensureStore();
+  return store.comparisonReports.find((r) => r.id === id) ?? null;
 }

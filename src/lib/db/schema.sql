@@ -38,3 +38,17 @@ CREATE TABLE IF NOT EXISTS quote_feedback (
 
 CREATE INDEX IF NOT EXISTS quote_feedback_created_at_idx ON quote_feedback (created_at DESC);
 CREATE INDEX IF NOT EXISTS quote_feedback_quote_upload_id_idx ON quote_feedback (quote_upload_id);
+
+CREATE TABLE IF NOT EXISTS comparison_reports (
+  id TEXT PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  snapshot JSONB NOT NULL,
+  quote_count INTEGER NOT NULL,
+  project_type TEXT,
+  recommended_contractor TEXT,
+  source TEXT DEFAULT 'quote-comparison',
+  expires_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS comparison_reports_created_at_idx ON comparison_reports (created_at DESC);
+

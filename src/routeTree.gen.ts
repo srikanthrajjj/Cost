@@ -30,6 +30,7 @@ import { Route as TopicsRoofRouteImport } from './routes/topics/roof'
 import { Route as TopicsQuotesRouteImport } from './routes/topics/quotes'
 import { Route as TopicsKitchenRouteImport } from './routes/topics/kitchen'
 import { Route as TopicsFlooringRouteImport } from './routes/topics/flooring'
+import { Route as RIdRouteImport } from './routes/r/$id'
 import { Route as LocationsStateRouteImport } from './routes/locations/$state'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
@@ -149,6 +150,11 @@ const TopicsFlooringRoute = TopicsFlooringRouteImport.update({
   path: '/topics/flooring',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RIdRoute = RIdRouteImport.update({
+  id: '/r/$id',
+  path: '/r/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LocationsStateRoute = LocationsStateRouteImport.update({
   id: '/locations/$state',
   path: '/locations/$state',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
+  '/r/$id': typeof RIdRoute
   '/topics/flooring': typeof TopicsFlooringRoute
   '/topics/kitchen': typeof TopicsKitchenRoute
   '/topics/quotes': typeof TopicsQuotesRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
+  '/r/$id': typeof RIdRoute
   '/topics/flooring': typeof TopicsFlooringRoute
   '/topics/kitchen': typeof TopicsKitchenRoute
   '/topics/quotes': typeof TopicsQuotesRoute
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
+  '/r/$id': typeof RIdRoute
   '/topics/flooring': typeof TopicsFlooringRoute
   '/topics/kitchen': typeof TopicsKitchenRoute
   '/topics/quotes': typeof TopicsQuotesRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/locations/$state'
+    | '/r/$id'
     | '/topics/flooring'
     | '/topics/kitchen'
     | '/topics/quotes'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/locations/$state'
+    | '/r/$id'
     | '/topics/flooring'
     | '/topics/kitchen'
     | '/topics/quotes'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/guides/roof-replacement'
     | '/guides/window-replacement'
     | '/locations/$state'
+    | '/r/$id'
     | '/topics/flooring'
     | '/topics/kitchen'
     | '/topics/quotes'
@@ -467,6 +479,7 @@ export interface RootRouteChildren {
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
   LocationsStateRoute: typeof LocationsStateRoute
+  RIdRoute: typeof RIdRoute
   TopicsFlooringRoute: typeof TopicsFlooringRoute
   TopicsKitchenRoute: typeof TopicsKitchenRoute
   TopicsQuotesRoute: typeof TopicsQuotesRoute
@@ -626,6 +639,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TopicsFlooringRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$id': {
+      id: '/r/$id'
+      path: '/r/$id'
+      fullPath: '/r/$id'
+      preLoaderRoute: typeof RIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/locations/$state': {
       id: '/locations/$state'
       path: '/locations/$state'
@@ -747,6 +767,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
   LocationsStateRoute: LocationsStateRoute,
+  RIdRoute: RIdRoute,
   TopicsFlooringRoute: TopicsFlooringRoute,
   TopicsKitchenRoute: TopicsKitchenRoute,
   TopicsQuotesRoute: TopicsQuotesRoute,

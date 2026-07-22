@@ -14,8 +14,7 @@ const GUIDE_LINKS = [
 ];
 
 const QUOTE_LINKS = [
-  { name: "Analyze a quote", href: "/quote-analyzer" },
-  { name: "Compare quotes", href: "/compare-quotes" },
+  { name: "Analyze & compare quotes", href: "/quote-analyzer" },
   { name: "How to read a quote", href: "/guides/how-to-read-a-contractor-quote" },
 ];
 

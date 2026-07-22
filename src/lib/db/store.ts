@@ -1,11 +1,14 @@
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getDb, getStorageMode } from "./client";
-import { quoteFeedback, quoteUploads } from "./schema";
+import { comparisonReports, quoteFeedback, quoteUploads } from "./schema";
 import {
+  fileGetComparisonReport,
   fileListQuoteFeedback,
   fileListQuoteUploads,
+  fileSaveComparisonReport,
   fileSaveQuoteFeedback,
   fileSaveQuoteUpload,
+  type StoredComparisonReport,
   type StoredQuoteFeedback,
   type StoredQuoteUpload,
 } from "./file-store";
@@ -38,6 +41,16 @@ export type SaveQuoteFeedbackInput = {
   projectType?: string;
   contractor?: string;
   completenessScore?: number;
+};
+
+export type SaveComparisonReportInput = {
+  snapshot: unknown;
+  quoteCount: number;
+  projectType?: string;
+  recommendedContractor?: string;
+  source?: string;
+  /** Days until the share link expires. Defaults to 90. */
+  expiresInDays?: number;
 };
 
 function newId(prefix: string) {
@@ -189,6 +202,68 @@ export async function listStoredQuoteFeedback(limit = 50): Promise<StoredQuoteFe
     }));
   }
   return fileListQuoteFeedback(limit);
+}
+
+export async function saveComparisonReport(input: SaveComparisonReportInput): Promise<{
+  id: string;
+  storage: "postgres" | "file";
+}> {
+  const id = newId("cmp");
+  const createdAt = new Date();
+  const expiresInDays = input.expiresInDays ?? 90;
+  const expiresAt = new Date(createdAt.getTime() + expiresInDays * 24 * 60 * 60 * 1000);
+  const row: StoredComparisonReport = {
+    id,
+    createdAt: createdAt.toISOString(),
+    snapshot: input.snapshot,
+    quoteCount: input.quoteCount,
+    projectType: input.projectType ?? null,
+    recommendedContractor: input.recommendedContractor ?? null,
+    source: input.source ?? "quote-comparison",
+    expiresAt: expiresAt.toISOString(),
+  };
+
+  const db = getDb();
+  if (db) {
+    await db.insert(comparisonReports).values({
+      id: row.id,
+      createdAt,
+      snapshot: row.snapshot,
+      quoteCount: row.quoteCount,
+      projectType: row.projectType,
+      recommendedContractor: row.recommendedContractor,
+      source: row.source,
+      expiresAt,
+    });
+    return { id, storage: "postgres" };
+  }
+
+  await fileSaveComparisonReport(row);
+  return { id, storage: "file" };
+}
+
+export async function getComparisonReport(id: string): Promise<StoredComparisonReport | null> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select()
+      .from(comparisonReports)
+      .where(eq(comparisonReports.id, id))
+      .limit(1);
+    const r = rows[0];
+    if (!r) return null;
+    return {
+      id: r.id,
+      createdAt: r.createdAt.toISOString(),
+      snapshot: r.snapshot,
+      quoteCount: r.quoteCount,
+      projectType: r.projectType,
+      recommendedContractor: r.recommendedContractor,
+      source: r.source,
+      expiresAt: r.expiresAt?.toISOString() ?? null,
+    };
+  }
+  return fileGetComparisonReport(id);
 }
 
 export { getStorageMode };

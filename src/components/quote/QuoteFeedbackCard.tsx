@@ -81,7 +81,7 @@ export function QuoteFeedbackSidebarCta({
 }) {
   if (submitted) {
     return (
-      <div className="mb-3 rounded-xl border border-accent/20 bg-accent/5 px-3 py-3">
+      <div className="mb-3 rounded-xl border border-accent/30 bg-white px-3 py-3 shadow-md">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
           <p className="text-xs font-semibold text-ink">Thanks for your feedback</p>
@@ -91,18 +91,14 @@ export function QuoteFeedbackSidebarCta({
   }
 
   return (
-    <div className="mb-3 relative">
-      <div
-        className="pointer-events-none absolute -inset-1 rounded-2xl bg-[#082A4B]/10 blur-[2px] animate-pulse motion-reduce:animate-none"
-        aria-hidden
-      />
+    <div className="mb-3">
       <button
         type="button"
         onClick={onOpen}
-        className="relative w-full rounded-xl border-2 border-[#082A4B] bg-[#082A4B] px-3 py-3.5 text-left shadow-md shadow-[#082A4B]/20 hover:bg-[#0a355c] transition"
+        className="relative w-full rounded-xl border-2 border-[#082A4B] bg-[#082A4B] px-3 py-3.5 text-left shadow-lg hover:bg-[#0a355c] transition"
       >
         <div className="flex items-start gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-[#0a355c] flex items-center justify-center shrink-0">
             <MessageSquare className="h-5 w-5 text-white" />
           </div>
           <div className="min-w-0 flex-1">
@@ -113,7 +109,7 @@ export function QuoteFeedbackSidebarCta({
               </span>
             </div>
             <p className="text-sm font-bold text-white leading-snug">Leave feedback</p>
-            <p className="text-[11px] text-white/75 mt-0.5 leading-snug">
+            <p className="text-[11px] text-white/90 mt-0.5 leading-snug">
               Help us improve CostReno for homeowners like you
             </p>
           </div>

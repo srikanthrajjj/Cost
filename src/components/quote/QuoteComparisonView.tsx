@@ -27,6 +27,7 @@ import {
   ExternalLink,
   Sparkles,
   Star,
+  Share2,
 } from "lucide-react";
 import {
   getComparisonQuotes,
@@ -34,146 +35,38 @@ import {
   type SavedQuote,
 } from "@/lib/quote/comparison-store";
 import type { QuoteAnalysisResult } from "@/lib/quote";
+import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import {
+  QuoteFeedbackCard,
+  QuoteFeedbackMobileCta,
+  QuoteFeedbackSidebarCta,
+} from "@/components/quote/QuoteFeedbackCard";
+import {
+  buildComparisonReportHtml,
+  ComparisonAIChatPanel,
+  computeComparisonScores,
+  getBestComparisonIndex,
+  printComparisonReport,
+  toComparisonScoreSummary,
+} from "@/components/quote/ComparisonExtras";
+import { subscribeToNewsletter } from "@/lib/email/subscribe";
+import { createComparisonShare } from "@/lib/quote/comparison-share";
 
 interface QuoteComparisonViewProps {
   selectedIds: string[];
   onBack: () => void;
+  /** When set, render these quotes instead of reading sessionStorage */
+  quotesOverride?: SavedQuote[];
+  /** Shared /r/:id view: reuse current URL for share, show visitor CTA */
+  isSharedView?: boolean;
 }
 
-// ── Scoring & Analysis Helpers ──────────────────────────────────────────────
-
-interface QuoteScore {
-  composite: number;
-  completeness: number;
-  riskLevel: "Low" | "Medium" | "High";
-  riskScore: number;
-  qualityScore: number;
-  valueBadge: string;
-  valueBadgeColor: string;
-  savingsVsOther: number;
-  savingsPercent: number;
-  marketDiff: number;
-  marketDiffPercent: number;
-  reasons: string[];
-}
-
-function computeScores(quotes: SavedQuote[]): QuoteScore[] {
-  if (quotes.length < 2) return [];
-
-  const prices = quotes.map((q) => q.result.extraction.totalPrice);
-  const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
-  const minPrice = Math.min(...prices);
-
-  return quotes.map((q, idx) => {
-    const e = q.result.extraction;
-    const a = q.result.analysis;
-    const score = a.summary.completenessScore;
-    const redFlagCount = a.redFlags.length;
-    const missingCount = a.missingScope.length;
-    const hasWarranties = e.warranties.length > 0;
-    const hasPermits = e.permits.length > 0;
-
-    // Completeness: 0-40 points
-    const completenessScore = Math.round(score * 0.4);
-
-    // Red flags penalty: 0-25 points (more red flags = lower score)
-    const redFlagScore = Math.max(0, 25 - redFlagCount * 8);
-
-    // Missing items penalty: 0-15 points
-    const missingScore = Math.max(0, 15 - missingCount * 3);
-
-    // Coverage bonus: 0-10 points
-    const coverageScore = (hasWarranties ? 5 : 0) + (hasPermits ? 5 : 0);
-
-    // Price competitiveness: 0-10 points
-    const priceRatio = e.totalPrice / avgPrice;
-    const priceScore = Math.round(Math.max(0, Math.min(10, (2 - priceRatio) * 10)));
-
-    const composite = Math.min(
-      100,
-      completenessScore + redFlagScore + missingScore + coverageScore + priceScore,
-    );
-
-    // Risk level
-    let riskScore = 0;
-    if (redFlagCount >= 3) riskScore += 40;
-    else if (redFlagCount >= 2) riskScore += 25;
-    else if (redFlagCount >= 1) riskScore += 10;
-    if (missingCount >= 5) riskScore += 30;
-    else if (missingCount >= 3) riskScore += 15;
-    else if (missingCount >= 1) riskScore += 5;
-    if (!hasWarranties) riskScore += 10;
-    if (!hasPermits) riskScore += 10;
-    if (priceRatio > 1.3) riskScore += 5;
-
-    const riskLevel: "Low" | "Medium" | "High" =
-      riskScore >= 30 ? "High" : riskScore >= 15 ? "Medium" : "Low";
-
-    // Quality score (0-100 based on completeness + coverage)
-    const qualityScore = Math.min(100, Math.round(score * 0.6 + coverageScore * 4));
-
-    // Value badge
-    let valueBadge = "Fair value";
-    let valueBadgeColor = "bg-blue-50 text-blue-600 border-blue-200";
-    if (e.totalPrice === minPrice && composite >= 75) {
-      valueBadge = "Best value";
-      valueBadgeColor = "bg-accent/10 text-accent border-accent/20";
-    } else if (priceRatio > 1.25) {
-      valueBadge = "Overpriced";
-      valueBadgeColor = "bg-red-50 text-red-600 border-red-200";
-    } else if (priceRatio < 0.85) {
-      valueBadge = "Great deal";
-      valueBadgeColor = "bg-accent/10 text-accent border-accent/20";
-    }
-
-    // Savings vs the other quote
-    const otherIdx = idx === 0 ? 1 : 0;
-    const otherPrice = prices[otherIdx];
-    const savingsVsOther = otherPrice - e.totalPrice;
-    const savingsPercent = otherPrice > 0 ? Math.round((savingsVsOther / otherPrice) * 100) : 0;
-
-    // Market comparison (using avg as "market")
-    const marketDiff = avgPrice - e.totalPrice;
-    const marketDiffPercent = avgPrice > 0 ? Math.round((marketDiff / avgPrice) * 100) : 0;
-
-    // Reasons
-    const reasons: string[] = [];
-    if (e.totalPrice === minPrice) reasons.push("Lowest total cost");
-    if (score >= 80) reasons.push("Highly complete scope");
-    if (redFlagCount === 0) reasons.push("No red flags detected");
-    if (hasWarranties) reasons.push("Includes warranty coverage");
-    if (hasPermits) reasons.push("Permits addressed");
-    if (qualityScore >= 75) reasons.push("Strong quality indicators");
-    if (marketDiff > 0) reasons.push("Below market average");
-    if (missingCount === 0) reasons.push("No missing scope items");
-
-    return {
-      composite,
-      completeness: score,
-      riskLevel,
-      riskScore,
-      qualityScore,
-      valueBadge,
-      valueBadgeColor,
-      savingsVsOther,
-      savingsPercent,
-      marketDiff,
-      marketDiffPercent,
-      reasons,
-    };
-  });
-}
-
-function getBestQuoteIndex(scores: QuoteScore[]): number {
-  let bestIdx = 0;
-  let bestScore = -1;
-  for (let i = 0; i < scores.length; i++) {
-    if (scores[i].composite > bestScore) {
-      bestScore = scores[i].composite;
-      bestIdx = i;
-    }
+function valueBadgeColor(badge: string): string {
+  if (badge === "Best value" || badge === "Great deal") {
+    return "bg-accent/10 text-accent border-accent/20";
   }
-  return bestIdx;
+  if (badge === "Overpriced") return "bg-red-50 text-red-600 border-red-200";
+  return "bg-blue-50 text-blue-600 border-blue-200";
 }
 
 function getHealthGrade(score: number) {
@@ -278,8 +171,10 @@ function mergeItems(quotes: SavedQuote[]): MergedRow[] {
         minPrice !== null &&
         validPrices.filter((v) => v === minPrice).length === 1,
     );
-    const difference = validPrices.length === 2 ? Math.abs(validPrices[0] - validPrices[1]) : null;
-    const hasDifference = difference !== null && difference > 0;
+    const spread =
+      validPrices.length >= 2 ? Math.max(...validPrices) - Math.min(...validPrices) : null;
+    const difference = spread !== null && spread > 0 ? spread : null;
+    const hasDifference = difference !== null;
 
     rows.push({
       label: displayName,
@@ -509,15 +404,41 @@ function FilterTabs({
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonViewProps) {
-  const quotes = getComparisonQuotes().filter((q) => selectedIds.includes(q.id));
+export function QuoteComparisonView({
+  selectedIds,
+  onBack,
+  quotesOverride,
+  isSharedView = false,
+}: QuoteComparisonViewProps) {
+  const quotes =
+    quotesOverride ?? getComparisonQuotes().filter((q) => selectedIds.includes(q.id));
   const [filter, setFilter] = useState<FilterType>("differences");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [shareCreating, setShareCreating] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
 
-  const scores = useMemo(() => computeScores(quotes), [quotes]);
-  const bestIdx = useMemo(() => getBestQuoteIndex(scores), [scores]);
+  useEffect(() => {
+    if (isSharedView && typeof window !== "undefined") {
+      setShareLink(window.location.href.split("?")[0]);
+    }
+  }, [isSharedView]);
+
+  const scores = useMemo(() => computeComparisonScores(quotes), [quotes]);
+  const bestIdx = useMemo(() => getBestComparisonIndex(scores), [scores]);
   const rows = useMemo(() => mergeItems(quotes), [quotes]);
   const groupedMissing = useMemo(() => groupMissing(quotes), [quotes]);
+  const analysisKey = useMemo(
+    () => `compare:${selectedIds.slice().sort().join("|")}`,
+    [selectedIds],
+  );
 
   const animatedSavings = useAnimatedValue(
     scores.length > 0
@@ -553,6 +474,70 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
   const maxPrice = Math.max(...quotes.map((q) => q.result.extraction.totalPrice));
   const avgPrice = quotes.reduce((s, q) => s + q.result.extraction.totalPrice, 0) / quotes.length;
 
+  const handleEmailDownload = async (email: string) => {
+    setIsDownloading(true);
+    try {
+      subscribeToNewsletter({ data: { email, source: "quote-comparison-download" } }).catch(
+        () => {},
+      );
+      const html = buildComparisonReportHtml({
+        quotes,
+        scores,
+        bestIdx,
+      });
+      printComparisonReport(html);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const ensureShareLink = async (): Promise<string | null> => {
+    if (shareLink) return shareLink;
+    if (isSharedView) {
+      const url = window.location.href.split("?")[0];
+      setShareLink(url);
+      return url;
+    }
+    setShareCreating(true);
+    setShareError(null);
+    try {
+      const saved = await createComparisonShare({
+        data: {
+          quotes,
+          projectType: bestExtraction.projectType || undefined,
+          recommendedContractor: bestExtraction.contractor || undefined,
+        },
+      });
+      const url = `${window.location.origin}/r/${saved.id}`;
+      setShareLink(url);
+      return url;
+    } catch (error) {
+      console.error("[comparison-share] failed:", error);
+      setShareError("Could not create a share link. Try again, or use download instead.");
+      return null;
+    } finally {
+      setShareCreating(false);
+    }
+  };
+
+  const openShareModal = async () => {
+    setShowShareModal(true);
+    setShareCopied(false);
+    await ensureShareLink();
+  };
+
+  const copyShareLink = async () => {
+    const url = await ensureShareLink();
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch {
+      setShareError("Could not copy. Select the link and copy manually.");
+    }
+  };
+
   // Filter counts
   const diffRows = rows.filter((r) => r.hasDifference);
   const filterCounts: Record<FilterType, number> = {
@@ -570,14 +555,15 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
 
   // Generate AI insights
   const insights: string[] = [];
+  const quoteWord = quotes.length === 2 ? "the other quote" : "the highest quote";
   if (best.savingsVsOther > 0) {
     insights.push(
-      `${bestQuote.result.extraction.contractor || "The recommended quote"} saves you $${best.savingsVsOther.toLocaleString()} compared to the other quote.`,
+      `${bestQuote.result.extraction.contractor || "The recommended quote"} saves you $${best.savingsVsOther.toLocaleString()} compared to ${quoteWord}.`,
     );
   }
   if (bestExtraction.totalPrice < avgPrice) {
     insights.push(
-      `This quote is ${Math.abs(best.marketDiffPercent)}% ${best.marketDiff > 0 ? "below" : "above"} the average of both quotes.`,
+      `This quote is ${Math.abs(best.marketDiffPercent)}% ${best.marketDiff > 0 ? "below" : "above"} the average of your ${quotes.length} quotes.`,
     );
   }
   const overpricedIdx = scores.findIndex((s) => s.valueBadge === "Overpriced");
@@ -660,17 +646,63 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                clearComparisonQuotes();
-                onBack();
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:bg-muted/50 transition"
+              type="button"
+              onClick={() => setShowEmailModal(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50 transition"
             >
-              <X className="h-3.5 w-3.5" /> Start over
+              <Download className="h-3.5 w-3.5" /> Download
             </button>
+            <button
+              type="button"
+              onClick={() => void openShareModal()}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50 transition"
+            >
+              <Share2 className="h-3.5 w-3.5" /> Share
+            </button>
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition shadow-sm shadow-accent/20"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> Ask AI
+            </button>
+            {isSharedView ? (
+              <a
+                href="/quote-analyzer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-ink hover:bg-muted/50 transition"
+              >
+                Analyze my quotes
+              </a>
+            ) : (
+              <button
+                onClick={() => {
+                  clearComparisonQuotes();
+                  onBack();
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:bg-muted/50 transition"
+              >
+                <X className="h-3.5 w-3.5" /> Start over
+              </button>
+            )}
           </div>
         </div>
       </header>
+
+      {isSharedView && (
+        <div className="border-b border-border bg-primary/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p className="text-sm text-ink">
+              You are viewing a shared CostReno comparison. Want the same clarity on your quotes?
+            </p>
+            <a
+              href="/quote-analyzer"
+              className="inline-flex self-start items-center justify-center px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90"
+            >
+              Compare my quotes free
+            </a>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10">
         {/* Page Title */}
@@ -793,7 +825,7 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
                     </p>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${s.valueBadgeColor}`}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${valueBadgeColor(s.valueBadge)}`}
                   >
                     {s.valueBadge}
                   </span>
@@ -1528,16 +1560,23 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
             Ready to make a decision?
           </h3>
           <p className="text-sm text-white/60 mb-6 max-w-md mx-auto">
-            You now have a complete AI-powered comparison. Choose{" "}
-            {bestExtraction.contractor || "the recommended contractor"} for the best value.
+            Save this comparison, ask a follow-up question, or go back to upload different bids.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="/quote-analyzer"
+            <button
+              type="button"
+              onClick={() => setShowEmailModal(true)}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-lg shadow-accent/20"
             >
-              <FileText className="h-4 w-4" /> Analyze a single quote
-            </a>
+              <Download className="h-4 w-4" /> Download comparison
+            </button>
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition border border-white/10"
+            >
+              <MessageCircle className="h-4 w-4" /> Ask AI about these quotes
+            </button>
             <button
               onClick={() => {
                 clearComparisonQuotes();
@@ -1565,6 +1604,151 @@ export function QuoteComparisonView({ selectedIds, onBack }: QuoteComparisonView
           </p>
         </div>
       </div>
+
+      {!chatOpen && (
+        <>
+          <div className="fixed bottom-24 right-5 z-40 lg:bottom-6 lg:right-6 flex flex-col items-end gap-3">
+            <div className="hidden lg:block w-[220px]">
+              <QuoteFeedbackSidebarCta
+                onOpen={() => setFeedbackOpen(true)}
+                submitted={feedbackSubmitted}
+              />
+              <div className="mt-3 rounded-xl border-2 border-accent bg-white p-3 shadow-lg">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Sparkles className="h-4 w-4 text-accent" />
+                  <span className="text-xs font-bold text-accent">CostReno AI</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mb-2.5">
+                  Ask which quote is stronger and what to negotiate.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setChatOpen(true)}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent/90 transition"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" /> Ask AI
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="lg:hidden w-14 h-14 rounded-full bg-accent shadow-lg shadow-accent/30 flex items-center justify-center text-white hover:scale-105 transition-transform"
+              aria-label="Ask AI"
+            >
+              <MessageCircle className="h-6 w-6" />
+            </button>
+          </div>
+          <QuoteFeedbackMobileCta
+            onOpen={() => setFeedbackOpen(true)}
+            submitted={feedbackSubmitted}
+          />
+        </>
+      )}
+
+      {chatOpen && (
+        <ComparisonAIChatPanel
+          quotes={quotes}
+          scores={toComparisonScoreSummary(scores)}
+          bestIdx={bestIdx}
+          onClose={() => setChatOpen(false)}
+        />
+      )}
+
+      <EmailDownloadModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailDownload}
+        reportName="Quote comparison"
+        isLoading={isDownloading}
+      />
+
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="w-full max-w-md rounded-2xl bg-white border border-border p-5 shadow-xl">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold text-ink">Share comparison</h3>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="text-muted-foreground hover:text-ink"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Send a link to this full comparison. Anyone with the link can view it (no PDF needed).
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={
+                    shareCreating
+                      ? "Creating link…"
+                      : shareLink || "Link will appear here"
+                  }
+                  className="flex-1 px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground bg-muted/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => void copyShareLink()}
+                  disabled={shareCreating || (!shareLink && !isSharedView)}
+                  className="px-3 py-2 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 disabled:opacity-50"
+                >
+                  {shareCopied ? "Copied" : "Copy"}
+                </button>
+              </div>
+              {shareError && <p className="text-xs text-red-600">{shareError}</p>}
+              <div className="flex gap-2">
+                <a
+                  href={
+                    shareLink
+                      ? `https://wa.me/?text=${encodeURIComponent(`Here's our CostReno quote comparison: ${shareLink}`)}`
+                      : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!shareLink) e.preventDefault();
+                  }}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-semibold hover:bg-green-600 ${!shareLink ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  <Share2 className="h-3.5 w-3.5" /> WhatsApp
+                </a>
+                <a
+                  href={
+                    shareLink
+                      ? `mailto:?subject=${encodeURIComponent("CostReno quote comparison")}&body=${encodeURIComponent(`Here's our CostReno quote comparison: ${shareLink}`)}`
+                      : undefined
+                  }
+                  onClick={(e) => {
+                    if (!shareLink) e.preventDefault();
+                  }}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 ${!shareLink ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  <Share2 className="h-3.5 w-3.5" /> Email
+                </a>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Links expire after 90 days. Original quote files are not included.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <QuoteFeedbackCard
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+        projectType={bestExtraction.projectType}
+        contractor={bestExtraction.contractor}
+        completenessScore={bestAnalysis.summary.completenessScore}
+        analysisKey={analysisKey}
+        submitted={feedbackSubmitted}
+        onSubmitted={() => setFeedbackSubmitted(true)}
+      />
     </div>
   );
 }
