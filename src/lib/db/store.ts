@@ -1,7 +1,9 @@
-import { desc, eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { getDb, getStorageMode } from "./client";
 import { comparisonReports, quoteFeedback, quoteUploads } from "./schema";
 import {
+  fileCountQuoteFeedback,
+  fileCountQuoteUploads,
   fileGetComparisonReport,
   fileListQuoteFeedback,
   fileListQuoteUploads,
@@ -239,6 +241,24 @@ export async function listStoredQuoteFeedback(limit = 50): Promise<StoredQuoteFe
     }));
   }
   return fileListQuoteFeedback(limit);
+}
+
+export async function countStoredQuoteUploads(): Promise<number> {
+  const db = getDb();
+  if (db) {
+    const rows = await db.select({ value: count() }).from(quoteUploads);
+    return Number(rows[0]?.value ?? 0);
+  }
+  return fileCountQuoteUploads();
+}
+
+export async function countStoredQuoteFeedback(): Promise<number> {
+  const db = getDb();
+  if (db) {
+    const rows = await db.select({ value: count() }).from(quoteFeedback);
+    return Number(rows[0]?.value ?? 0);
+  }
+  return fileCountQuoteFeedback();
 }
 
 export async function saveComparisonReport(input: SaveComparisonReportInput): Promise<{

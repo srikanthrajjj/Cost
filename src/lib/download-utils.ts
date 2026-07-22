@@ -25,6 +25,228 @@ const generateReportId = () => {
 };
 
 /**
+ * Generate a professional HTML estimate report for print/PDF
+ */
+function generateEstimateReportHtml(data: Record<string, any>, date: string, reportId: string): string {
+  const breakdownRows = (data.breakdown || [])
+    .map(
+      (b: { label?: string; amount?: number; pct?: number }) => `
+      <tr>
+        <td>${safeDisplay(b.label)}</td>
+        <td style="text-align:right;">${fmt(Number(b.amount || 0))}</td>
+        <td style="text-align:right;">${Number(b.pct || 0)}%</td>
+      </tr>`,
+    )
+    .join("");
+
+  const detailRows = Object.entries(data.details || {})
+    .map(
+      ([label, value]) => `
+      <tr>
+        <td style="color:#6b7280;">${safeDisplay(label)}</td>
+        <td style="text-align:right;font-weight:600;">${safeDisplay(value)}</td>
+      </tr>`,
+    )
+    .join("");
+
+  const mid = Number(String(data.estimate || "").replace(/[^0-9.-]/g, "")) || 0;
+  const range = safeDisplay(data.range, "—");
+  const confidence = Number(data.confidence || 0);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CostReno estimate report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1f2937;
+      line-height: 1.5;
+      background: #fff;
+    }
+    @media print {
+      body { padding: 0; }
+      .page { box-shadow: none !important; margin: 0 !important; max-width: 100% !important; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    .page {
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 50px 60px;
+      background: #fff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #082A4B;
+      margin-bottom: 30px;
+    }
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      color: #082A4B;
+    }
+    .header-meta {
+      text-align: right;
+      font-size: 11px;
+      color: #6b7280;
+    }
+    .report-id { font-weight: 600; color: #082A4B; }
+    .cover {
+      background: linear-gradient(135deg, #082A4B 0%, #0a3a5f 100%);
+      border-radius: 16px;
+      padding: 40px;
+      color: white;
+      margin-bottom: 30px;
+    }
+    .cover-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    .cover-main {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .cover-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+    .cover-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .cover-stat {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .cover-stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+    .cover-stat-value { font-size: 18px; font-weight: 700; }
+    .section { margin-bottom: 32px; }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #082A4B;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #082A4B;
+      margin-bottom: 16px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      background: #f9fafb;
+      color: #082A4B;
+      font-weight: 600;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 11px;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="logo-text">CostReno</div>
+      <div class="header-meta">
+        <div class="report-id">Report ID: ${reportId}</div>
+        <div>${date}</div>
+        <div>${safeDisplay(data.location, "")}</div>
+      </div>
+    </div>
+
+    <div class="cover">
+      <div class="cover-title">Cost estimate report</div>
+      <div class="cover-main">${safeDisplay(data.projectType, "Renovation project")}</div>
+      <div class="cover-subtitle">Estimated mid cost: ${mid > 0 ? fmt(mid) : safeDisplay(data.estimate)}</div>
+      <div class="cover-grid">
+        <div class="cover-stat">
+          <div class="cover-stat-label">Typical range</div>
+          <div class="cover-stat-value">${range}</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-label">Confidence</div>
+          <div class="cover-stat-value">${confidence}%</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-label">Timeline</div>
+          <div class="cover-stat-value">${safeDisplay(data.timeline, "TBD")}</div>
+        </div>
+      </div>
+    </div>
+
+    ${(data.breakdown || []).length > 0 ? `
+    <div class="section">
+      <div class="section-title">Cost breakdown</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th style="text-align:right;">Amount</th>
+            <th style="text-align:right;">Share</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${breakdownRows}
+        </tbody>
+      </table>
+    </div>
+    ` : ""}
+
+    ${detailRows ? `
+    <div class="section">
+      <div class="section-title">Project details</div>
+      <table>
+        <tbody>
+          ${detailRows}
+          <tr>
+            <td style="color:#6b7280;">Permit</td>
+            <td style="text-align:right;font-weight:600;">${data.permitRequired ? "Required" : "Not typically needed"}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    ` : ""}
+
+    <div class="footer">
+      <p><strong>Disclaimer:</strong> This estimate is for planning purposes only. Actual costs may vary based on local conditions, materials, and contractor pricing. Verify important details before hiring.</p>
+      <p style="margin-top:8px;">© ${new Date().getFullYear()} CostReno. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+/**
  * Generate a professional HTML report for print/PDF
  */
 export async function generateReport(
@@ -37,6 +259,10 @@ export async function generateReport(
     day: "numeric",
   });
   const reportId = generateReportId();
+
+  if (reportType === "estimate") {
+    return new Blob([generateEstimateReportHtml(data, date, reportId)], { type: "text/html" });
+  }
 
   // Sort red flags by severity
   const sortedRedFlags = (data.redFlagsList || [])
@@ -776,29 +1002,50 @@ export async function submitEmailAndDownload(options: DownloadOptions): Promise<
   }
 
   try {
-    console.log("[PDF] Generating report with data:", {
-      ...data,
-      breakdown: data.breakdown?.length + " items",
-    });
     const blob = await generateReport(reportType, data);
     const html = await blob.text();
-    console.log("[PDF] HTML length:", html.length);
 
-    // Open in new window and trigger print (Save as PDF)
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.open();
-      printWindow.document.write(html);
-      printWindow.document.close();
-      // Wait longer for content to render
+    const openPrintWindow = () => {
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+        }, 500);
+        return true;
+      }
+      return false;
+    };
+
+    if (openPrintWindow()) return;
+
+    // Fallback when popups are blocked: print via hidden iframe
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "none";
+    document.body.appendChild(iframe);
+    const iframeDoc = iframe.contentWindow?.document;
+    if (iframeDoc) {
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
       setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-      }, 500);
-    } else {
-      // Fallback: download as HTML if popup blocked
-      triggerDownload(blob, options.filename);
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 400);
+      return;
     }
+
+    // Last resort: download HTML file
+    triggerDownload(blob, options.filename);
   } catch (error) {
     console.error("Download error:", error);
     throw error;

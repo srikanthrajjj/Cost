@@ -9,7 +9,6 @@ import {
   Download,
   FileText,
   Shield,
-  TrendingUp,
   Clock,
   Wrench,
   Sparkles,
@@ -951,7 +950,7 @@ function PhotoUploadQuestion({
 }: {
   answers: EstimatorAnswers;
   onChange: (key: keyof EstimatorAnswers, value: unknown) => void;
-  onAdvance: () => void;
+  onAdvance: (photoStatus?: "analyzed" | "skipped") => void;
 }) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -959,6 +958,7 @@ function PhotoUploadQuestion({
   const [error, setError] = useState<string | null>(null);
   const [detections, setDetections] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cancelledRef = useRef(false);
 
   const handleFiles = async (files: FileList | File[]) => {
     const arr = Array.from(files).slice(0, 6 - photos.length);
@@ -984,6 +984,7 @@ function PhotoUploadQuestion({
 
   const handleAnalyze = async () => {
     if (photos.length < 2) return;
+    cancelledRef.current = false;
     setIsAnalyzing(true);
     setError(null);
     try {
@@ -999,6 +1000,7 @@ function PhotoUploadQuestion({
       );
       const { analyzeKitchen } = await import("@/lib/kitchen-estimator/analyze-kitchen");
       const result = await analyzeKitchen({ data: { photos: base64Photos } });
+      if (cancelledRef.current) return;
       if (result.success) {
         setDetections(result.data);
         // Pre-fill answers
@@ -1025,19 +1027,29 @@ function PhotoUploadQuestion({
         setError(result.error);
       }
     } catch {
-      setError("Analysis failed. You can continue with manual questions instead.");
+      if (!cancelledRef.current) {
+        setError("Analysis failed. You can continue with manual questions instead.");
+      }
     } finally {
-      setIsAnalyzing(false);
+      if (!cancelledRef.current) {
+        setIsAnalyzing(false);
+      }
     }
   };
 
   const handleSkip = () => {
+    cancelledRef.current = true;
+    setIsAnalyzing(false);
+    setError(null);
+    setDetections(null);
     onChange("kitchenMethod" as any, "manual");
-    onChange("kitchenPhotos" as any, "skipped");
+    // Wait for answersRef to pick up kitchenMethod=manual so advance
+    // skips AI-only follow-up questions and lands on the manual path.
+    onAdvance("skipped");
   };
 
   const handleConfirm = () => {
-    onAdvance();
+    onAdvance("analyzed");
   };
 
   // ─── POST-ANALYSIS: Show detections as editable cards ─────────────────────
@@ -1253,10 +1265,11 @@ function PhotoUploadQuestion({
           {isAnalyzing ? "Analyzing..." : "Analyze My Kitchen"}
         </button>
         <button
+          type="button"
           onClick={handleSkip}
           className="w-full rounded-lg border border-border py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 transition"
         >
-          Skip — answer manually instead
+          Skip, answer manually instead
         </button>
       </div>
     </div>
@@ -1294,9 +1307,9 @@ function QuestionRenderer({
       <PhotoUploadQuestion
         answers={answers}
         onChange={onChange}
-        onAdvance={() => {
-          onChange("kitchenPhotos" as any, "analyzed");
-          if (onAdvance) setTimeout(onAdvance, 200);
+        onAdvance={(photoStatus = "analyzed") => {
+          onChange("kitchenPhotos" as any, photoStatus);
+          if (onAdvance) setTimeout(onAdvance, 250);
         }}
       />
     );
@@ -1316,85 +1329,6 @@ function FinalReport({
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownloadClick = () => {
-    setShowEmailModal(true);
-  };
-
-  const handleEmailSubmit = async (email: string) => {
-    setIsDownloading(true);
-    try {
-      // Subscribe to newsletter (fire and forget)
-      subscribeToNewsletter({ data: { email, source: "estimate-download" } }).catch(() => {});
-
-      const projectLabel: Record<string, string> = {
-        roof: "Roof Replacement",
-        kitchen: "Kitchen Remodel",
-        bathroom: "Bathroom Remodel",
-        hvac: "HVAC Replacement",
-        windows: "Window Replacement",
-        flooring: "Flooring",
-        painting: "Painting",
-        solar: "Solar Installation",
-        deck: "Deck / Patio",
-        plumbing: "Plumbing",
-        electrical: "Electrical",
-      };
-
-      // Build details from answers
-      const details: Record<string, string> = {};
-      if (answers.zipCode)
-        details["Location"] =
-          `${answers.city || ""} ${answers.state || ""} ${answers.zipCode}`.trim();
-      if (answers.propertyType) details["Property Type"] = answers.propertyType.replace("-", " ");
-      if (answers.squareFootage)
-        details[answers.projectType === "kitchen" ? "Kitchen Size" : "Home Size"] =
-          `${answers.squareFootage.toLocaleString()} sq ft`;
-      if (answers.yearBuilt) details["Year Built"] = String(answers.yearBuilt);
-      // Kitchen-specific
-      if (answers.kitchenCabinets) details["Cabinets"] = answers.kitchenCabinets.replace("-", " ");
-      if (answers.kitchenCountertops) details["Countertops"] = answers.kitchenCountertops;
-      if (answers.kitchenFlooring) details["Flooring"] = answers.kitchenFlooring;
-      if ((answers as any).kitchenLayout)
-        details["Layout Changes"] = (answers as any).kitchenLayout;
-      if ((answers as any).kitchenApplianceTier)
-        details["Appliances"] = (answers as any).kitchenApplianceTier;
-      if ((answers as any).kitchenBacksplash)
-        details["Backsplash"] = (answers as any).kitchenBacksplash;
-      // Roof-specific
-      if (answers.roofAction) details["Action"] = answers.roofAction;
-      if (answers.roofMaterial) details["Material"] = answers.roofMaterial;
-      if (answers.roofSize) details["Roof Size"] = `${answers.roofSize.toLocaleString()} sq ft`;
-      // General
-      if (answers.currentCondition) details["Current Condition"] = answers.currentCondition;
-      if (answers.startTimeline) details["Timeline"] = answers.startTimeline.replace("-", " ");
-
-      await submitEmailAndDownload({
-        filename: `costreno-estimate-${answers.projectType}-${Date.now()}.html`,
-        email,
-        reportType: "estimate",
-        data: {
-          projectType: projectLabel[answers.projectType ?? ""] ?? "Your Project",
-          estimate: fmt(estimate.mid),
-          range: `${fmt(estimate.low)} – ${fmt(estimate.high)}`,
-          confidence: estimate.confidence,
-          location:
-            answers.city && answers.state
-              ? `${answers.city}, ${answers.state} ${answers.zipCode || ""}`
-              : answers.zipCode || "",
-          timeline: estimate.timeline,
-          permitRequired: estimate.permitRequired,
-          insuranceEligible: estimate.insuranceEligible,
-          breakdown: estimate.breakdown,
-          details,
-        },
-      });
-    } catch (error) {
-      console.error("Download failed:", error);
-      throw error;
-    } finally {
-      setIsDownloading(false);
-    }
-  };
   const projectLabel: Record<string, string> = {
     roof: "Roof Replacement",
     kitchen: "Kitchen Remodel",
@@ -1408,23 +1342,67 @@ function FinalReport({
     plumbing: "Plumbing",
     electrical: "Electrical",
   };
-  const insuranceBadge = estimate.insuranceEligible
-    ? { label: "🟢 Likely Covered", color: "bg-accent/10 text-accent border-accent/20" }
-    : { label: "🔴 Not Covered", color: "bg-red-50 text-red-500 border-red-100" };
+
+  const handleEmailSubmit = async (email: string) => {
+    setIsDownloading(true);
+    try {
+      subscribeToNewsletter({ data: { email, source: "estimate-download" } }).catch(() => {});
+
+      const details: Record<string, string> = {};
+      if (answers.zipCode)
+        details["Location"] =
+          `${answers.city || ""} ${answers.state || ""} ${answers.zipCode}`.trim();
+      if (answers.propertyType) details["Property type"] = answers.propertyType.replace("-", " ");
+      if (answers.squareFootage)
+        details[answers.projectType === "kitchen" ? "Kitchen size" : "Home size"] =
+          `${answers.squareFootage.toLocaleString()} sq ft`;
+      if (answers.yearBuilt) details["Year built"] = String(answers.yearBuilt);
+      if (answers.kitchenCabinets) details["Cabinets"] = answers.kitchenCabinets.replace("-", " ");
+      if (answers.kitchenCountertops) details["Countertops"] = answers.kitchenCountertops;
+      if (answers.kitchenFlooring) details["Flooring"] = answers.kitchenFlooring;
+      if ((answers as any).kitchenLayout)
+        details["Layout changes"] = (answers as any).kitchenLayout;
+      if ((answers as any).kitchenApplianceTier)
+        details["Appliances"] = (answers as any).kitchenApplianceTier;
+      if ((answers as any).kitchenBacksplash)
+        details["Backsplash"] = (answers as any).kitchenBacksplash;
+      if (answers.roofAction) details["Action"] = answers.roofAction;
+      if (answers.roofMaterial) details["Material"] = answers.roofMaterial;
+      if (answers.roofSize) details["Roof size"] = `${answers.roofSize.toLocaleString()} sq ft`;
+      if (answers.currentCondition) details["Current condition"] = answers.currentCondition;
+      if (answers.startTimeline) details["Timeline"] = answers.startTimeline.replace("-", " ");
+
+      await submitEmailAndDownload({
+        filename: `costreno-estimate-${answers.projectType || "project"}-${Date.now()}.html`,
+        email,
+        reportType: "estimate",
+        data: {
+          projectType: projectLabel[answers.projectType ?? ""] ?? "Your project",
+          estimate: fmt(estimate.mid),
+          range: `${fmt(estimate.low)} to ${fmt(estimate.high)}`,
+          confidence: estimate.confidence,
+          location:
+            answers.city && answers.state
+              ? `${answers.city}, ${answers.state} ${answers.zipCode || ""}`.trim()
+              : answers.zipCode || "",
+          timeline: estimate.timeline,
+          permitRequired: estimate.permitRequired,
+          breakdown: estimate.breakdown,
+          details,
+        },
+      });
+    } catch (error) {
+      console.error("Download failed:", error);
+      throw error;
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const breakdownWithColors = estimate.breakdown.map((b, i) => ({
     ...b,
     color: BREAKDOWN_COLORS[i] ?? "#e5e7eb",
   }));
-  const nextSteps = [
-    {
-      icon: FileText,
-      label: "Upload Contractor Quote",
-      desc: "AI detects overcharges & red flags",
-    },
-    { icon: Download, label: "Download PDF Report", desc: "Save your full estimate" },
-    { icon: TrendingUp, label: "Compare Quotes", desc: "Side-by-side quote comparison" },
-    { icon: Shield, label: "Check Insurance", desc: "See what your policy may cover" },
-  ];
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
       {/* Hero card */}
@@ -1494,63 +1472,46 @@ function FinalReport({
               <span className="font-semibold text-ink capitalize">{val}</span>
             </div>
           ))}
-          {/* Insurance badge */}
-          <div
-            className={`mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold w-full justify-center ${insuranceBadge.color}`}
-          >
-            {insuranceBadge.label}
-          </div>
-          {estimate.insuranceEligible && (
-            <button className="w-full flex items-center justify-center gap-2 text-xs text-accent font-semibold py-2 hover:underline">
-              Why? Check Coverage <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Next steps */}
+      {/* Next steps — live actions only */}
       <div className="rounded-2xl border border-border bg-white p-6">
         <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
-          Recommended Next Steps
+          Recommended next steps
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {nextSteps.map((s) => {
-            const isQuoteUpload = s.label === "Upload Contractor Quote";
-            const handleClick = () => {
-              if (s.label === "Download PDF Report") handleDownloadClick();
-              else if (isQuoteUpload) window.location.href = "/quote-analyzer";
-            };
-            return (
-              <button
-                key={s.label}
-                onClick={handleClick}
-                className={`group flex items-center gap-3 p-4 rounded-xl border transition-all text-left ${
-                  isQuoteUpload
-                    ? "border-accent/60 shadow-[0_0_0_1px_rgba(3,164,77,0.15)] hover:shadow-[0_0_0_3px_rgba(3,164,77,0.2)] hover:border-accent hover:-translate-y-0.5 bg-accent/[0.03]"
-                    : "border-border hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5"
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all ${
-                    isQuoteUpload
-                      ? "bg-accent/15 group-hover:bg-accent group-hover:text-white"
-                      : "bg-accent/10 group-hover:bg-accent group-hover:text-white"
-                  }`}
-                >
-                  <s.icon className="h-5 w-5 text-accent group-hover:text-white transition-colors" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={`text-sm font-semibold group-hover:text-accent transition-colors ${isQuoteUpload ? "text-accent" : "text-ink"}`}
-                  >
-                    {s.label}
-                  </div>
-                  <div className="text-xs text-muted-foreground">{s.desc}</div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-accent transition-all shrink-0" />
-              </button>
-            );
-          })}
+          <a
+            href="/quote-analyzer"
+            className="group flex items-center gap-3 p-4 rounded-xl border border-accent/60 shadow-[0_0_0_1px_rgba(3,164,77,0.15)] hover:shadow-[0_0_0_3px_rgba(3,164,77,0.2)] hover:border-accent hover:-translate-y-0.5 bg-accent/[0.03] transition-all text-left"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-accent/15 group-hover:bg-accent transition-all">
+              <FileText className="h-5 w-5 text-accent group-hover:text-white transition-colors" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-accent">Upload contractor quote</div>
+              <div className="text-xs text-muted-foreground">
+                AI detects overcharges and red flags
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-accent transition-all shrink-0" />
+          </a>
+          <button
+            type="button"
+            onClick={() => setShowEmailModal(true)}
+            className="group flex items-center gap-3 p-4 rounded-xl border border-border hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-accent/10 group-hover:bg-accent transition-all">
+              <Download className="h-5 w-5 text-accent group-hover:text-white transition-colors" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-ink group-hover:text-accent transition-colors">
+                Download PDF report
+              </div>
+              <div className="text-xs text-muted-foreground">Save your full estimate</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-accent transition-all shrink-0" />
+          </button>
         </div>
       </div>
 
@@ -1559,7 +1520,7 @@ function FinalReport({
           onClick={onRestart}
           className="flex-1 py-3.5 rounded-lg border-2 border-border text-sm font-semibold text-muted-foreground hover:bg-muted/40 transition"
         >
-          Start New Estimate
+          Start new estimate
         </button>
         <a
           href="/"
@@ -1573,7 +1534,7 @@ function FinalReport({
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
         onSubmit={handleEmailSubmit}
-        reportName="Estimate Report"
+        reportName="Estimate report"
         isLoading={isDownloading}
       />
     </div>

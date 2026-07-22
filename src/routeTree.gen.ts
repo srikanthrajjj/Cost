@@ -19,6 +19,7 @@ import { Route as EstimateRouteImport } from './routes/estimate'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CompareQuotesRouteImport } from './routes/compare-quotes'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ProjectSlugRouteImport } from './routes/$projectSlug'
 import { Route as IndexRouteImport } from './routes/index'
@@ -92,6 +93,11 @@ const ContactRoute = ContactRouteImport.update({
 const CompareQuotesRoute = CompareQuotesRouteImport.update({
   id: '/compare-quotes',
   path: '/compare-quotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/compare-quotes': typeof CompareQuotesRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/compare-quotes': typeof CompareQuotesRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -297,6 +305,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$projectSlug': typeof ProjectSlugRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/compare-quotes': typeof CompareQuotesRoute
   '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$projectSlug'
     | '/about'
+    | '/admin'
     | '/compare-quotes'
     | '/contact'
     | '/disclaimer'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$projectSlug'
     | '/about'
+    | '/admin'
     | '/compare-quotes'
     | '/contact'
     | '/disclaimer'
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$projectSlug'
     | '/about'
+    | '/admin'
     | '/compare-quotes'
     | '/contact'
     | '/disclaimer'
@@ -444,6 +456,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProjectSlugRoute: typeof ProjectSlugRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
   CompareQuotesRoute: typeof CompareQuotesRoute
   ContactRoute: typeof ContactRoute
   DisclaimerRoute: typeof DisclaimerRoute
@@ -547,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/compare-quotes'
       fullPath: '/compare-quotes'
       preLoaderRoute: typeof CompareQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -724,6 +744,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectSlugRoute: ProjectSlugRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
   CompareQuotesRoute: CompareQuotesRoute,
   ContactRoute: ContactRoute,
   DisclaimerRoute: DisclaimerRoute,

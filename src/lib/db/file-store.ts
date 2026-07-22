@@ -136,6 +136,16 @@ export async function fileListQuoteFeedback(limit = 50): Promise<StoredQuoteFeed
   return store.quoteFeedback.slice(0, limit);
 }
 
+export async function fileCountQuoteUploads(): Promise<number> {
+  const store = await ensureStore();
+  return store.quoteUploads.length;
+}
+
+export async function fileCountQuoteFeedback(): Promise<number> {
+  const store = await ensureStore();
+  return store.quoteFeedback.length;
+}
+
 export async function fileSaveComparisonReport(
   row: StoredComparisonReport,
 ): Promise<StoredComparisonReport> {
