@@ -86,7 +86,7 @@ export const Route = createFileRoute("/")({
       },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/" }],
   }),
   component: Landing,
 });

@@ -85,6 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Get clear home renovation cost estimates, analyze contractor quotes with AI, and compare bids with local pricing context. Free tools for homeowners.",
       },
       { name: "author", content: "CostReno" },
+      { name: "msvalidate.01", content: "E9A24DF33DB0398044BA8C9DCD91E732" },
       {
         property: "og:title",
         content: "CostReno | Home renovation cost estimates and quote analysis",
