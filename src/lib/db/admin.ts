@@ -157,6 +157,15 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
     assertAdminPassword(data.password);
     const recentLimit = data.recentLimit ?? 8;
 
+    const safe = async <T>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+      try {
+        return await fn();
+      } catch (error) {
+        console.error("[admin-stats]", error);
+        return fallback;
+      }
+    };
+
     const [
       quotesProcessed,
       feedbackReceived,
@@ -168,19 +177,26 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       topLocations,
       recentVisits,
     ] = await Promise.all([
-      countStoredQuoteUploads(),
-      countStoredQuoteFeedback(),
+      safe(() => countStoredQuoteUploads(), 0),
+      safe(() => countStoredQuoteFeedback(), 0),
       countWaitlistEmails(),
-      listStoredQuoteUploads(recentLimit),
-      listStoredQuoteFeedback(recentLimit),
-      countStoredPageVisits(),
-      countStoredUniqueVisitors(),
-      topStoredVisitLocations(8),
-      listStoredPageVisits(recentLimit),
+      safe(() => listStoredQuoteUploads(recentLimit), []),
+      safe(() => listStoredQuoteFeedback(recentLimit), []),
+      safe(() => countStoredPageVisits(), 0),
+      safe(() => countStoredUniqueVisitors(), 0),
+      safe(() => topStoredVisitLocations(8), []),
+      safe(() => listStoredPageVisits(recentLimit), []),
     ]);
 
+    const storage = getStorageMode();
+    const storageWarning =
+      storage === "file"
+        ? "No DATABASE_URL configured. On Vercel, set Neon DATABASE_URL and run schema.sql so stats persist."
+        : null;
+
     return {
-      storage: getStorageMode(),
+      storage,
+      storageWarning,
       quotesProcessed,
       feedbackReceived,
       waitlistEmails: waitlist.count,

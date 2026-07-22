@@ -202,6 +202,11 @@ function AdminPage() {
             {statsError}
           </p>
         )}
+        {stats?.storageWarning && (
+          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            {stats.storageWarning}
+          </p>
+        )}
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <MetricCard

@@ -72,38 +72,85 @@ const EMPTY_STORE: FileStoreShape = {
   pageVisits: [],
 };
 
+/** In-memory fallback when the filesystem is read-only (e.g. Vercel /var/task). */
+let memoryStore: FileStoreShape | null = null;
+let useMemoryOnly = false;
+
+function isServerlessRuntime() {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.LAMBDA_TASK_ROOT ||
+      process.env.NETLIFY,
+  );
+}
+
 function storePath() {
+  // Vercel/Lambda only allow writes under /tmp
+  if (isServerlessRuntime()) {
+    return path.join("/tmp", "costreno-data", "costreno-store.json");
+  }
   return path.join(process.cwd(), "data", "costreno-store.json");
 }
 
+function cloneEmptyStore(): FileStoreShape {
+  return {
+    quoteUploads: [],
+    quoteFeedback: [],
+    comparisonReports: [],
+    pageVisits: [],
+  };
+}
+
 async function ensureStore(): Promise<FileStoreShape> {
+  if (useMemoryOnly && memoryStore) {
+    return memoryStore;
+  }
+
   const file = storePath();
-  await mkdir(path.dirname(file), { recursive: true });
   try {
-    const raw = await readFile(file, "utf8");
-    const parsed = JSON.parse(raw) as FileStoreShape;
-    return {
-      quoteUploads: Array.isArray(parsed.quoteUploads) ? parsed.quoteUploads : [],
-      quoteFeedback: Array.isArray(parsed.quoteFeedback) ? parsed.quoteFeedback : [],
-      comparisonReports: Array.isArray(parsed.comparisonReports) ? parsed.comparisonReports : [],
-      pageVisits: Array.isArray(parsed.pageVisits) ? parsed.pageVisits : [],
-    };
+    await mkdir(path.dirname(file), { recursive: true });
+    try {
+      const raw = await readFile(file, "utf8");
+      const parsed = JSON.parse(raw) as FileStoreShape;
+      const store: FileStoreShape = {
+        quoteUploads: Array.isArray(parsed.quoteUploads) ? parsed.quoteUploads : [],
+        quoteFeedback: Array.isArray(parsed.quoteFeedback) ? parsed.quoteFeedback : [],
+        comparisonReports: Array.isArray(parsed.comparisonReports) ? parsed.comparisonReports : [],
+        pageVisits: Array.isArray(parsed.pageVisits) ? parsed.pageVisits : [],
+      };
+      memoryStore = store;
+      return store;
+    } catch {
+      const empty = cloneEmptyStore();
+      try {
+        await writeFile(file, JSON.stringify(EMPTY_STORE, null, 2), "utf8");
+      } catch {
+        // Writable path unavailable — stay in memory
+        useMemoryOnly = true;
+      }
+      memoryStore = empty;
+      return empty;
+    }
   } catch {
-    await writeFile(file, JSON.stringify(EMPTY_STORE, null, 2), "utf8");
-    return {
-      ...EMPTY_STORE,
-      quoteUploads: [],
-      quoteFeedback: [],
-      comparisonReports: [],
-      pageVisits: [],
-    };
+    // Read-only filesystem (common on Vercel without /tmp access edge cases)
+    useMemoryOnly = true;
+    memoryStore = memoryStore ?? cloneEmptyStore();
+    return memoryStore;
   }
 }
 
 async function writeStore(store: FileStoreShape) {
+  memoryStore = store;
+  if (useMemoryOnly) return;
+
   const file = storePath();
-  await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, JSON.stringify(store, null, 2), "utf8");
+  try {
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(file, JSON.stringify(store, null, 2), "utf8");
+  } catch {
+    useMemoryOnly = true;
+  }
 }
 
 export async function fileSaveQuoteUpload(
