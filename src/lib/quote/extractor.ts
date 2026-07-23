@@ -4,6 +4,8 @@ import { callOpenRouter, type OpenRouterCallOptions } from "./openrouter-client"
 export interface ExtractQuoteOptions {
   signal?: AbortSignal;
   onRetry?: OpenRouterCallOptions["onRetry"];
+  /** Fast details fetch: shorter input, no retries, lower token budget. */
+  mode?: "fast" | "full";
 }
 
 export async function extractQuote(
@@ -11,12 +13,19 @@ export async function extractQuote(
   apiKey: string,
   options: ExtractQuoteOptions = {},
 ): Promise<QuoteExtraction> {
+  const mode = options.mode ?? "full";
+  const isFast = mode === "fast";
+
   // Truncate input to avoid overwhelming the model
-  const maxInputChars = 12000;
+  const maxInputChars = isFast ? 7000 : 12000;
   const truncatedText =
     text.length > maxInputChars ? text.substring(0, maxInputChars) + "\n[...truncated...]" : text;
 
-  const systemPrompt = `You are a JSON extraction bot. You read contractor quotes and output structured JSON. NEVER output explanations, safety notes, or anything except valid JSON.
+  const systemPrompt = isFast
+    ? `Extract contractor quote line items as JSON only. No prose.
+{"projectType":"roof","contractor":"Name","materials":[{"name":"Item","quantity":1,"unit":"SQ","unitPrice":0,"totalPrice":0,"notes":""}],"scopeItems":[{"name":"Work","description":"","quantity":1,"unit":"LF","unitPrice":0,"totalPrice":0,"notes":""}],"permits":[],"warranties":[],"exclusions":[],"totalPrice":0,"confidence":0.8}
+Rules: totalPrice=line total; unitPrice=per-unit rate; numbers only (no $); keep quote units; projectType one of roof|kitchen|bathroom|hvac|windows|flooring|painting|solar|deck|plumbing|electrical; extract every priced line you can.`
+    : `You are a JSON extraction bot. You read contractor quotes and output structured JSON. NEVER output explanations, safety notes, or anything except valid JSON.
 
 Output this exact JSON structure (fill with data from the quote):
 {"projectType":"roof","contractor":"Company Name","materials":[{"name":"Material","quantity":32,"unit":"SQ","unitPrice":185,"totalPrice":5920,"notes":""}],"scopeItems":[{"name":"Work Item","description":"Details","quantity":140,"unit":"LF","unitPrice":3,"totalPrice":420,"notes":""}],"permits":["permit info"],"warranties":["warranty info"],"exclusions":["exclusion info"],"totalPrice":0,"confidence":0.8}
@@ -40,14 +49,15 @@ OTHER RULES:
 
   const userPrompt = `CONTRACTOR QUOTE TO EXTRACT:\n\n${truncatedText}\n\nRETURN JSON ONLY:`;
 
-  // Use deepseek-chat which is very cheap ($0.14/M input, $0.28/M output) and reliable for JSON
   const content = await callOpenRouter({
     apiKey,
     systemPrompt,
     userPrompt,
     model: "deepseek/deepseek-chat",
     temperature: 0.05,
-    maxTokens: 3000,
+    maxTokens: isFast ? 1800 : 3000,
+    timeoutMs: isFast ? 12000 : 25000,
+    maxRetries: isFast ? 0 : 2,
     signal: options.signal,
     onRetry: options.onRetry,
   });

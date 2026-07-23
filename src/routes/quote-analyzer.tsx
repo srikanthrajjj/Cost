@@ -19,10 +19,25 @@ import {
   Lock,
   GitCompare,
   Trophy,
+  BarChart3,
+  Download,
+  Bookmark,
 } from "lucide-react";
-import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
+import { type QuoteAnalysisResult, type QuotePipelineStage, buildQuoteAnalysisFromExtraction } from "@/lib/quote";
+import type { QuoteExtraction } from "@/lib/quote/types";
 import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
-import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
+import { serverExtractQuoteDetails } from "@/lib/quote/quote-server";
+import {
+  canRunAdvancedReportClient,
+  getAdvancedReportSessionId,
+  recordClientAdvancedReportRun,
+} from "@/lib/quote/advanced-rate-limit";
+import {
+  formatMarketRange,
+  resolveMarketRange,
+  scoreVendorAgainstMarket,
+} from "@/lib/quote/market-scorecard";
+import { looksLikeMisparsedLineTotal } from "@/lib/quote/extractor";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
@@ -36,7 +51,7 @@ import {
   saveQuoteProgress,
   type SavedQuoteProgress,
 } from "@/lib/quote/progress-store";
-import { QuoteFeedbackCard, QuoteFeedbackMobileCta } from "@/components/quote/QuoteFeedbackCard";
+import { QuoteFeedbackCard } from "@/components/quote/QuoteFeedbackCard";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 
 const QuoteComparisonView = lazy(() =>
@@ -172,7 +187,7 @@ export const Route = createFileRoute("/quote-analyzer")({
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type AnalysisState = "idle" | "processing" | "complete" | "error";
+type AnalysisState = "idle" | "processing" | "details" | "complete" | "error";
 
 interface ScopeCard {
   name: string;
@@ -196,17 +211,17 @@ const PROCESSING_TIPS = [
 ];
 
 const STAGE_LABELS: Record<QuotePipelineStage | "reading", { label: string; icon: string }> = {
-  reading: { label: "Reading your document", icon: "📄" },
-  extracting: { label: "Extracting line items with AI", icon: "🔍" },
-  matching: { label: "Cross-referencing knowledge base", icon: "🏠" },
-  analyzing: { label: "Classifying scope & detecting gaps", icon: "⚡" },
-  reporting: { label: "Generating your report", icon: "📝" },
+  reading: { label: "Reading your PDF", icon: "📄" },
+  extracting: { label: "Pulling line items instantly", icon: "⚡" },
+  matching: { label: "Building market scorecard", icon: "🏠" },
+  analyzing: { label: "Checking gaps and red flags", icon: "🔍" },
+  reporting: { label: "Finishing advanced report", icon: "📝" },
 };
 
 /** Soft ceilings so progress keeps moving within each stage, but never hits 100% until done */
 const STAGE_PROGRESS_CEILING: Record<string, number> = {
-  reading: 14,
-  extracting: 42,
+  reading: 55,
+  extracting: 92,
   matching: 58,
   analyzing: 82,
   reporting: 95,
@@ -248,6 +263,14 @@ function QuoteAnalyzerPage() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [quoteSlots, setQuoteSlots] = useState<(File | null)[]>([null, null, null]);
   const [activeSlot, setActiveSlot] = useState<number>(0);
+  const [pendingExtraction, setPendingExtraction] = useState<QuoteExtraction | null>(null);
+  const [pendingFileName, setPendingFileName] = useState<string>("");
+  const [pendingRawText, setPendingRawText] = useState<string>("");
+  const [detailsSource, setDetailsSource] = useState<"local" | "ai">("local");
+  const [isRunningAdvanced, setIsRunningAdvanced] = useState(false);
+  const [advancedPrefetchStatus, setAdvancedPrefetchStatus] = useState<
+    "idle" | "preparing" | "ready" | "error"
+  >("idle");
   const [savedProgress, setSavedProgress] = useState<SavedQuoteProgress | null>(null);
   const [batchProgress, setBatchProgress] = useState<{
     current: number;
@@ -258,6 +281,21 @@ function QuoteAnalyzerPage() {
   const abortRef = useRef<AbortController | null>(null);
   const stageTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const batchRef = useRef({ current: 1, total: 1 });
+  const detailsOnlyRef = useRef(false);
+  const advancedPrefetchGenRef = useRef(0);
+  const advancedPrefetchRef = useRef<{
+    status: "idle" | "running" | "ready" | "error";
+    promise: Promise<QuoteAnalysisResult> | null;
+    result: QuoteAnalysisResult | null;
+    error: unknown;
+    startedAt: number;
+  }>({
+    status: "idle",
+    promise: null,
+    result: null,
+    error: null,
+    startedAt: 0,
+  });
 
   const MAX_QUOTE_SLOTS = 3;
   const MAX_FILE_BYTES = 15 * 1024 * 1024;
@@ -327,6 +365,49 @@ function QuoteAnalyzerPage() {
     stageTimersRef.current = [];
   };
 
+  const rampProcessingProgress = useCallback(
+    (
+      target: number,
+      options?: {
+        intervalMs?: number;
+        minStep?: number;
+        rate?: number;
+      },
+    ) => {
+      clearStageTimers();
+
+      const intervalMs = options?.intervalMs ?? 120;
+      const minStep = options?.minStep ?? 0.35;
+      const rate = options?.rate ?? 0.12;
+
+      const tick = () => {
+        setProcessingProgress((prev) => {
+          if (prev >= target) return prev;
+
+          const remaining = target - prev;
+          const increment = Math.max(minStep, remaining * rate);
+          const next = Math.min(target, Math.round((prev + increment) * 10) / 10);
+
+          if (next < target) {
+            const timer = setTimeout(tick, intervalMs);
+            stageTimersRef.current.push(timer);
+          }
+
+          return next;
+        });
+      };
+
+      const timer = setTimeout(tick, intervalMs);
+      stageTimersRef.current.push(timer);
+    },
+    [setProcessingProgress],
+  );
+
+  // Warm PDF.js so the first upload is not blocked on CDN download
+  useEffect(() => {
+    void import("@/lib/file-processor").then((m) => m.preloadPdfjs());
+  }, []);
+
   // Load analysis from sessionStorage if available (from chat flow)
   useEffect(() => {
     try {
@@ -361,6 +442,8 @@ function QuoteAnalyzerPage() {
   // Gradually advance overall progress toward the current stage ceiling (batched across quotes)
   useEffect(() => {
     if (state !== "processing") return;
+    // Details-only fetch drives progress manually (avoid the old 42% extracting stall)
+    if (detailsOnlyRef.current) return;
 
     const interval = setInterval(() => {
       const { current, total } = batchRef.current;
@@ -385,9 +468,108 @@ function QuoteAnalyzerPage() {
     return () => clearTimeout(timeout);
   }, [error]);
 
-  const analyzeSingleFile = async (file: File): Promise<QuoteAnalysisResult> => {
+  const clearAdvancedPrefetch = useCallback(() => {
+    advancedPrefetchGenRef.current += 1;
+    advancedPrefetchRef.current = {
+      status: "idle",
+      promise: null,
+      result: null,
+      error: null,
+      startedAt: 0,
+    };
+    setAdvancedPrefetchStatus("idle");
+  }, []);
+
+  const buildAdvancedAnalysis = useCallback(
+    async (
+      extraction: QuoteExtraction,
+      rawText: string,
+      fileName: string,
+      source: "local" | "ai",
+    ): Promise<QuoteAnalysisResult> => {
+      let next = extraction;
+      if (source === "local" && rawText.length > 40) {
+        const { extraction: refined } = await serverExtractQuoteDetails({
+          data: {
+            rawText: `Analyze this contractor quote:\n\n${rawText}`,
+            fileName: fileName || undefined,
+            source: "quote-analyzer-advanced",
+            sessionId: getAdvancedReportSessionId(),
+          },
+        });
+        next = refined;
+      }
+      return buildQuoteAnalysisFromExtraction(next);
+    },
+    [],
+  );
+
+  /** Start advanced report in the background while the user reads basic details. */
+  const startAdvancedPrefetch = useCallback(
+    (
+      extraction: QuoteExtraction,
+      rawText: string,
+      fileName: string,
+      source: "local" | "ai",
+    ) => {
+      const gate = canRunAdvancedReportClient();
+      if (!gate.ok) {
+        clearAdvancedPrefetch();
+        return;
+      }
+
+      const gen = ++advancedPrefetchGenRef.current;
+      const startedAt = Date.now();
+      setAdvancedPrefetchStatus("preparing");
+
+      const promise = buildAdvancedAnalysis(extraction, rawText, fileName, source);
+      advancedPrefetchRef.current = {
+        status: "running",
+        promise,
+        result: null,
+        error: null,
+        startedAt,
+      };
+
+      void promise.then(
+        (result) => {
+          if (gen !== advancedPrefetchGenRef.current) return;
+          advancedPrefetchRef.current = {
+            status: "ready",
+            promise,
+            result,
+            error: null,
+            startedAt,
+          };
+          setAdvancedPrefetchStatus("ready");
+        },
+        (error) => {
+          if (gen !== advancedPrefetchGenRef.current) return;
+          advancedPrefetchRef.current = {
+            status: "error",
+            promise: null,
+            result: null,
+            error,
+            startedAt,
+          };
+          setAdvancedPrefetchStatus("error");
+        },
+      );
+    },
+    [buildAdvancedAnalysis, clearAdvancedPrefetch],
+  );
+
+  const fetchQuoteDetails = async (
+    file: File,
+  ): Promise<{ extraction: QuoteExtraction; rawText: string }> => {
+    setProcessingStage("reading");
+    setProcessingProgress(12);
+    rampProcessingProgress(44, { intervalMs: 110, minStep: 0.45, rate: 0.14 });
+
     const { extractTextFromFile } = await import("@/lib/file-processor");
-    const extracted = await extractTextFromFile(file);
+    setProcessingProgress((prev) => Math.max(prev, 18));
+    rampProcessingProgress(68, { intervalMs: 140, minStep: 0.3, rate: 0.09 });
+    const extracted = await extractTextFromFile(file, { maxPages: 3 });
 
     if (extracted.text.length < 10) {
       throw new Error(
@@ -396,29 +578,24 @@ function QuoteAnalyzerPage() {
     }
 
     setProcessingStage("extracting");
-    setProcessingProgress((p) => {
-      const floor = mapStageToOverall(12, batchRef.current.current, batchRef.current.total);
-      return Math.max(p, floor);
-    });
+    setProcessingProgress((prev) => Math.max(prev, 72));
+    rampProcessingProgress(94, { intervalMs: 110, minStep: 0.35, rate: 0.13 });
 
-    const combinedText = `Analyze this contractor quote:\n\n${extracted.text}`;
-
+    // Details are ALWAYS local. Never wait on AI here (that was the 10s / 42% stall).
+    const { extractQuoteLocally } = await import("@/lib/quote/local-extract");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const local = extractQuoteLocally(extracted.text);
+    setPendingRawText(extracted.text);
+    setDetailsSource("local");
     clearStageTimers();
-    stageTimersRef.current = [
-      setTimeout(() => setProcessingStage("matching"), 6000),
-      setTimeout(() => setProcessingStage("analyzing"), 14000),
-      setTimeout(() => setProcessingStage("reporting"), 28000),
-    ];
+    setProcessingProgress(97);
+    return { extraction: local, rawText: extracted.text };
+  };
 
-    return serverAnalyzeQuoteFull({
-      data: {
-        rawText: combinedText,
-        fileName: file.name,
-        fileType: file.type || undefined,
-        fileSize: file.size,
-        source: "quote-analyzer",
-      },
-    });
+  const analyzeSingleFile = async (file: File): Promise<QuoteAnalysisResult> => {
+    const { extraction } = await fetchQuoteDetails(file);
+    setProcessingStage("matching");
+    return buildQuoteAnalysisFromExtraction(extraction);
   };
 
   const handleAnalyzeSelected = async () => {
@@ -428,6 +605,11 @@ function QuoteAnalyzerPage() {
     setState("processing");
     setError("");
     setResult(null);
+    setPendingExtraction(null);
+    setPendingFileName("");
+    setPendingRawText("");
+    setDetailsSource("local");
+    clearAdvancedPrefetch();
     setProcessingProgress(0);
     setProcessingStage("reading");
     setFeedbackOpen(false);
@@ -439,19 +621,24 @@ function QuoteAnalyzerPage() {
 
     try {
       if (selectedFiles.length === 1) {
+        detailsOnlyRef.current = true;
         setBatchProgress({ current: 1, total: 1, name: selectedFiles[0].name });
         batchRef.current = { current: 1, total: 1 };
-        const analysis = await analyzeSingleFile(selectedFiles[0]);
+        const { extraction, rawText } = await fetchQuoteDetails(selectedFiles[0]);
         clearStageTimers();
-        setProcessingStage("reporting");
         setProcessingProgress(100);
-        setResult(analysis);
-        setSavedProgress(saveQuoteProgress(analysis));
+        setPendingExtraction(extraction);
+        setPendingFileName(selectedFiles[0].name);
         setQuoteSlots([null, null, null]);
         setBatchProgress(null);
-        setState("complete");
+        detailsOnlyRef.current = false;
+        setState("details");
+        // Prefetch advanced report while they read the basic details
+        startAdvancedPrefetch(extraction, rawText, selectedFiles[0].name, "local");
         return;
       }
+
+      detailsOnlyRef.current = false;
 
       clearComparisonQuotes();
       const savedIds: string[] = [];
@@ -492,11 +679,112 @@ function QuoteAnalyzerPage() {
       setState("complete");
     } catch (err) {
       clearStageTimers();
+      detailsOnlyRef.current = false;
       setBatchProgress(null);
       setError(friendlyOpenRouterMessage(err));
       setState("error");
     } finally {
       abortRef.current = null;
+      detailsOnlyRef.current = false;
+    }
+  };
+
+  const handleRunAdvancedReport = async () => {
+    if (!pendingExtraction) return;
+
+    const gate = canRunAdvancedReportClient();
+    if (!gate.ok) {
+      setError(gate.message);
+      return;
+    }
+
+    setIsRunningAdvanced(true);
+    detailsOnlyRef.current = false;
+    batchRef.current = { current: 1, total: 1 };
+    setBatchProgress({
+      current: 1,
+      total: 1,
+      name: pendingFileName || "Advanced report",
+    });
+    setError("");
+    setProcessingStage("matching");
+    setProcessingProgress(18);
+    setState("processing");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    try {
+      const prefetch = advancedPrefetchRef.current;
+      let analysis: QuoteAnalysisResult;
+
+      if (prefetch.status === "ready" && prefetch.result) {
+        // Already finished in the background while they read details
+        analysis = prefetch.result;
+        setProcessingStage("analyzing");
+        setProcessingProgress(70);
+        await new Promise((resolve) => setTimeout(resolve, 280));
+        setProcessingStage("reporting");
+        setProcessingProgress(92);
+        await new Promise((resolve) => setTimeout(resolve, 320));
+      } else if (prefetch.status === "running" && prefetch.promise) {
+        // Join the in-flight job; take as long as it needs
+        const tickAnalyzing = setTimeout(() => {
+          setProcessingStage("analyzing");
+          setProcessingProgress((prev) => Math.max(prev, 55));
+        }, 1200);
+        const tickReporting = setTimeout(() => {
+          setProcessingStage("reporting");
+          setProcessingProgress((prev) => Math.max(prev, 78));
+        }, 2800);
+        try {
+          analysis = await prefetch.promise;
+        } finally {
+          clearTimeout(tickAnalyzing);
+          clearTimeout(tickReporting);
+        }
+        setProcessingStage("reporting");
+        setProcessingProgress((prev) => Math.max(prev, 90));
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      } else {
+        // No prefetch (or prior error): run fresh, however long it takes
+        setProcessingStage("matching");
+        analysis = await buildAdvancedAnalysis(
+          pendingExtraction,
+          pendingRawText,
+          pendingFileName,
+          detailsSource,
+        );
+        setProcessingStage("analyzing");
+        setProcessingProgress((prev) => Math.max(prev, 70));
+        setProcessingStage("reporting");
+        setProcessingProgress((prev) => Math.max(prev, 90));
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+
+      setProcessingProgress(100);
+      recordClientAdvancedReportRun();
+      setResult(analysis);
+      setSavedProgress(saveQuoteProgress(analysis));
+      setPendingExtraction(null);
+      setPendingRawText("");
+      clearAdvancedPrefetch();
+      setState("complete");
+    } catch (err) {
+      setError(friendlyOpenRouterMessage(err));
+      setState("details");
+      // Retry background prep so the next click can still be fast
+      if (pendingExtraction) {
+        startAdvancedPrefetch(
+          pendingExtraction,
+          pendingRawText,
+          pendingFileName,
+          detailsSource,
+        );
+      } else {
+        clearAdvancedPrefetch();
+      }
+    } finally {
+      setIsRunningAdvanced(false);
+      setBatchProgress(null);
     }
   };
 
@@ -510,6 +798,12 @@ function QuoteAnalyzerPage() {
     setSavedProgress(getSavedQuoteProgress());
     setState("idle");
     setResult(null);
+    setPendingExtraction(null);
+    setPendingFileName("");
+    setPendingRawText("");
+    setDetailsSource("local");
+    setIsRunningAdvanced(false);
+    clearAdvancedPrefetch();
     setError("");
     setProcessingProgress(0);
     setProcessingStage("reading");
@@ -866,15 +1160,17 @@ function QuoteAnalyzerPage() {
                 {filledCount === 0
                   ? "Add at least one quote"
                   : filledCount === 1
-                    ? "Review this quote"
+                    ? "Fetch quote details"
                     : `Compare my ${filledCount} quotes`}
               </button>
               <p className="text-xs text-muted-foreground text-center leading-relaxed">
-                {filledCount < 2
-                  ? "Tip: add a second and third quote for a clearer recommendation."
-                  : filledCount === 2
-                    ? "Nice. Add a third quote if you have one. Three bids give the clearest picture."
-                    : "Great. We'll rank all three and explain which looks strongest."}
+                {filledCount === 1
+                  ? "Fast details first (usually a few seconds). Advanced report is free for now."
+                  : filledCount < 2
+                    ? "Tip: add a second and third quote for a clearer recommendation."
+                    : filledCount === 2
+                      ? "Nice. Add a third quote if you have one. Three bids give the clearest picture."
+                      : "Great. We'll rank all three and explain which looks strongest."}
               </p>
             </div>
           </div>
@@ -1258,6 +1554,257 @@ function QuoteAnalyzerPage() {
     );
   }
 
+  // ─── DETAILS STATE (fetched quote, before advanced report) ─────────────────
+  if (state === "details" && pendingExtraction) {
+    const lineRows = [
+      ...pendingExtraction.materials.map((m) => {
+        const priceUnreliable = looksLikeMisparsedLineTotal(m.totalPrice, m.quantity, m.unitPrice);
+        const vendorPrice = priceUnreliable ? 0 : m.totalPrice;
+        const range = resolveMarketRange(m.name, m.quantity, m.unit);
+        const score = scoreVendorAgainstMarket(vendorPrice, range, { priceUnreliable });
+        return {
+          name: m.name,
+          qty: m.quantity,
+          unit: m.unit,
+          price: vendorPrice,
+          score,
+        };
+      }),
+      ...pendingExtraction.scopeItems.map((s) => {
+        const unitPrice = s.unitPrice ?? 0;
+        const priceUnreliable = looksLikeMisparsedLineTotal(s.totalPrice, s.quantity, unitPrice);
+        const vendorPrice = priceUnreliable ? 0 : s.totalPrice;
+        const range = resolveMarketRange(s.name, s.quantity, s.unit);
+        const score = scoreVendorAgainstMarket(vendorPrice, range, { priceUnreliable });
+        return {
+          name: s.name,
+          qty: s.quantity,
+          unit: s.unit,
+          price: vendorPrice,
+          score,
+        };
+      }),
+    ];
+    const scored = lineRows.filter((r) => r.score.marketComparable);
+
+    return (
+      <div className="min-h-screen bg-[#f7f8fa]">
+        <SiteNav active="quote" />
+        <div className="max-w-4xl mx-auto px-4 py-10">
+          <div className="rounded-2xl border border-primary/15 bg-white p-6 md:p-8 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-accent mb-2">
+                  Quote details ready
+                </p>
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
+                  {pendingExtraction.contractor || "Your contractor quote"}
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {detailsSource === "local"
+                    ? `Fetched instantly from ${pendingFileName || "your upload"}. Review line items, then run the advanced report for AI refinement.`
+                    : `Fetched from ${pendingFileName || "your upload"}. Review the line items, then run the advanced market scorecard when you are ready.`}
+                </p>
+                {detailsSource === "local" && (
+                  <p className="mt-1 text-xs font-semibold text-accent">
+                    Instant local parse · AI refinement happens in the advanced report
+                  </p>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Quoted total</p>
+                <p className="font-display text-3xl font-bold text-ink">
+                  {pendingExtraction.totalPrice > 0
+                    ? `$${pendingExtraction.totalPrice.toLocaleString()}`
+                    : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 capitalize">
+                  {pendingExtraction.projectType || "project"} · {lineRows.length} line items
+                </p>
+              </div>
+            </div>
+
+            {scored.length > 0 && (
+              <div className="mb-5 flex flex-wrap gap-2">
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-accent/10 text-accent">
+                  {scored.filter((r) => r.score.label === "Within range").length} within range
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-50 text-red-600">
+                  {scored.filter((r) => r.score.label === "Above market").length} above market
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700">
+                  {scored.filter((r) => r.score.label === "Below market").length} below market
+                </span>
+              </div>
+            )}
+
+            <div className="rounded-xl border border-border overflow-hidden mb-6">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase text-muted-foreground">
+                      Line item
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase text-muted-foreground">
+                      Qty
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase text-muted-foreground">
+                      Quoted
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase text-muted-foreground">
+                      Market range
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-[10px] font-semibold uppercase text-muted-foreground">
+                      Score
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lineRows.map((row, i) => (
+                    <tr key={`${row.name}-${i}`} className="border-b border-border/50">
+                      <td className="px-3 py-3 font-medium text-ink">{row.name}</td>
+                      <td className="px-3 py-3 text-muted-foreground text-xs">
+                        {row.qty > 0 ? `${row.qty} ${row.unit}` : "—"}
+                      </td>
+                      <td className="px-3 py-3 text-xs font-semibold text-ink">
+                        {row.price > 0 ? `$${row.price.toLocaleString()}` : "—"}
+                      </td>
+                      <td className="px-3 py-3 text-xs text-muted-foreground">
+                        {row.score.marketComparable
+                          ? formatMarketRange(
+                              row.score.marketLow,
+                              row.score.marketMid,
+                              row.score.marketHigh,
+                            )
+                          : "—"}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${row.score.className}`}
+                        >
+                          {row.score.label}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {error && (
+              <p className="mb-4 text-sm text-red-600" role="alert">
+                {error}
+              </p>
+            )}
+
+            <div className="rounded-2xl border border-accent/20 bg-accent/[0.08] p-6 md:p-8">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h2 className="text-xl font-medium text-ink">
+                  What you get in the advanced report
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full bg-white/80 text-accent text-xs font-medium">
+                  Free during early access
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6 max-w-2xl leading-relaxed">
+                Details above show what was quoted. The advanced report adds CostReno tools so you
+                know what to ask, save, and share before you hire.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5 mb-7">
+                {[
+                  {
+                    icon: BarChart3,
+                    title: "Market scorecard",
+                    desc: "See each line vs local low, mid, and high ranges",
+                  },
+                  {
+                    icon: AlertTriangle,
+                    title: "Gaps and red flags",
+                    desc: "Spot missing scope, vague terms, and risky payment language",
+                  },
+                  {
+                    icon: MessageCircle,
+                    title: "Ask AI follow-up questions",
+                    desc: "Chat about pricing, exclusions, and what to negotiate",
+                  },
+                  {
+                    icon: Download,
+                    title: "Download and share",
+                    desc: "Export the report or send it to someone you trust",
+                  },
+                  {
+                    icon: Bookmark,
+                    title: "Save your progress",
+                    desc: "Come back later without starting over",
+                  },
+                  {
+                    icon: GitCompare,
+                    title: "Compare more quotes",
+                    desc: "Add other bids side by side when you get them",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-3 min-w-0">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-accent">
+                      <item.icon className="h-4 w-4" aria-hidden />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void handleRunAdvancedReport()}
+                  disabled={isRunningAdvanced}
+                  className="inline-flex items-center justify-center gap-2 h-10 px-5 rounded-full bg-accent text-white text-sm font-medium hover:bg-accent/90 transition disabled:opacity-60"
+                >
+                  {isRunningAdvanced ? (
+                    "Opening advanced report…"
+                  ) : advancedPrefetchStatus === "ready" ? (
+                    <>
+                      View advanced report <ArrowRight className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      Run advanced report <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="inline-flex items-center justify-center h-10 px-5 rounded-full border border-border bg-white text-sm font-medium text-ink hover:bg-white/80 transition"
+                >
+                  Upload another quote
+                </button>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                {advancedPrefetchStatus === "preparing" && (
+                  <span className="text-ink/70">
+                    Preparing your advanced report in the background. Often ready in about 5
+                    seconds.{" "}
+                  </span>
+                )}
+                {advancedPrefetchStatus === "ready" && (
+                  <span className="text-accent font-medium">Advanced report ready. </span>
+                )}
+                Free during early access. No signup required for this step.
+              </p>
+            </div>
+          </div>
+        </div>
+        <SiteFooter />
+      </div>
+    );
+  }
+
   // ─── PROCESSING STATE ───────────────────────────────────────────────────────
   if (state === "processing") {
     const stageKeys = Object.keys(STAGE_LABELS) as (QuotePipelineStage | "reading")[];
@@ -1370,13 +1917,27 @@ function QuoteAnalyzerPage() {
             >
               {processingStage === "reading" && "Reading your document..."}
               {processingStage === "extracting" && "Pulling out every line item..."}
-              {processingStage === "matching" && "Comparing to local market rates..."}
-              {processingStage === "analyzing" && "Checking for missing scope & red flags..."}
-              {processingStage === "reporting" && "Building your personalized report..."}
+              {processingStage === "matching" &&
+                (isRunningAdvanced
+                  ? "Building your market scorecard..."
+                  : "Comparing to local market rates...")}
+              {processingStage === "analyzing" &&
+                (isRunningAdvanced
+                  ? "Finding gaps and red flags..."
+                  : "Checking for missing scope & red flags...")}
+              {processingStage === "reporting" &&
+                (isRunningAdvanced
+                  ? "Finishing your advanced report..."
+                  : "Building your personalized report...")}
             </h2>
             {batchProgress?.name && (
               <p className="text-sm text-muted-foreground mt-2 truncate max-w-sm mx-auto">
                 {batchProgress.name}
+              </p>
+            )}
+            {isRunningAdvanced && (
+              <p className="text-xs text-muted-foreground mt-2">
+                This usually takes a few seconds
               </p>
             )}
           </div>
@@ -1385,13 +1946,17 @@ function QuoteAnalyzerPage() {
             {(completedQuotes > 0 || currentIdx >= 0) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">Document received</span>
+                <span className="text-xs text-ink">
+                  {isRunningAdvanced ? "Quote details ready" : "Document received"}
+                </span>
               </div>
             )}
             {(completedQuotes > 0 || currentIdx >= 1) && (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-border animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-xs text-ink">Extracting line items</span>
+                <span className="text-xs text-ink">
+                  {isRunningAdvanced ? "Line items confirmed" : "Extracting line items"}
+                </span>
               </div>
             )}
             {(completedQuotes > 0 || currentIdx >= 2) && (
@@ -1506,16 +2071,9 @@ function QuoteAnalyzerPage() {
             setCompareIds(ids);
             setShowCompare(true);
           }}
-          feedbackSubmitted={feedbackSubmitted}
-          onOpenFeedback={() => setFeedbackOpen(true)}
         />
       </Suspense>
-      {!feedbackOpen && (
-        <QuoteFeedbackMobileCta
-          onOpen={() => setFeedbackOpen(true)}
-          submitted={feedbackSubmitted}
-        />
-      )}
+      {/* Site-wide Leave feedback FAB lives in __root; keep quote-specific modal below */}
       <QuoteFeedbackCard
         key={feedbackAnalysisKey}
         analysisKey={feedbackAnalysisKey}

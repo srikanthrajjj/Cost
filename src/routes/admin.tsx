@@ -342,7 +342,12 @@ function AdminPage() {
               <p className="text-sm text-muted-foreground">No feedback yet.</p>
             ) : (
               <ul className="space-y-3">
-                {stats.recentFeedback.map((f) => (
+                {stats.recentFeedback.map((f) => {
+                  const isSite = (f.projectType || "").startsWith("site:") || f.contractor === "site-feedback";
+                  const pagePath = isSite
+                    ? (f.projectType || "").replace(/^site:/, "") || "/"
+                    : null;
+                  return (
                   <li
                     key={f.id}
                     className="rounded-xl border border-border/70 px-3 py-2.5 text-sm"
@@ -350,10 +355,14 @@ function AdminPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-semibold text-ink">
-                          {f.accuracy || "—"} accuracy · use again {f.useAgain || "—"}
+                          {isSite ? "Site feedback" : `${f.accuracy || "—"} accuracy`}
+                          {" · "}
+                          use again {f.useAgain || "—"}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                          {f.comment || f.projectType || "No comment"}
+                          {f.comment ||
+                            (pagePath ? `From ${pagePath}` : f.projectType) ||
+                            "No comment"}
                         </p>
                       </div>
                       <span className="text-[11px] text-muted-foreground shrink-0">
@@ -361,7 +370,8 @@ function AdminPage() {
                       </span>
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </div>

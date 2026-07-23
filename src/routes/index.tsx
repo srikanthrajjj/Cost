@@ -34,6 +34,10 @@ import {
   ThumbsDown,
   ChevronDown,
   ChevronDownIcon,
+  CalendarRange,
+  Wallet,
+  ClipboardList,
+  Milestone,
 } from "lucide-react";
 import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
@@ -48,6 +52,7 @@ import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { SiteNav } from "@/components/SiteNav";
 import { TrustBar } from "@/components/TrustBar";
 import { SiteFooter } from "@/components/SiteFooter";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
 import projKitchen from "@/assets/proj-kitchen.jpg";
@@ -1736,6 +1741,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           fileType: file.type || undefined,
           fileSize: file.size,
           source: "home-chat",
+          includeReport: true,
         },
       });
 
@@ -2348,33 +2354,28 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       </section>
 
       {/* Trust differentiator */}
-      <div className="border-y border-primary/10 bg-[#082A4B]/[0.04]">
-        <div className="container-x py-3.5">
-          <p className="text-center text-sm md:text-[15px] text-ink leading-relaxed max-w-3xl mx-auto">
-            <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
-              <Shield className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
-              <span>
-                Built on{" "}
-                <span className="font-semibold text-primary">regional cost data</span> and{" "}
-                <span className="font-semibold text-primary">real submitted quotes</span>, not a
-                single AI guess.
-              </span>
-              <span className="text-muted-foreground">·</span>
-              <a
-                href="/methodology"
-                className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition"
-              >
-                How it works
-              </a>
-              <span className="text-muted-foreground">·</span>
-              <a
-                href="/quote-analyzer#vs-ai"
-                className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition"
-              >
-                Compare to ChatGPT
-              </a>
-            </span>
+      <div className="border-y border-primary/15 bg-[#082A4B]/[0.06]">
+        <div className="container-x flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-4 text-center sm:flex-nowrap sm:whitespace-nowrap">
+          <Shield className="hidden h-5 w-5 shrink-0 text-primary sm:block" aria-hidden />
+          <p className="text-base font-semibold text-ink sm:text-lg">
+            <span className="font-bold text-primary">Not a single AI guess.</span> Built on
+            regional cost data and real submitted quotes.
           </p>
+          <a
+            href="/methodology"
+            className="text-base font-bold text-primary underline underline-offset-4 transition hover:text-primary/80 sm:text-lg"
+          >
+            How it works
+          </a>
+          <span className="hidden text-primary/40 sm:inline" aria-hidden>
+            ·
+          </span>
+          <a
+            href="/quote-analyzer#vs-ai"
+            className="text-base font-bold text-primary underline underline-offset-4 transition hover:text-primary/80 sm:text-lg"
+          >
+            vs ChatGPT
+          </a>
         </div>
       </div>
 
@@ -3080,121 +3081,217 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
       {/* SMART TOOLS */}
       <section className="container-x py-20">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 mb-5">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             <span className="text-xs font-bold text-accent tracking-widest uppercase">
-              Smart Tools
+              Smart tools
             </span>
           </div>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight max-w-3xl mx-auto">
-            Estimate costs. Review quotes. That's all you need.
+            Built for renovation decisions, not chat prompts
           </h2>
-          <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Start with what matters. Everything else will follow.
+          <p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            ChatGPT can guess a number. CostReno runs structured checks against regional cost data
+            and real quote patterns, then shows what looks high, missing, or risky.
+          </p>
+          <p className="mt-3 text-sm font-semibold text-primary">
+            <a
+              href="/quote-analyzer#vs-ai"
+              className="underline underline-offset-4 hover:text-primary/80 transition"
+            >
+              See how we differ from ChatGPT
+            </a>
+            <span className="mx-2 text-primary/30">·</span>
+            <a
+              href="/methodology"
+              className="underline underline-offset-4 hover:text-primary/80 transition"
+            >
+              How it works
+            </a>
           </p>
         </div>
 
-        {/* Unified Tools Grid — live tools only */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
-          {/* Cost Estimator - Active */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-6 h-6 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="4" y="3" width="20" height="22" rx="3" />
-                <rect x="7" y="6" width="14" height="5" rx="1.5" />
-                <line x1="8" y1="22" x2="8" y2="19" strokeWidth="2.5" />
-                <line x1="12" y1="22" x2="12" y2="17" strokeWidth="2.5" />
-                <line x1="16" y1="22" x2="16" y2="20" strokeWidth="2.5" />
-                <line x1="20" y1="22" x2="20" y2="15" strokeWidth="2.5" />
-              </svg>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+          {/* Cost estimator */}
+          <div className="group relative flex flex-col rounded-2xl border border-primary/15 bg-white p-6 shadow-sm hover:border-primary/35 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80" aria-hidden />
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-primary/8 flex items-center justify-center">
+                <Calculator className="w-6 h-6 text-primary" />
+              </div>
+              <span className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
+                Not ChatGPT
+              </span>
             </div>
-            <h3 className="font-display text-sm font-bold text-ink mb-1.5">Cost Estimator</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
-              Get clear, local cost estimates for your project in minutes.
+            <h3 className="font-display text-lg font-bold text-ink mb-2">Cost estimator</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              ZIP-based ranges from regional labor and material data, not a one-off AI number.
             </p>
+            <ul className="mb-5 space-y-2 flex-1">
+              {[
+                "Uses your ZIP for local pricing context",
+                "Shows ranges, not a fake exact bid",
+                "Labels confidence based on your inputs",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-ink">
+                  <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
             <a
               href="/estimate"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
             >
               Get estimate <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
-          {/* Quote Review - Active */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-6 h-6 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 3h11l5 5v17H6V3z" />
-                <path d="M17 3v5h5" />
-                <circle cx="13" cy="16" r="4" />
-                <line x1="16" y1="19" x2="19.5" y2="22.5" strokeWidth="2.2" />
-              </svg>
+          {/* Quote review */}
+          <div className="group relative flex flex-col rounded-2xl border border-primary/15 bg-white p-6 shadow-sm hover:border-primary/35 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80" aria-hidden />
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-primary/8 flex items-center justify-center">
+                <Search className="w-6 h-6 text-primary" />
+              </div>
+              <span className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
+                Detects gaps
+              </span>
             </div>
-            <h3 className="font-display text-sm font-bold text-ink mb-1.5">Quote Review</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
-              Upload a contractor quote and get AI-powered analysis instantly.
+            <h3 className="font-display text-lg font-bold text-ink mb-2">Quote review</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              Reads contractor quotes line by line and flags what a chat reply usually misses.
             </p>
+            <ul className="mb-5 space-y-2 flex-1">
+              {[
+                "Breaks quotes into line items",
+                "Flags overpriced or vague items",
+                "Spots missing scope before you sign",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-ink">
+                  <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
             <a
               href="/quote-analyzer"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
             >
               Review a quote <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
 
-          {/* Compare Quotes - Active */}
-          <div className="group relative flex flex-col rounded-2xl border border-border bg-white p-6 hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
-            <div className="w-12 h-12 rounded-2xl bg-accent/8 flex items-center justify-center mb-4 group-hover:bg-accent/15 transition-colors duration-300">
-              <svg
-                className="w-6 h-6 text-accent"
-                viewBox="0 0 28 28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M10 3H5a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-5" />
-                <polyline points="14 3 14 11 18 8 22 11 22 3" />
-                <line x1="3" y1="15" x2="25" y2="15" />
-                <line x1="10" y1="19" x2="14" y2="19" />
-                <line x1="14" y1="19" x2="14" y2="23" />
-                <line x1="14" y1="23" x2="18" y2="23" />
-              </svg>
+          {/* Compare quotes */}
+          <div className="group relative flex flex-col rounded-2xl border border-primary/15 bg-white p-6 shadow-sm hover:border-primary/35 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden sm:col-span-2 lg:col-span-1">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-primary/80" aria-hidden />
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-primary/8 flex items-center justify-center">
+                <GitCompare className="w-6 h-6 text-primary" />
+              </div>
+              <span className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
+                Side by side
+              </span>
             </div>
-            <h3 className="font-display text-sm font-bold text-ink mb-1.5">
-              Compare multiple quotes
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
-              Analyze and compare contractor quotes side by side to find the best value.
+            <h3 className="font-display text-lg font-bold text-ink mb-2">Compare multiple quotes</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              Same checklist across every bid, so you compare scope and risk, not just the bottom
+              line.
             </p>
+            <ul className="mb-5 space-y-2 flex-1">
+              {[
+                "Aligns line items across quotes",
+                "Highlights price and scope differences",
+                "Gives questions to ask each contractor",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-ink">
+                  <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
             <a
               href="/compare-quotes"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
             >
               Compare quotes <ArrowRight className="h-3.5 w-3.5" />
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Coming soon: whole-home renovation tools */}
+      <section className="border-y border-border/60 bg-muted/30">
+        <div className="container-x py-20">
+          <div className="text-center mb-12 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-5">
+              <Home className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-bold text-primary tracking-widest uppercase">
+                Coming soon
+              </span>
+            </div>
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight">
+              Tools to manage a whole-home renovation
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+              Estimating and quote checks are step one. Next we are building the tools homeowners
+              actually need when roof, kitchen, bath, and more overlap: sequencing, budget control,
+              clearer scopes, and payment protection.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            {[
+              {
+                icon: CalendarRange,
+                title: "Whole-home planner",
+                why: "Needed when projects overlap",
+                desc: "Prioritize rooms, sequence work so you do not redo finishes, and keep one renovation roadmap.",
+              },
+              {
+                icon: Wallet,
+                title: "Multi-project budget tracker",
+                why: "Stops budget drift",
+                desc: "Track estimate vs quote vs actual spend across every project in one household budget.",
+              },
+              {
+                icon: ClipboardList,
+                title: "Scope of work builder",
+                why: "Makes quotes comparable",
+                desc: "Create a clear scope before you request bids, so contractors price the same work.",
+              },
+              {
+                icon: Milestone,
+                title: "Payment and change-order tracker",
+                why: "Protects your cash flow",
+                desc: "Tie payments to milestones and flag change orders against the quote you already approved.",
+              },
+            ].map((tool) => (
+              <div
+                key={tool.title}
+                className="relative flex flex-col rounded-2xl border border-border bg-white p-5"
+              >
+                <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Soon
+                </span>
+                <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center mb-4">
+                  <tool.icon className="h-5 w-5 text-primary" />
+                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-primary mb-1.5">
+                  {tool.why}
+                </p>
+                <h3 className="font-display text-base font-bold text-ink mb-2">{tool.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1">{tool.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 max-w-md mx-auto text-center">
+            <p className="text-sm font-semibold text-ink mb-3">
+              Get notified when whole-home tools launch
+            </p>
+            <NewsletterSignup source="whole-home-tools-waitlist" compact />
           </div>
         </div>
       </section>

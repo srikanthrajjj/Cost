@@ -1,12 +1,22 @@
 // pdfjs-dist requires browser APIs (DOMMatrix) and cannot run during SSR.
-// We load it entirely from CDN at runtime to prevent bundlers from including it.
+// Load it only in the browser via dynamic import (bundled, not CDN).
 
 export interface ExtractedFileContent {
   text: string;
   pages: number;
 }
 
-export async function extractTextFromFile(file: File): Promise<ExtractedFileContent> {
+type PdfTextItem = {
+  str?: string;
+  transform?: number[];
+  width?: number;
+  hasEOL?: boolean;
+};
+
+export async function extractTextFromFile(
+  file: File,
+  opts?: { maxPages?: number },
+): Promise<ExtractedFileContent> {
   if (typeof window === "undefined") {
     throw new Error("File processing is only available in the browser");
   }
@@ -15,10 +25,10 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFileCont
 
   // Normalize and check file type more robustly
   const normalizedType = fileType.toLowerCase();
-  const isPDF = 
-    normalizedType === "application/pdf" || 
+  const isPDF =
+    normalizedType === "application/pdf" ||
     normalizedType === "application/octet-stream" ||
-    file.name.toLowerCase().endsWith('.pdf');
+    file.name.toLowerCase().endsWith(".pdf");
 
   console.log("[FILE PROCESSOR] Extracting text from file:", {
     name: file.name,
@@ -29,42 +39,38 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFileCont
   });
 
   if (isPDF) {
-    return extractTextFromPDF(file);
+    return extractTextFromPDF(file, { maxPages: opts?.maxPages ?? 3 });
   }
 
-  if (normalizedType === "image/jpeg" || normalizedType === "image/png" || normalizedType === "image/jpg") {
+  if (
+    normalizedType === "image/jpeg" ||
+    normalizedType === "image/png" ||
+    normalizedType === "image/jpg"
+  ) {
     return extractTextFromImage(file);
   }
 
   throw new Error(`Unsupported file type: ${fileType}`);
 }
 
-// Load pdfjs from CDN to completely avoid server-side bundling
+/** Warm PDF.js so the first upload is not blocked on module download. */
+export function preloadPdfjs(): void {
+  if (typeof window === "undefined") return;
+  void loadPdfjs().catch(() => {});
+}
+
 async function loadPdfjs(): Promise<any> {
-  // Check if already loaded
   if ((window as any).__pdfjsLib) return (window as any).__pdfjsLib;
 
-  // Load the script from CDN
-  await new Promise<void>((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
-    script.type = "module";
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load PDF.js from CDN"));
-    document.head.appendChild(script);
-  });
-
-  // pdfjs loaded as ES module via import map won't attach to window, use dynamic import instead
-  const pdfjsLib = await import(
-    /* @vite-ignore */ "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs"
-  );
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+  const pdfjsLib = await import("pdfjs-dist");
+  // Vite resolves the worker URL at build time (much faster than CDN on localhost)
+  const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
   (window as any).__pdfjsLib = pdfjsLib;
   return pdfjsLib;
 }
 
-async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
+async function extractTextFromPDF(file: File, opts?: { maxPages?: number }): Promise<ExtractedFileContent> {
   try {
     const pdfjsLib = await loadPdfjs();
 
@@ -77,17 +83,18 @@ async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
       disableStream: true,
     }).promise;
 
-    console.log("[FILE PROCESSOR] PDF numPages:", pdf.numPages);
+    const maxPages = Math.min(pdf.numPages, opts?.maxPages ?? pdf.numPages);
+    console.log("[FILE PROCESSOR] PDF numPages:", pdf.numPages, "reading:", maxPages);
 
     let fullText = "";
     const pageTexts: string[] = [];
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
       const page = await pdf.getPage(pageNum);
       const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item: any) => item.str || "").join(" ");
+      const pageText = rebuildPdfPageText(textContent.items as PdfTextItem[]);
       pageTexts.push(pageText);
-      fullText += pageText + " ";
+      fullText += pageText + "\n";
     }
 
     if (pdf.destroy) {
@@ -107,6 +114,52 @@ async function extractTextFromPDF(file: File): Promise<ExtractedFileContent> {
       `Failed to extract PDF text: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
+}
+
+function rebuildPdfPageText(items: PdfTextItem[]): string {
+  const positioned = items
+    .map((item, index) => {
+      const text = String(item?.str ?? "").replace(/\s+/g, " ").trim();
+      const transform = item?.transform ?? [];
+      return {
+        text,
+        x: Number(transform[4] ?? 0),
+        y: Number(transform[5] ?? 0),
+        hasEOL: Boolean(item?.hasEOL),
+        index,
+      };
+    })
+    .filter((item) => item.text.length > 0);
+
+  if (positioned.length === 0) return "";
+
+  const rows: Array<{ y: number; items: typeof positioned }> = [];
+
+  for (const entry of positioned) {
+    const row = rows.find((candidate) => Math.abs(candidate.y - entry.y) <= 2.5);
+    if (row) {
+      row.items.push(entry);
+      if (entry.hasEOL) {
+        row.y = entry.y;
+      }
+      continue;
+    }
+
+    rows.push({ y: entry.y, items: [entry] });
+  }
+
+  return rows
+    .sort((a, b) => b.y - a.y)
+    .map((row) =>
+      row.items
+        .sort((a, b) => (Math.abs(a.x - b.x) <= 2 ? a.index - b.index : a.x - b.x))
+        .map((item) => item.text)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean)
+    .join("\n");
 }
 
 async function extractTextFromImage(file: File): Promise<ExtractedFileContent> {

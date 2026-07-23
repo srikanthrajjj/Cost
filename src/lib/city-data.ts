@@ -106,6 +106,39 @@ export function getAllCities(): City[] {
   return citiesData as City[];
 }
 
+/** Match a US ZIP to a seeded metro using zip prefix (longest match wins). */
+export function findCityByZip(zip: string): City | undefined {
+  const digits = zip.replace(/\D/g, "");
+  if (digits.length < 3) return undefined;
+
+  let best: City | undefined;
+  let bestLen = 0;
+
+  for (const city of getAllCities()) {
+    const prefix = String(city.zipPrefix || "").replace(/\D/g, "");
+    if (!prefix) continue;
+    for (const len of [5, 4, 3] as const) {
+      if (prefix.length < len || digits.length < len) continue;
+      if (digits.startsWith(prefix.slice(0, len)) && len > bestLen) {
+        best = city;
+        bestLen = len;
+      }
+    }
+  }
+
+  return best;
+}
+
+export function findCityByName(cityName: string, stateAbbr?: string): City | undefined {
+  const name = cityName.trim().toLowerCase();
+  if (!name) return undefined;
+  return getAllCities().find((c) => {
+    if (c.city.toLowerCase() !== name) return false;
+    if (stateAbbr && c.stateAbbr.toUpperCase() !== stateAbbr.toUpperCase()) return false;
+    return true;
+  });
+}
+
 export function getAllCategories(): Category[] {
   return categoriesData as Category[];
 }

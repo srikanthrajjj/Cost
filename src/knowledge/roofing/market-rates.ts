@@ -278,18 +278,43 @@ export function estimateRoofingMarketPrice(
   qty: number,
   unit: string,
 ): number {
+  return estimateRoofingMarketRange(itemName, qty, unit)?.mid ?? 0;
+}
+
+export type MarketPriceRange = {
+  low: number;
+  mid: number;
+  high: number;
+  rateId: string;
+  label: string;
+};
+
+/**
+ * Estimate market low / mid / high totals for a line item.
+ * Returns null when qty/unit are missing or incompatible.
+ */
+export function estimateRoofingMarketRange(
+  itemName: string,
+  qty: number,
+  unit: string,
+): MarketPriceRange | null {
   const rate = findRoofingMarketRate(itemName);
-  if (!rate) return 0;
+  if (!rate) return null;
 
-  const mid = (rate.low + rate.high) / 2;
   const normalizedQty = normalizeQtyToRateUnit(qty, unit, rate.unit);
+  if (!(normalizedQty > 0)) return null;
 
-  if (normalizedQty > 0) {
-    return normalizedQty * mid;
-  }
+  const low = normalizedQty * rate.low;
+  const high = normalizedQty * rate.high;
+  const mid = (low + high) / 2;
 
-  // Unknown/incompatible units: do not invent a comparable total
-  return 0;
+  return {
+    low,
+    mid,
+    high,
+    rateId: rate.id,
+    label: rate.label,
+  };
 }
 
 /** Vendor vs market totals are only comparable within a sane magnitude band. */

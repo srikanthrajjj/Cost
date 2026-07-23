@@ -31,6 +31,12 @@ export interface AnalyzeQuoteFullOptions {
   onStageChange?: (stage: QuotePipelineStage) => void;
   /** Fired when an AI call is being retried after a transient failure. */
   onRetry?: OpenRouterCallOptions["onRetry"];
+  /**
+   * Generate the long AI narrative report.
+   * Default false: scorecard/analysis returns faster (extract + match + analyze only).
+   * Set true for chat/narration flows that display `report`.
+   */
+  includeReport?: boolean;
 }
 
 export async function analyzeQuoteFull(
@@ -38,10 +44,35 @@ export async function analyzeQuoteFull(
   apiKey: string,
   options: AnalyzeQuoteFullOptions = {},
 ): Promise<QuoteAnalysisResult> {
-  const { signal, onStageChange, onRetry } = options;
+  const { signal, onStageChange, onRetry, includeReport = false } = options;
 
   onStageChange?.("extracting");
   const extraction = await extractQuote(rawText, apiKey, { signal, onRetry });
+
+  return buildQuoteAnalysisFromExtraction(extraction, {
+    apiKey,
+    signal,
+    onStageChange,
+    onRetry,
+    includeReport,
+  });
+}
+
+/**
+ * Fast path after extraction: local match + analyze (no LLM).
+ * Use this for the "advanced report" step after details are already fetched.
+ */
+export async function buildQuoteAnalysisFromExtraction(
+  extraction: QuoteExtraction,
+  options: {
+    apiKey?: string;
+    signal?: AbortSignal;
+    onStageChange?: (stage: QuotePipelineStage) => void;
+    onRetry?: OpenRouterCallOptions["onRetry"];
+    includeReport?: boolean;
+  } = {},
+): Promise<QuoteAnalysisResult> {
+  const { apiKey, signal, onStageChange, onRetry, includeReport = false } = options;
 
   onStageChange?.("matching");
   const { matchedMaterials, matchedScopeItems, unmatchedMaterials, unmatchedScopeItems } =
@@ -56,8 +87,11 @@ export async function analyzeQuoteFull(
     unmatchedScopeItems,
   );
 
-  onStageChange?.("reporting");
-  const report = await generateReport(analysis, apiKey, { signal, onRetry });
+  let report = "";
+  if (includeReport && apiKey) {
+    onStageChange?.("reporting");
+    report = await generateReport(analysis, apiKey, { signal, onRetry });
+  }
 
   return {
     extraction,

@@ -813,40 +813,63 @@ export async function generateReport(
     ${(data.lineItems || []).length > 0 ? `
     <div class="section">
       <div class="section-title">
-        <span>📊</span> Line items (${(data.lineItems || []).length})
+        <span>📊</span> Market scorecard (${(data.lineItems || []).length} line items)
       </div>
       <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">
-        Market averages appear only when quantity and unit data are reliable enough for a fair comparison.
+        Quoted price vs market low / mid / high. Ranges appear only when quantity and unit data are reliable enough for a fair comparison. This is not a single AI guess.
       </p>
+      ${(() => {
+        const items = data.lineItems || [];
+        const scored = items.filter((item: any) => item.marketComparable && Number(item.marketMid || item.marketPrice || 0) > 0);
+        const above = scored.filter((item: any) => item.marketStatus === 'Above market').length;
+        const within = scored.filter((item: any) => item.marketStatus === 'Within range').length;
+        const below = scored.filter((item: any) => item.marketStatus === 'Below market').length;
+        if (scored.length === 0) return '';
+        return `
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;">
+          <span style="padding:4px 10px;border-radius:999px;background:#e8f7ef;color:#03A44D;font-size:11px;font-weight:700;">${within} within range</span>
+          <span style="padding:4px 10px;border-radius:999px;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;">${above} above market</span>
+          <span style="padding:4px 10px;border-radius:999px;background:#fffbeb;color:#b45309;font-size:11px;font-weight:700;">${below} below market</span>
+        </div>`;
+      })()}
       <table class="comparison-table">
         <thead>
           <tr>
             <th>Item</th>
             <th>Qty</th>
-            <th>Unit</th>
-            <th>Vendor price</th>
-            <th>Market avg</th>
-            <th>Difference</th>
+            <th>Quoted</th>
+            <th>Market low</th>
+            <th>Market mid</th>
+            <th>Market high</th>
+            <th>Score</th>
           </tr>
         </thead>
         <tbody>
           ${(data.lineItems || []).map((item: any) => {
             const vendorPrice = Number(item.price || item.totalPrice || 0);
-            const rawMarket = Number(item.marketPrice || item.typicalCostMid || 0);
-            const marketComparable = item.marketComparable === true && rawMarket > 0 && vendorPrice > 0;
-            const marketPrice = marketComparable ? rawMarket : 0;
-            const diff = marketComparable ? vendorPrice - marketPrice : 0;
-            const diffPct = marketComparable ? ((diff / marketPrice) * 100).toFixed(1) : null;
+            const marketMid = Number(item.marketMid || item.marketPrice || 0);
+            const marketLow = Number(item.marketLow || 0);
+            const marketHigh = Number(item.marketHigh || 0);
+            const marketComparable = item.marketComparable === true && marketMid > 0 && vendorPrice > 0;
+            const status = marketComparable
+              ? (item.marketStatus || (vendorPrice > marketHigh ? 'Above market' : vendorPrice < marketLow ? 'Below market' : 'Within range'))
+              : 'No market data';
+            const statusColor = status === 'Above market'
+              ? '#dc2626'
+              : status === 'Below market'
+                ? '#b45309'
+                : status === 'Within range'
+                  ? '#03A44D'
+                  : '#6b7280';
             return `
             <tr>
               <td>${item.name || item.description || '—'}</td>
-              <td>${item.qty || item.quantity || '—'}</td>
-              <td>${item.unit || '—'}</td>
+              <td>${item.qty || item.quantity || '—'} ${item.unit || ''}</td>
               <td>${vendorPrice > 0 ? fmt(vendorPrice) : '—'}</td>
-              <td>${marketPrice > 0 ? fmt(Math.round(marketPrice)) : '—'}</td>
-              <td class="${marketComparable ? (diff > 0 ? 'diff-negative' : diff < 0 ? 'diff-positive' : '') : ''}">
-                ${marketComparable && diff !== 0 ? (diff > 0 ? '+' : '') + fmt(Math.round(diff)) + ' (' + diffPct + '%)' : '—'}
-              </td>
+              <td>${marketComparable && marketLow > 0 ? fmt(Math.round(marketLow)) : '—'}</td>
+              <td>${marketComparable ? fmt(Math.round(marketMid)) : '—'}</td>
+              <td>${marketComparable && marketHigh > 0 ? fmt(Math.round(marketHigh)) : '—'}</td>
+              <td style="color:${statusColor};font-weight:700;">${status}</td>
             </tr>
             `;
           }).join('')}

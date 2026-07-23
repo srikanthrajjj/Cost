@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DEFAULT_OG_IMAGE } from "../lib/seo";
 import { VisitorTracker } from "../components/VisitorTracker";
+import { SiteFeedbackFab } from "../components/SiteFeedbackFab";
 
 function NotFoundComponent() {
   return (
@@ -177,6 +178,7 @@ function RootComponent() {
       <VisitorTracker />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <SiteFeedbackFab />
     </QueryClientProvider>
   );
 }

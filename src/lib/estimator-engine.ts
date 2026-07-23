@@ -1,3 +1,5 @@
+import { findCityByName, findCityByZip } from "@/lib/city-data";
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type ProjectType =
@@ -214,6 +216,58 @@ const PERMIT_REQUIRED: Record<ProjectType, boolean> = {
   electrical: true,
 };
 
+export function resolveRegionalMultiplier(answers: {
+  zipCode?: string;
+  city?: string;
+  state?: string;
+}): {
+  multiplier: number;
+  source: "city" | "state" | "national";
+  label: string;
+} {
+  const zip = answers.zipCode?.replace(/\D/g, "");
+  if (zip && zip.length >= 3) {
+    const metro = findCityByZip(zip);
+    if (metro) {
+      return {
+        multiplier: metro.laborCostMultiplier,
+        source: "city",
+        label: `${metro.city}, ${metro.stateAbbr}`,
+      };
+    }
+  }
+
+  if (answers.city) {
+    const metro = findCityByName(answers.city, answers.state);
+    if (metro) {
+      return {
+        multiplier: metro.laborCostMultiplier,
+        source: "city",
+        label: `${metro.city}, ${metro.stateAbbr}`,
+      };
+    }
+  }
+
+  const state = answers.state?.toUpperCase();
+  if (state && STATE_MULTIPLIERS[state]) {
+    return {
+      multiplier: STATE_MULTIPLIERS[state],
+      source: "state",
+      label: state,
+    };
+  }
+
+  return { multiplier: 1, source: "national", label: "US average" };
+}
+
+/**
+ * Instant local estimate from in-code base costs + regional multipliers.
+ * No LLM and no database lookup.
+ */
+export function lookupInstantEstimate(answers: EstimatorAnswers): LiveEstimate {
+  return calculateEstimate(answers);
+}
+
 export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   const project = answers.projectType;
   if (!project) {
@@ -232,9 +286,12 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   let { low, mid, high } = { ...BASE_COSTS[project] };
   let confidence = 20;
 
-  // ── Location multiplier
-  const regionMult = answers.state ? (STATE_MULTIPLIERS[answers.state] ?? 1.0) : 1.0;
-  if (answers.zipCode || answers.city) confidence += 10;
+  // ── Location multiplier (city ZIP when available, else state, else national)
+  const region = resolveRegionalMultiplier(answers);
+  const regionMult = region.multiplier;
+  if (answers.zipCode || answers.city || answers.state) confidence += 10;
+  if (region.source === "city") confidence += 8;
+  else if (region.source === "state") confidence += 4;
 
   // ── Square footage scaling
   const sqft = answers.squareFootage ?? 2000;

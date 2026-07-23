@@ -23,7 +23,7 @@ import {
   HelpCircle,
   Lock,
 } from "lucide-react";
-import { calculateEstimate } from "@/lib/estimator-engine";
+import { calculateEstimate, resolveRegionalMultiplier } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
@@ -1403,6 +1403,7 @@ function FinalReport({
     ...b,
     color: BREAKDOWN_COLORS[i] ?? "#e5e7eb",
   }));
+  const region = resolveRegionalMultiplier(answers);
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
       {/* Hero card */}
@@ -1417,12 +1418,14 @@ function FinalReport({
         <div className="mt-2 text-white/50 text-sm">
           Typical range: {fmt(estimate.low)} – {fmt(estimate.high)}
         </div>
-        {answers.city && (
-          <div className="mt-1 text-white/30 text-xs">
-            Pricing based on {answers.city}
-            {answers.state ? `, ${answers.state}` : ""}
-          </div>
-        )}
+        <div className="mt-1 text-white/30 text-xs">
+          Instant lookup for {region.label}
+          {region.source === "city"
+            ? " (metro rate)"
+            : region.source === "state"
+              ? " (state rate)"
+              : " (national average)"}
+        </div>
         <div className="mt-6 grid grid-cols-3 gap-3">
           {[
             { label: "Timeline", val: estimate.timeline },
@@ -1810,6 +1813,14 @@ function EstimatorPage() {
                   {currentQuestion.id === "zipCode" && answers.city && (
                     <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 text-accent text-xs font-semibold">
                       <CheckCircle2 className="h-4 w-4" /> Detected: {answers.city}, {answers.state}
+                      {(() => {
+                        const region = resolveRegionalMultiplier(answers);
+                        return region.source === "city"
+                          ? ` · Instant metro rate for ${region.label}`
+                          : region.source === "state"
+                            ? ` · Instant state rate (${region.label})`
+                            : "";
+                      })()}
                     </div>
                   )}
                   {currentQuestion.id === "zipCode" && zipError && (
