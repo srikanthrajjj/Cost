@@ -950,10 +950,10 @@ function QuoteAnalyzerPage() {
             </div>
           </div>
 
-          {/* CostReno vs Others - Simplified */}
-          <div className="mt-16 pt-12 border-t border-border">
+          {/* CostReno vs others */}
+          <div id="vs-ai" className="mt-16 pt-12 border-t border-border scroll-mt-24">
             <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
-              Why CostReno vs. Generic AI?
+              Why CostReno vs generic AI?
             </h2>
             <p className="text-sm text-muted-foreground text-center mb-8 max-w-md mx-auto">
               Built specifically for contractor quotes. Not general chat.

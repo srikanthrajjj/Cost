@@ -1557,6 +1557,10 @@ function EstimatorPage() {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     const baseAnswers: Record<string, unknown> = stored ? JSON.parse(stored) : {};
+    const savedZip = localStorage.getItem("costreno_zip");
+    if (savedZip && /^\d{5}$/.test(savedZip) && !baseAnswers.zipCode) {
+      baseAnswers.zipCode = savedZip;
+    }
     const preselected = urlProject || sessionStorage.getItem("costreno_preselected_project");
     if (preselected) {
       sessionStorage.removeItem("costreno_preselected_project");

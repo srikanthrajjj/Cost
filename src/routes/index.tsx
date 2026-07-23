@@ -1125,9 +1125,12 @@ function Landing() {
   const [quoteDebugInfo, setQuoteDebugInfo] = useState<QuoteAnalysisResult | null>(null);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [userLocation, setUserLocation] = useState<string | null>(null);
-  const [locationDetected, setLocationDetected] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
-  const [manualCity, setManualCity] = useState("");
+  const [manualZip, setManualZip] = useState("");
+  const [resolvedPlace, setResolvedPlace] = useState<string | null>(null);
+  const [zipPromptError, setZipPromptError] = useState<string | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [isSavingLocation, setIsSavingLocation] = useState(false);
 
   // Abort any in-flight quote analysis if the component unmounts (e.g. user
   // navigates away) so we don't keep retrying/updating state on a dead widget.
@@ -1988,28 +1991,157 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     return () => clearTimeout(timerRef.current);
   }, [searchQuery, termIdx]);
 
-  useEffect(() => {
-    const savedCity = localStorage.getItem("costreno_city");
-    if (savedCity) {
-      setUserLocation(savedCity);
-      setLocationDetected(true);
+  const applyDetectedGeo = (data: {
+    city?: string;
+    region_code?: string;
+    region?: string;
+    postal?: string;
+  }) => {
+    if (data.city) {
+      const label = [data.city, data.region_code || data.region].filter(Boolean).join(", ");
+      setUserLocation(label);
+      setResolvedPlace(label);
+      localStorage.setItem("costreno_city", label);
+    }
+    const postal =
+      typeof data.postal === "string" ? data.postal.replace(/\D/g, "").slice(0, 5) : "";
+    if (postal.length === 5) {
+      setManualZip(postal);
+      setZipPromptError(null);
+    }
+  };
+
+  const detectLocationFromIp = async (opts?: { autoSave?: boolean }) => {
+    setIsDetectingLocation(true);
+    setZipPromptError(null);
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (!res.ok) throw new Error("detect failed");
+      const data = await res.json();
+      if (!data?.city && !data?.postal) throw new Error("no location");
+      applyDetectedGeo(data);
+      const postal =
+        typeof data.postal === "string" ? data.postal.replace(/\D/g, "").slice(0, 5) : "";
+      if (opts?.autoSave && postal.length === 5) {
+        setIsDetectingLocation(false);
+        await saveLocationFromZip(postal);
+        return;
+      }
+      if (opts?.autoSave && postal.length !== 5) {
+        setZipPromptError("We found your area, but not a ZIP. Enter your ZIP code to continue.");
+      }
+    } catch {
+      setZipPromptError("Could not detect your location. Enter your ZIP code instead.");
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  };
+
+  const resolveZipToPlace = async (zip: string): Promise<string | null> => {
+    const res = await fetch(`https://api.zippopotam.us/us/${zip}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const place = data?.places?.[0];
+    if (!place) return null;
+    return `${place["place name"]}, ${place["state abbreviation"]}`;
+  };
+
+  const saveLocationFromZip = async (zipRaw: string) => {
+    const zip = zipRaw.replace(/\D/g, "").slice(0, 5);
+    if (zip.length !== 5) {
+      setZipPromptError("Enter a valid 5-digit ZIP code");
       return;
     }
-    fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.city) {
-          setUserLocation(data.city);
-          setLocationDetected(true);
-          localStorage.setItem("costreno_city", data.city);
-        } else {
+    setIsSavingLocation(true);
+    setZipPromptError(null);
+    try {
+      const label = await resolveZipToPlace(zip);
+      if (!label) {
+        setZipPromptError("ZIP code not found. Please enter a valid US ZIP code.");
+        setResolvedPlace(null);
+        return;
+      }
+      setResolvedPlace(label);
+      setUserLocation(label);
+      localStorage.setItem("costreno_city", label);
+      localStorage.setItem("costreno_zip", zip);
+      localStorage.setItem("costreno_location_confirmed", "1");
+      localStorage.removeItem("costreno_location_dismissed");
+      setShowLocationPrompt(false);
+    } catch {
+      setZipPromptError("Could not verify that ZIP. Try again.");
+    } finally {
+      setIsSavingLocation(false);
+    }
+  };
+
+  useEffect(() => {
+    const savedCity = localStorage.getItem("costreno_city");
+    const savedZip = localStorage.getItem("costreno_zip");
+    const confirmed = localStorage.getItem("costreno_location_confirmed") === "1";
+    const dismissed = localStorage.getItem("costreno_location_dismissed") === "1";
+
+    if (savedCity) setUserLocation(savedCity);
+    if (savedZip) setManualZip(savedZip);
+
+    if (confirmed || dismissed) return;
+
+    let cancelled = false;
+    void (async () => {
+      setIsDetectingLocation(true);
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (!res.ok) throw new Error("detect failed");
+        const data = await res.json();
+        if (cancelled) return;
+        applyDetectedGeo(data);
+      } catch {
+        // Modal still opens so the user can enter a ZIP manually.
+      } finally {
+        if (!cancelled) {
+          setIsDetectingLocation(false);
           setShowLocationPrompt(true);
         }
-      })
-      .catch(() => {
-        setShowLocationPrompt(true);
-      });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!showLocationPrompt) return;
+    const zip = manualZip.replace(/\D/g, "").slice(0, 5);
+    if (zip.length !== 5) {
+      if (manualZip.length > 0 && zip.length < 5) setResolvedPlace(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void resolveZipToPlace(zip)
+        .then((label) => {
+          if (cancelled) return;
+          if (label) {
+            setResolvedPlace(label);
+            setZipPromptError(null);
+          } else {
+            setResolvedPlace(null);
+            setZipPromptError("ZIP code not found. Please enter a valid US ZIP code.");
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setResolvedPlace(null);
+            setZipPromptError("Could not verify that ZIP. Try again.");
+          }
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [manualZip, showLocationPrompt]);
 
   const projectData = [
     {
@@ -2214,6 +2346,37 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           </div>
         </div>
       </section>
+
+      {/* Trust differentiator */}
+      <div className="border-y border-primary/10 bg-[#082A4B]/[0.04]">
+        <div className="container-x py-3.5">
+          <p className="text-center text-sm md:text-[15px] text-ink leading-relaxed max-w-3xl mx-auto">
+            <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
+              <Shield className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden />
+              <span>
+                Built on{" "}
+                <span className="font-semibold text-primary">regional cost data</span> and{" "}
+                <span className="font-semibold text-primary">real submitted quotes</span>, not a
+                single AI guess.
+              </span>
+              <span className="text-muted-foreground">·</span>
+              <a
+                href="/methodology"
+                className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition"
+              >
+                How it works
+              </a>
+              <span className="text-muted-foreground">·</span>
+              <a
+                href="/quote-analyzer#vs-ai"
+                className="font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition"
+              >
+                Compare to ChatGPT
+              </a>
+            </span>
+          </p>
+        </div>
+      </div>
 
       <TrustBar region={userLocation ?? "your area"} />
 
@@ -2738,7 +2901,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowLocationPrompt(false)}
+            onClick={() => {
+              localStorage.setItem("costreno_location_dismissed", "1");
+              setShowLocationPrompt(false);
+            }}
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
@@ -2746,49 +2912,84 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 <MapPin className="h-7 w-7 text-accent" />
               </div>
               <h2 className="font-display text-xl font-bold text-ink text-center">
-                Set Your Location
+                Set your location
               </h2>
               <p className="text-sm text-muted-foreground text-center mt-2 leading-relaxed">
-                Your location helps us provide{" "}
+                Your ZIP helps us provide{" "}
                 <span className="font-semibold text-ink">clear, local cost estimates</span> for your
-                home projects. Construction costs vary significantly by region due to labor rates,
-                material availability, and local regulations.
+                home projects. Construction costs vary by region due to labor rates, material
+                availability, and local regulations.
               </p>
               <div className="mt-5 space-y-3">
+                {(isDetectingLocation || resolvedPlace) && (
+                  <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-sm text-ink">
+                    {isDetectingLocation
+                      ? "Detecting your location…"
+                      : `Detected: ${resolvedPlace}`}
+                  </div>
+                )}
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
-                    value={manualCity}
-                    onChange={(e) => setManualCity(e.target.value)}
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    maxLength={5}
+                    value={manualZip}
+                    onChange={(e) => {
+                      const next = e.target.value.replace(/\D/g, "").slice(0, 5);
+                      setManualZip(next);
+                      setZipPromptError(null);
+                    }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && manualCity.trim()) {
-                        setUserLocation(manualCity.trim());
-                        setShowLocationPrompt(false);
-                        localStorage.setItem("costreno_city", manualCity.trim());
+                      if (e.key === "Enter" && manualZip.trim().length === 5 && !isSavingLocation) {
+                        void saveLocationFromZip(manualZip);
                       }
                     }}
-                    placeholder="Enter your city (e.g. Austin, TX)"
+                    placeholder="Enter ZIP code"
+                    aria-label="ZIP code"
                     className="w-full h-11 rounded-xl border border-border bg-background pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition"
                   />
                 </div>
+                {zipPromptError && (
+                  <p className="text-xs text-red-600" role="alert">
+                    {zipPromptError}
+                  </p>
+                )}
                 <button
-                  onClick={() => {
-                    if (manualCity.trim()) {
-                      setUserLocation(manualCity.trim());
-                      setShowLocationPrompt(false);
-                      localStorage.setItem("costreno_city", manualCity.trim());
-                    }
-                  }}
-                  className="w-full h-11 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition"
+                  type="button"
+                  onClick={() => void saveLocationFromZip(manualZip)}
+                  disabled={manualZip.replace(/\D/g, "").length !== 5 || isSavingLocation}
+                  className="w-full h-11 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition disabled:opacity-50"
                 >
-                  Save Location
+                  {isSavingLocation ? "Saving…" : "Save location"}
                 </button>
                 <button
-                  onClick={() => setShowLocationPrompt(false)}
+                  type="button"
+                  onClick={() => {
+                    const zip = manualZip.replace(/\D/g, "").slice(0, 5);
+                    if (zip.length === 5) {
+                      void saveLocationFromZip(zip);
+                      return;
+                    }
+                    void detectLocationFromIp({ autoSave: true });
+                  }}
+                  disabled={isDetectingLocation || isSavingLocation}
+                  className="w-full h-11 rounded-lg border border-border text-sm font-medium text-ink hover:bg-muted/50 transition disabled:opacity-50"
+                >
+                  {isDetectingLocation || isSavingLocation
+                    ? "Detecting…"
+                    : "Use my detected location"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem("costreno_location_dismissed", "1");
+                    setShowLocationPrompt(false);
+                  }}
                   className="w-full h-11 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
                 >
-                  Maybe Later
+                  Maybe later
                 </button>
               </div>
             </div>
@@ -2799,22 +3000,14 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       {/* POPULAR PROJECTS */}
       <section className="container-x py-20 overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-[1.08] mb-4">
-                What project are you planning?
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                Explore renovation projects, compare local costs, and get expert guidance before you
-                start.
-              </p>
-            </div>
-            <a
-              href="/estimate"
-              className="hidden md:inline-flex items-center gap-1.5 px-5 py-2.5 rounded-md border border-border text-sm font-semibold text-primary hover:bg-primary/5 transition"
-            >
-              View all projects <ArrowRight className="h-3.5 w-3.5" />
-            </a>
+          <div className="mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-[1.08] mb-4">
+              What project are you planning?
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+              Explore renovation projects, compare local costs, and get expert guidance before you
+              start.
+            </p>
           </div>
 
           <div className="relative">
