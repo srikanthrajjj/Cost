@@ -12,7 +12,6 @@ import {
   Sparkles,
   Lock,
   ArrowRight,
-  Star,
   Check,
   TrendingUp,
   Facebook,
@@ -3439,20 +3438,19 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       </section>
 
-      {/* TRUST & REVIEWS */}
+      {/* Trust signals */}
       <section className="container-x py-20">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
-            Trusted by homeowners nationwide
+            Built for clear renovation decisions
           </h2>
           <p className="mt-3 text-sm text-muted-foreground max-w-lg mx-auto">
-            Join thousands of homeowners who saved money and made better renovation decisions with
-            CostReno.
+            Local pricing context, quote checks, and practical guides, so you can hire with more
+            confidence.
           </p>
         </div>
 
-        {/* Trust Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { value: "32", label: "U.S. cities covered" },
             { value: "Free", label: "Core tools" },
@@ -3467,71 +3465,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 {stat.value}
               </div>
               <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Reviews */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[
-            {
-              name: "Sarah M.",
-              location: "Austin, TX",
-              project: "Roof Replacement",
-              text: "CostReno saved me $4,200 on my roof. The quote analyzer found 3 missing items my contractor didn't include. I went back and got them added at no extra charge.",
-              rating: 5,
-            },
-            {
-              name: "James R.",
-              location: "Denver, CO",
-              project: "Kitchen Remodel",
-              text: "I had no idea my kitchen quote was $8K over market rate until I used the estimator. Got a second quote and saved a fortune. This tool pays for itself instantly.",
-              rating: 5,
-            },
-            {
-              name: "Maria L.",
-              location: "Tampa, FL",
-              project: "HVAC System",
-              text: "The AI caught that my HVAC quote was missing the permit fee and ductwork inspection. Would have been a $1,500 surprise after signing. Incredible tool.",
-              rating: 5,
-            },
-            {
-              name: "David K.",
-              location: "Portland, OR",
-              project: "Bathroom Remodel",
-              text: "Simple, fast, and accurate. I compared 3 contractor bids using CostReno and felt confident picking the right one. No more guessing or overpaying.",
-              rating: 5,
-            },
-          ].map((review) => (
-            <div
-              key={review.name}
-              className="flex flex-col rounded-2xl border border-border bg-white p-5"
-            >
-              {/* Stars */}
-              <div className="flex items-center gap-0.5 mb-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star
-                    key={i}
-                    className={`h-3.5 w-3.5 ${i <= review.rating ? "text-amber-400 fill-amber-400" : "text-muted"}`}
-                  />
-                ))}
-              </div>
-              {/* Quote */}
-              <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
-                "{review.text}"
-              </p>
-              {/* Author */}
-              <div className="flex items-center gap-3 pt-3 border-t border-border">
-                <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-xs font-bold text-accent">
-                  {review.name.charAt(0)}
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-ink">{review.name}</div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {review.location} · {review.project}
-                  </div>
-                </div>
-              </div>
             </div>
           ))}
         </div>
