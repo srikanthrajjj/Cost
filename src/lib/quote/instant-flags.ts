@@ -85,8 +85,13 @@ export function detectInstantQuoteFlags(
   const hasPermitField = extraction.permits.length > 0;
   const hasPermitMention = hasPermitField || mentionsPermit(blob);
   const permitShifted = permitExcludedOrOwnerPaid(blob);
+  const permitLine = [...extraction.materials, ...extraction.scopeItems].find((i) =>
+    /\bpermits?\b/i.test(i.name),
+  );
+  const permitFeeMissing =
+    Boolean(permitLine) && !(permitLine && permitLine.totalPrice > 0);
 
-  if (!hasPermitMention) {
+  if (!hasPermitMention && !permitLine) {
     flags.push({
       id: "instant-missing-permit",
       severity: "high",
@@ -97,17 +102,22 @@ export function detectInstantQuoteFlags(
       recommendation:
         "Ask who pulls the permit, whether the fee is included, and what happens if inspection fails.",
     });
-  } else if (permitShifted) {
+  } else if (permitShifted || permitFeeMissing) {
     flags.push({
       id: "instant-permit-owner",
       severity: "high",
       kind: "missing_permit",
-      title: "Permit responsibility pushed to you",
-      explanation:
-        "The quote shifts permit work or cost to the homeowner, or says permits are not included. That is a common place surprise costs show up.",
+      title: permitFeeMissing
+        ? "Permit listed without a fee"
+        : "Permit responsibility pushed to you",
+      explanation: permitFeeMissing
+        ? "A permit line appears, but no dollar amount is included. That usually means the city fee (and sometimes filing) will be billed later or left to you."
+        : "The quote shifts permit work or cost to the homeowner, or says permits are not included. That is a common place surprise costs show up.",
       recommendation:
         "Confirm the exact permit fee, who files it, and whether inspection scheduling is included.",
-      evidence: extraction.permits[0] || "Permit language found in quote text",
+      evidence: permitLine
+        ? `${permitLine.name}${permitLine.totalPrice ? ` ($${permitLine.totalPrice})` : " ($0)"}`
+        : extraction.permits[0] || "Permit language found in quote text",
     });
   }
 
