@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GuideArticle } from "@/components/guides/GuideArticle";
-import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import {
+  DEFAULT_OG_IMAGE,
+  absoluteUrl,
+  buildArticleSchema,
+  buildBreadcrumbList,
+  buildFaqSchema,
+} from "@/lib/seo";
 
 const FAQS = [
   {
@@ -16,6 +22,8 @@ const FAQS = [
     a: "Neither should be treated as a trivet. Hot pans can damage resins in quartz and can harm sealers or cause thermal shock risk on stone. Use protective pads for both.",
   },
 ];
+
+const PATH = "/guides/quartz-vs-granite-countertops";
 
 export const Route = createFileRoute("/guides/quartz-vs-granite-countertops")({
   component: QuartzVsGraniteGuide,
@@ -37,38 +45,38 @@ export const Route = createFileRoute("/guides/quartz-vs-granite-countertops")({
           "A practical comparison of quartz and granite for kitchen remodels, including cost drivers and maintenance differences.",
       },
       { property: "og:type", content: "article" },
-      {
-        property: "og:url",
-        content: "https://costreno.com/guides/quartz-vs-granite-countertops",
-      },
+      { property: "og:url", content: absoluteUrl(PATH) },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [
-      { rel: "canonical", href: "https://costreno.com/guides/quartz-vs-granite-countertops" },
-    ],
+    links: [{ rel: "canonical", href: absoluteUrl(PATH) }],
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: "Quartz vs granite countertops",
-          dateModified: "2026-07-22",
-          author: { "@type": "Organization", name: "CostReno" },
-        }),
+        children: JSON.stringify(
+          buildArticleSchema({
+            headline: "Quartz vs granite countertops",
+            description:
+              "A practical comparison of quartz and granite for kitchen remodels, including cost drivers and maintenance differences.",
+            path: PATH,
+            datePublished: "2026-07-22",
+            dateModified: "2026-07-22",
+          }),
+        ),
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: FAQS.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }),
+        children: JSON.stringify(buildFaqSchema(FAQS)),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbList([
+            { name: "Home", path: "/" },
+            { name: "Guides", path: "/guides" },
+            { name: "Quartz vs granite", path: PATH },
+          ]),
+        ),
       },
     ],
   }),

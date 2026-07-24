@@ -23,9 +23,9 @@ export const Route = createFileRoute("/locations/$state")({
         { name: "robots", content: "index, follow" },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
-        { property: "og:url", content: `https://costreno.com/locations/${params.state}` },
+        { property: "og:url", content: `https://www.costreno.com/locations/${params.state}` },
       ],
-      links: [{ rel: "canonical", href: `https://costreno.com/locations/${params.state}` }],
+      links: [{ rel: "canonical", href: `https://www.costreno.com/locations/${params.state}` }],
     };
   },
 });

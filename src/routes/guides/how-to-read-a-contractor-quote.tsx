@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GuideArticle } from "@/components/guides/GuideArticle";
-import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import {
+  DEFAULT_OG_IMAGE,
+  absoluteUrl,
+  buildArticleSchema,
+  buildBreadcrumbList,
+  buildFaqSchema,
+} from "@/lib/seo";
 
 const FAQS = [
   {
@@ -16,6 +22,8 @@ const FAQS = [
     a: "Yes for major materials and equipment. Vague terms like standard shingles or quality cabinets make apples-to-apples comparison difficult.",
   },
 ];
+
+const PATH = "/guides/how-to-read-a-contractor-quote";
 
 export const Route = createFileRoute("/guides/how-to-read-a-contractor-quote")({
   component: HowToReadQuoteGuide,
@@ -34,36 +42,38 @@ export const Route = createFileRoute("/guides/how-to-read-a-contractor-quote")({
           "A practical checklist for reading renovation bids: scope, materials, allowances, exclusions, and payment schedules.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/how-to-read-a-contractor-quote" },
+      { property: "og:url", content: absoluteUrl(PATH) },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [
-      { rel: "canonical", href: "https://costreno.com/guides/how-to-read-a-contractor-quote" },
-    ],
+    links: [{ rel: "canonical", href: absoluteUrl(PATH) }],
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: "How to read a contractor quote",
-          dateModified: "2026-07-22",
-          author: { "@type": "Organization", name: "CostReno" },
-          publisher: { "@type": "Organization", name: "CostReno", url: "https://costreno.com" },
-        }),
+        children: JSON.stringify(
+          buildArticleSchema({
+            headline: "How to read a contractor quote",
+            description:
+              "A practical checklist for reading renovation bids: scope, materials, allowances, exclusions, and payment schedules.",
+            path: PATH,
+            datePublished: "2026-07-22",
+            dateModified: "2026-07-22",
+          }),
+        ),
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: FAQS.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }),
+        children: JSON.stringify(buildFaqSchema(FAQS)),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbList([
+            { name: "Home", path: "/" },
+            { name: "Guides", path: "/guides" },
+            { name: "How to read a contractor quote", path: PATH },
+          ]),
+        ),
       },
     ],
   }),

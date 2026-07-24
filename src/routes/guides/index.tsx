@@ -116,10 +116,10 @@ export const Route = createFileRoute("/guides/")({
         content:
           "Browse CostReno guides on renovation costs, quote red flags, and project planning.",
       },
-      { property: "og:url", content: "https://costreno.com/guides" },
+      { property: "og:url", content: "https://www.costreno.com/guides" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/guides" }],
   }),
 });
 

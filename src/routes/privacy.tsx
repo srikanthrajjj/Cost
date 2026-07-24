@@ -15,7 +15,7 @@ export const Route = createFileRoute("/privacy")({
       },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/privacy" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/privacy" }],
   }),
 });
 

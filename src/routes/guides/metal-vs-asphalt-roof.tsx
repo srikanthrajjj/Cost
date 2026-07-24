@@ -38,10 +38,10 @@ export const Route = createFileRoute("/guides/metal-vs-asphalt-roof")({
           "Metal vs asphalt roof full comparison. Costs, lifespan, energy savings, resale value, and which is right for your home. Updated July 2026.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/metal-vs-asphalt-roof" },
+      { property: "og:url", content: "https://www.costreno.com/guides/metal-vs-asphalt-roof" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides/metal-vs-asphalt-roof" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/guides/metal-vs-asphalt-roof" }],
   }),
 });
 
@@ -188,11 +188,11 @@ function MetalVsAsphaltGuide() {
             publisher: {
               "@type": "Organization",
               name: "CostReno",
-              logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" },
+              logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
             },
             datePublished: "2026-07-21",
             dateModified: "2026-07-21",
-            mainEntityOfPage: "https://costreno.com/guides/metal-vs-asphalt-roof",
+            mainEntityOfPage: "https://www.costreno.com/guides/metal-vs-asphalt-roof",
           }),
         }}
       />
@@ -217,12 +217,12 @@ function MetalVsAsphaltGuide() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.costreno.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Guides",
-                item: "https://costreno.com/guides",
+                item: "https://www.costreno.com/guides",
               },
               { "@type": "ListItem", position: 3, name: "Metal vs asphalt roof" },
             ],

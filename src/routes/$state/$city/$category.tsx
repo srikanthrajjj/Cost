@@ -97,7 +97,7 @@ function CityCategoryPage() {
     isPartOf: {
       "@type": "WebSite",
       name: "CostReno",
-      url: "https://costreno.com",
+      url: "https://www.costreno.com",
     },
     about: {
       "@type": "Place",
@@ -126,19 +126,19 @@ function CityCategoryPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://costreno.com/",
+        item: "https://www.costreno.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Locations",
-        item: "https://costreno.com/locations",
+        item: "https://www.costreno.com/locations",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: city.state,
-        item: `https://costreno.com/locations/${city.stateSlug}`,
+        item: `https://www.costreno.com/locations/${city.stateSlug}`,
       },
       {
         "@type": "ListItem",

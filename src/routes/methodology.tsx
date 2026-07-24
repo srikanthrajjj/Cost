@@ -19,10 +19,10 @@ export const Route = createFileRoute("/methodology")({
         content:
           "See how CostReno builds renovation cost estimates from regional data and transparent assumptions.",
       },
-      { property: "og:url", content: "https://costreno.com/methodology" },
+      { property: "og:url", content: "https://www.costreno.com/methodology" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/methodology" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/methodology" }],
   }),
 });
 

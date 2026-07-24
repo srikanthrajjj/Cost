@@ -34,10 +34,10 @@ export const Route = createFileRoute("/guides/inflated-quote-signs")({
           "12 warning signs your contractor quote is inflated. Learn to spot overpriced labor, padded materials, vague scope, and hidden fees before signing.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/inflated-quote-signs" },
+      { property: "og:url", content: "https://www.costreno.com/guides/inflated-quote-signs" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides/inflated-quote-signs" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/guides/inflated-quote-signs" }],
   }),
 });
 
@@ -212,11 +212,11 @@ function InflatedQuoteSignsGuide() {
             publisher: {
               "@type": "Organization",
               name: "CostReno",
-              logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" },
+              logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
             },
             datePublished: "2026-07-21",
             dateModified: "2026-07-21",
-            mainEntityOfPage: "https://costreno.com/guides/inflated-quote-signs",
+            mainEntityOfPage: "https://www.costreno.com/guides/inflated-quote-signs",
           }),
         }}
       />
@@ -241,12 +241,12 @@ function InflatedQuoteSignsGuide() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.costreno.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Guides",
-                item: "https://costreno.com/guides",
+                item: "https://www.costreno.com/guides",
               },
               { "@type": "ListItem", position: 3, name: "Signs a contractor quote is inflated" },
             ],

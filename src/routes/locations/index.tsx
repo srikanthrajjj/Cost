@@ -29,13 +29,13 @@ export const Route = createFileRoute("/locations/")({
         content:
           "Browse local renovation cost pages across major U.S. cities for roof, kitchen, bathroom, HVAC, windows, and flooring.",
       },
-      { property: "og:url", content: "https://costreno.com/locations" },
+      { property: "og:url", content: "https://www.costreno.com/locations" },
       {
         property: "og:image",
         content: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
       },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/locations" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/locations" }],
   }),
 });
 

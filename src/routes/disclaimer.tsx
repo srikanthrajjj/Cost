@@ -15,7 +15,7 @@ export const Route = createFileRoute("/disclaimer")({
       },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/disclaimer" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/disclaimer" }],
   }),
 });
 

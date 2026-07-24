@@ -57,10 +57,10 @@ export const Route = createFileRoute("/estimate")({
         content:
           "Estimate renovation costs with local pricing context before you request contractor quotes.",
       },
-      { property: "og:url", content: "https://costreno.com/estimate" },
+      { property: "og:url", content: "https://www.costreno.com/estimate" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/estimate" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/estimate" }],
   }),
   component: EstimatorPage,
 });

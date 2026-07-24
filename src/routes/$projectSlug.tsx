@@ -25,10 +25,10 @@ export const Route = createFileRoute("/$projectSlug")({
         { property: "og:title", content: project.seoTitle },
         { property: "og:description", content: project.seoDescription },
         { property: "og:type", content: "article" },
-        { property: "og:url", content: `https://costreno.com/${project.slug}` },
+        { property: "og:url", content: `https://www.costreno.com/${project.slug}` },
         { name: "robots", content: "index, follow" },
       ],
-      links: [{ rel: "canonical", href: `https://costreno.com/${project.slug}` }],
+      links: [{ rel: "canonical", href: `https://www.costreno.com/${project.slug}` }],
     };
   },
 });
@@ -77,11 +77,11 @@ function ProjectLandingPage() {
               publisher: {
                 "@type": "Organization",
                 name: "CostReno",
-                logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" },
+                logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
               },
               datePublished: "2026-07-19",
               dateModified: "2026-07-19",
-              mainEntityOfPage: `https://costreno.com/${project.slug}`,
+              mainEntityOfPage: `https://www.costreno.com/${project.slug}`,
             }),
           }}
         />
@@ -107,7 +107,7 @@ function ProjectLandingPage() {
               "@type": "Service",
               name: `${project.name} cost estimator`,
               description: project.seoDescription,
-              provider: { "@type": "Organization", name: "CostReno", url: "https://costreno.com" },
+              provider: { "@type": "Organization", name: "CostReno", url: "https://www.costreno.com" },
               areaServed: { "@type": "Country", name: "United States" },
               priceRange: project.costRange,
             }),

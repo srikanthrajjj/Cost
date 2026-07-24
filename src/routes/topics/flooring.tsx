@@ -15,11 +15,11 @@ export const Route = createFileRoute("/topics/flooring")({
           "Flooring installation cost guides and local city pages to help you compare materials before hiring.",
       },
       { property: "og:title", content: "Flooring costs topic hub | CostReno" },
-      { property: "og:url", content: "https://costreno.com/topics/flooring" },
+      { property: "og:url", content: "https://www.costreno.com/topics/flooring" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/topics/flooring" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/topics/flooring" }],
   }),
 });
 

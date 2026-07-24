@@ -14,7 +14,7 @@ export const Route = createFileRoute("/terms")({
       },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/terms" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/terms" }],
   }),
 });
 

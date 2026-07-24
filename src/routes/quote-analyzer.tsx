@@ -90,7 +90,7 @@ export const Route = createFileRoute("/quote-analyzer")({
           "Upload 1 to 3 contractor quotes. Get a clear recommendation with price, missing scope, and red-flag checks.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://costreno.com/quote-analyzer" },
+      { property: "og:url", content: "https://www.costreno.com/quote-analyzer" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       {
@@ -104,7 +104,7 @@ export const Route = createFileRoute("/quote-analyzer")({
       },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/quote-analyzer" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/quote-analyzer" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -169,7 +169,7 @@ export const Route = createFileRoute("/quote-analyzer")({
           "@context": "https://schema.org",
           "@type": "WebApplication",
           name: "CostReno quote analyzer",
-          url: "https://costreno.com/quote-analyzer",
+          url: "https://www.costreno.com/quote-analyzer",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
           offers: {
@@ -1317,6 +1317,47 @@ function QuoteAnalyzerPage() {
               Free. No signup. Review one quote or compare up to three.
             </p>
           </div>
+
+          {/* Related guides (internal links for topical SEO) */}
+          <section className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
+              Related guides before you hire
+            </h2>
+            <p className="text-sm text-muted-foreground text-center max-w-lg mx-auto mb-8">
+              Pair the analyzer with these homeowner guides for clearer decisions.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+              {[
+                {
+                  href: "/guides/how-to-read-a-contractor-quote",
+                  title: "How to read a contractor quote",
+                  desc: "Line-item checklist before you sign",
+                },
+                {
+                  href: "/guides/inflated-quote-signs",
+                  title: "Signs of an inflated quote",
+                  desc: "Common overpricing patterns to watch for",
+                },
+                {
+                  href: "/guides/questions-before-signing",
+                  title: "Questions before signing",
+                  desc: "What to ask your contractor next",
+                },
+              ].map((g) => (
+                <a
+                  key={g.href}
+                  href={g.href}
+                  className="rounded-xl border border-border bg-white p-4 hover:border-primary/30 hover:shadow-sm transition"
+                >
+                  <h3 className="text-sm font-semibold text-ink">{g.title}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{g.desc}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                    Read guide <ArrowRight className="h-3 w-3" />
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
 
           {/* SEO: How It Works Section */}
           <section className="mt-20 pt-12 border-t border-border">

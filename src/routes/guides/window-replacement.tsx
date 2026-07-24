@@ -35,10 +35,10 @@ export const Route = createFileRoute("/guides/window-replacement")({
           "Learn about window replacement costs ($6,000–$21,000), best materials, contractor selection, permits, and more.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/window-replacement" },
+      { property: "og:url", content: "https://www.costreno.com/guides/window-replacement" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides/window-replacement" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/guides/window-replacement" }],
   }),
 });
 
@@ -186,11 +186,11 @@ function WindowReplacementGuide() {
             publisher: {
               "@type": "Organization",
               name: "CostReno",
-              logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" },
+              logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
             },
             datePublished: "2026-07-01",
             dateModified: "2026-07-19",
-            mainEntityOfPage: "https://costreno.com/guides/window-replacement",
+            mainEntityOfPage: "https://www.costreno.com/guides/window-replacement",
           }),
         }}
       />
@@ -215,18 +215,18 @@ function WindowReplacementGuide() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.costreno.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Renovation Guides",
-                item: "https://costreno.com/guides",
+                item: "https://www.costreno.com/guides",
               },
               {
                 "@type": "ListItem",
                 position: 3,
                 name: "Windows",
-                item: "https://costreno.com/guides/windows",
+                item: "https://www.costreno.com/guides/window-replacement",
               },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],

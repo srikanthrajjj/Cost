@@ -15,11 +15,11 @@ export const Route = createFileRoute("/topics/roof")({
           "Roof replacement cost guides, material comparisons, and local city pages to help you plan before hiring.",
       },
       { property: "og:title", content: "Roof costs topic hub | CostReno" },
-      { property: "og:url", content: "https://costreno.com/topics/roof" },
+      { property: "og:url", content: "https://www.costreno.com/topics/roof" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/topics/roof" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/topics/roof" }],
   }),
 });
 

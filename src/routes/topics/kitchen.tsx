@@ -15,11 +15,11 @@ export const Route = createFileRoute("/topics/kitchen")({
           "Kitchen remodel cost guides, countertop comparisons, and local city pages to help you plan before hiring.",
       },
       { property: "og:title", content: "Kitchen costs topic hub | CostReno" },
-      { property: "og:url", content: "https://costreno.com/topics/kitchen" },
+      { property: "og:url", content: "https://www.costreno.com/topics/kitchen" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/topics/kitchen" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/topics/kitchen" }],
   }),
 });
 

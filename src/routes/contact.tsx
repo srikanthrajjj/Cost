@@ -32,10 +32,10 @@ export const Route = createFileRoute("/contact")({
         content: "Reach the CostReno team for support, feedback, or partnership inquiries.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://costreno.com/contact" },
+      { property: "og:url", content: "https://www.costreno.com/contact" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/contact" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/contact" }],
   }),
 });
 

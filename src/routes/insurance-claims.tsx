@@ -20,10 +20,10 @@ export const Route = createFileRoute("/insurance-claims")({
         content:
           "AI-powered insurance claims analysis is coming to CostReno. Sign up for early access.",
       },
-      { property: "og:url", content: "https://costreno.com/insurance-claims" },
+      { property: "og:url", content: "https://www.costreno.com/insurance-claims" },
       { name: "robots", content: "noindex, nofollow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/insurance-claims" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/insurance-claims" }],
   }),
 });
 

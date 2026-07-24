@@ -73,11 +73,11 @@ export const Route = createFileRoute("/topics/quotes")({
           "Guides and tools for reading, analyzing, and comparing contractor quotes before you hire.",
       },
       { property: "og:title", content: "Contractor quotes topic hub | CostReno" },
-      { property: "og:url", content: "https://costreno.com/topics/quotes" },
+      { property: "og:url", content: "https://www.costreno.com/topics/quotes" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/topics/quotes" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/topics/quotes" }],
   }),
 });
 

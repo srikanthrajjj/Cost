@@ -47,11 +47,11 @@ export const Route = createFileRoute("/about")({
           "CostReno combines local pricing context with AI quote analysis to help homeowners plan renovations with clearer information.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://costreno.com/about" },
+      { property: "og:url", content: "https://www.costreno.com/about" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/about" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/about" }],
   }),
 });
 

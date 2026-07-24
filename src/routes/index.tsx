@@ -83,7 +83,7 @@ export const Route = createFileRoute("/")({
           "Estimate renovation costs, analyze contractor quotes, and compare bids with tools built for homeowners.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://costreno.com/" },
+      { property: "og:url", content: "https://www.costreno.com/" },
       {
         property: "og:image",
         content: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",

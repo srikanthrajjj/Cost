@@ -43,11 +43,11 @@ export const Route = createFileRoute("/compare-quotes")({
         content:
           "Compare two contractor quotes side by side. Spot pricing and scope differences before you hire.",
       },
-      { property: "og:url", content: "https://costreno.com/compare-quotes" },
+      { property: "og:url", content: "https://www.costreno.com/compare-quotes" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/compare-quotes" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/compare-quotes" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -112,7 +112,7 @@ export const Route = createFileRoute("/compare-quotes")({
           "@context": "https://schema.org",
           "@type": "WebApplication",
           name: "CostReno Quote Comparison Tool",
-          url: "https://costreno.com/compare-quotes",
+          url: "https://www.costreno.com/compare-quotes",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Any",
           offers: {

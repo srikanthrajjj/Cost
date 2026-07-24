@@ -36,10 +36,10 @@ export const Route = createFileRoute("/guides/flooring")({
           "Learn about flooring installation costs ($3,000–$15,000), best materials, contractor selection, and more.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/flooring" },
+      { property: "og:url", content: "https://www.costreno.com/guides/flooring" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides/flooring" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/guides/flooring" }],
   }),
 });
 
@@ -193,11 +193,11 @@ function FlooringGuide() {
             publisher: {
               "@type": "Organization",
               name: "CostReno",
-              logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" },
+              logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
             },
             datePublished: "2026-07-01",
             dateModified: "2026-07-19",
-            mainEntityOfPage: "https://costreno.com/guides/flooring",
+            mainEntityOfPage: "https://www.costreno.com/guides/flooring",
           }),
         }}
       />
@@ -222,18 +222,18 @@ function FlooringGuide() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.costreno.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Renovation Guides",
-                item: "https://costreno.com/guides",
+                item: "https://www.costreno.com/guides",
               },
               {
                 "@type": "ListItem",
                 position: 3,
                 name: "Flooring",
-                item: "https://costreno.com/guides/flooring",
+                item: "https://www.costreno.com/guides/flooring",
               },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],

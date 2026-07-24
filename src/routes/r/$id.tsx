@@ -26,7 +26,7 @@ export const Route = createFileRoute("/r/$id")({
         { name: "robots", content: "noindex, nofollow" },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
-        { property: "og:url", content: `https://costreno.com/r/${params.id}` },
+        { property: "og:url", content: `https://www.costreno.com/r/${params.id}` },
       ],
     };
   },
@@ -56,7 +56,7 @@ function SharedComparisonNotFound() {
 function SharedComparisonPage() {
   const report = Route.useLoaderData();
   const [copied, setCopied] = useState(false);
-  const shareUrl = `https://costreno.com/r/${report.id}`;
+  const shareUrl = `https://www.costreno.com/r/${report.id}`;
 
   const html = useMemo(() => {
     const scores = computeComparisonScores(report.quotes);

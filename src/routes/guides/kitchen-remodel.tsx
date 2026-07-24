@@ -40,10 +40,10 @@ export const Route = createFileRoute("/guides/kitchen-remodel")({
           "Complete 2026 kitchen remodel pricing guide. Costs by project scope, materials, and region. Learn about hidden fees, permits, and how to compare contractor quotes.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/kitchen-remodel" },
+      { property: "og:url", content: "https://www.costreno.com/guides/kitchen-remodel" },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides/kitchen-remodel" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/guides/kitchen-remodel" }],
   }),
 });
 
@@ -198,11 +198,11 @@ function KitchenRemodelGuide() {
             publisher: {
               "@type": "Organization",
               name: "CostReno",
-              logo: { "@type": "ImageObject", url: "https://costreno.com/logo.svg" },
+              logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
             },
             datePublished: "2026-07-01",
             dateModified: "2026-07-19",
-            mainEntityOfPage: "https://costreno.com/guides/kitchen-remodel",
+            mainEntityOfPage: "https://www.costreno.com/guides/kitchen-remodel",
           }),
         }}
       />
@@ -227,18 +227,18 @@ function KitchenRemodelGuide() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://costreno.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://www.costreno.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Renovation Guides",
-                item: "https://costreno.com/guides",
+                item: "https://www.costreno.com/guides",
               },
               {
                 "@type": "ListItem",
                 position: 3,
                 name: "Kitchen",
-                item: "https://costreno.com/guides/kitchen",
+                item: "https://www.costreno.com/guides/kitchen-remodel",
               },
               { "@type": "ListItem", position: 4, name: "Complete Guide" },
             ],

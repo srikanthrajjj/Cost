@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GuideArticle } from "@/components/guides/GuideArticle";
-import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import {
+  DEFAULT_OG_IMAGE,
+  absoluteUrl,
+  buildArticleSchema,
+  buildBreadcrumbList,
+  buildFaqSchema,
+} from "@/lib/seo";
 
 const FAQS = [
   {
@@ -16,6 +22,8 @@ const FAQS = [
     a: "Treat that as a warning sign. Major terms should be in the contract, not left as verbal promises.",
   },
 ];
+
+const PATH = "/guides/questions-before-signing";
 
 export const Route = createFileRoute("/guides/questions-before-signing")({
   component: QuestionsBeforeSigningGuide,
@@ -34,33 +42,38 @@ export const Route = createFileRoute("/guides/questions-before-signing")({
           "A practical question list for homeowners reviewing renovation contracts and contractor bids.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://costreno.com/guides/questions-before-signing" },
+      { property: "og:url", content: absoluteUrl(PATH) },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://costreno.com/guides/questions-before-signing" }],
+    links: [{ rel: "canonical", href: absoluteUrl(PATH) }],
     scripts: [
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: "Questions to ask a contractor before signing",
-          dateModified: "2026-07-22",
-          author: { "@type": "Organization", name: "CostReno" },
-        }),
+        children: JSON.stringify(
+          buildArticleSchema({
+            headline: "Questions to ask a contractor before signing",
+            description:
+              "A practical question list for homeowners reviewing renovation contracts and contractor bids.",
+            path: PATH,
+            datePublished: "2026-07-22",
+            dateModified: "2026-07-22",
+          }),
+        ),
       },
       {
         type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: FAQS.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }),
+        children: JSON.stringify(buildFaqSchema(FAQS)),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbList([
+            { name: "Home", path: "/" },
+            { name: "Guides", path: "/guides" },
+            { name: "Questions before signing", path: PATH },
+          ]),
+        ),
       },
     ],
   }),
