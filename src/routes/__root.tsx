@@ -98,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Plan renovations with ZIP-based estimates, AI quote analysis, and practical guides. Built for homeowners who want clear pricing before they hire.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://costreno.com/" },
+      { property: "og:url", content: "https://www.costreno.com/" },
       {
         property: "og:image",
         content: DEFAULT_OG_IMAGE,
@@ -111,8 +111,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "canonical", href: "https://costreno.com/" },
+      { rel: "canonical", href: "https://www.costreno.com/" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "alternate", type: "text/plain", href: "https://www.costreno.com/llms.txt", title: "llms.txt" },
     ],
     scripts: [
       {
@@ -121,10 +122,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "CostReno",
-          url: "https://costreno.com",
-          logo: "https://costreno.com/logo.svg",
+          url: "https://www.costreno.com",
+          logo: "https://www.costreno.com/logo.svg",
           description:
             "CostReno helps homeowners estimate renovation costs and analyze contractor quotes with clear, data-informed tools.",
+          sameAs: ["https://twitter.com/CostReno"],
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "customer support",
+            url: "https://www.costreno.com/contact",
+          },
         }),
       },
       {
@@ -133,13 +140,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "CostReno",
-          url: "https://costreno.com",
+          url: "https://www.costreno.com",
           description:
-            "Home renovation cost estimates, AI contractor quote analysis, and project guides.",
+            "Home renovation cost estimates, AI contractor quote analysis, and project guides for U.S. homeowners.",
           publisher: {
             "@type": "Organization",
             name: "CostReno",
-            url: "https://costreno.com",
+            url: "https://www.costreno.com",
+          },
+          inLanguage: "en-US",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "CostReno quote analyzer",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          url: "https://www.costreno.com/quote-analyzer",
+          description:
+            "Free AI tool for homeowners to review contractor quotes, spot missing scope and red flags, and compare line items with local market ranges.",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+          },
+          provider: {
+            "@type": "Organization",
+            name: "CostReno",
+            url: "https://www.costreno.com",
           },
         }),
       },
