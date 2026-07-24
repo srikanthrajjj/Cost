@@ -7,6 +7,8 @@ import { OpenRouterError, type OpenRouterCallOptions } from "./openrouter-client
 
 export * from "./types";
 export { extractQuote, matchQuote, analyzeQuote, generateReport };
+export { detectInstantQuoteFlags } from "./instant-flags";
+export type { InstantQuoteFlag } from "./instant-flags";
 export {
   toMoneyNumber,
   repairLinePrices,

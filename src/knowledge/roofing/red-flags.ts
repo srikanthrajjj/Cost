@@ -65,6 +65,14 @@ export const roofingRedFlags: RedFlag[] = [
       "Quote is $12,000 when 3 other quotes are $17,000–$22,000 for the same material and scope",
   },
   {
+    flag: "Vague material grade or finish language",
+    severity: "high",
+    explanation:
+      "Terms like builder grade, standard grade, or high-end finish leave quality undefined. Contractors can substitute cheaper products or bill upgrades later unless brand and model are written into the contract.",
+    howToSpot:
+      "Quote says builder grade cabinets, standard shingles, high-end finish, or quality materials without brand, model, or SKU",
+  },
+  {
     flag: "No permit pulled — 'roofing doesn't need a permit'",
     severity: "medium",
     explanation:

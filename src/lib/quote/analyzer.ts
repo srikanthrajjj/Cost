@@ -12,6 +12,7 @@ import type {
 } from "./types";
 import type { ProjectType } from "../estimator-engine";
 import type { ScopeItem, RedFlag } from "@/types/knowledge";
+import { detectInstantQuoteFlags, instantFlagsToAnalysisParts } from "./instant-flags";
 
 // ─── Item Status Classification ───────────────────────────────────────────────
 // Every knowledge item falls into exactly ONE of these states:
@@ -179,6 +180,16 @@ function detectClarificationNeeded(notes: string | undefined, scopeItem: ScopeIt
     return `Indicates reuse of existing materials. Verify whether replacement is needed for code compliance or manufacturer warranty.`;
   }
 
+  // Vague grades / finishes that hide upgrade costs
+  if (
+    /\bbuilder[\s-]?grade\b/.test(combined) ||
+    /\bstandard[\s-]?grade\b/.test(combined) ||
+    /\bhigh[\s-]?end\s+finish/.test(combined) ||
+    /\bpremium\s+finish/.test(combined)
+  ) {
+    return `Uses vague grade or finish language. Confirm exact brand, model, and finish so upgrades cannot be billed later.`;
+  }
+
   // "Per homeowner" or "by owner" on permits
   if (
     combined.includes("homeowner") ||
@@ -319,19 +330,30 @@ export async function analyzeQuote(
   const recommendations: string[] = [];
 
   if (!knowledge) {
+    const instant = instantFlagsToAnalysisParts(detectInstantQuoteFlags(extracted));
     return {
-      summary: { totalItems: 0, matchedItems: 0, unmatchedItems: 0, completenessScore: 0, quoteHealthScore: 0 },
+      summary: {
+        totalItems:
+          matchedMaterials.length +
+          matchedScopeItems.length +
+          unmatchedMaterials.length +
+          unmatchedScopeItems.length,
+        matchedItems: matchedMaterials.length + matchedScopeItems.length,
+        unmatchedItems: unmatchedMaterials.length + unmatchedScopeItems.length,
+        completenessScore: 0,
+        quoteHealthScore: 0,
+      },
       presentItems,
-      needsClarification,
-      missingScope,
+      needsClarification: instant.needsClarification,
+      missingScope: instant.missingScope,
       missingMaterials,
       commonOmissions,
-      redFlags,
+      redFlags: instant.redFlags,
       buildingCodes,
       insuranceConsiderations,
-      questionsToAsk,
-      recommendations: [],
-      confidence: 0,
+      questionsToAsk: instant.questionsToAsk,
+      recommendations: instant.recommendations,
+      confidence: extracted.confidence || 0.5,
     };
   }
 
@@ -611,6 +633,34 @@ export async function analyzeQuote(
     );
   }
 
+  // Instant field checks: missing permits + vague grade/finish language
+  const instant = instantFlagsToAnalysisParts(detectInstantQuoteFlags(extracted));
+  const seenTitles = new Set(redFlags.map((f) => f.title.toLowerCase()));
+  for (const flag of instant.redFlags) {
+    if (!seenTitles.has(flag.title.toLowerCase())) {
+      redFlags.push(flag);
+      seenTitles.add(flag.title.toLowerCase());
+    }
+  }
+  const seenMissing = new Set(missingScope.map((m) => m.title.toLowerCase()));
+  for (const miss of instant.missingScope) {
+    if (!seenMissing.has(miss.title.toLowerCase())) {
+      missingScope.push(miss);
+      seenMissing.add(miss.title.toLowerCase());
+    }
+  }
+  for (const c of instant.needsClarification) {
+    if (!needsClarification.some((x) => x.question === c.question)) {
+      needsClarification.push(c);
+    }
+  }
+  for (const q of instant.questionsToAsk) {
+    if (!questionsToAsk.includes(q)) questionsToAsk.push(q);
+  }
+  for (const r of instant.recommendations) {
+    if (!recommendations.includes(r)) recommendations.push(r);
+  }
+
   // ─── STEP 10: Weighted completeness score ──────────────────────────────────
   const completenessScore = calculateWeightedScore(classifiedItems, extracted, projectType);
 
@@ -740,6 +790,38 @@ function findRedFlagEvidence(
       quoteTextLower.includes("multi-layer fee")
     ) {
       return "Quote charges per-layer removal fee instead of flat project price.";
+    }
+  }
+
+  // Vague material grade / finish language
+  if (
+    flagLower.includes("vague material") ||
+    flagLower.includes("builder grade") ||
+    (flagLower.includes("grade") && flagLower.includes("finish"))
+  ) {
+    if (
+      quoteTextLower.includes("builder grade") ||
+      quoteTextLower.includes("builder-grade") ||
+      quoteTextLower.includes("standard grade") ||
+      quoteTextLower.includes("high-end finish") ||
+      quoteTextLower.includes("high end finish") ||
+      quoteTextLower.includes("premium finish") ||
+      quoteTextLower.includes("contractor grade")
+    ) {
+      return "Quote uses vague grade or finish language without locking product specs.";
+    }
+  }
+
+  // Permit skip / "no permit needed"
+  if (flagLower.includes("permit")) {
+    if (
+      quoteTextLower.includes("no permit") ||
+      quoteTextLower.includes("permit not needed") ||
+      quoteTextLower.includes("permits aren't needed") ||
+      quoteTextLower.includes("skip the permit") ||
+      quoteTextLower.includes("permit not included")
+    ) {
+      return "Quote downplays or excludes permit requirements.";
     }
   }
 

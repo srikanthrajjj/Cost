@@ -23,7 +23,7 @@ import {
   Download,
   Bookmark,
 } from "lucide-react";
-import { type QuoteAnalysisResult, type QuotePipelineStage, buildQuoteAnalysisFromExtraction } from "@/lib/quote";
+import { type QuoteAnalysisResult, type QuotePipelineStage, buildQuoteAnalysisFromExtraction, detectInstantQuoteFlags } from "@/lib/quote";
 import type { QuoteExtraction } from "@/lib/quote/types";
 import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { serverExtractQuoteDetails } from "@/lib/quote/quote-server";
@@ -1627,6 +1627,7 @@ function QuoteAnalyzerPage() {
       }),
     ];
     const scored = lineRows.filter((r) => r.score.marketComparable);
+    const instantFlags = detectInstantQuoteFlags(pendingExtraction, pendingRawText);
 
     return (
       <div className="min-h-screen bg-[#f7f8fa]">
@@ -1664,6 +1665,50 @@ function QuoteAnalyzerPage() {
                 </p>
               </div>
             </div>
+
+            {instantFlags.length > 0 && (
+              <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50/70 p-4">
+                <div className="flex items-start gap-2 mb-3">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-ink">
+                      Instant checks ({instantFlags.length})
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Caught locally before the advanced report: missing permit costs and vague
+                      material or finish language.
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-2.5">
+                  {instantFlags.slice(0, 6).map((flag) => (
+                    <li
+                      key={flag.id}
+                      className="rounded-lg border border-amber-200/80 bg-white px-3 py-2.5"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                            flag.severity === "high"
+                              ? "bg-red-50 text-red-600"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {flag.severity}
+                        </span>
+                        <p className="text-sm font-medium text-ink">{flag.title}</p>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        {flag.explanation}
+                      </p>
+                      <p className="mt-1 text-xs text-ink/80 leading-relaxed">
+                        {flag.recommendation}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {scored.length > 0 && (
               <div className="mb-5 flex flex-wrap gap-2">
