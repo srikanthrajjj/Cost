@@ -1800,11 +1800,11 @@ function FinalReport({
       </div>
 
       {/* Breakdown + summary above the fold on desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-stretch">
-        <div className="lg:col-span-7 rounded-2xl border border-border bg-white p-4 lg:p-5 min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
+        <div className="lg:col-span-7 rounded-2xl border border-border bg-white p-4 lg:p-5">
           <CostBreakdownChart breakdown={breakdownWithColors} total={estimate.mid} compact />
         </div>
-        <div className="lg:col-span-5 rounded-2xl border border-border bg-white p-4 lg:p-5 flex flex-col min-h-0">
+        <div className="lg:col-span-5 rounded-2xl border border-border bg-white p-4 lg:p-5 flex flex-col">
           <div className="text-sm font-bold text-primary mb-3 shrink-0">Project summary</div>
           <div className="min-h-0 lg:overflow-y-auto lg:max-h-[min(22rem,calc(100vh-22rem))]">
             {summaryRows.map(({ label, val }) => (

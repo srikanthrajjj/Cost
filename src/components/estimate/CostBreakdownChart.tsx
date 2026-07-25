@@ -86,11 +86,11 @@ function VerticalBars({
   const maxPct = Math.max(...items.map((i) => i.pct), 1);
 
   return (
-    <div className="shrink-0 w-full min-w-0">
+    <div className={cn("min-w-0", compact ? "w-full shrink-0 sm:w-[42%] sm:max-w-[16rem]" : "w-full shrink-0")}>
       <div
         className={cn(
           "rounded-xl border border-border/60 bg-muted/20 px-3 pt-3 pb-2",
-          compact ? "max-w-[min(100%,20rem)]" : "max-w-[min(100%,28rem)]",
+          compact ? "w-full" : "max-w-[min(100%,28rem)]",
         )}
         role="img"
         aria-label={`Cost breakdown bar chart. Total estimate ${fmt(total)}.`}
@@ -405,12 +405,12 @@ export function CostBreakdownChart({
 
       <div
         className={cn(
-          "flex flex-col items-center",
+          "flex w-full min-w-0",
           isSidebar
-            ? "gap-2"
+            ? "flex-col gap-2"
             : isCompact
-              ? "gap-3 lg:flex-row lg:items-start lg:gap-5"
-              : "gap-6 lg:flex-row lg:items-start lg:gap-8",
+              ? "flex-col gap-3 sm:flex-row sm:items-start sm:gap-4"
+              : "flex-col items-center gap-6 lg:flex-row lg:items-start lg:gap-8",
         )}
       >
         {!isSidebar && (
