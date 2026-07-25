@@ -4,8 +4,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  ChevronDown,
   ChevronRight,
+  ChevronDown,
   Download,
   FileText,
   Shield,
@@ -14,22 +14,33 @@ import {
   Sparkles,
   X,
   AlertCircle,
-  Info,
   MapPin,
-  Building2,
-  Calendar,
   DollarSign,
   CheckCircle2,
-  HelpCircle,
   Lock,
+  Loader2,
+  Map,
 } from "lucide-react";
-import { calculateEstimate, resolveRegionalMultiplier } from "@/lib/estimator-engine";
+import {
+  calculateEstimate,
+  resolveRegionalMultiplier,
+  resolveRoofArea,
+} from "@/lib/estimator-engine";
+import {
+  measureRoofFromMap,
+  searchAddressesForMap,
+  type AddressSuggestion,
+} from "@/lib/estimate/osm-roof";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
+import { EstimateFeedbackCard } from "@/components/estimate/EstimateFeedbackCard";
+import { CostBreakdownChart, colorizeBreakdown } from "@/components/estimate/CostBreakdownChart";
+import { QuestionInfo } from "@/components/estimate/QuestionInfo";
 import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { cn } from "@/lib/utils";
 import type { EstimatorAnswers, LiveEstimate } from "@/lib/estimator-engine";
 import type { StepDef, Question } from "@/lib/estimator-steps";
 import projRoof from "@/assets/proj-roof.jpg";
@@ -58,6 +69,11 @@ export const Route = createFileRoute("/estimate")({
           "Estimate renovation costs with local pricing context before you request contractor quotes.",
       },
       { property: "og:url", content: "https://www.costreno.com/estimate" },
+      { property: "og:type", content: "website" },
+      {
+        property: "og:image",
+        content: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200",
+      },
       { name: "robots", content: "index, follow" },
     ],
     links: [{ rel: "canonical", href: "https://www.costreno.com/estimate" }],
@@ -67,7 +83,6 @@ export const Route = createFileRoute("/estimate")({
 
 const STORAGE_KEY = "costreno_estimator_v2";
 const fmt = (n: number) => "$" + Math.round(n).toLocaleString();
-const fmtK = (n: number) => (n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`);
 
 // ─── SVG icon map for project cards ──────────────────────────────────────────
 const PROJECT_ICONS: Record<string, string> = {
@@ -168,6 +183,12 @@ const TIPS: Partial<Record<keyof EstimatorAnswers, string>> = {
     "Metal roofs last 2× longer than asphalt and may lower your homeowner's insurance premium.",
   roofAction:
     "A full replacement is often more cost-effective than repeated repairs on roofs older than 15 years.",
+  roofPitch:
+    "A steep roof needs more material than the floor area below it, plus safety staging for crews.",
+  roofComplexity:
+    "Valleys, hips, and dormers need extra flashing and cutting, which adds labor hours.",
+  roofLayers:
+    "Most codes allow two layers maximum. Removing a second layer adds tear-off and disposal cost.",
   yearBuilt: "Homes built before 1980 may require additional permits and asbestos testing.",
   kitchenCabinets:
     "Semi-custom cabinets offer the best value. 80% of the look for 50% of custom cabinet cost.",
@@ -180,67 +201,10 @@ const TIPS: Partial<Record<keyof EstimatorAnswers, string>> = {
   solarBattery:
     "Battery storage qualifies for the 30% federal ITC (Investment Tax Credit) through 2032.",
   causeOfProject:
-    "Storm and water damage claims have the highest insurance approval rates. Document everything.",
+    "Sudden damage from storms, fire, or water may be eligible for an insurance claim. Photos and notes help.",
   currentCondition:
     "Poor condition adds 15–25% to project cost due to extra prep, demo, and repair work.",
 };
-
-// ─── Donut chart ──────────────────────────────────────────────────────────────
-function DonutChart({
-  breakdown,
-  total,
-}: {
-  breakdown: { label: string; amount: number; pct: number; color: string }[];
-  total: number;
-}) {
-  let cumulative = 0;
-  const r = 54;
-  const cx = 64;
-  const cy = 64;
-  const circumference = 2 * Math.PI * r;
-  return (
-    <div className="flex items-center gap-6">
-      <div className="relative shrink-0">
-        <svg width="128" height="128" viewBox="0 0 128 128">
-          {breakdown.map((item, i) => {
-            const dash = (item.pct / 100) * circumference;
-            const offset = (-cumulative * circumference) / 100;
-            cumulative += item.pct;
-            return (
-              <circle
-                key={i}
-                cx={cx}
-                cy={cy}
-                r={r}
-                fill="none"
-                stroke={item.color}
-                strokeWidth="16"
-                strokeDasharray={`${dash} ${circumference - dash}`}
-                strokeDashoffset={offset - circumference * 0.25}
-                className="transition-all duration-500"
-              />
-            );
-          })}
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-[10px] text-muted-foreground">Total</div>
-          <div className="text-sm font-bold text-ink">{fmtK(total)}</div>
-        </div>
-      </div>
-      <div className="flex-1 space-y-2">
-        {breakdown.map((item) => (
-          <div key={item.label} className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: item.color }} />
-            <div className="flex-1 flex items-center justify-between gap-2">
-              <span className="text-xs text-muted-foreground">{item.label}</span>
-              <span className="text-xs font-semibold text-ink">{fmtK(item.amount)}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── Cards Question ───────────────────────────────────────────────────────────
 function CardsQuestion({
@@ -301,8 +265,8 @@ function CardsQuestion({
                 style={{ opacity: 0.75 }}
               >
                 {/* Coming Soon Badge - absolute positioned */}
-                <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-bold text-accent uppercase tracking-wider">
-                  Soon
+                <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-[9px] font-semibold text-accent">
+                  Coming soon
                 </span>
 
                 {/* SVG Icon */}
@@ -367,7 +331,7 @@ function CardsQuestion({
                       onClick={() => setNotifyOpen(c.value)}
                       className="w-full py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:border-accent/40 hover:text-accent transition"
                     >
-                      Notify Me
+                      Notify me
                     </button>
                   )}
                 </div>
@@ -539,7 +503,7 @@ function NumberQuestion({
             const n = parseFloat(e.target.value);
             if (!isNaN(n)) onChange(n);
           }}
-          className={`w-full h-14 rounded-xl border-2 bg-white px-5 pr-20 text-lg font-semibold text-ink outline-none transition-colors ${
+          className={`w-full h-14 rounded-xl border-2 bg-white px-5 pr-20 text-lg font-semibold text-ink outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/30 ${
             errorMsg ? "border-red-400 focus:border-red-500" : "border-border focus:border-accent"
           }`}
         />
@@ -596,7 +560,7 @@ function TextQuestion({
             const val = isZip ? e.target.value.replace(/\D/g, "").slice(0, 5) : e.target.value;
             onChange(val);
           }}
-          className={`w-full h-14 rounded-xl border-2 bg-white pl-11 pr-5 text-lg font-semibold text-ink outline-none transition-colors ${
+          className={`w-full h-14 rounded-xl border-2 bg-white pl-11 pr-5 text-lg font-semibold text-ink outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/30 ${
             errorMsg ? "border-red-400 focus:border-red-500" : "border-border focus:border-accent"
           }`}
         />
@@ -687,12 +651,11 @@ function BudgetQuestion({
 }
 
 // ─── Live Estimate Panel ──────────────────────────────────────────────────────
-const BREAKDOWN_COLORS = ["#03A44D", "#082A4B", "#60a5fa", "#f59e0b", "#a78bfa"];
-
 function EstimatePanel({ estimate, prevMid }: { estimate: LiveEstimate; prevMid: number }) {
   const hasData = estimate.mid > 0;
   const delta = hasData && prevMid > 0 ? estimate.mid - prevMid : 0;
   const [showDelta, setShowDelta] = useState(false);
+  const [snapshotOpen, setSnapshotOpen] = useState(false);
 
   useEffect(() => {
     if (delta !== 0) {
@@ -704,35 +667,34 @@ function EstimatePanel({ estimate, prevMid }: { estimate: LiveEstimate; prevMid:
 
   const stepsLeft = Math.max(0, Math.ceil((95 - estimate.confidence) / 10));
   const insuranceStatus = estimate.insuranceEligible
-    ? { label: "Likely Covered", color: "text-accent", bg: "bg-accent/10", dot: "bg-accent" }
+    ? { label: "Likely covered", color: "text-accent", bg: "bg-accent/10", dot: "bg-accent" }
     : {
-        label: "Not Covered",
+        label: "Not covered",
         color: "text-muted-foreground",
         bg: "bg-muted/50",
         dot: "bg-muted-foreground/40",
       };
 
-  const breakdownWithColors = estimate.breakdown.map((b, i) => ({
-    ...b,
-    color: BREAKDOWN_COLORS[i] ?? "#e5e7eb",
-  }));
+  const breakdownWithColors = colorizeBreakdown(estimate.breakdown);
+  const snapshotSummary = [
+    estimate.timeline,
+    estimate.permitRequired ? "Permit required" : "No permit",
+  ].join(" · ");
 
   return (
-    <div className="flex flex-col gap-4 sticky top-24">
+    <div className="flex flex-col gap-2">
       {/* Main cost card */}
-      <div className="rounded-2xl border border-border bg-white p-6 shadow-sm overflow-hidden relative">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-2xl border border-border bg-white p-3 shadow-sm overflow-hidden relative">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-accent" />
+            <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center">
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
             </div>
-            <span className="text-xs font-bold text-accent uppercase tracking-wider">
-              Live Estimate
-            </span>
+            <span className="text-[11px] font-semibold text-accent">Live estimate</span>
           </div>
           {hasData && showDelta && delta !== 0 && (
             <div
-              className={`text-xs font-bold px-2 py-1 rounded-full animate-in fade-in zoom-in duration-200
+              className={`text-[11px] font-bold px-2 py-0.5 rounded-full animate-in fade-in zoom-in duration-200
               ${delta > 0 ? "text-red-500 bg-red-50" : "text-accent bg-accent/10"}`}
             >
               {delta > 0 ? "+" : ""}
@@ -743,10 +705,10 @@ function EstimatePanel({ estimate, prevMid }: { estimate: LiveEstimate; prevMid:
 
         {hasData ? (
           <>
-            <div className="text-[42px] font-display font-bold text-ink leading-none transition-all duration-500">
+            <div className="text-[26px] font-display font-bold text-ink leading-none transition-all duration-500">
               {fmt(estimate.mid)}
             </div>
-            <div className="text-sm text-muted-foreground mt-1.5">
+            <div className="text-xs text-muted-foreground mt-0.5">
               Range:{" "}
               <span className="font-medium text-ink">
                 {fmt(estimate.low)} – {fmt(estimate.high)}
@@ -754,88 +716,113 @@ function EstimatePanel({ estimate, prevMid }: { estimate: LiveEstimate; prevMid:
             </div>
 
             {/* Confidence */}
-            <div className="mt-5 space-y-1.5">
+            <div className="mt-2 space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Accuracy</span>
-                <span className="text-xs font-bold text-ink">{estimate.confidence}%</span>
+                <span className="text-[11px] text-muted-foreground">Accuracy</span>
+                <span className="text-[11px] font-bold text-ink">{estimate.confidence}%</span>
               </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full rounded-full bg-accent transition-all duration-700 ease-out"
                   style={{ width: `${estimate.confidence}%` }}
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground leading-snug">
+              <p className="text-[10px] text-muted-foreground leading-snug">
                 {stepsLeft > 0
-                  ? `Answer ${stepsLeft} more question${stepsLeft > 1 ? "s" : ""} to reach 95% accuracy.`
+                  ? `${stepsLeft} more question${stepsLeft > 1 ? "s" : ""} to reach 95% accuracy.`
                   : "High confidence estimate."}
               </p>
             </div>
           </>
         ) : (
-          <div className="py-4 text-sm text-muted-foreground">
+          <div className="py-2 text-sm text-muted-foreground">
             Select a project to see your estimate.
           </div>
         )}
       </div>
 
-      {/* Project snapshot */}
+      {/* Project snapshot — collapsed by default to keep breakdown visible */}
       {hasData && (
-        <div className="rounded-2xl border border-border bg-white p-5 space-y-3">
-          <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Project Snapshot
-          </div>
-          <div className="divide-y divide-border/50">
-            {[
-              { icon: Clock, label: "Timeline", value: estimate.timeline },
-              {
-                icon: Wrench,
-                label: "Permit",
-                value: estimate.permitRequired ? "Required" : "Not required",
-                highlight: estimate.permitRequired,
-              },
-            ].map(({ icon: Icon, label, value, highlight }) => (
-              <div key={label} className="flex items-center justify-between py-2.5">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Icon className="h-3.5 w-3.5" />
-                  {label}
-                </div>
-                <span
-                  className={`text-xs font-semibold ${highlight ? "text-amber-600" : "text-ink"}`}
-                >
-                  {value}
-                </span>
+        <div className="rounded-2xl border border-border bg-white overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setSnapshotOpen((open) => !open)}
+            aria-expanded={snapshotOpen}
+            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left hover:bg-muted/20 transition duration-200"
+          >
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold text-muted-foreground">
+                Project snapshot
               </div>
-            ))}
-            {/* Insurance status badge */}
-            <div className="flex items-center justify-between py-2.5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Shield className="h-3.5 w-3.5" />
-                Insurance
-              </div>
-              <div
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${insuranceStatus.bg} ${insuranceStatus.color}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${insuranceStatus.dot}`} />
-                {insuranceStatus.label}
-              </div>
+              {!snapshotOpen && (
+                <p className="mt-0.5 text-[11px] text-muted-foreground truncate">
+                  {snapshotSummary}
+                </p>
+              )}
             </div>
-          </div>
-          {estimate.insuranceEligible && (
-            <button className="w-full text-xs text-accent font-semibold flex items-center justify-between px-3 py-2 rounded-lg bg-accent/5 hover:bg-accent/10 transition">
-              Why? Check Coverage <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                snapshotOpen && "rotate-180",
+              )}
+              aria-hidden
+            />
+          </button>
+          {snapshotOpen && (
+            <div className="px-4 pb-3 space-y-0 border-t border-border/50">
+              <div className="divide-y divide-border/50">
+                {[
+                  { icon: Clock, label: "Timeline", value: estimate.timeline },
+                  {
+                    icon: Wrench,
+                    label: "Permit",
+                    value: estimate.permitRequired ? "Required" : "Not required",
+                    highlight: estimate.permitRequired,
+                  },
+                ].map(({ icon: Icon, label, value, highlight }) => (
+                  <div key={label} className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <Icon className="h-3.5 w-3.5" />
+                      {label}
+                    </div>
+                    <span
+                      className={`text-[11px] font-semibold ${highlight ? "text-amber-600" : "text-ink"}`}
+                    >
+                      {value}
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <Shield className="h-3.5 w-3.5" />
+                    Insurance
+                  </div>
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold ${insuranceStatus.bg} ${insuranceStatus.color}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${insuranceStatus.dot}`} />
+                    {insuranceStatus.label}
+                  </div>
+                </div>
+              </div>
+              {estimate.insuranceEligible && (
+                <button className="w-full text-[11px] text-accent font-semibold flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-accent/5 hover:bg-accent/10 transition">
+                  Why? Check coverage <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
 
-      {/* Donut breakdown */}
+      {/* Cost breakdown */}
       {hasData && (
-        <div className="rounded-2xl border border-border bg-white p-5">
-          <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
-            Cost Breakdown
-          </div>
-          <DonutChart breakdown={breakdownWithColors} total={estimate.mid} />
+        <div className="rounded-2xl border border-border bg-white p-3">
+          <CostBreakdownChart
+            breakdown={breakdownWithColors}
+            total={estimate.mid}
+            variant="sidebar"
+          />
         </div>
       )}
     </div>
@@ -850,9 +837,7 @@ function AiTip({ tip }: { tip: string }) {
         <Sparkles className="h-3.5 w-3.5 text-accent" />
       </div>
       <div>
-        <div className="text-[11px] font-bold text-[#082A4B]/60 uppercase tracking-wider mb-0.5">
-          CostReno AI Tip
-        </div>
+        <div className="text-[11px] font-semibold text-[#082A4B]/60 mb-0.5">CostReno AI tip</div>
         <p className="text-sm text-ink/80 leading-relaxed">{tip}</p>
       </div>
     </div>
@@ -875,10 +860,10 @@ function StepStepper({
 }) {
   // Collapse to dots on small screens, show labels on md+
   return (
-    <div className="w-full mb-8">
+    <div className="w-full mb-5 md:mb-6">
       {/* Selected Project Compact Bar */}
       {currentIdx > 0 && selectedProject && (
-        <div className="mb-4 flex items-center gap-2.5 px-3 py-2 rounded-lg bg-accent/8 border border-accent/20">
+        <div className="mb-3 flex items-center gap-2.5 px-3 py-2 rounded-lg bg-accent/8 border border-accent/20">
           {projectImage && (
             <div className="w-8 h-8 rounded overflow-hidden shrink-0">
               <img
@@ -889,7 +874,7 @@ function StepStepper({
             </div>
           )}
           <Check className="h-3.5 w-3.5 text-accent shrink-0" />
-          <span className="text-xs font-bold text-accent uppercase tracking-wider">Selected</span>
+          <span className="text-xs font-semibold text-accent">Selected</span>
           <span className="text-sm font-semibold text-ink truncate">{selectedProject}</span>
           {onChangeProject && (
             <button
@@ -1188,7 +1173,7 @@ function PhotoUploadQuestion({
         {/* Observations */}
         {detections.observations?.length > 0 && (
           <div className="p-4 rounded-xl border border-border bg-muted/20">
-            <p className="text-xs font-semibold text-ink mb-2">AI Observations</p>
+            <p className="text-xs font-semibold text-ink mb-2">AI observations</p>
             <ul className="space-y-1">
               {detections.observations.map((obs: string, i: number) => (
                 <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
@@ -1215,8 +1200,16 @@ function PhotoUploadQuestion({
   return (
     <div className="max-w-lg mx-auto space-y-4">
       <div
+        role="button"
+        tabIndex={0}
         onClick={() => fileInputRef.current?.click()}
-        className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border p-6 cursor-pointer hover:border-accent/40 hover:bg-muted/20 transition-all"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border p-6 cursor-pointer hover:border-accent/40 hover:bg-muted/20 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
       >
         <span className="text-2xl">📸</span>
         <div className="text-center">
@@ -1262,7 +1255,7 @@ function PhotoUploadQuestion({
           aria-busy={isAnalyzing}
           className="w-full rounded-lg bg-accent py-3 text-sm font-semibold text-white hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isAnalyzing ? "Analyzing..." : "Analyze My Kitchen"}
+          {isAnalyzing ? "Analyzing..." : "Analyze my kitchen"}
         </button>
         <button
           type="button"
@@ -1272,6 +1265,276 @@ function PhotoUploadQuestion({
           Skip, answer manually instead
         </button>
       </div>
+    </div>
+  );
+}
+
+// ─── OpenStreetMap roof measurement ───────────────────────────────────────────
+function RoofMapMeasure({
+  answers,
+  onMeasured,
+  onClear,
+  variant = "details",
+}: {
+  answers: EstimatorAnswers;
+  onMeasured: (roofSqFt: number) => void;
+  onClear?: () => void;
+  variant?: "location" | "details";
+}) {
+  const [address, setAddress] = useState("");
+  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchStatus, setSearchStatus] = useState<"idle" | "loading">("idle");
+  const [measureStatus, setMeasureStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [message, setMessage] = useState<string | null>(null);
+  const [measured, setMeasured] = useState<number | null>(
+    answers.roofSizeSource === "map" && answers.roofSize ? answers.roofSize : null,
+  );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (answers.roofSizeSource === "map" && answers.roofSize) {
+      setMeasured(answers.roofSize);
+      setMeasureStatus("done");
+    }
+  }, [answers.roofSize, answers.roofSizeSource]);
+
+  useEffect(() => {
+    const query = address.trim();
+    if (query.length < 3 || measureStatus === "loading") {
+      setSuggestions([]);
+      return;
+    }
+
+    window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(async () => {
+      setSearchStatus("loading");
+      try {
+        const result = await searchAddressesForMap({
+          data: {
+            query,
+            zipCode: answers.zipCode,
+            city: answers.city,
+            state: answers.state,
+          },
+        });
+        if (result.success) {
+          setSuggestions(result.suggestions);
+          setShowSuggestions(result.suggestions.length > 0);
+          setMessage(null);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } catch {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      } finally {
+        setSearchStatus("idle");
+      }
+    }, 380);
+
+    return () => window.clearTimeout(debounceRef.current);
+  }, [address, answers.zipCode, answers.city, answers.state, measureStatus]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const runMeasure = async (
+    streetAddress: string,
+    coords?: { lat: number; lng: number } | null,
+  ) => {
+    if (streetAddress.trim().length < 4 || measureStatus === "loading") return;
+    setMeasureStatus("loading");
+    setMessage(null);
+    try {
+      const result = await measureRoofFromMap({
+        data: {
+          address: streetAddress.trim(),
+          zipCode: answers.zipCode,
+          city: answers.city,
+          state: answers.state,
+          roofPitch: answers.roofPitch,
+          lat: coords?.lat,
+          lng: coords?.lng,
+        },
+      });
+      if (result.success) {
+        setMeasured(result.roofSqFt);
+        setMeasureStatus("done");
+        setMessage(null);
+        setShowSuggestions(false);
+        onMeasured(result.roofSqFt);
+      } else {
+        setMeasureStatus("idle");
+        setMeasured(null);
+        setMessage(result.message);
+      }
+    } catch {
+      setMeasureStatus("idle");
+      setMeasured(null);
+      setMessage("Map lookup failed. You can enter the roof size manually on the next step.");
+    }
+  };
+
+  const handleSelectSuggestion = (suggestion: AddressSuggestion) => {
+    setAddress(suggestion.label);
+    const coords = { lat: suggestion.lat, lng: suggestion.lng };
+    setSelectedCoords(coords);
+    setShowSuggestions(false);
+    void runMeasure(suggestion.label, coords);
+  };
+
+  const handleMeasureClick = () => {
+    void runMeasure(address, selectedCoords);
+  };
+
+  const handleMeasureAgain = () => {
+    setMeasured(null);
+    setMeasureStatus("idle");
+    setAddress("");
+    setSelectedCoords(null);
+    setMessage(null);
+    onClear?.();
+  };
+
+  const isLocationStep = variant === "location";
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        "max-w-sm rounded-xl border border-border bg-white p-4",
+        isLocationStep && "mt-4",
+      )}
+    >
+      <div className="flex items-start gap-2.5 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-[#082A4B]/5 flex items-center justify-center shrink-0">
+          <Map className="h-4 w-4 text-[#082A4B]" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-ink">
+            {isLocationStep ? "Measure roof from map data" : "Measure my roof from map data"}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Uses OpenStreetMap building outlines near your address. Footprint area is adjusted for
+            typical roof slope. Optional, and you can edit the result later.
+          </p>
+        </div>
+      </div>
+
+      {measured !== null && measureStatus === "done" ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2.5">
+            <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
+            <p className="text-xs text-ink">
+              About <span className="font-semibold">{measured.toLocaleString()} sq ft</span> from
+              map data
+              {answers.city ? ` near ${answers.city}` : ""}.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleMeasureAgain}
+            className="text-xs font-medium text-muted-foreground hover:text-ink underline underline-offset-2 transition"
+          >
+            Measure a different address
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="relative flex gap-2">
+            <label htmlFor={`roof-map-address-${variant}`} className="sr-only">
+              Street address
+            </label>
+            <input
+              id={`roof-map-address-${variant}`}
+              value={address}
+              autoComplete="street-address"
+              onChange={(e) => {
+                setAddress(e.target.value);
+                setSelectedCoords(null);
+              }}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowSuggestions(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  setShowSuggestions(false);
+                  void handleMeasureClick();
+                }
+                if (e.key === "Escape") setShowSuggestions(false);
+              }}
+              placeholder="123 Main St"
+              className="flex-1 min-w-0 h-10 rounded-lg border border-border bg-white px-3 text-sm text-ink placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#082A4B]/30"
+            />
+            <button
+              type="button"
+              onClick={handleMeasureClick}
+              disabled={address.trim().length < 4 || measureStatus === "loading"}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#082A4B] px-3 text-xs font-semibold text-white transition hover:bg-[#0a355c] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {measureStatus === "loading" ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Measuring
+                </>
+              ) : (
+                "Measure"
+              )}
+            </button>
+          </div>
+
+          {showSuggestions && suggestions.length > 0 && (
+            <ul
+              className="mt-1 max-h-44 overflow-y-auto rounded-lg border border-border bg-white shadow-sm"
+              role="listbox"
+              aria-label="Address suggestions"
+            >
+              {suggestions.map((suggestion) => (
+                <li key={`${suggestion.lat}-${suggestion.lng}-${suggestion.displayName}`}>
+                  <button
+                    type="button"
+                    role="option"
+                    onClick={() => handleSelectSuggestion(suggestion)}
+                    className="w-full px-3 py-2 text-left text-xs text-ink hover:bg-muted/40 transition"
+                  >
+                    {suggestion.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {searchStatus === "loading" && (
+            <p className="mt-2 text-[11px] text-muted-foreground flex items-center gap-1.5">
+              <Loader2 className="h-3 w-3 animate-spin" /> Looking up addresses
+            </p>
+          )}
+
+          {message && (
+            <p className="mt-2 text-[11px] text-amber-700 flex items-start gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              {message}
+            </p>
+          )}
+
+          {isLocationStep && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Optional. Skip this and enter roof size manually on the details step.
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -1294,6 +1557,32 @@ function QuestionRenderer({
     return <CardsQuestion q={question} value={val as string} onChange={h} />;
   if (question.type === "select-grid")
     return <SelectGridQuestion q={question} value={val as string} onChange={h} />;
+  if (question.id === "roofSize")
+    return (
+      <div className="space-y-4">
+        <RoofMapMeasure
+          answers={answers}
+          variant="details"
+          onMeasured={(roofSqFt) => {
+            onChange("roofSizeSource", "map");
+            onChange("roofSize", roofSqFt);
+          }}
+          onClear={() => {
+            onChange("roofSizeSource", undefined);
+            onChange("roofSize", undefined);
+          }}
+        />
+        <NumberQuestion
+          key={val === undefined ? "empty" : String(val)}
+          q={question}
+          value={val as number}
+          onChange={(v) => {
+            onChange("roofSizeSource", "manual");
+            onChange("roofSize", v);
+          }}
+        />
+      </div>
+    );
   if (question.type === "number")
     return <NumberQuestion q={question} value={val as number} onChange={h} />;
   if (question.type === "text")
@@ -1329,6 +1618,13 @@ function FinalReport({
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const roofArea = answers.projectType === "roof" ? resolveRoofArea(answers) : null;
+  const roofSizeSourceLabel: Record<"manual" | "map" | "estimated", string> = {
+    map: "measured from OpenStreetMap building data",
+    manual: "the size you entered",
+    estimated: "estimated from your home size and roof slope",
+  };
+
   const projectLabel: Record<string, string> = {
     roof: "Roof Replacement",
     kitchen: "Kitchen Remodel",
@@ -1353,7 +1649,7 @@ function FinalReport({
         details["Location"] =
           `${answers.city || ""} ${answers.state || ""} ${answers.zipCode}`.trim();
       if (answers.propertyType) details["Property type"] = answers.propertyType.replace("-", " ");
-      if (answers.squareFootage)
+      if (answers.squareFootage && answers.projectType !== "roof")
         details[answers.projectType === "kitchen" ? "Kitchen size" : "Home size"] =
           `${answers.squareFootage.toLocaleString()} sq ft`;
       if (answers.yearBuilt) details["Year built"] = String(answers.yearBuilt);
@@ -1368,7 +1664,15 @@ function FinalReport({
         details["Backsplash"] = (answers as any).kitchenBacksplash;
       if (answers.roofAction) details["Action"] = answers.roofAction;
       if (answers.roofMaterial) details["Material"] = answers.roofMaterial;
-      if (answers.roofSize) details["Roof size"] = `${answers.roofSize.toLocaleString()} sq ft`;
+      if (answers.projectType === "roof") {
+        const area = resolveRoofArea(answers);
+        details["Roof area"] =
+          `${area.sqFt.toLocaleString()} sq ft (${roofSizeSourceLabel[area.source]})`;
+      }
+      if (answers.roofPitch) details["Roof slope"] = answers.roofPitch;
+      if (answers.roofComplexity) details["Roof shape"] = answers.roofComplexity;
+      if (answers.roofLayers)
+        details["Existing layers"] = answers.roofLayers === "two-plus" ? "Two or more" : "One";
       if (answers.currentCondition) details["Current condition"] = answers.currentCondition;
       if (answers.startTimeline) details["Timeline"] = answers.startTimeline.replace("-", " ");
 
@@ -1399,90 +1703,134 @@ function FinalReport({
     }
   };
 
-  const breakdownWithColors = estimate.breakdown.map((b, i) => ({
-    ...b,
-    color: BREAKDOWN_COLORS[i] ?? "#e5e7eb",
-  }));
+  const breakdownWithColors = colorizeBreakdown(estimate.breakdown);
   const region = resolveRegionalMultiplier(answers);
+  const feedbackKey = `${answers.projectType ?? "project"}-${answers.zipCode ?? "nozip"}-${estimate.mid}`;
+
+  const summaryRows = [
+    ...(answers.projectType !== "roof"
+      ? [
+          {
+            label: "Property size",
+            val: answers.squareFootage ? `${answers.squareFootage.toLocaleString()} sq ft` : "-",
+          },
+        ]
+      : []),
+    { label: "Property type", val: answers.propertyType?.replace("-", " ") ?? "-" },
+    ...(roofArea
+      ? [
+          { label: "Roof area", val: `${roofArea.sqFt.toLocaleString()} sq ft` },
+          { label: "Roof slope", val: answers.roofPitch ?? "-" },
+          { label: "Roof shape", val: answers.roofComplexity ?? "-" },
+          {
+            label: "Existing layers",
+            val:
+              answers.roofLayers === "two-plus"
+                ? "Two or more"
+                : answers.roofLayers === "one"
+                  ? "One"
+                  : "-",
+          },
+        ]
+      : []),
+    { label: "Condition", val: answers.currentCondition ?? "-" },
+    { label: "Cause", val: answers.causeOfProject?.replace("-", " ") ?? "-" },
+  ];
+
+  const metaPills = [
+    { label: "Timeline", val: estimate.timeline },
+    { label: "Permit", val: estimate.permitRequired ? "Required" : "Not needed" },
+    {
+      label: "Start",
+      val:
+        answers.startTimeline === "asap"
+          ? "ASAP"
+          : (answers.startTimeline?.replace("-", " to ") ?? "TBD"),
+    },
+  ];
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
-      {/* Hero card */}
-      <div className="rounded-2xl bg-[#082A4B] p-8 md:p-10 text-white">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold mb-5">
-          <CheckCircle2 className="h-3.5 w-3.5" /> {estimate.confidence}% Confidence Score
-        </div>
-        <div className="text-sm text-white/50 mb-2">
-          {projectLabel[answers.projectType ?? ""] ?? "Your Project"}
-        </div>
-        <div className="font-display text-5xl md:text-6xl font-bold">{fmt(estimate.mid)}</div>
-        <div className="mt-2 text-white/50 text-sm">
-          Typical range: {fmt(estimate.low)} – {fmt(estimate.high)}
-        </div>
-        <div className="mt-1 text-white/30 text-xs">
-          Instant lookup for {region.label}
-          {region.source === "city"
-            ? " (metro rate)"
-            : region.source === "state"
-              ? " (state rate)"
-              : " (national average)"}
-        </div>
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          {[
-            { label: "Timeline", val: estimate.timeline },
-            { label: "Permit", val: estimate.permitRequired ? "Required" : "Not needed" },
-            {
-              label: "Start",
-              val:
-                answers.startTimeline === "asap"
-                  ? "ASAP"
-                  : (answers.startTimeline?.replace("-", "–") ?? "TBD"),
-            },
-          ].map(({ label, val }) => (
-            <div key={label} className="rounded-xl bg-white/10 px-3 py-2.5">
-              <div className="text-[10px] text-white/40 mb-0.5">{label}</div>
-              <div className="text-sm font-semibold text-white">{val}</div>
+    <div className="w-full space-y-4 lg:space-y-3 pb-12 animate-in fade-in duration-500">
+      {/* Compact hero */}
+      <div className="rounded-2xl bg-[#082A4B] p-5 lg:px-6 lg:py-5 text-white">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-8">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-2">
+              <span className="text-xs text-white/50">
+                {projectLabel[answers.projectType ?? ""] ?? "Your project"}
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-bold">
+                <CheckCircle2 className="h-3 w-3" aria-hidden />
+                {estimate.confidence}% confidence
+              </span>
             </div>
-          ))}
+            <h1 className="font-display text-4xl lg:text-[2.75rem] font-bold leading-none tabular-nums">
+              <span className="sr-only">
+                Your {projectLabel[answers.projectType ?? ""] ?? "renovation"} estimate:{" "}
+              </span>
+              {fmt(estimate.mid)}
+            </h1>
+            <div className="mt-1.5 text-white/50 text-sm">
+              Typical range: {fmt(estimate.low)} to {fmt(estimate.high)}
+            </div>
+            <p className="mt-1 text-white/30 text-xs leading-snug">
+              Instant lookup for {region.label}
+              {region.source === "city"
+                ? " (metro rate)"
+                : region.source === "state"
+                  ? " (state rate)"
+                  : " (national average)"}
+              {roofArea &&
+                `. Priced on ${roofArea.sqFt.toLocaleString()} sq ft of roof, ${roofSizeSourceLabel[roofArea.source]}.`}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 lg:gap-2.5 shrink-0 lg:max-w-sm">
+            {metaPills.map(({ label, val }) => (
+              <div
+                key={label}
+                className="rounded-xl bg-white/10 px-3 py-2 min-w-[5.5rem] flex-1 lg:flex-none"
+              >
+                <div className="text-[10px] text-white/40 mb-0.5">{label}</div>
+                <div className="text-sm font-semibold text-white leading-tight">{val}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Breakdown + Summary row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="rounded-2xl border border-border bg-white p-6">
-          <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-5">
-            Cost Breakdown
-          </div>
-          <DonutChart breakdown={breakdownWithColors} total={estimate.mid} />
+      {/* Breakdown + summary above the fold on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-stretch">
+        <div className="lg:col-span-7 rounded-2xl border border-border bg-white p-4 lg:p-5 min-h-0">
+          <CostBreakdownChart breakdown={breakdownWithColors} total={estimate.mid} compact />
         </div>
-        <div className="rounded-2xl border border-border bg-white p-6 space-y-1">
-          <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
-            Project Summary
+        <div className="lg:col-span-5 rounded-2xl border border-border bg-white p-4 lg:p-5 flex flex-col min-h-0">
+          <div className="text-sm font-bold text-primary mb-3 shrink-0">Project summary</div>
+          <div className="min-h-0 lg:overflow-y-auto lg:max-h-[min(22rem,calc(100vh-22rem))]">
+            {summaryRows.map(({ label, val }) => (
+              <div
+                key={label}
+                className="flex items-center justify-between gap-3 py-1.5 border-b border-border/40 last:border-0 text-sm"
+              >
+                <span className="text-muted-foreground shrink-0">{label}</span>
+                <span className="font-semibold text-ink capitalize text-right">{val}</span>
+              </div>
+            ))}
           </div>
-          {[
-            {
-              label: "Property Size",
-              val: answers.squareFootage ? `${answers.squareFootage.toLocaleString()} sq ft` : "—",
-            },
-            { label: "Property Type", val: answers.propertyType?.replace("-", " ") ?? "—" },
-            { label: "Condition", val: answers.currentCondition ?? "—" },
-            { label: "Cause", val: answers.causeOfProject?.replace("-", " ") ?? "—" },
-          ].map(({ label, val }) => (
-            <div
-              key={label}
-              className="flex items-center justify-between py-2 border-b border-border/40 last:border-0 text-sm"
-            >
-              <span className="text-muted-foreground capitalize">{label}</span>
-              <span className="font-semibold text-ink capitalize">{val}</span>
-            </div>
-          ))}
         </div>
       </div>
+
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        This is a planning estimate based on your answers and local labor rates, not a contractor
+        bid. Final pricing depends on site access, material choices, and what crews find once work
+        starts.
+        {roofArea?.source === "estimated" &&
+          " Adding a measured roof size, from map data or your own measurement, improves the range."}
+      </p>
 
       {/* Next steps — live actions only */}
-      <div className="rounded-2xl border border-border bg-white p-6">
-        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
-          Recommended next steps
-        </div>
+      <div className="rounded-2xl border border-border bg-white p-5 lg:p-6">
+        <div className="text-sm font-bold text-primary mb-4">Recommended next steps</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <a
             href="/quote-analyzer"
@@ -1539,6 +1887,12 @@ function FinalReport({
         onSubmit={handleEmailSubmit}
         reportName="Estimate report"
         isLoading={isDownloading}
+      />
+
+      <EstimateFeedbackCard
+        estimateKey={feedbackKey}
+        projectType={answers.projectType}
+        confidence={estimate.confidence}
       />
     </div>
   );
@@ -1728,11 +2082,20 @@ function EstimatorPage() {
       {/* Header - Same as landing page */}
       <SiteNav active="estimator" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+      <main
+        className={cn(
+          "max-w-6xl mx-auto px-4 sm:px-6",
+          done ? "pt-2 pb-6 md:pt-3 md:pb-8" : "pt-4 pb-8 md:pt-5 md:pb-10",
+        )}
+      >
+        {!done && (
+          <h1 className="sr-only">Home renovation cost estimator</h1>
+        )}
+
         {/* Progress bar + Start over */}
         {!done && (
-          <div className="mb-8">
-            <div className="flex items-center justify-end gap-3 mb-4">
+          <div className="mb-4 md:mb-5">
+            <div className="flex items-center justify-end gap-3 mb-2">
               <span className="hidden sm:inline text-xs text-muted-foreground">
                 Progress auto-saved
               </span>
@@ -1744,7 +2107,14 @@ function EstimatorPage() {
               </button>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="flex-1 h-2 rounded-full bg-muted overflow-hidden"
+                role="progressbar"
+                aria-valuenow={overallProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Estimate progress"
+              >
                 <div
                   className="h-full rounded-full bg-accent transition-all duration-500"
                   style={{ width: `${overallProgress}%` }}
@@ -1760,7 +2130,7 @@ function EstimatorPage() {
         {done ? (
           <FinalReport answers={answers} estimate={estimate} onRestart={restart} />
         ) : (
-          <div className="flex flex-col lg:flex-row gap-8 xl:gap-12 items-start">
+          <div className="flex flex-col lg:flex-row gap-6 xl:gap-8 items-start">
             {/* Left: questions */}
             <div className="flex-1 min-w-0">
               <StepStepper
@@ -1781,19 +2151,20 @@ function EstimatorPage() {
                   className="animate-in fade-in slide-in-from-bottom-4 duration-350"
                 >
                   {/* Question header */}
-                  <div className="mb-7">
+                  <div className="mb-5">
                     <div className="flex items-center justify-between gap-4 mb-2">
-                      <span className="text-xs font-bold text-accent uppercase tracking-wider">
-                        {currentStep?.title}
-                      </span>
+                      <span className="text-xs font-semibold text-accent">{currentStep?.title}</span>
                       {currentQuestion.optional && (
                         <span className="px-2.5 py-1 rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                           Optional
                         </span>
                       )}
                     </div>
-                    <h2 className="font-display text-2xl md:text-3xl font-bold text-ink leading-snug">
-                      {currentQuestion.title}
+                    <h2 className="font-display text-2xl md:text-3xl font-bold text-ink leading-snug flex items-start gap-1">
+                      <span className="min-w-0">{currentQuestion.title}</span>
+                      {currentQuestion.info && (
+                        <QuestionInfo topic={currentQuestion.title} info={currentQuestion.info} />
+                      )}
                     </h2>
                     {currentQuestion.subtitle && (
                       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -1823,6 +2194,28 @@ function EstimatorPage() {
                       })()}
                     </div>
                   )}
+                  {currentStep?.id === "location" && answers.projectType === "roof" && (
+                    <RoofMapMeasure
+                      answers={answers}
+                      variant="location"
+                      onMeasured={(roofSqFt) => {
+                        setAnswer("roofSizeSource", "map");
+                        setAnswer("roofSize", roofSqFt);
+                      }}
+                      onClear={() => {
+                        setAnswer("roofSizeSource", undefined);
+                        setAnswer("roofSize", undefined);
+                      }}
+                    />
+                  )}
+                  {currentQuestion.id === "zipCode" &&
+                    answers.roofSizeSource === "map" &&
+                    answers.roofSize && (
+                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 text-accent text-xs font-semibold">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Roof measured: {answers.roofSize.toLocaleString()} sq ft
+                      </div>
+                    )}
                   {currentQuestion.id === "zipCode" && zipError && (
                     <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
                       <AlertCircle className="h-4 w-4" /> {zipError}
@@ -1850,7 +2243,7 @@ function EstimatorPage() {
                         disabled={!isAnswered(currentQuestion)}
                         className="flex items-center gap-2 px-7 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-accent/20"
                       >
-                        {isLast ? "See My Estimate" : "Continue"} <ArrowRight className="h-4 w-4" />
+                        {isLast ? "See my estimate" : "Continue"} <ArrowRight className="h-4 w-4" />
                       </button>
                     )}
                     {currentQuestion.optional && (
@@ -1867,12 +2260,12 @@ function EstimatorPage() {
             </div>
 
             {/* Right: live estimate sidebar */}
-            <div className="w-full lg:w-72 xl:w-80 shrink-0">
+            <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-[4.25rem] lg:self-start lg:max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto lg:overscroll-y-contain [scrollbar-gutter:stable]">
               <EstimatePanel estimate={estimate} prevMid={prevMidRef.current} />
             </div>
           </div>
         )}
-      </div>
+      </main>
       <SiteFooter />
     </div>
   );

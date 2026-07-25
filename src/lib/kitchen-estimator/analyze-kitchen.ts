@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { AIDetectionResult } from "./types";
 import { parseAIResponse } from "./ai-response-parser";
+import { getAiApiKey, getAiChatCompletionsUrl } from "@/lib/ai-config";
 
 const AI_PROMPT = `Analyze the following kitchen photos and provide a structured assessment. You MUST respond with ONLY valid JSON (no markdown, no code blocks, no explanation text).
 
@@ -18,7 +19,6 @@ Required JSON format:
 
 Respond with ONLY the JSON object, nothing else.`;
 
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const VISION_MODEL = "openai/gpt-4o-mini";
 const TIMEOUT_MS = 30000;
 
@@ -29,7 +29,7 @@ export type AnalyzeKitchenResult =
 export const analyzeKitchen = createServerFn({ method: "POST" })
   .validator(z.object({ photos: z.array(z.string().min(1)).min(1).max(6) }))
   .handler(async ({ data }): Promise<AnalyzeKitchenResult> => {
-    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
+    const apiKey = getAiApiKey();
     if (!apiKey) {
       return { success: false, error: "API key not configured.", code: "auth_error" };
     }
@@ -50,7 +50,7 @@ export const analyzeKitchen = createServerFn({ method: "POST" })
     const tid = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      const res = await fetch(OPENROUTER_API_URL, {
+      const res = await fetch(getAiChatCompletionsUrl(), {
         method: "POST",
         signal: controller.signal,
         headers: {

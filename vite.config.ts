@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Expose server secrets to Vite-processed server code (chat, quote, kitchen).
+  // Prefer OPENROUTER_API_KEY; VITE_SK_API_KEY remains as a legacy fallback.
+  vite: {
+    envPrefix: ["VITE_", "OPENROUTER_"],
+  },
 });

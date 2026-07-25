@@ -195,11 +195,28 @@
   animation: progress-sweep 1.6s linear infinite;
 }
 
+@keyframes feedback-emoji-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-5px);
+    opacity: 0.92;
+  }
+}
+
+.animate-feedback-emoji {
+  animation: feedback-emoji-bob 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-progress-orbit,
   .animate-progress-breathe,
   .animate-progress-sweep,
-  .animate-pulse-glow {
+  .animate-pulse-glow,
+  .animate-feedback-emoji {
     animation: none !important;
   }
 }

@@ -7,6 +7,8 @@
 
 import { knowledgeProvider } from "./knowledge-provider";
 import type { ProjectType } from "./estimator-engine";
+import { callOpenRouter } from "./quote/openrouter-client";
+import { getAiChatCompletionsUrl, getAiModel } from "./ai-config";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -195,62 +197,14 @@ ${focusedStructuredKnowledge}
 USER MESSAGE
 ${userMessage}`;
 
-  const messagesForLLM: ChatMessage[] = [
-    {
-      role: "user",
-      content: userMessage,
-    },
-  ];
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://costreno.com",
-        "X-Title": "CostReno AI",
-      },
-      body: JSON.stringify({
-        model: "deepseek/deepseek-chat",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          ...messagesForLLM.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        ],
-        temperature: 0.7,
-        max_tokens: 1500,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`OpenRouter error: ${response.status} - ${errorBody}`);
-    }
-
-    const data = await response.json();
-    if (!data.choices || data.choices.length === 0) {
-      throw new Error("No response from AI - empty choices");
-    }
-    return data.choices?.[0]?.message?.content || "Unable to generate response.";
-  } catch (error) {
-    console.error("Chat with knowledge error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
-      return "API key invalid or expired. Please check your VITE_SK_API_KEY.";
-    }
-    if (errorMessage.includes("429") || errorMessage.includes("rate limit")) {
-      return "Rate limit exceeded. Please wait a moment and try again.";
-    }
-    if (errorMessage.includes("404") || errorMessage.includes("not found")) {
-      return "Model not found. Please check the model configuration.";
-    }
-    return `Error: ${errorMessage}. Please try again.`;
-  }
+  return await callOpenRouter({
+    apiKey,
+    systemPrompt,
+    userPrompt: userMessage,
+    temperature: 0.7,
+    maxTokens: 1500,
+    timeoutMs: 45000,
+  });
 }
 
 // ─── Streaming Version (for real-time responses) ──────────────────────────────
@@ -275,7 +229,7 @@ ${knowledgePrompt}`;
   }));
 
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch(getAiChatCompletionsUrl(), {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -284,7 +238,7 @@ ${knowledgePrompt}`;
         "X-Title": "CostReno AI",
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-chat",
+        model: getAiModel(),
         messages: [
           {
             role: "system",

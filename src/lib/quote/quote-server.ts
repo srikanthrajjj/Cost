@@ -8,6 +8,7 @@ import {
 import type { QuoteExtraction } from "./types";
 import { saveQuoteUpload } from "@/lib/db/store";
 import { assertServerAdvancedReportAllowed } from "@/lib/quote/advanced-rate-limit";
+import { requireAiApiKey } from "@/lib/ai-config";
 
 export type QuoteAnalysisWithUpload = QuoteAnalysisResult & {
   uploadId?: string;
@@ -30,8 +31,7 @@ export const serverExtractQuoteDetails = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<QuoteDetailsResult> => {
-    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
-    if (!apiKey) throw new Error("API key not configured.");
+    const apiKey = requireAiApiKey();
 
     if (data.source === "quote-analyzer-advanced") {
       assertServerAdvancedReportAllowed(data.sessionId);
@@ -54,8 +54,7 @@ export const serverAnalyzeQuoteFull = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<QuoteAnalysisWithUpload> => {
-    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
-    if (!apiKey) throw new Error("API key not configured.");
+    const apiKey = requireAiApiKey();
 
     const result = await analyzeQuoteFull(data.rawText, apiKey, {
       includeReport: data.includeReport === true,

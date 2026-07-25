@@ -1438,6 +1438,10 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       return response;
     } catch (error) {
       console.error("AI API error:", error);
+      const message = error instanceof Error ? error.message : "";
+      if (message && !message.toLowerCase().includes("fetch")) {
+        return message;
+      }
       return "I'm having trouble connecting right now. Please try again in a moment.";
     }
   };

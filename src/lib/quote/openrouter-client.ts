@@ -1,14 +1,21 @@
 /**
- * Shared OpenRouter chat-completion client for the quote analysis pipeline.
+ * Shared OpenRouter-compatible chat-completion client.
  *
  * Wraps `fetch` with:
  *  - a per-request timeout (so a stalled request can't hang the UI forever)
  *  - automatic retries with backoff for transient failures (timeouts, network
  *    errors, 429 rate limits, 5xx server errors)
+ *  - model fallbacks when the configured model returns 404
  *  - support for an external AbortSignal so the user can cancel in-flight work
  *  - categorized errors (`OpenRouterError.code`) so callers can show accurate,
  *    friendly messages instead of a raw error string
  */
+
+import {
+  getAiChatCompletionsUrl,
+  getAiModel,
+  getAiModelFallbacks,
+} from "@/lib/ai-config";
 
 export type OpenRouterErrorCode =
   | "cancelled"
@@ -68,12 +75,14 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-async function attemptOnce(options: OpenRouterCallOptions): Promise<string> {
+async function attemptOnce(
+  options: OpenRouterCallOptions,
+  model: string,
+): Promise<string> {
   const {
     apiKey,
     systemPrompt,
     userPrompt,
-    model = "deepseek/deepseek-chat",
     temperature = 0.2,
     maxTokens = 2000,
     signal: externalSignal,
@@ -96,7 +105,7 @@ async function attemptOnce(options: OpenRouterCallOptions): Promise<string> {
 
   let response: Response;
   try {
-    response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    response = await fetch(getAiChatCompletionsUrl(), {
       method: "POST",
       signal: controller.signal,
       headers: {
@@ -137,16 +146,16 @@ async function attemptOnce(options: OpenRouterCallOptions): Promise<string> {
   if (!response.ok) {
     const errorBody = await response.text().catch(() => "");
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       throw new OpenRouterError(
         "auth",
-        "API key invalid or expired. Please check your VITE_SK_API_KEY.",
+        "API key invalid, revoked, or missing. Update OPENROUTER_API_KEY (or VITE_SK_API_KEY) in .env.",
       );
     }
     if (response.status === 404) {
       throw new OpenRouterError(
         "not_found",
-        "AI model not found. Please check the model configuration.",
+        `AI model not found: ${model}`,
       );
     }
     if (response.status === 429) {
@@ -185,38 +194,54 @@ async function attemptOnce(options: OpenRouterCallOptions): Promise<string> {
  * Resolves with the raw message content string, or throws an `OpenRouterError`.
  */
 export async function callOpenRouter(options: OpenRouterCallOptions): Promise<string> {
-  const { maxRetries = 2, signal, onRetry } = options;
+  const { maxRetries = 2, signal, onRetry, model } = options;
   const maxAttempts = maxRetries + 1;
+  const models = model ? [model] : getAiModelFallbacks();
+  const primaryModel = model || getAiModel();
 
   let lastError: OpenRouterError | undefined;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await attemptOnce(options);
-    } catch (err) {
-      const error =
-        err instanceof OpenRouterError
-          ? err
-          : new OpenRouterError("network", err instanceof Error ? err.message : String(err));
+  for (let modelIndex = 0; modelIndex < models.length; modelIndex++) {
+    const activeModel = models[modelIndex] ?? primaryModel;
 
-      lastError = error;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await attemptOnce(options, activeModel);
+      } catch (err) {
+        const error =
+          err instanceof OpenRouterError
+            ? err
+            : new OpenRouterError("network", err instanceof Error ? err.message : String(err));
 
-      const isLastAttempt = attempt >= maxAttempts;
-      const isRetryable = RETRYABLE_CODES.includes(error.code);
+        lastError = error;
 
-      if (error.code === "cancelled" || !isRetryable || isLastAttempt) {
-        throw error;
+        if (error.code === "cancelled" || error.code === "auth") {
+          throw error;
+        }
+
+        // Try the next configured model when this one is missing.
+        if (error.code === "not_found" && modelIndex < models.length - 1) {
+          break;
+        }
+
+        const isLastAttempt = attempt >= maxAttempts;
+        const isRetryable = RETRYABLE_CODES.includes(error.code);
+
+        if (!isRetryable || isLastAttempt) {
+          if (error.code === "not_found" && modelIndex < models.length - 1) {
+            break;
+          }
+          throw error;
+        }
+
+        onRetry?.({ attempt: attempt + 1, maxAttempts, reason: error.code });
+
+        const backoffMs = error.retryAfterMs ?? Math.min(1500 * attempt, 6000);
+        await sleep(backoffMs, signal);
       }
-
-      onRetry?.({ attempt: attempt + 1, maxAttempts, reason: error.code });
-
-      // Exponential-ish backoff, honoring Retry-After for 429s when provided.
-      const backoffMs = error.retryAfterMs ?? Math.min(1500 * attempt, 6000);
-      await sleep(backoffMs, signal);
     }
   }
 
-  // Unreachable in practice, but keeps TypeScript happy.
   throw lastError ?? new OpenRouterError("network", "Unknown error calling AI provider");
 }
 
@@ -227,11 +252,11 @@ export function friendlyOpenRouterMessage(error: unknown): string {
       case "cancelled":
         return "Analysis cancelled.";
       case "timeout":
-        return "The AI took too long to respond. This can happen when the service is busy — please try again in a moment.";
+        return "The AI took too long to respond. This can happen when the service is busy. Please try again in a moment.";
       case "rate_limit":
         return "The AI provider is rate-limiting requests right now. Please wait a moment and try again.";
       case "auth":
-        return "AI service is misconfigured (invalid API key). Please contact support.";
+        return "AI chat is unavailable because the OpenRouter API key is invalid or revoked. Create a new key at openrouter.ai and set OPENROUTER_API_KEY in .env.";
       case "not_found":
         return "AI model is unavailable right now. Please try again shortly.";
       case "server":

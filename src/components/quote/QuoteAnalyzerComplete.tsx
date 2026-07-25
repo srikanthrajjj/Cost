@@ -1888,11 +1888,12 @@ function AIChatPanel({
         data: { messages: chatMsgs, userProjectType: projectType || undefined },
       });
       setMessages((prev) => [...prev, { role: "ai", text: response }]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "Sorry, I encountered an error. Please try again." },
-      ]);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Sorry, I encountered an error. Please try again.";
+      setMessages((prev) => [...prev, { role: "ai", text: message }]);
     } finally {
       setIsTyping(false);
       setTimeout(scrollToBottom, 50);

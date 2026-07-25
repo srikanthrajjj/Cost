@@ -36,6 +36,14 @@ export interface EstimatorAnswers {
   roofMaterial?: "asphalt" | "metal" | "tile" | "wood" | "slate";
   roofSize?: number;
   roofCondition?: "good" | "fair" | "poor";
+  /** Slope. Steeper roofs cost more to walk, stage, and install. */
+  roofPitch?: "low" | "medium" | "steep";
+  /** Number of planes, valleys, hips, and dormers. */
+  roofComplexity?: "simple" | "average" | "complex";
+  /** Existing shingle layers. Two or more means extra tear-off and disposal. */
+  roofLayers?: "one" | "two-plus";
+  /** How the roof area used for pricing was determined. */
+  roofSizeSource?: "manual" | "map" | "estimated";
   addGutters?: boolean;
   addSkylights?: boolean;
 
@@ -268,6 +276,66 @@ export function lookupInstantEstimate(answers: EstimatorAnswers): LiveEstimate {
   return calculateEstimate(answers);
 }
 
+/**
+ * Roof surface area is larger than the floor plan below it because of slope.
+ * Typical multipliers against the building footprint (plan view).
+ * Used by the estimator and by OpenStreetMap footprint → roof surface conversion.
+ */
+export const ROOF_PITCH_FACTORS: Record<"low" | "medium" | "steep", number> = {
+  low: 1.15,
+  medium: 1.25,
+  steep: 1.4,
+};
+
+/** Pitch multiplier for footprint → roof surface. Defaults to medium (~1.25). */
+export function resolveRoofPitchFactor(
+  pitch?: "low" | "medium" | "steep" | null,
+): number {
+  return ROOF_PITCH_FACTORS[pitch ?? "medium"];
+}
+
+export interface RoofAreaResult {
+  /** Roof surface area in sq ft used for pricing. */
+  sqFt: number;
+  source: "manual" | "map" | "estimated";
+  pitchFactor: number;
+}
+
+/** Stories is captured as a string by the select grid, so normalize it here. */
+function parseStories(value: unknown): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return 1;
+  return Math.min(3, Math.round(parsed));
+}
+
+/**
+ * Resolves the roof area to price against.
+ *
+ * A measured value (typed by the homeowner or returned by the map lookup)
+ * always wins. Otherwise we derive it from the building footprint
+ * (home size divided by stories) and the roof slope, because floor area alone
+ * overstates single-story roofs and understates nothing on taller homes.
+ */
+export function resolveRoofArea(answers: EstimatorAnswers): RoofAreaResult {
+  const pitchFactor = resolveRoofPitchFactor(answers.roofPitch);
+
+  if (answers.roofSize && answers.roofSize > 0) {
+    return {
+      sqFt: answers.roofSize,
+      source: answers.roofSizeSource === "map" ? "map" : "manual",
+      pitchFactor,
+    };
+  }
+
+  const homeSqFt = answers.squareFootage ?? 2000;
+  const footprint = homeSqFt / parseStories(answers.stories);
+  return {
+    sqFt: Math.max(300, Math.round(footprint * pitchFactor)),
+    source: "estimated",
+    pitchFactor,
+  };
+}
+
 export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   const project = answers.projectType;
   if (!project) {
@@ -298,7 +366,9 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   const sizeFactor = sqft / 2000;
 
   if (project === "roof") {
-    const roofSizeFactor = answers.roofSize ? answers.roofSize / 2000 : sizeFactor;
+    // Base bands assume a 2,000 sq ft roof surface.
+    const roofArea = resolveRoofArea(answers);
+    const roofSizeFactor = roofArea.sqFt / 2000;
     low = Math.round(low * roofSizeFactor * regionMult);
     mid = Math.round(mid * roofSizeFactor * regionMult);
     high = Math.round(high * roofSizeFactor * regionMult);
@@ -317,11 +387,57 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
       mid *= 1.4;
       high *= 1.5;
     }
+    if (answers.roofMaterial === "wood") {
+      low *= 1.15;
+      mid *= 1.25;
+      high *= 1.35;
+    }
     if (answers.roofMaterial === "slate") {
       low *= 2.0;
       mid *= 2.2;
       high *= 2.5;
     }
+
+    // Slope drives staging and safety labor even when the area is already known.
+    if (answers.roofPitch === "steep") {
+      low *= 1.06;
+      mid *= 1.08;
+      high *= 1.12;
+    } else if (answers.roofPitch === "low") {
+      mid *= 0.98;
+      high *= 0.98;
+    }
+
+    // Valleys, hips, and dormers add cutting, flashing, and waste.
+    if (answers.roofComplexity === "simple") {
+      low *= 0.95;
+      mid *= 0.95;
+      high *= 0.97;
+    } else if (answers.roofComplexity === "complex") {
+      low *= 1.08;
+      mid *= 1.12;
+      high *= 1.18;
+    }
+
+    // Height and access.
+    const stories = parseStories(answers.stories);
+    if (stories === 2) {
+      low *= 1.04;
+      mid *= 1.06;
+      high *= 1.08;
+    } else if (stories >= 3) {
+      low *= 1.08;
+      mid *= 1.12;
+      high *= 1.15;
+    }
+
+    // Removing a second layer typically runs $1 to $3 per sq ft.
+    if (answers.roofAction === "replace" && answers.roofLayers === "two-plus") {
+      low += Math.round(roofArea.sqFt * 0.9);
+      mid += Math.round(roofArea.sqFt * 1.5);
+      high += Math.round(roofArea.sqFt * 2.5);
+    }
+
     if (answers.addGutters) {
       low += 1200;
       mid += 1800;
@@ -339,7 +455,13 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
     }
     if (answers.roofAction) confidence += 15;
     if (answers.roofMaterial) confidence += 15;
-    if (answers.roofSize) confidence += 10;
+    if (roofArea.source === "map") confidence += 12;
+    else if (roofArea.source === "manual") confidence += 10;
+    else confidence += 3;
+    if (answers.roofPitch) confidence += 5;
+    if (answers.roofComplexity) confidence += 5;
+    if (answers.roofLayers) confidence += 3;
+    if (answers.stories) confidence += 3;
     if (answers.roofCondition) confidence += 5;
   } else if (project === "kitchen") {
     // Kitchen size factor — cap at reasonable range
@@ -576,7 +698,7 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   if (answers.currentCondition) confidence += 5;
 
   // ── Property details confidence
-  if (answers.squareFootage) confidence += 10;
+  if (answers.squareFootage && project !== "roof") confidence += 10;
   if (answers.yearBuilt) confidence += 5;
   if (answers.propertyType) confidence += 5;
 
@@ -602,14 +724,30 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   high = Math.max(mid, Math.round(high));
   confidence = Math.min(95, Math.round(confidence));
 
-  // ── Breakdown
-  const breakdown = [
-    { label: "Materials", pct: 44, amount: Math.round(mid * 0.44) },
-    { label: "Labor", pct: 34, amount: Math.round(mid * 0.34) },
-    { label: "Permits", pct: 4, amount: Math.round(mid * 0.04) },
-    { label: "Disposal", pct: 3, amount: Math.round(mid * 0.03) },
-    { label: "Contingency", pct: 15, amount: Math.round(mid * 0.15) },
-  ];
+  // ── Breakdown (roof uses the roofing knowledge base mix)
+  const breakdownShares =
+    project === "roof"
+      ? [
+          { label: "Materials", pct: 35 },
+          { label: "Labor", pct: 40 },
+          { label: "Deck repair and prep", pct: 8 },
+          { label: "Disposal", pct: 4 },
+          { label: "Permits", pct: 3 },
+          { label: "Contingency", pct: 10 },
+        ]
+      : [
+          { label: "Materials", pct: 44 },
+          { label: "Labor", pct: 34 },
+          { label: "Permits", pct: 4 },
+          { label: "Disposal", pct: 3 },
+          { label: "Contingency", pct: 15 },
+        ];
+
+  const breakdown = breakdownShares.map(({ label, pct }) => ({
+    label,
+    pct,
+    amount: Math.round((mid * pct) / 100),
+  }));
 
   return {
     low,

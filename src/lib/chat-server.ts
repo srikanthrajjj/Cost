@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireAiApiKey } from "./ai-config";
 import { chatWithKnowledge, type ChatMessage } from "./chat-with-knowledge";
+import type { ProjectType } from "./estimator-engine";
+import { friendlyOpenRouterMessage } from "./quote/openrouter-client";
 
 export const serverChatWithKnowledge = createServerFn({ method: "POST" })
   .validator(
@@ -15,7 +18,15 @@ export const serverChatWithKnowledge = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<string> => {
-    const apiKey = import.meta.env.VITE_SK_API_KEY || process.env.VITE_SK_API_KEY;
-    if (!apiKey) return "API key not configured.";
-    return chatWithKnowledge(data.messages as ChatMessage[], apiKey, data.userProjectType);
+    try {
+      const apiKey = requireAiApiKey();
+      return await chatWithKnowledge(
+        data.messages as ChatMessage[],
+        apiKey,
+        data.userProjectType as ProjectType | undefined,
+      );
+    } catch (error) {
+      console.error("serverChatWithKnowledge error:", error);
+      throw new Error(friendlyOpenRouterMessage(error));
+    }
   });
