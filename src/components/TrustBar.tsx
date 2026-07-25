@@ -5,26 +5,50 @@ interface TrustBarProps {
   region?: string;
 }
 
+const TRUST_CARDS = [
+  {
+    icon: MapPin,
+    title: "Regional labor cost index",
+    body: "Our labor estimates are anchored to BLS metro-level wage data for construction occupations, not a single national average.",
+    badge: "Updated monthly",
+  },
+  {
+    icon: Receipt,
+    title: "Material cost benchmarks",
+    body: "Material pricing uses published supplier and industry indices, refreshed periodically to reflect market movement in your region.",
+    badge: "Updated regularly",
+  },
+  {
+    icon: FileStack,
+    title: "Growing from real quotes",
+    body: "Every user-shared quote improves our models. More quotes means tighter, more reliable ranges.",
+    badge: "Continuously learning",
+  },
+  {
+    icon: TrendingUp,
+    title: "Local market factors",
+    body: "We factor in regional demand, permitting costs, seasonality, and project complexity to personalize every estimate.",
+    badge: "Regionally adjusted",
+  },
+] as const;
+
 export function TrustBar({ region = "your area" }: TrustBarProps) {
   const [showMethodology, setShowMethodology] = useState(false);
 
   return (
     <section className="bg-white border-b border-border/50 overflow-hidden">
       <div className="container-x py-14 md:py-20">
-        {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <h2 className="font-display text-3xl md:text-4xl lg:text-[44px] font-bold text-ink max-w-2xl mx-auto leading-[1.15]">
             Regionally adjusted,<br />
             <span className="underline decoration-accent/60 decoration-[3px] underline-offset-[6px]">not</span> a flat national number
           </h2>
           <p className="mt-4 text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            We combine trusted data sources and real market insights to deliver accurate, up-to-date estimates for your area.
+            We combine trusted data sources and real market insights to deliver accurate, up-to-date estimates for {region}.
           </p>
         </div>
 
-        {/* Desktop layout */}
-        <div className="hidden lg:block relative max-w-5xl mx-auto">
-          {/* CSS for animated dashes */}
+        <div className="relative max-w-5xl mx-auto">
           <style>{`
             @keyframes flowDash {
               0% { stroke-dashoffset: 16; }
@@ -36,103 +60,53 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
             }
           `}</style>
 
-          {/* SVG connection lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet">
-            {/* Top-left to center */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-0 hidden lg:block"
+            viewBox="0 0 1000 400"
+            preserveAspectRatio="xMidYMid meet"
+            aria-hidden
+          >
             <path d="M 230 100 C 320 100, 380 180, 440 195" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" />
-            {/* Bottom-left to center */}
-            <path d="M 230 300 C 320 300, 380 220, 440 205" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{animationDelay:"0.3s"}} />
-            {/* Top-right to center */}
-            <path d="M 770 100 C 680 100, 620 180, 560 195" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{animationDelay:"0.5s"}} />
-            {/* Bottom-right to center */}
-            <path d="M 770 300 C 680 300, 620 220, 560 205" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{animationDelay:"0.7s"}} />
-            {/* Dots at card ends */}
+            <path d="M 230 300 C 320 300, 380 220, 440 205" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{ animationDelay: "0.3s" }} />
+            <path d="M 770 100 C 680 100, 620 180, 560 195" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{ animationDelay: "0.5s" }} />
+            <path d="M 770 300 C 680 300, 620 220, 560 205" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{ animationDelay: "0.7s" }} />
             <circle cx="230" cy="100" r="4" fill="rgba(3,164,77,0.5)" />
             <circle cx="230" cy="300" r="4" fill="rgba(3,164,77,0.5)" />
             <circle cx="770" cy="100" r="4" fill="rgba(3,164,77,0.5)" />
             <circle cx="770" cy="300" r="4" fill="rgba(3,164,77,0.5)" />
           </svg>
 
-          {/* Grid: left cards | center hub | right cards */}
-          <div className="relative z-10 grid grid-cols-[1fr_180px_1fr] gap-6 items-center">
-            {/* Left cards */}
-            <div className="flex flex-col gap-5">
-              <TrustCard
-                icon={<MapPin className="h-5 w-5 text-accent" />}
-                title="Regional labor cost index"
-                body="Our labor estimates are anchored to BLS metro-level wage data for construction occupations, not a single national average."
-                badge="Updated monthly"
-              />
-              <TrustCard
-                icon={<Receipt className="h-5 w-5 text-accent" />}
-                title="Material cost benchmarks"
-                body="Material pricing uses published supplier and industry indices, refreshed periodically to reflect market movement in your region."
-                badge="Updated regularly"
-              />
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_180px_1fr] lg:grid-rows-2 gap-4 lg:gap-6 items-center">
+            <div className="lg:col-start-1 lg:row-start-1">
+              <TrustCard {...TRUST_CARDS[0]} />
+            </div>
+            <div className="lg:col-start-1 lg:row-start-2">
+              <TrustCard {...TRUST_CARDS[1]} />
             </div>
 
-            {/* Center hub */}
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="w-[120px] h-[120px] rounded-full border border-black/50 bg-white flex flex-col items-center justify-center relative">
-                <svg className="w-10 h-10 text-[#082A4B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="hidden lg:flex lg:col-start-2 lg:row-start-1 lg:row-span-2 flex-col items-center justify-center py-8">
+              <div className="w-[120px] h-[120px] rounded-full border border-black/50 bg-white flex flex-col items-center justify-center">
+                <svg className="w-10 h-10 text-[#082A4B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M9.5 2a3.5 3.5 0 0 0-3.4 4.4A3.5 3.5 0 0 0 4 10a3.5 3.5 0 0 0 1.8 3.1A3.5 3.5 0 0 0 8 17h1v4h6v-4h1a3.5 3.5 0 0 0 2.2-3.9A3.5 3.5 0 0 0 20 10a3.5 3.5 0 0 0-2.1-3.6A3.5 3.5 0 0 0 14.5 2a3.5 3.5 0 0 0-2.5 1 3.5 3.5 0 0 0-2.5-1z" />
                   <path d="M12 2v8" />
                   <path d="M8 10h8" />
                 </svg>
               </div>
-              <span className="mt-3 text-[10px] font-bold text-ink uppercase tracking-wider text-center leading-tight">AI Pricing<br/>Engine</span>
+              <span className="mt-3 text-[10px] font-bold text-ink uppercase tracking-wider text-center leading-tight">
+                AI Pricing<br />Engine
+              </span>
               <span className="mt-1.5 text-[11px] text-muted-foreground font-medium italic">Analyzes & learns</span>
             </div>
 
-            {/* Right cards */}
-            <div className="flex flex-col gap-5">
-              <TrustCard
-                icon={<FileStack className="h-5 w-5 text-accent" />}
-                title="Growing from real quotes"
-                body="Every user-shared quote improves our models. More quotes means tighter, more reliable ranges."
-                badge="Continuously learning"
-              />
-              <TrustCard
-                icon={<TrendingUp className="h-5 w-5 text-accent" />}
-                title="Local market factors"
-                body="We factor in regional demand, permitting costs, seasonality, and project complexity to personalize every estimate."
-                badge="Regionally adjusted"
-              />
+            <div className="lg:col-start-3 lg:row-start-1">
+              <TrustCard {...TRUST_CARDS[2]} />
+            </div>
+            <div className="lg:col-start-3 lg:row-start-2">
+              <TrustCard {...TRUST_CARDS[3]} />
             </div>
           </div>
         </div>
 
-        {/* Mobile/Tablet layout */}
-        <div className="lg:hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TrustCard
-              icon={<MapPin className="h-5 w-5 text-accent" />}
-              title="Regional labor cost index"
-              body="Our labor estimates are anchored to BLS metro-level wage data for construction occupations, not a single national average."
-              badge="Updated monthly"
-            />
-            <TrustCard
-              icon={<Receipt className="h-5 w-5 text-accent" />}
-              title="Material cost benchmarks"
-              body="Material pricing uses published supplier and industry indices, refreshed periodically to reflect market movement in your region."
-              badge="Updated regularly"
-            />
-            <TrustCard
-              icon={<FileStack className="h-5 w-5 text-accent" />}
-              title="Growing from real quotes"
-              body="Every user-shared quote improves our models. More quotes means tighter, more reliable ranges."
-              badge="Continuously learning"
-            />
-            <TrustCard
-              icon={<TrendingUp className="h-5 w-5 text-accent" />}
-              title="Local market factors"
-              body="We factor in regional demand, permitting costs, seasonality, and project complexity to personalize every estimate."
-              badge="Regionally adjusted"
-            />
-          </div>
-        </div>
-
-        {/* Bottom CTA */}
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 px-6 py-5 max-w-3xl mx-auto">
           <div>
             <p className="text-sm font-semibold text-ink">Want the full breakdown?</p>
@@ -149,7 +123,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
         </div>
       </div>
 
-      {/* Methodology Modal */}
       {showMethodology && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowMethodology(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -157,7 +130,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
             className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
               <h2 className="font-display text-lg font-bold text-ink">Our methodology</h2>
               <button
@@ -169,13 +141,11 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
               </button>
             </div>
 
-            {/* Modal content */}
             <div className="px-6 py-6 space-y-8">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Transparency matters. Here's exactly how CostReno calculates renovation cost estimates, what data we use, and how we keep it accurate.
               </p>
 
-              {/* Data Sources */}
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <Database className="h-4 w-4 text-accent" />
@@ -190,7 +160,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                 </ul>
               </div>
 
-              {/* Regional Adjustments */}
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <MapPin className="h-4 w-4 text-accent" />
@@ -205,7 +174,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                 </ul>
               </div>
 
-              {/* AI Pricing Engine */}
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <Brain className="h-4 w-4 text-accent" />
@@ -219,7 +187,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                 </ul>
               </div>
 
-              {/* Refresh Cadence */}
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <RefreshCw className="h-4 w-4 text-accent" />
@@ -244,7 +211,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                 </div>
               </div>
 
-              {/* What We Don't Do */}
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <Shield className="h-4 w-4 text-accent" />
@@ -259,7 +225,6 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                 </ul>
               </div>
 
-              {/* Footer note */}
               <p className="text-[10px] text-muted-foreground/60 text-center pt-4 border-t border-border">
                 Last updated: July 2026. This reflects our current methodology and will be updated as our models evolve.
               </p>
@@ -271,18 +236,28 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
   );
 }
 
-function TrustCard({ icon, title, body, badge }: { icon: React.ReactNode; title: string; body: string; badge: string }) {
+function TrustCard({
+  icon: Icon,
+  title,
+  body,
+  badge,
+}: {
+  icon: typeof MapPin;
+  title: string;
+  body: string;
+  badge: string;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 hover:shadow-md transition-shadow duration-200">
+    <div className="rounded-2xl border border-border bg-white p-5 hover:shadow-md transition-shadow duration-200 h-full">
       <div className="flex items-start gap-3.5">
         <div className="w-9 h-9 rounded-lg bg-accent/8 flex items-center justify-center shrink-0 mt-0.5">
-          {icon}
+          <Icon className="h-5 w-5 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-[13px] font-bold text-ink mb-1">{title}</h3>
           <p className="text-[11px] text-muted-foreground leading-relaxed">{body}</p>
           <div className="mt-2.5 flex items-center gap-1.5">
-            <svg className="w-3 h-3 text-accent shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-3 h-3 text-accent shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <polyline points="2 6 5 9 10 3" />
             </svg>
             <span className="text-[10px] font-semibold text-accent">{badge}</span>

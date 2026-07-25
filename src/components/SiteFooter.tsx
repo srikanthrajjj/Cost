@@ -64,30 +64,6 @@ export function SiteFooter() {
                   Quote analyzer
                 </a>
               </li>
-              <li>
-                <a
-                  href="/kitchen-remodel-cost"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Kitchen remodel cost
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/roof-replacement-cost"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Roof replacement cost
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/bathroom-remodel-cost"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Bathroom remodel cost
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -145,6 +121,14 @@ export function SiteFooter() {
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
                   Kitchen remodel
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/guides/bathroom-remodel"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Bathroom remodel
                 </a>
               </li>
             </ul>

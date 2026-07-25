@@ -33,10 +33,6 @@ import {
   ThumbsDown,
   ChevronDown,
   ChevronDownIcon,
-  CalendarRange,
-  Wallet,
-  ClipboardList,
-  Milestone,
 } from "lucide-react";
 import { calculateEstimate } from "@/lib/estimator-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
@@ -3224,81 +3220,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       </section>
 
-      {/* Coming soon: whole-home renovation tools */}
-      <section className="border-y border-border/60 bg-muted/30">
-        <div className="container-x py-20">
-          <div className="text-center mb-12 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-5">
-              <Home className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-bold text-primary tracking-widest uppercase">
-                Coming soon
-              </span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight">
-              Tools to manage a whole-home renovation
-            </h2>
-            <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-              Estimating and quote checks are step one. Next we are building the tools homeowners
-              actually need when roof, kitchen, bath, and more overlap: sequencing, budget control,
-              clearer scopes, and payment protection.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {[
-              {
-                icon: CalendarRange,
-                title: "Whole-home planner",
-                why: "Needed when projects overlap",
-                desc: "Prioritize rooms, sequence work so you do not redo finishes, and keep one renovation roadmap.",
-              },
-              {
-                icon: Wallet,
-                title: "Multi-project budget tracker",
-                why: "Stops budget drift",
-                desc: "Track estimate vs quote vs actual spend across every project in one household budget.",
-              },
-              {
-                icon: ClipboardList,
-                title: "Scope of work builder",
-                why: "Makes quotes comparable",
-                desc: "Create a clear scope before you request bids, so contractors price the same work.",
-              },
-              {
-                icon: Milestone,
-                title: "Payment and change-order tracker",
-                why: "Protects your cash flow",
-                desc: "Tie payments to milestones and flag change orders against the quote you already approved.",
-              },
-            ].map((tool) => (
-              <div
-                key={tool.title}
-                className="relative flex flex-col rounded-2xl border border-border bg-white p-5"
-              >
-                <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Soon
-                </span>
-                <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center mb-4">
-                  <tool.icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-primary mb-1.5">
-                  {tool.why}
-                </p>
-                <h3 className="font-display text-base font-bold text-ink mb-2">{tool.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed flex-1">{tool.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 max-w-md mx-auto text-center">
-            <p className="text-sm font-semibold text-ink mb-3">
-              Get notified when whole-home tools launch
-            </p>
-            <NewsletterSignup source="whole-home-tools-waitlist" compact />
-          </div>
-        </div>
-      </section>
-
       {/* QUOTE ANALYSIS SECTION */}
       <QuoteAnalysisSection />
 
@@ -3520,6 +3441,27 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               </div>
             </a>
           ))}
+        </div>
+      </section>
+
+      <section className="border-t border-border/60 bg-muted/20">
+        <div className="container-x py-8 md:py-10">
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
+                Coming soon
+              </p>
+              <p className="text-sm font-semibold text-ink">
+                Whole-home planner, budget tracker, and scope tools
+              </p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Get notified when multi-project renovation tools launch. Live tools above work today.
+              </p>
+            </div>
+            <div className="w-full md:w-auto md:min-w-[300px] shrink-0">
+              <NewsletterSignup source="whole-home-tools-waitlist" compact />
+            </div>
+          </div>
         </div>
       </section>
 
