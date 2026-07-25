@@ -16,9 +16,7 @@ export function shouldAskHomeSize(a: EstimatorAnswers): boolean {
 
 /** Skip duplicate roof size question when map measurement already succeeded. */
 export function shouldAskRoofSize(a: EstimatorAnswers): boolean {
-  if (a.projectType !== "roof") return false;
-  if (hasRoofArea(a) && a.roofSizeSource === "map") return false;
-  return true;
+  return false;
 }
 
 // ─── Step / Question types ────────────────────────────────────────────────────
@@ -31,7 +29,8 @@ export type QuestionType =
   | "toggle" // yes/no
   | "slider" // range slider
   | "budget" // budget input with preset chips
-  | "photo-upload"; // AI photo upload for kitchen
+  | "photo-upload" // AI photo upload for kitchen
+  | "roof-measure"; // roof footprint manual entry
 
 export interface Choice {
   value: string;
@@ -106,6 +105,22 @@ export const ALL_STEPS: StepDef[] = [
         type: "text",
         title: "ZIP code",
         placeholder: "e.g. 90210",
+      },
+    ],
+  },
+
+  // ── Step 2b: Roof measure (after ZIP, roof projects only)
+  {
+    id: "roof-measure",
+    title: "Measure your roof",
+    subtitle: "Enter your roof footprint, pitch, and complexity.",
+    showIf: (a) => a.projectType === "roof",
+    questions: [
+      {
+        id: "roofSize",
+        type: "roof-measure",
+        title: "Roof area",
+        info: "Footprint is the plan-view ground size of your roof. Pitch and complexity adjust it to sloped roof area and material waste.",
       },
     ],
   },
@@ -218,44 +233,6 @@ export const ALL_STEPS: StepDef[] = [
           { value: "tile", icon: "🟫", label: "Clay / tile", desc: "Mediterranean style" },
           { value: "wood", icon: "🪵", label: "Wood shake", desc: "Natural look" },
           { value: "slate", icon: "⬜", label: "Slate", desc: "Premium" },
-        ],
-      },
-      {
-        id: "roofSize",
-        type: "number",
-        title: "Roof size (sq ft)",
-        info: "Roof area is measured on the sloped surface, not the floor plan below. Steeper or complex roofs cover more square feet than the footprint of your home.",
-        subtitle: "Enter your roof size, or use map measurement on the location step",
-        placeholder: "2,200",
-        min: 500,
-        max: 10000,
-        step: 50,
-        unit: "sq ft",
-        optional: true,
-        showIf: shouldAskRoofSize,
-      },
-      {
-        id: "roofPitch",
-        type: "select-grid",
-        title: "How steep is your roof?",
-        info: "Roof pitch is how steep your roof is. Steeper roofs need more material, extra safety equipment for workers, and often take longer to install.",
-        subtitle: "Slope changes both the roof area and the labor needed.",
-        choices: [
-          { value: "low", icon: "📐", label: "Low slope", desc: "Easy to walk on" },
-          { value: "medium", icon: "🏠", label: "Medium slope", desc: "Most common" },
-          { value: "steep", icon: "⛰️", label: "Steep slope", desc: "Needs extra safety setup" },
-        ],
-      },
-      {
-        id: "roofComplexity",
-        type: "select-grid",
-        title: "How complex is the roof shape?",
-        info: "Roof complexity refers to valleys, hips, dormers, and other angles. More cuts and flashing details mean more labor time and cost.",
-        subtitle: "Valleys, hips, and dormers add cutting, flashing, and labor time.",
-        choices: [
-          { value: "simple", icon: "▭", label: "Simple", desc: "One or two flat planes" },
-          { value: "average", icon: "🔷", label: "Average", desc: "A few valleys or hips" },
-          { value: "complex", icon: "🧩", label: "Complex", desc: "Many angles or dormers" },
         ],
       },
       {

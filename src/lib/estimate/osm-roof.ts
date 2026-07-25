@@ -21,6 +21,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { resolveRoofPitchFactor } from "@/lib/estimator-engine";
+import { footprintSqFtFromRings } from "@/lib/roof/roof-area-geo";
 
 const SQ_METERS_TO_SQ_FEET = 10.7639;
 const EARTH_RADIUS_M = 6378137;
@@ -46,6 +47,8 @@ function getOverpassUrls(): string[] {
   return override ? [override, ...defaults.filter((url) => url !== override)] : defaults;
 }
 
+export type MapLatLng = { lat: number; lng: number };
+
 export type RoofMeasurementResult =
   | {
       success: true;
@@ -54,6 +57,10 @@ export type RoofMeasurementResult =
       footprintSqFt: number;
       formattedAddress: string;
       pitchFactor: number;
+      lat: number;
+      lng: number;
+      /** OSM building outline rings (plan view), for map preview. */
+      footprintRings: MapLatLng[][];
     }
   | {
       success: false;
@@ -72,6 +79,14 @@ export type AddressSuggestion = {
 export type AddressSearchResult =
   | { success: true; suggestions: AddressSuggestion[] }
   | { success: false; reason: "rate_limited" | "error"; message: string };
+
+export type BuildingClickResult =
+  | {
+      success: true;
+      footprintRings: MapLatLng[][];
+      footprintSqFt: number;
+    }
+  | { success: false; reason: "not_found" | "rate_limited" | "error"; message: string };
 
 interface NominatimResult {
   lat?: string;
@@ -347,6 +362,11 @@ interface CandidateBuilding {
   footprintSqMeters: number;
   distanceM: number;
   containsPoint: boolean;
+  rings: LatLon[][];
+}
+
+function latLonRingsToMap(rings: LatLon[][]): MapLatLng[][] {
+  return rings.map((ring) => ring.map((p) => ({ lat: p.lat, lng: p.lon })));
 }
 
 function selectBestBuilding(elements: OverpassElement[], point: LatLon): CandidateBuilding | null {
@@ -374,6 +394,7 @@ function selectBestBuilding(elements: OverpassElement[], point: LatLon): Candida
       footprintSqMeters,
       distanceM: Number.isFinite(bestDistance) ? bestDistance : BUILDING_SEARCH_RADIUS_M,
       containsPoint,
+      rings,
     });
   }
 
@@ -523,6 +544,9 @@ export const measureRoofFromMap = createServerFn({ method: "POST" })
         footprintSqFt,
         formattedAddress: geo.formattedAddress,
         pitchFactor,
+        lat: geo.lat,
+        lng: geo.lng,
+        footprintRings: latLonRingsToMap(building.rings),
       };
     } catch (error) {
       if (error instanceof Error && error.name === "RateLimitedError") {
@@ -538,6 +562,54 @@ export const measureRoofFromMap = createServerFn({ method: "POST" })
         success: false,
         reason: "error",
         message: "Map lookup failed. Please enter the size manually.",
+      };
+    }
+  });
+
+/** Detect OSM building footprint at a map click point (satellite tap-to-select). */
+export const detectBuildingAtPoint = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    }),
+  )
+  .handler(async ({ data }): Promise<BuildingClickResult> => {
+    try {
+      const elements = await fetchNearbyBuildings(data.lat, data.lng);
+      const building = selectBestBuilding(elements, { lat: data.lat, lon: data.lng });
+      if (!building) {
+        return {
+          success: false,
+          reason: "not_found",
+          message: "No building outline found here. Try another spot or draw manually.",
+        };
+      }
+
+      const footprintRings = latLonRingsToMap(building.rings);
+      const footprintSqFt = footprintSqFtFromRings(footprintRings);
+      if (footprintSqFt < MIN_ROOF_SQ_FT || footprintSqFt > MAX_ROOF_SQ_FT) {
+        return {
+          success: false,
+          reason: "not_found",
+          message: "Building outline here looks unreliable. Draw the roof shape manually.",
+        };
+      }
+
+      return { success: true, footprintRings, footprintSqFt };
+    } catch (error) {
+      if (error instanceof Error && error.name === "RateLimitedError") {
+        return {
+          success: false,
+          reason: "rate_limited",
+          message: "Map lookup is busy. Wait a moment and try again.",
+        };
+      }
+      console.error("[osm-roof] building click detect failed:", error);
+      return {
+        success: false,
+        reason: "error",
+        message: "Could not detect a building at that spot.",
       };
     }
   });

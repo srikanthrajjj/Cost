@@ -19,23 +19,18 @@ import {
   CheckCircle2,
   Lock,
   Loader2,
-  Map,
 } from "lucide-react";
 import {
   calculateEstimate,
   resolveRegionalMultiplier,
   resolveRoofArea,
 } from "@/lib/estimator-engine";
-import {
-  measureRoofFromMap,
-  searchAddressesForMap,
-  type AddressSuggestion,
-} from "@/lib/estimate/osm-roof";
-import { getActiveSteps } from "@/lib/estimator-steps";
+import { getActiveSteps, hasRoofArea } from "@/lib/estimator-steps";
 import { submitEmailAndDownload } from "@/lib/download-utils";
 import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import { EstimateFeedbackCard } from "@/components/estimate/EstimateFeedbackCard";
 import { CostBreakdownChart, colorizeBreakdown } from "@/components/estimate/CostBreakdownChart";
+import { RoofMeasureStep } from "@/components/estimate/RoofMeasureStep";
 import { QuestionInfo } from "@/components/estimate/QuestionInfo";
 import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
@@ -160,6 +155,7 @@ const OPTION_ICONS: Record<string, string> = {
 const STEP_LABELS: Record<string, string> = {
   project: "Project",
   location: "Location",
+  "roof-measure": "Roof size",
   property: "Property",
   "details-roof": "Details",
   "details-kitchen": "Kitchen",
@@ -460,10 +456,12 @@ function NumberQuestion({
   q,
   value,
   onChange,
+  inputId,
 }: {
   q: Question;
   value: number | undefined;
   onChange: (v: number) => void;
+  inputId?: string;
 }) {
   const [raw, setRaw] = useState(value?.toString() ?? "");
   const [touched, setTouched] = useState(false);
@@ -491,6 +489,7 @@ function NumberQuestion({
     <div className="max-w-sm space-y-2">
       <div className="relative">
         <input
+          id={inputId}
           type="number"
           value={raw}
           placeholder={q.placeholder}
@@ -1269,275 +1268,6 @@ function PhotoUploadQuestion({
   );
 }
 
-// ─── OpenStreetMap roof measurement ───────────────────────────────────────────
-function RoofMapMeasure({
-  answers,
-  onMeasured,
-  onClear,
-  variant = "details",
-}: {
-  answers: EstimatorAnswers;
-  onMeasured: (roofSqFt: number) => void;
-  onClear?: () => void;
-  variant?: "location" | "details";
-}) {
-  const [address, setAddress] = useState("");
-  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [searchStatus, setSearchStatus] = useState<"idle" | "loading">("idle");
-  const [measureStatus, setMeasureStatus] = useState<"idle" | "loading" | "done">("idle");
-  const [message, setMessage] = useState<string | null>(null);
-  const [measured, setMeasured] = useState<number | null>(
-    answers.roofSizeSource === "map" && answers.roofSize ? answers.roofSize : null,
-  );
-  const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<number | undefined>(undefined);
-
-  useEffect(() => {
-    if (answers.roofSizeSource === "map" && answers.roofSize) {
-      setMeasured(answers.roofSize);
-      setMeasureStatus("done");
-    }
-  }, [answers.roofSize, answers.roofSizeSource]);
-
-  useEffect(() => {
-    const query = address.trim();
-    if (query.length < 3 || measureStatus === "loading") {
-      setSuggestions([]);
-      return;
-    }
-
-    window.clearTimeout(debounceRef.current);
-    debounceRef.current = window.setTimeout(async () => {
-      setSearchStatus("loading");
-      try {
-        const result = await searchAddressesForMap({
-          data: {
-            query,
-            zipCode: answers.zipCode,
-            city: answers.city,
-            state: answers.state,
-          },
-        });
-        if (result.success) {
-          setSuggestions(result.suggestions);
-          setShowSuggestions(result.suggestions.length > 0);
-          setMessage(null);
-        } else {
-          setSuggestions([]);
-          setShowSuggestions(false);
-        }
-      } catch {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      } finally {
-        setSearchStatus("idle");
-      }
-    }, 380);
-
-    return () => window.clearTimeout(debounceRef.current);
-  }, [address, answers.zipCode, answers.city, answers.state, measureStatus]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const runMeasure = async (
-    streetAddress: string,
-    coords?: { lat: number; lng: number } | null,
-  ) => {
-    if (streetAddress.trim().length < 4 || measureStatus === "loading") return;
-    setMeasureStatus("loading");
-    setMessage(null);
-    try {
-      const result = await measureRoofFromMap({
-        data: {
-          address: streetAddress.trim(),
-          zipCode: answers.zipCode,
-          city: answers.city,
-          state: answers.state,
-          roofPitch: answers.roofPitch,
-          lat: coords?.lat,
-          lng: coords?.lng,
-        },
-      });
-      if (result.success) {
-        setMeasured(result.roofSqFt);
-        setMeasureStatus("done");
-        setMessage(null);
-        setShowSuggestions(false);
-        onMeasured(result.roofSqFt);
-      } else {
-        setMeasureStatus("idle");
-        setMeasured(null);
-        setMessage(result.message);
-      }
-    } catch {
-      setMeasureStatus("idle");
-      setMeasured(null);
-      setMessage("Map lookup failed. You can enter the roof size manually on the next step.");
-    }
-  };
-
-  const handleSelectSuggestion = (suggestion: AddressSuggestion) => {
-    setAddress(suggestion.label);
-    const coords = { lat: suggestion.lat, lng: suggestion.lng };
-    setSelectedCoords(coords);
-    setShowSuggestions(false);
-    void runMeasure(suggestion.label, coords);
-  };
-
-  const handleMeasureClick = () => {
-    void runMeasure(address, selectedCoords);
-  };
-
-  const handleMeasureAgain = () => {
-    setMeasured(null);
-    setMeasureStatus("idle");
-    setAddress("");
-    setSelectedCoords(null);
-    setMessage(null);
-    onClear?.();
-  };
-
-  const isLocationStep = variant === "location";
-
-  return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "max-w-sm rounded-xl border border-border bg-white p-4",
-        isLocationStep && "mt-4",
-      )}
-    >
-      <div className="flex items-start gap-2.5 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-[#082A4B]/5 flex items-center justify-center shrink-0">
-          <Map className="h-4 w-4 text-[#082A4B]" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-ink">
-            {isLocationStep ? "Measure roof from map data" : "Measure my roof from map data"}
-          </p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            Uses OpenStreetMap building outlines near your address. Footprint area is adjusted for
-            typical roof slope. Optional, and you can edit the result later.
-          </p>
-        </div>
-      </div>
-
-      {measured !== null && measureStatus === "done" ? (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/5 px-3 py-2.5">
-            <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
-            <p className="text-xs text-ink">
-              About <span className="font-semibold">{measured.toLocaleString()} sq ft</span> from
-              map data
-              {answers.city ? ` near ${answers.city}` : ""}.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleMeasureAgain}
-            className="text-xs font-medium text-muted-foreground hover:text-ink underline underline-offset-2 transition"
-          >
-            Measure a different address
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="relative flex gap-2">
-            <label htmlFor={`roof-map-address-${variant}`} className="sr-only">
-              Street address
-            </label>
-            <input
-              id={`roof-map-address-${variant}`}
-              value={address}
-              autoComplete="street-address"
-              onChange={(e) => {
-                setAddress(e.target.value);
-                setSelectedCoords(null);
-              }}
-              onFocus={() => {
-                if (suggestions.length > 0) setShowSuggestions(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  setShowSuggestions(false);
-                  void handleMeasureClick();
-                }
-                if (e.key === "Escape") setShowSuggestions(false);
-              }}
-              placeholder="123 Main St"
-              className="flex-1 min-w-0 h-10 rounded-lg border border-border bg-white px-3 text-sm text-ink placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#082A4B]/30"
-            />
-            <button
-              type="button"
-              onClick={handleMeasureClick}
-              disabled={address.trim().length < 4 || measureStatus === "loading"}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#082A4B] px-3 text-xs font-semibold text-white transition hover:bg-[#0a355c] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {measureStatus === "loading" ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Measuring
-                </>
-              ) : (
-                "Measure"
-              )}
-            </button>
-          </div>
-
-          {showSuggestions && suggestions.length > 0 && (
-            <ul
-              className="mt-1 max-h-44 overflow-y-auto rounded-lg border border-border bg-white shadow-sm"
-              role="listbox"
-              aria-label="Address suggestions"
-            >
-              {suggestions.map((suggestion) => (
-                <li key={`${suggestion.lat}-${suggestion.lng}-${suggestion.displayName}`}>
-                  <button
-                    type="button"
-                    role="option"
-                    onClick={() => handleSelectSuggestion(suggestion)}
-                    className="w-full px-3 py-2 text-left text-xs text-ink hover:bg-muted/40 transition"
-                  >
-                    {suggestion.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {searchStatus === "loading" && (
-            <p className="mt-2 text-[11px] text-muted-foreground flex items-center gap-1.5">
-              <Loader2 className="h-3 w-3 animate-spin" /> Looking up addresses
-            </p>
-          )}
-
-          {message && (
-            <p className="mt-2 text-[11px] text-amber-700 flex items-start gap-1.5">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              {message}
-            </p>
-          )}
-
-          {isLocationStep && (
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              Optional. Skip this and enter roof size manually on the details step.
-            </p>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
 
 // ─── Question Renderer ────────────────────────────────────────────────────────
 function QuestionRenderer({
@@ -1557,32 +1287,8 @@ function QuestionRenderer({
     return <CardsQuestion q={question} value={val as string} onChange={h} />;
   if (question.type === "select-grid")
     return <SelectGridQuestion q={question} value={val as string} onChange={h} />;
-  if (question.id === "roofSize")
-    return (
-      <div className="space-y-4">
-        <RoofMapMeasure
-          answers={answers}
-          variant="details"
-          onMeasured={(roofSqFt) => {
-            onChange("roofSizeSource", "map");
-            onChange("roofSize", roofSqFt);
-          }}
-          onClear={() => {
-            onChange("roofSizeSource", undefined);
-            onChange("roofSize", undefined);
-          }}
-        />
-        <NumberQuestion
-          key={val === undefined ? "empty" : String(val)}
-          q={question}
-          value={val as number}
-          onChange={(v) => {
-            onChange("roofSizeSource", "manual");
-            onChange("roofSize", v);
-          }}
-        />
-      </div>
-    );
+  if (question.type === "roof-measure")
+    return <RoofMeasureStep answers={answers} onChange={onChange} />;
   if (question.type === "number")
     return <NumberQuestion q={question} value={val as number} onChange={h} />;
   if (question.type === "text")
@@ -1619,9 +1325,10 @@ function FinalReport({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const roofArea = answers.projectType === "roof" ? resolveRoofArea(answers) : null;
-  const roofSizeSourceLabel: Record<"manual" | "map" | "estimated", string> = {
-    map: "measured from OpenStreetMap building data",
-    manual: "the size you entered",
+  const roofSizeSourceLabel: Record<"manual" | "trace" | "map" | "estimated", string> = {
+    trace: "traced on satellite imagery",
+    map: "measured from map building data",
+    manual: "from your footprint entry",
     estimated: "estimated from your home size and roof slope",
   };
 
@@ -1825,7 +1532,7 @@ function FinalReport({
         bid. Final pricing depends on site access, material choices, and what crews find once work
         starts.
         {roofArea?.source === "estimated" &&
-          " Adding a measured roof size, from map data or your own measurement, improves the range."}
+          " Adding your measured roof footprint improves the range."}
       </p>
 
       {/* Next steps — live actions only */}
@@ -1990,6 +1697,13 @@ function EstimatorPage() {
   }, []);
 
   const isAnswered = (q: Question) => {
+    if (q.type === "roof-measure") {
+      return (
+        hasRoofArea(answers) &&
+        Boolean(answers.roofPitch) &&
+        Boolean(answers.roofComplexity)
+      );
+    }
     if (q.optional) return true;
     const v = answers[q.id];
     if (v === undefined || v === null || v === "") return false;
@@ -2194,28 +1908,6 @@ function EstimatorPage() {
                       })()}
                     </div>
                   )}
-                  {currentStep?.id === "location" && answers.projectType === "roof" && (
-                    <RoofMapMeasure
-                      answers={answers}
-                      variant="location"
-                      onMeasured={(roofSqFt) => {
-                        setAnswer("roofSizeSource", "map");
-                        setAnswer("roofSize", roofSqFt);
-                      }}
-                      onClear={() => {
-                        setAnswer("roofSizeSource", undefined);
-                        setAnswer("roofSize", undefined);
-                      }}
-                    />
-                  )}
-                  {currentQuestion.id === "zipCode" &&
-                    answers.roofSizeSource === "map" &&
-                    answers.roofSize && (
-                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/10 text-accent text-xs font-semibold">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Roof measured: {answers.roofSize.toLocaleString()} sq ft
-                      </div>
-                    )}
                   {currentQuestion.id === "zipCode" && zipError && (
                     <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
                       <AlertCircle className="h-4 w-4" /> {zipError}
@@ -2237,7 +1929,8 @@ function EstimatorPage() {
                     )}
                     {(currentQuestion.type === "number" ||
                       currentQuestion.type === "text" ||
-                      currentQuestion.type === "budget") && (
+                      currentQuestion.type === "budget" ||
+                      currentQuestion.type === "roof-measure") && (
                       <button
                         onClick={advance}
                         disabled={!isAnswered(currentQuestion)}

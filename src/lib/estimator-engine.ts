@@ -37,13 +37,20 @@ export interface EstimatorAnswers {
   roofSize?: number;
   roofCondition?: "good" | "fair" | "poor";
   /** Slope. Steeper roofs cost more to walk, stage, and install. */
-  roofPitch?: "low" | "medium" | "steep";
+  roofPitch?: "flat" | "standard" | "steep" | "very_steep" | "low" | "medium";
   /** Number of planes, valleys, hips, and dormers. */
-  roofComplexity?: "simple" | "average" | "complex";
+  roofComplexity?: "simple" | "moderate" | "complex" | "average";
   /** Existing shingle layers. Two or more means extra tear-off and disposal. */
   roofLayers?: "one" | "two-plus";
   /** How the roof area used for pricing was determined. */
-  roofSizeSource?: "manual" | "map" | "estimated";
+  roofSizeSource?: "manual" | "trace" | "map" | "estimated";
+  /** Plan-view footprint sq ft (before pitch uplift). */
+  roofFootprintSqFt?: number;
+  /** Geocoded coordinates from satellite trace. */
+  roofLat?: number;
+  roofLng?: number;
+  /** Traced footprint ring(s) from satellite draw. */
+  roofFootprintRings?: Array<Array<{ lat: number; lng: number }>>;
   addGutters?: boolean;
   addSkylights?: boolean;
 
@@ -281,23 +288,27 @@ export function lookupInstantEstimate(answers: EstimatorAnswers): LiveEstimate {
  * Typical multipliers against the building footprint (plan view).
  * Used by the estimator and by OpenStreetMap footprint → roof surface conversion.
  */
-export const ROOF_PITCH_FACTORS: Record<"low" | "medium" | "steep", number> = {
-  low: 1.15,
-  medium: 1.25,
-  steep: 1.4,
+export const ROOF_PITCH_FACTORS: Record<string, number> = {
+  flat: 1.03,
+  low: 1.03,
+  standard: 1.1,
+  medium: 1.1,
+  steep: 1.2,
+  very_steep: 1.36,
 };
 
-/** Pitch multiplier for footprint → roof surface. Defaults to medium (~1.25). */
+/** Pitch multiplier for footprint → roof surface. Defaults to standard (~1.10). */
 export function resolveRoofPitchFactor(
-  pitch?: "low" | "medium" | "steep" | null,
+  pitch?: EstimatorAnswers["roofPitch"] | null,
 ): number {
-  return ROOF_PITCH_FACTORS[pitch ?? "medium"];
+  if (!pitch) return ROOF_PITCH_FACTORS.standard;
+  return ROOF_PITCH_FACTORS[pitch] ?? ROOF_PITCH_FACTORS.standard;
 }
 
 export interface RoofAreaResult {
   /** Roof surface area in sq ft used for pricing. */
   sqFt: number;
-  source: "manual" | "map" | "estimated";
+  source: "manual" | "trace" | "map" | "estimated";
   pitchFactor: number;
 }
 
@@ -322,7 +333,10 @@ export function resolveRoofArea(answers: EstimatorAnswers): RoofAreaResult {
   if (answers.roofSize && answers.roofSize > 0) {
     return {
       sqFt: answers.roofSize,
-      source: answers.roofSizeSource === "map" ? "map" : "manual",
+      source:
+        answers.roofSizeSource === "trace" || answers.roofSizeSource === "map"
+          ? answers.roofSizeSource
+          : "manual",
       pitchFactor,
     };
   }
@@ -399,16 +413,15 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
     }
 
     // Slope drives staging and safety labor even when the area is already known.
-    if (answers.roofPitch === "steep") {
+    if (answers.roofPitch === "very_steep" || answers.roofPitch === "steep") {
       low *= 1.06;
       mid *= 1.08;
       high *= 1.12;
-    } else if (answers.roofPitch === "low") {
+    } else if (answers.roofPitch === "flat" || answers.roofPitch === "low") {
       mid *= 0.98;
       high *= 0.98;
     }
 
-    // Valleys, hips, and dormers add cutting, flashing, and waste.
     if (answers.roofComplexity === "simple") {
       low *= 0.95;
       mid *= 0.95;
@@ -417,6 +430,9 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
       low *= 1.08;
       mid *= 1.12;
       high *= 1.18;
+    } else if (answers.roofComplexity === "moderate" || answers.roofComplexity === "average") {
+      mid *= 1.03;
+      high *= 1.05;
     }
 
     // Height and access.
