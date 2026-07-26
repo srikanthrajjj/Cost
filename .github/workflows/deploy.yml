@@ -17,9 +17,14 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # Vite bakes VITE_* at build time; also set the same key in the Vercel
-          # project Environment Variables UI for Production (and Preview).
-          build-env: VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY }}
-          env: VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY }}
+          # Server chat/quote AI uses OPENROUTER_API_KEY first (see src/lib/ai-config.ts).
+          # Set OPENROUTER_API_KEY in GitHub Secrets and Vercel env vars (Production + Preview).
+          # VITE_SK_API_KEY remains as a legacy fallback during migration.
+          build-env: |
+            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY || secrets.VITE_SK_API_KEY }}
+            VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY || secrets.OPENROUTER_API_KEY }}
+          env: |
+            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY || secrets.VITE_SK_API_KEY }}
+            VITE_SK_API_KEY=${{ secrets.VITE_SK_API_KEY || secrets.OPENROUTER_API_KEY }}
           production: true
           vercel-args: --force
