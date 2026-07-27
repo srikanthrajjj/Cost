@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import type { ProjectType } from "@/lib/estimator-engine";
 
 export const ESTIMATOR_FAQS = [
   {
@@ -20,7 +21,7 @@ export const ESTIMATOR_FAQS = [
   },
   {
     q: "What projects can I estimate?",
-    a: "You can estimate roof replacement, kitchen remodel, bathroom remodel, HVAC, windows, flooring, and other common home projects. Pick a project type at the start and answer a few questions to see a range.",
+    a: "You can estimate roof replacement, kitchen remodel, bathroom remodel, HVAC, windows, flooring, painting, deck, plumbing, electrical, and solar. Pick a project type at the start and answer a few questions to see a range.",
   },
   {
     q: "Do I need an account to use the estimator?",
@@ -32,18 +33,71 @@ export const ESTIMATOR_FAQS = [
   },
 ] as const;
 
-const GUIDE_LINKS = [
+const DEFAULT_GUIDE_LINKS = [
   { href: "/guides/roof-replacement", label: "Roof replacement cost guide" },
-  { href: "/topics/roof", label: "Roof costs topic hub" },
-  { href: "/guides/roof-replacement-cost-by-city", label: "Roof cost by city" },
-  { href: "/guides/roof-quote-review", label: "Roof quote review" },
   { href: "/guides/kitchen-remodel", label: "Kitchen remodel cost guide" },
   { href: "/guides/bathroom-remodel", label: "Bathroom remodel cost guide" },
+  { href: "/guides/hvac-installation", label: "HVAC installation cost guide" },
+  { href: "/guides/window-replacement", label: "Window replacement cost guide" },
+  { href: "/guides/flooring", label: "Flooring cost guide" },
   { href: "/quote-analyzer", label: "Quote analyzer" },
   { href: "/methodology", label: "How we calculate estimates" },
 ] as const;
 
-export function EstimateSeoSection() {
+const PROJECT_GUIDE_LINKS: Partial<
+  Record<ProjectType, { href: string; label: string }[]>
+> = {
+  roof: [
+    { href: "/guides/roof-replacement", label: "Roof replacement cost guide" },
+    { href: "/topics/roof", label: "Roof costs topic hub" },
+    { href: "/guides/roof-replacement-cost-by-city", label: "Roof cost by city" },
+    { href: "/guides/roof-quote-review", label: "Roof quote review" },
+    { href: "/quote-analyzer", label: "Quote analyzer" },
+    { href: "/methodology", label: "How we calculate estimates" },
+  ],
+  kitchen: [
+    { href: "/guides/kitchen-remodel", label: "Kitchen remodel cost guide" },
+    { href: "/topics/kitchen", label: "Kitchen costs topic hub" },
+    { href: "/guides/quartz-vs-granite-countertops", label: "Quartz vs granite" },
+    { href: "/quote-analyzer", label: "Quote analyzer" },
+    { href: "/methodology", label: "How we calculate estimates" },
+  ],
+  bathroom: [
+    { href: "/guides/bathroom-remodel", label: "Bathroom remodel cost guide" },
+    { href: "/quote-analyzer", label: "Quote analyzer" },
+    { href: "/methodology", label: "How we calculate estimates" },
+  ],
+  hvac: [
+    { href: "/guides/hvac-installation", label: "HVAC installation cost guide" },
+    { href: "/topics/hvac", label: "HVAC costs topic hub" },
+    { href: "/hvac-installation-cost", label: "HVAC cost overview" },
+    { href: "/quote-analyzer", label: "Quote analyzer" },
+    { href: "/methodology", label: "How we calculate estimates" },
+  ],
+  windows: [
+    { href: "/guides/window-replacement", label: "Window replacement cost guide" },
+    { href: "/topics/windows", label: "Window costs topic hub" },
+    { href: "/window-replacement-cost", label: "Window cost overview" },
+    { href: "/quote-analyzer", label: "Quote analyzer" },
+    { href: "/methodology", label: "How we calculate estimates" },
+  ],
+  flooring: [
+    { href: "/guides/flooring", label: "Flooring cost guide" },
+    { href: "/topics/flooring", label: "Flooring costs topic hub" },
+    { href: "/flooring-cost", label: "Flooring cost overview" },
+    { href: "/quote-analyzer", label: "Quote analyzer" },
+    { href: "/methodology", label: "How we calculate estimates" },
+  ],
+};
+
+interface EstimateSeoSectionProps {
+  projectType?: ProjectType;
+}
+
+export function EstimateSeoSection({ projectType }: EstimateSeoSectionProps) {
+  const guideLinks =
+    (projectType && PROJECT_GUIDE_LINKS[projectType]) || DEFAULT_GUIDE_LINKS;
+
   return (
     <section
       className="mt-12 md:mt-16 pt-10 border-t border-border/60"
@@ -57,8 +111,8 @@ export function EstimateSeoSection() {
           About this estimator
         </h2>
         <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-          Free ZIP-based planning ranges for common renovation projects. For deeper pricing by
-          project type, see our guides below.
+          Free ZIP-based planning ranges for roof, kitchen, bathroom, HVAC, windows, flooring, and
+          other common home projects. For deeper pricing by project type, see our guides below.
         </p>
 
         <Accordion type="single" collapsible className="mt-6">
@@ -79,7 +133,7 @@ export function EstimateSeoSection() {
             Related guides and tools
           </h3>
           <ul className="flex flex-col sm:flex-row sm:flex-wrap gap-x-4 gap-y-2">
-            {GUIDE_LINKS.map((link) => (
+            {guideLinks.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}

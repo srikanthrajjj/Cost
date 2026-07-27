@@ -77,19 +77,27 @@ export interface EstimatorAnswers {
   hvacAction?: "repair" | "replace";
   hvacType?: "central-air" | "heat-pump" | "furnace" | "mini-split";
   hvacSize?: "small" | "medium" | "large";
+  hvacDuctwork?: "good" | "repair" | "replace" | "none";
+  hvacEfficiency?: "standard" | "high";
 
   // Windows
   windowCount?: number;
   windowMaterial?: "vinyl" | "wood" | "fiberglass" | "aluminum";
   windowType?: "single" | "double" | "triple";
+  windowInstallType?: "retrofit" | "full-frame";
+  windowStyle?: "double-hung" | "casement" | "picture" | "mixed";
 
   // Flooring
   flooringMaterial?: "hardwood" | "laminate" | "tile" | "vinyl" | "carpet";
   flooringArea?: number;
+  flooringRemoval?: boolean;
+  flooringPrep?: "minimal" | "moderate" | "major";
+  flooringQuality?: "basic" | "standard" | "premium";
 
   // Painting
   paintingScope?: "interior" | "exterior" | "both";
   paintingRooms?: number;
+  paintingQuality?: "standard" | "premium";
 
   // Solar
   solarPanelCount?: number;
@@ -98,12 +106,16 @@ export interface EstimatorAnswers {
   // Deck
   deckSize?: number;
   deckMaterial?: "wood" | "composite" | "pvc";
+  deckHeight?: "ground" | "elevated";
+  deckRailing?: boolean;
 
   // Plumbing
   plumbingType?: "repair" | "repiping" | "fixture";
+  plumbingScope?: "localized" | "whole-home";
 
   // Electrical
   electricalType?: "panel-upgrade" | "rewiring" | "outlets";
+  electricalScope?: "limited" | "whole-home";
 
   // Step 5 — Condition
   currentCondition?: "excellent" | "good" | "fair" | "poor";
@@ -632,42 +644,99 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
     low = Math.round(low * regionMult);
     mid = Math.round(mid * regionMult);
     high = Math.round(high * regionMult);
+
     if (answers.hvacAction === "repair") {
-      low = 300;
-      mid = 800;
-      high = 2500;
+      low = Math.round(300 * regionMult);
+      mid = Math.round(900 * regionMult);
+      high = Math.round(2800 * regionMult);
+    } else {
+      const sizeMult =
+        answers.hvacSize === "small" ? 0.78 : answers.hvacSize === "large" ? 1.35 : 1;
+      low = Math.round(low * sizeMult);
+      mid = Math.round(mid * sizeMult);
+      high = Math.round(high * sizeMult);
+
+      if (answers.hvacType === "heat-pump") {
+        mid += Math.round(1800 * regionMult);
+        high += Math.round(3500 * regionMult);
+      }
+      if (answers.hvacType === "furnace") {
+        low = Math.round(low * 0.72);
+        mid = Math.round(mid * 0.78);
+        high = Math.round(high * 0.85);
+      }
+      if (answers.hvacType === "mini-split") {
+        low = Math.round(low * 0.7);
+        mid = Math.round(mid * 0.8);
+        high = Math.round(high * 0.95);
+      }
+      if (answers.hvacEfficiency === "high") {
+        low = Math.round(low * 1.12);
+        mid = Math.round(mid * 1.18);
+        high = Math.round(high * 1.25);
+      }
+      if (answers.hvacDuctwork === "repair") {
+        low += Math.round(1200 * regionMult);
+        mid += Math.round(2200 * regionMult);
+        high += Math.round(3500 * regionMult);
+      }
+      if (answers.hvacDuctwork === "replace") {
+        low += Math.round(3500 * regionMult);
+        mid += Math.round(6000 * regionMult);
+        high += Math.round(10000 * regionMult);
+      }
     }
-    if (answers.hvacType === "heat-pump") {
-      mid += 1500;
-      high += 3000;
-    }
-    if (answers.hvacType === "mini-split") {
-      low -= 1000;
-      mid -= 500;
-    }
-    if (answers.hvacAction) confidence += 20;
-    if (answers.hvacType) confidence += 15;
+
+    if (answers.hvacAction) confidence += 15;
+    if (answers.hvacType) confidence += 12;
+    if (answers.hvacSize) confidence += 10;
+    if (answers.hvacDuctwork) confidence += 8;
+    if (answers.hvacEfficiency) confidence += 5;
   } else if (project === "windows") {
     const count = answers.windowCount ?? 10;
     low = Math.round((low / 10) * count * regionMult);
     mid = Math.round((mid / 10) * count * regionMult);
     high = Math.round((high / 10) * count * regionMult);
     if (answers.windowType === "double") {
-      mid *= 1.2;
+      mid *= 1.15;
       high *= 1.2;
     }
     if (answers.windowType === "triple") {
-      mid *= 1.4;
-      high *= 1.5;
+      mid *= 1.35;
+      high *= 1.45;
     }
     if (answers.windowMaterial === "wood") {
-      mid += count * 200;
-      high += count * 400;
+      mid += count * 220;
+      high += count * 420;
     }
-    if (answers.windowCount) confidence += 20;
+    if (answers.windowMaterial === "fiberglass") {
+      mid += count * 150;
+      high += count * 280;
+    }
+    if (answers.windowMaterial === "aluminum") {
+      mid = Math.round(mid * 0.92);
+      high = Math.round(high * 0.95);
+    }
+    if (answers.windowInstallType === "full-frame") {
+      low = Math.round(low * 1.2);
+      mid = Math.round(mid * 1.28);
+      high = Math.round(high * 1.35);
+    }
+    if (answers.windowStyle === "casement") {
+      mid = Math.round(mid * 1.08);
+      high = Math.round(high * 1.1);
+    }
+    if (answers.windowStyle === "mixed") {
+      mid = Math.round(mid * 1.05);
+      high = Math.round(high * 1.08);
+    }
+    if (answers.windowCount) confidence += 18;
+    if (answers.windowType) confidence += 8;
+    if (answers.windowMaterial) confidence += 8;
+    if (answers.windowInstallType) confidence += 8;
   } else if (project === "flooring") {
     const area = answers.flooringArea ?? sqft * 0.6;
-    const perSqft =
+    let perSqft =
       answers.flooringMaterial === "hardwood"
         ? 12
         : answers.flooringMaterial === "tile"
@@ -677,13 +746,20 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
             : answers.flooringMaterial === "laminate"
               ? 6
               : 5;
+    if (answers.flooringQuality === "basic") perSqft *= 0.85;
+    if (answers.flooringQuality === "premium") perSqft *= 1.28;
+    if (answers.flooringRemoval) perSqft += 2;
+    if (answers.flooringPrep === "moderate") perSqft += 1.5;
+    if (answers.flooringPrep === "major") perSqft += 3.5;
     low = Math.round(area * (perSqft * 0.7) * regionMult);
     mid = Math.round(area * perSqft * regionMult);
     high = Math.round(area * (perSqft * 1.4) * regionMult);
-    if (answers.flooringMaterial) confidence += 25;
-    if (answers.flooringArea) confidence += 15;
+    if (answers.flooringMaterial) confidence += 18;
+    if (answers.flooringArea) confidence += 12;
+    if (answers.flooringPrep) confidence += 6;
+    if (answers.flooringQuality) confidence += 5;
   } else if (project === "solar") {
-    const panels = answers.solarPanelCount ?? 20;
+    const panels = answers.solarPanelCount ?? Math.max(12, Math.round(sqft / 100));
     low = Math.round((low / 20) * panels * regionMult);
     mid = Math.round((mid / 20) * panels * regionMult);
     high = Math.round((high / 20) * panels * regionMult);
@@ -693,6 +769,83 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
       high += 15000;
     }
     if (answers.solarPanelCount) confidence += 20;
+  } else if (project === "painting") {
+    const rooms = answers.paintingRooms ?? Math.max(3, Math.round(sqft / 400));
+    const qualityMult = answers.paintingQuality === "premium" ? 1.2 : 1;
+    if (answers.paintingScope === "interior") {
+      low = Math.round(rooms * 350 * qualityMult * regionMult);
+      mid = Math.round(rooms * 550 * qualityMult * regionMult);
+      high = Math.round(rooms * 850 * qualityMult * regionMult);
+    } else if (answers.paintingScope === "exterior") {
+      const storyMult = (answers.stories ?? 1) >= 2 ? 1.25 : 1;
+      low = Math.round(sqft * 1.2 * storyMult * qualityMult * regionMult);
+      mid = Math.round(sqft * 2.0 * storyMult * qualityMult * regionMult);
+      high = Math.round(sqft * 3.2 * storyMult * qualityMult * regionMult);
+    } else {
+      // both
+      const interiorMid = rooms * 550 * qualityMult;
+      const exteriorMid = sqft * 2.0 * ((answers.stories ?? 1) >= 2 ? 1.25 : 1) * qualityMult;
+      low = Math.round((interiorMid * 0.7 + exteriorMid * 0.7) * regionMult);
+      mid = Math.round((interiorMid + exteriorMid) * regionMult);
+      high = Math.round((interiorMid * 1.4 + exteriorMid * 1.4) * regionMult);
+    }
+    if (answers.paintingScope) confidence += 15;
+    if (answers.paintingRooms) confidence += 10;
+    if (answers.paintingQuality) confidence += 5;
+  } else if (project === "deck") {
+    const area = answers.deckSize ?? 300;
+    const perSqft =
+      answers.deckMaterial === "pvc" ? 45 : answers.deckMaterial === "composite" ? 35 : 22;
+    let heightMult = answers.deckHeight === "elevated" ? 1.3 : 1;
+    let railingAdd = answers.deckRailing || answers.deckHeight === "elevated" ? 18 : 0;
+    low = Math.round(area * (perSqft * 0.75 + railingAdd * 0.7) * heightMult * regionMult);
+    mid = Math.round(area * (perSqft + railingAdd) * heightMult * regionMult);
+    high = Math.round(area * (perSqft * 1.4 + railingAdd * 1.3) * heightMult * regionMult);
+    if (answers.deckMaterial) confidence += 15;
+    if (answers.deckSize) confidence += 15;
+    if (answers.deckHeight) confidence += 8;
+  } else if (project === "plumbing") {
+    if (answers.plumbingType === "repair") {
+      low = Math.round(250 * regionMult);
+      mid = Math.round(750 * regionMult);
+      high = Math.round(2200 * regionMult);
+    } else if (answers.plumbingType === "fixture") {
+      const scopeMult = answers.plumbingScope === "whole-home" ? 3.2 : 1;
+      low = Math.round(800 * scopeMult * regionMult);
+      mid = Math.round(2200 * scopeMult * regionMult);
+      high = Math.round(5000 * scopeMult * regionMult);
+    } else {
+      // repiping
+      const scopeMult = answers.plumbingScope === "localized" ? 0.35 : 1;
+      low = Math.round(4000 * scopeMult * sizeFactor * regionMult);
+      mid = Math.round(10000 * scopeMult * sizeFactor * regionMult);
+      high = Math.round(22000 * scopeMult * sizeFactor * regionMult);
+    }
+    if (answers.plumbingType) confidence += 18;
+    if (answers.plumbingScope) confidence += 10;
+  } else if (project === "electrical") {
+    if (answers.electricalType === "outlets") {
+      const scopeMult = answers.electricalScope === "whole-home" ? 4 : 1;
+      low = Math.round(400 * scopeMult * regionMult);
+      mid = Math.round(1200 * scopeMult * regionMult);
+      high = Math.round(3500 * scopeMult * regionMult);
+    } else if (answers.electricalType === "panel-upgrade") {
+      low = Math.round(1800 * regionMult);
+      mid = Math.round(3500 * regionMult);
+      high = Math.round(6500 * regionMult);
+      if (answers.electricalScope === "whole-home") {
+        mid += Math.round(2500 * regionMult);
+        high += Math.round(5000 * regionMult);
+      }
+    } else {
+      // rewiring
+      const scopeMult = answers.electricalScope === "limited" ? 0.4 : 1;
+      low = Math.round(5000 * scopeMult * sizeFactor * regionMult);
+      mid = Math.round(12000 * scopeMult * sizeFactor * regionMult);
+      high = Math.round(25000 * scopeMult * sizeFactor * regionMult);
+    }
+    if (answers.electricalType) confidence += 18;
+    if (answers.electricalScope) confidence += 10;
   } else {
     low = Math.round(low * (sizeFactor * 0.8) * regionMult);
     mid = Math.round(mid * (sizeFactor * 0.9) * regionMult);

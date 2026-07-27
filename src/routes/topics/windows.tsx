@@ -35,6 +35,11 @@ const LINKS = [
     desc: "Materials, energy factors, and planning tips before you request bids.",
   },
   {
+    title: "Free window estimate",
+    href: "/estimate?project=windows",
+    desc: "Enter window count, glazing, frame, and install method for a ZIP-based range.",
+  },
+  {
     title: "Window costs by city",
     href: "/locations",
     desc: "Browse locally reviewed window replacement pages across major U.S. markets.",

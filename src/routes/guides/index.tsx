@@ -25,6 +25,11 @@ const TOPIC_HUBS = [
     desc: "Replacement ranges, energy factors, and local window pages.",
   },
   {
+    href: "/topics/hvac",
+    title: "HVAC costs",
+    desc: "Installation ranges, repair vs replace, and local HVAC pages.",
+  },
+  {
     href: "/topics/flooring",
     title: "Flooring costs",
     desc: "Material comparisons and local flooring installation pages.",

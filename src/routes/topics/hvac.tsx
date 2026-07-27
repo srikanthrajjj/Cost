@@ -4,49 +4,54 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 
-export const Route = createFileRoute("/topics/flooring")({
-  component: FlooringTopicPage,
+export const Route = createFileRoute("/topics/hvac")({
+  component: HvacTopicPage,
   head: () => ({
     meta: [
-      { title: "Flooring costs topic hub | CostReno" },
+      { title: "HVAC costs topic hub | CostReno" },
       {
         name: "description",
         content:
-          "Flooring installation cost guides and local city pages to help you compare materials before hiring.",
+          "HVAC installation and replacement cost guides, system comparisons, and local city pages to help you plan before hiring.",
       },
-      { property: "og:title", content: "Flooring costs topic hub | CostReno" },
-      { property: "og:url", content: "https://www.costreno.com/topics/flooring" },
+      { property: "og:title", content: "HVAC costs topic hub | CostReno" },
+      {
+        property: "og:description",
+        content:
+          "Plan an HVAC project with national cost ranges, repair vs replace guidance, and city-level pricing context.",
+      },
+      { property: "og:url", content: "https://www.costreno.com/topics/hvac" },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://www.costreno.com/topics/flooring" }],
+    links: [{ rel: "canonical", href: "https://www.costreno.com/topics/hvac" }],
   }),
 });
 
 const LINKS = [
   {
-    title: "Flooring cost landing",
-    href: "/flooring-cost",
-    desc: "National flooring ranges by material, with breakdowns and FAQs.",
+    title: "HVAC installation cost landing",
+    href: "/hvac-installation-cost",
+    desc: "National HVAC cost ranges, breakdowns, and FAQs for repair and replacement.",
   },
   {
-    title: "Flooring cost guide",
-    href: "/guides/flooring",
-    desc: "Compare hardwood, LVP, tile, and install cost drivers.",
+    title: "HVAC installation guide",
+    href: "/guides/hvac-installation",
+    desc: "System sizing, labor factors, and what to check before you buy.",
   },
   {
-    title: "Free flooring estimate",
-    href: "/estimate?project=flooring",
-    desc: "Choose material, area, tear-out, and subfloor prep for a ZIP-based range.",
-  },
-  {
-    title: "Flooring costs by city",
+    title: "HVAC costs by city",
     href: "/locations",
-    desc: "Browse locally reviewed flooring pages across major U.S. markets.",
+    desc: "Browse locally reviewed HVAC pages across major U.S. markets.",
+  },
+  {
+    title: "Free HVAC estimate",
+    href: "/estimate?project=hvac",
+    desc: "Answer a few questions about system type, size, and ductwork for a ZIP-based range.",
   },
 ];
 
-function FlooringTopicPage() {
+function HvacTopicPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav active="guides" />
@@ -60,10 +65,12 @@ function FlooringTopicPage() {
               / Topic hub
             </p>
             <h1 className="font-display text-3xl md:text-5xl font-bold text-ink mb-4">
-              Flooring costs
+              HVAC costs
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Plan a flooring project with national guides and city-level pricing context.
+              Plan a repair or full system replacement with national guides, local pricing pages,
+              and a free estimate wizard that asks about system type, capacity, ductwork, and
+              efficiency.
             </p>
           </div>
         </section>
@@ -85,16 +92,16 @@ function FlooringTopicPage() {
           </div>
           <div className="container-x max-w-5xl mt-10 flex flex-wrap gap-3">
             <a
-              href="/estimate?project=flooring"
+              href="/estimate?project=hvac"
               className="inline-flex rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent/90"
             >
-              Estimate a flooring project
+              Estimate an HVAC project
             </a>
             <a
-              href="/flooring-cost"
+              href="/hvac-installation-cost"
               className="inline-flex rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-ink hover:bg-muted"
             >
-              Flooring cost overview
+              HVAC cost overview
             </a>
           </div>
         </section>

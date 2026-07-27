@@ -57,7 +57,7 @@ export const Route = createFileRoute("/estimate")({
       {
         name: "description",
         content:
-          "Get a ZIP-based home renovation cost estimate for roof, kitchen, bathroom, HVAC, and more. Free planning tool with no signup required.",
+          "Get a ZIP-based home renovation cost estimate for roof, kitchen, bathroom, HVAC, windows, flooring, and more. Free planning tool with no signup required.",
       },
       { property: "og:title", content: "Home renovation cost estimator | CostReno" },
       {
@@ -202,10 +202,22 @@ const TIPS: Partial<Record<keyof EstimatorAnswers, string>> = {
     "Mid-range fixtures offer the best ROI. Luxury upgrades rarely return full cost at resale.",
   hvacType:
     "Heat pumps are up to 3× more efficient than traditional systems and may qualify for tax credits.",
+  hvacSize:
+    "Correct tonnage matters. An oversized unit short-cycles; undersized units run constantly and wear out faster.",
+  hvacDuctwork:
+    "Leaky ducts can waste 20–30% of heated or cooled air. Sealing or replacing ducts often improves comfort more than a bigger unit alone.",
   windowType:
     "Double-pane windows pay back through energy savings within 5–7 years in most climates.",
+  windowInstallType:
+    "Full-frame replacement costs more but fixes rot and air leaks that insert windows can leave behind.",
+  flooringPrep:
+    "Skipping subfloor prep is a common reason new floors squeak or fail early. Ask contractors what prep is included.",
+  flooringRemoval:
+    "Glue-down and tile tear-out take longer than carpet or floating floors. Confirm disposal is in the quote.",
   solarBattery:
     "Battery storage qualifies for the 30% federal ITC (Investment Tax Credit) through 2032.",
+  deckHeight:
+    "Elevated decks need deeper footings and code-compliant railings, which raises both material and labor cost.",
   causeOfProject:
     "Sudden damage from storms, fire, or water may be eligible for an insurance claim. Photos and notes help.",
   currentCondition:
@@ -252,12 +264,12 @@ function CardsQuestion({
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      {q.choices!.map((c, idx) => {
+      {q.choices!.map((c) => {
         const iconSrc = PROJECT_ICONS[c.value];
         const isSelected = value === c.value;
         const isFlashing = flash === c.value;
         const amount = c.desc ? c.desc.replace("Avg ", "").replace("Avg", "") : "";
-        const isDisabled = idx >= 3; // Disable cards 4+ (indices 3 and above)
+        const isDisabled = Boolean(c.comingSoon);
         const isNotifyOpen = notifyOpen === c.value;
         const isNotifySuccess = notifySuccess === c.value;
 
@@ -1445,6 +1457,29 @@ function FinalReport({
       if (answers.roofComplexity) details["Roof shape"] = answers.roofComplexity;
       if (answers.roofLayers)
         details["Existing layers"] = answers.roofLayers === "two-plus" ? "Two or more" : "One";
+      if (answers.hvacAction) details["HVAC action"] = answers.hvacAction;
+      if (answers.hvacType) details["System type"] = answers.hvacType.replace("-", " ");
+      if (answers.hvacSize) details["System size"] = answers.hvacSize;
+      if (answers.hvacDuctwork) details["Ductwork"] = answers.hvacDuctwork;
+      if (answers.hvacEfficiency) details["Efficiency"] = answers.hvacEfficiency;
+      if (answers.windowCount) details["Windows"] = String(answers.windowCount);
+      if (answers.windowType) details["Glazing"] = `${answers.windowType} pane`;
+      if (answers.windowMaterial) details["Frame"] = answers.windowMaterial;
+      if (answers.windowInstallType)
+        details["Install method"] = answers.windowInstallType.replace("-", " ");
+      if (answers.windowStyle) details["Window style"] = answers.windowStyle.replace("-", " ");
+      if (answers.flooringMaterial) details["Flooring"] = answers.flooringMaterial;
+      if (answers.flooringArea)
+        details["Flooring area"] = `${answers.flooringArea.toLocaleString()} sq ft`;
+      if (answers.flooringPrep) details["Subfloor prep"] = answers.flooringPrep;
+      if (answers.flooringQuality) details["Flooring quality"] = answers.flooringQuality;
+      if (answers.flooringRemoval) details["Remove existing"] = "Yes";
+      if (answers.paintingScope) details["Paint scope"] = answers.paintingScope;
+      if (answers.deckMaterial) details["Deck material"] = answers.deckMaterial;
+      if (answers.deckSize) details["Deck size"] = `${answers.deckSize.toLocaleString()} sq ft`;
+      if (answers.plumbingType) details["Plumbing work"] = answers.plumbingType;
+      if (answers.electricalType)
+        details["Electrical work"] = answers.electricalType.replace("-", " ");
       if (answers.currentCondition) details["Current condition"] = answers.currentCondition;
       if (answers.startTimeline) details["Timeline"] = answers.startTimeline.replace("-", " ");
 
@@ -2024,7 +2059,7 @@ function EstimatorPage() {
           </div>
         )}
 
-        <EstimateSeoSection />
+        <EstimateSeoSection projectType={answers.projectType} />
       </main>
       <SiteFooter />
     </div>

@@ -20,6 +20,7 @@ const STATIC_PATHS: { path: string; priority: string }[] = [
   { path: "/topics/kitchen", priority: "0.8" },
   { path: "/topics/windows", priority: "0.75" },
   { path: "/topics/flooring", priority: "0.75" },
+  { path: "/topics/hvac", priority: "0.75" },
   { path: "/guides/how-to-read-a-contractor-quote", priority: "0.85" },
   { path: "/guides/questions-before-signing", priority: "0.85" },
   { path: "/guides/quartz-vs-granite-countertops", priority: "0.8" },

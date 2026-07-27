@@ -29,6 +29,7 @@ import { Route as TopicsWindowsRouteImport } from './routes/topics/windows'
 import { Route as TopicsRoofRouteImport } from './routes/topics/roof'
 import { Route as TopicsQuotesRouteImport } from './routes/topics/quotes'
 import { Route as TopicsKitchenRouteImport } from './routes/topics/kitchen'
+import { Route as TopicsHvacRouteImport } from './routes/topics/hvac'
 import { Route as TopicsFlooringRouteImport } from './routes/topics/flooring'
 import { Route as RIdRouteImport } from './routes/r/$id'
 import { Route as LocationsStateRouteImport } from './routes/locations/$state'
@@ -150,6 +151,11 @@ const TopicsQuotesRoute = TopicsQuotesRouteImport.update({
 const TopicsKitchenRoute = TopicsKitchenRouteImport.update({
   id: '/topics/kitchen',
   path: '/topics/kitchen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TopicsHvacRoute = TopicsHvacRouteImport.update({
+  id: '/topics/hvac',
+  path: '/topics/hvac',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TopicsFlooringRoute = TopicsFlooringRouteImport.update({
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
   '/topics/flooring': typeof TopicsFlooringRoute
+  '/topics/hvac': typeof TopicsHvacRoute
   '/topics/kitchen': typeof TopicsKitchenRoute
   '/topics/quotes': typeof TopicsQuotesRoute
   '/topics/roof': typeof TopicsRoofRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
   '/topics/flooring': typeof TopicsFlooringRoute
+  '/topics/hvac': typeof TopicsHvacRoute
   '/topics/kitchen': typeof TopicsKitchenRoute
   '/topics/quotes': typeof TopicsQuotesRoute
   '/topics/roof': typeof TopicsRoofRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
   '/topics/flooring': typeof TopicsFlooringRoute
+  '/topics/hvac': typeof TopicsHvacRoute
   '/topics/kitchen': typeof TopicsKitchenRoute
   '/topics/quotes': typeof TopicsQuotesRoute
   '/topics/roof': typeof TopicsRoofRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/locations/$state'
     | '/r/$id'
     | '/topics/flooring'
+    | '/topics/hvac'
     | '/topics/kitchen'
     | '/topics/quotes'
     | '/topics/roof'
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/locations/$state'
     | '/r/$id'
     | '/topics/flooring'
+    | '/topics/hvac'
     | '/topics/kitchen'
     | '/topics/quotes'
     | '/topics/roof'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/locations/$state'
     | '/r/$id'
     | '/topics/flooring'
+    | '/topics/hvac'
     | '/topics/kitchen'
     | '/topics/quotes'
     | '/topics/roof'
@@ -576,6 +588,7 @@ export interface RootRouteChildren {
   LocationsStateRoute: typeof LocationsStateRoute
   RIdRoute: typeof RIdRoute
   TopicsFlooringRoute: typeof TopicsFlooringRoute
+  TopicsHvacRoute: typeof TopicsHvacRoute
   TopicsKitchenRoute: typeof TopicsKitchenRoute
   TopicsQuotesRoute: typeof TopicsQuotesRoute
   TopicsRoofRoute: typeof TopicsRoofRoute
@@ -725,6 +738,13 @@ declare module '@tanstack/react-router' {
       path: '/topics/kitchen'
       fullPath: '/topics/kitchen'
       preLoaderRoute: typeof TopicsKitchenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/topics/hvac': {
+      id: '/topics/hvac'
+      path: '/topics/hvac'
+      fullPath: '/topics/hvac'
+      preLoaderRoute: typeof TopicsHvacRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/topics/flooring': {
@@ -920,6 +940,7 @@ const rootRouteChildren: RootRouteChildren = {
   LocationsStateRoute: LocationsStateRoute,
   RIdRoute: RIdRoute,
   TopicsFlooringRoute: TopicsFlooringRoute,
+  TopicsHvacRoute: TopicsHvacRoute,
   TopicsKitchenRoute: TopicsKitchenRoute,
   TopicsQuotesRoute: TopicsQuotesRoute,
   TopicsRoofRoute: TopicsRoofRoute,

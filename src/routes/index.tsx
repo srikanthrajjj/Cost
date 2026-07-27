@@ -21,6 +21,8 @@ import {
   Fan,
   Sun,
   Square,
+  AppWindow,
+  Layers,
   Send,
   X,
   Bot,
@@ -67,7 +69,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Free renovation cost estimates and AI contractor quote analysis. Spot missing scope, check pricing context, and plan roof, kitchen, bathroom, and HVAC projects with clearer numbers.",
+          "Free renovation cost estimates and AI contractor quote analysis. Spot missing scope, check pricing context, and plan roof, kitchen, bathroom, HVAC, windows, and flooring projects with clearer numbers.",
       },
       {
         property: "og:title",
@@ -269,6 +271,18 @@ function QuickEstimate() {
       color: "bg-purple-50 text-purple-600 border-purple-200",
     },
     { id: "hvac", icon: Fan, label: "HVAC", color: "bg-green-50 text-green-600 border-green-200" },
+    {
+      id: "windows",
+      icon: AppWindow,
+      label: "Windows",
+      color: "bg-sky-50 text-sky-600 border-sky-200",
+    },
+    {
+      id: "flooring",
+      icon: Layers,
+      label: "Flooring",
+      color: "bg-amber-50 text-amber-700 border-amber-200",
+    },
   ];
 
   const loadingSteps = [
@@ -301,7 +315,11 @@ function QuickEstimate() {
                 ? 25
                 : projectType === "bathroom"
                   ? 8
-                  : 4;
+                  : projectType === "windows"
+                    ? 6
+                    : projectType === "flooring"
+                      ? 4
+                      : 4;
           const sizeMultiplier = parseInt(houseSize) / 2000;
           const randomVariance = 0.9 + Math.random() * 0.2;
           const cost = Math.round(baseCost * 1000 * sizeMultiplier * randomVariance);

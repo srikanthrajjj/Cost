@@ -101,6 +101,30 @@ export function SiteFooter() {
               </li>
               <li>
                 <a
+                  href="/topics/hvac"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  HVAC costs
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/topics/windows"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Window costs
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/topics/flooring"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Flooring costs
+                </a>
+              </li>
+              <li>
+                <a
                   href="/guides/how-to-read-a-contractor-quote"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >
