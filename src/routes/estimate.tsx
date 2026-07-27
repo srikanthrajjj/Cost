@@ -31,7 +31,9 @@ import { EmailDownloadModal } from "@/components/EmailDownloadModal";
 import { EstimateFeedbackCard } from "@/components/estimate/EstimateFeedbackCard";
 import { CostBreakdownChart, colorizeBreakdown } from "@/components/estimate/CostBreakdownChart";
 import { RoofMeasureStep } from "@/components/estimate/RoofMeasureStep";
+import { EstimateSeoSection, ESTIMATOR_FAQS } from "@/components/estimate/EstimateSeoSection";
 import { QuestionInfo } from "@/components/estimate/QuestionInfo";
+import { buildFaqSchema } from "@/lib/seo";
 import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -72,6 +74,14 @@ export const Route = createFileRoute("/estimate")({
       { name: "robots", content: "index, follow" },
     ],
     links: [{ rel: "canonical", href: "https://www.costreno.com/estimate" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildFaqSchema(ESTIMATOR_FAQS.map((faq) => ({ q: faq.q, a: faq.a }))),
+        ),
+      },
+    ],
   }),
   component: EstimatorPage,
 });
@@ -400,53 +410,86 @@ function SelectGridQuestion({
       onChange(v);
     }, 160);
   };
+  const isKitchenMethod = q.id === "kitchenMethod";
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl">
-      {q.choices!.map((c) => {
-        const isSelected = value === c.value;
-        return (
-          <div key={c.value} className="flex flex-col">
-            <button
-              onClick={() => handleClick(c.value)}
-              className={`group flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200
+    <div className="space-y-4 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {q.choices!.map((c) => {
+          const isSelected = value === c.value;
+          return (
+            <div key={c.value} className="flex flex-col">
+              <button
+                onClick={() => handleClick(c.value)}
+                className={`group flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200
                 ${
                   isSelected
                     ? "border-accent bg-accent/[0.06] shadow-md shadow-accent/8"
                     : "border-border bg-white hover:border-accent/40 hover:bg-muted/20 hover:shadow-sm"
                 } ${flash === c.value ? "scale-95" : "scale-100"}`}
-            >
-              <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all
-                ${isSelected ? "bg-accent text-white" : "bg-muted text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent"}`}
               >
-                {/* Use Lucide icon if mapped, else text icon fallback */}
-                {c.icon && !/\p{Emoji}/u.test(c.icon) ? (
-                  <span className="text-base">{c.icon}</span>
-                ) : (
-                  <span className="text-base leading-none">{c.icon}</span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
                 <div
-                  className={`text-sm font-semibold leading-tight ${isSelected ? "text-accent" : "text-ink"}`}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all
+                ${isSelected ? "bg-accent text-white" : "bg-muted text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent"}`}
                 >
-                  {c.label}
+                  {/* Use Lucide icon if mapped, else text icon fallback */}
+                  {c.icon && !/\p{Emoji}/u.test(c.icon) ? (
+                    <span className="text-base">{c.icon}</span>
+                  ) : (
+                    <span className="text-base leading-none">{c.icon}</span>
+                  )}
                 </div>
-                {c.desc && <div className="text-[11px] text-muted-foreground mt-0.5">{c.desc}</div>}
-              </div>
-              {isSelected && (
-                <Check className="h-4 w-4 text-accent shrink-0 animate-in zoom-in duration-150" />
+                <div className="min-w-0 flex-1">
+                  <div
+                    className={`text-sm font-semibold leading-tight ${isSelected ? "text-accent" : "text-ink"}`}
+                  >
+                    {c.label}
+                  </div>
+                  {c.desc && <div className="text-[11px] text-muted-foreground mt-0.5">{c.desc}</div>}
+                </div>
+                {isSelected && (
+                  <Check className="h-4 w-4 text-accent shrink-0 animate-in zoom-in duration-150" />
+                )}
+              </button>
+              {c.value === "ai" && q.choices!.some((ch) => ch.value === "manual") && (
+                <p className="mt-1.5 ml-1 flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                  <Lock className="h-2.5 w-2.5 shrink-0" />
+                  Photos are only used to generate your estimate
+                </p>
               )}
-            </button>
-            {c.value === "ai" && q.choices!.some((ch) => ch.value === "manual") && (
-              <p className="mt-1.5 ml-1 flex items-center gap-1 text-[10px] text-muted-foreground/70">
-                <Lock className="h-2.5 w-2.5 shrink-0" />
-                Photos are only used to generate your estimate
-              </p>
-            )}
-          </div>
-        );
-      })}
+            </div>
+          );
+        })}
+      </div>
+
+      {isKitchenMethod && (
+        <div className="rounded-xl border border-border bg-muted/20 p-4">
+          <p className="text-sm font-semibold text-ink mb-2">How photos improve your estimate</p>
+          <ul className="space-y-1.5 text-xs text-muted-foreground leading-relaxed">
+            <li className="flex items-start gap-2">
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              <span>
+                AI reads your photos and prefills cabinet type, countertops, flooring, backsplash,
+                kitchen size, and condition.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              <span>
+                You review and edit anything the AI detected before we calculate, so the estimate
+                reflects your actual kitchen.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              <span>
+                Fewer blank guesses means a tighter cost range and less back-and-forth when you
+                compare contractor quotes.
+              </span>
+            </li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -1113,9 +1156,9 @@ function PhotoUploadQuestion({
             <Sparkles className="h-5 w-5 text-accent" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-ink">AI detected your kitchen details</p>
+            <p className="text-sm font-semibold text-ink">We prefilled your kitchen details</p>
             <p className="text-xs text-muted-foreground">
-              Review below — tap any item to change it.
+              Review each item below. Tap to change anything before we calculate your estimate.
             </p>
           </div>
         </div>
@@ -1198,6 +1241,28 @@ function PhotoUploadQuestion({
   // ─── PRE-ANALYSIS: Upload UI ──────────────────────────────────────────────
   return (
     <div className="max-w-lg mx-auto space-y-4">
+      <div className="rounded-xl border border-border bg-white p-4">
+        <p className="text-sm font-semibold text-ink mb-2">What we detect from your photos</p>
+        <ul className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+          {[
+            "Cabinet type (stock, semi-custom, custom)",
+            "Countertop material",
+            "Flooring and backsplash",
+            "Approximate kitchen size",
+            "Visible wear and overall condition",
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-2">
+              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+          These details prefill your estimate so you skip most manual questions. You confirm or
+          change each item after analysis.
+        </p>
+      </div>
+
       <div
         role="button"
         tabIndex={0}
@@ -1958,6 +2023,8 @@ function EstimatorPage() {
             </div>
           </div>
         )}
+
+        <EstimateSeoSection />
       </main>
       <SiteFooter />
     </div>

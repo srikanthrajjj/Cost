@@ -99,7 +99,10 @@ export function PathSelector({ onSelectPath }: PathSelectorProps) {
         >
           How would you like to estimate your kitchen remodel?
         </h2>
-        <p className="mt-2 text-muted-foreground">Choose the path that works best for you.</p>
+        <p className="mt-2 text-muted-foreground max-w-xl mx-auto leading-relaxed">
+          Upload photos when you can. Our AI uses them to prefill cabinet type, countertops, size,
+          and condition so you answer fewer questions and get a more accurate estimate.
+        </p>
       </div>
       <div
         ref={containerRef}

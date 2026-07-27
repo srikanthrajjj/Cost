@@ -196,16 +196,22 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_GUIDES = [
-  { title: "Kitchen Remodel Cost Guide", href: "/kitchen-remodel-cost", icon: "/Kitchen.svg" },
   {
-    title: "HVAC Installation Guide",
-    href: "/hvac-installation-cost",
-    icon: "/Air Conditioner.svg",
+    title: "Roof cost by state",
+    href: "/guides/roof-replacement-cost-by-state",
+    icon: "/House.svg",
   },
-  { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "/Window.svg" },
-  { title: "Bathroom Remodel Guide", href: "/bathroom-remodel-cost", icon: "/Bathtub.svg" },
+  {
+    title: "Roof cost by city",
+    href: "/guides/roof-replacement-cost-by-city",
+    icon: "/House.svg",
+  },
   { title: "Metal vs asphalt roof", href: "/guides/metal-vs-asphalt-roof", icon: "/House.svg" },
-  { title: "Signs a quote is inflated", href: "/guides/inflated-quote-signs", icon: "/House.svg" },
+  { title: "Roof replacement timeline", href: "/guides/roof-replacement-timeline", icon: "/House.svg" },
+  { title: "Roof permits", href: "/guides/roof-permits", icon: "/House.svg" },
+  { title: "Roof financing", href: "/guides/roof-financing", icon: "/House.svg" },
+  { title: "Roof insurance claims", href: "/guides/roof-insurance-claims", icon: "/House.svg" },
+  { title: "Roof quote review", href: "/guides/roof-quote-review", icon: "/House.svg" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────

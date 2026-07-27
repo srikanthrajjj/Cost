@@ -40,9 +40,16 @@ function InsuranceClaimsComingSoon() {
         <h1 className="font-display text-3xl md:text-4xl font-bold text-ink mb-3">
           Insurance claims tool
         </h1>
-        <p className="text-base text-muted-foreground leading-relaxed max-w-md mx-auto mb-8">
+        <p className="text-base text-muted-foreground leading-relaxed max-w-md mx-auto mb-4">
           AI-powered insurance claims analysis is coming soon. Upload your claim documents, get
           instant insights, and maximize your coverage.
+        </p>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto mb-8">
+          Need help now? Read our{" "}
+          <a href="/guides/roof-insurance-claims" className="text-primary font-medium hover:underline">
+            roof insurance claims guide
+          </a>{" "}
+          for documentation, adjuster visits, and quote review steps.
         </p>
 
         <div className="rounded-2xl border border-border bg-white p-6 md:p-8 shadow-sm mb-8 max-w-md mx-auto">

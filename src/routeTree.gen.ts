@@ -33,7 +33,14 @@ import { Route as TopicsFlooringRouteImport } from './routes/topics/flooring'
 import { Route as RIdRouteImport } from './routes/r/$id'
 import { Route as LocationsStateRouteImport } from './routes/locations/$state'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
+import { Route as GuidesRoofReplacementTimelineRouteImport } from './routes/guides/roof-replacement-timeline'
+import { Route as GuidesRoofReplacementCostByStateRouteImport } from './routes/guides/roof-replacement-cost-by-state'
+import { Route as GuidesRoofReplacementCostByCityRouteImport } from './routes/guides/roof-replacement-cost-by-city'
 import { Route as GuidesRoofReplacementRouteImport } from './routes/guides/roof-replacement'
+import { Route as GuidesRoofQuoteReviewRouteImport } from './routes/guides/roof-quote-review'
+import { Route as GuidesRoofPermitsRouteImport } from './routes/guides/roof-permits'
+import { Route as GuidesRoofInsuranceClaimsRouteImport } from './routes/guides/roof-insurance-claims'
+import { Route as GuidesRoofFinancingRouteImport } from './routes/guides/roof-financing'
 import { Route as GuidesQuestionsBeforeSigningRouteImport } from './routes/guides/questions-before-signing'
 import { Route as GuidesQuartzVsGraniteCountertopsRouteImport } from './routes/guides/quartz-vs-granite-countertops'
 import { Route as GuidesMetalVsAsphaltRoofRouteImport } from './routes/guides/metal-vs-asphalt-roof'
@@ -165,9 +172,48 @@ const GuidesWindowReplacementRoute = GuidesWindowReplacementRouteImport.update({
   path: '/guides/window-replacement',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesRoofReplacementTimelineRoute =
+  GuidesRoofReplacementTimelineRouteImport.update({
+    id: '/guides/roof-replacement-timeline',
+    path: '/guides/roof-replacement-timeline',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesRoofReplacementCostByStateRoute =
+  GuidesRoofReplacementCostByStateRouteImport.update({
+    id: '/guides/roof-replacement-cost-by-state',
+    path: '/guides/roof-replacement-cost-by-state',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesRoofReplacementCostByCityRoute =
+  GuidesRoofReplacementCostByCityRouteImport.update({
+    id: '/guides/roof-replacement-cost-by-city',
+    path: '/guides/roof-replacement-cost-by-city',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesRoofReplacementRoute = GuidesRoofReplacementRouteImport.update({
   id: '/guides/roof-replacement',
   path: '/guides/roof-replacement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesRoofQuoteReviewRoute = GuidesRoofQuoteReviewRouteImport.update({
+  id: '/guides/roof-quote-review',
+  path: '/guides/roof-quote-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesRoofPermitsRoute = GuidesRoofPermitsRouteImport.update({
+  id: '/guides/roof-permits',
+  path: '/guides/roof-permits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesRoofInsuranceClaimsRoute =
+  GuidesRoofInsuranceClaimsRouteImport.update({
+    id: '/guides/roof-insurance-claims',
+    path: '/guides/roof-insurance-claims',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesRoofFinancingRoute = GuidesRoofFinancingRouteImport.update({
+  id: '/guides/roof-financing',
+  path: '/guides/roof-financing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesQuestionsBeforeSigningRoute =
@@ -250,7 +296,14 @@ export interface FileRoutesByFullPath {
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
   '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
+  '/guides/roof-financing': typeof GuidesRoofFinancingRoute
+  '/guides/roof-insurance-claims': typeof GuidesRoofInsuranceClaimsRoute
+  '/guides/roof-permits': typeof GuidesRoofPermitsRoute
+  '/guides/roof-quote-review': typeof GuidesRoofQuoteReviewRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
+  '/guides/roof-replacement-cost-by-city': typeof GuidesRoofReplacementCostByCityRoute
+  '/guides/roof-replacement-cost-by-state': typeof GuidesRoofReplacementCostByStateRoute
+  '/guides/roof-replacement-timeline': typeof GuidesRoofReplacementTimelineRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
@@ -287,7 +340,14 @@ export interface FileRoutesByTo {
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
   '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
+  '/guides/roof-financing': typeof GuidesRoofFinancingRoute
+  '/guides/roof-insurance-claims': typeof GuidesRoofInsuranceClaimsRoute
+  '/guides/roof-permits': typeof GuidesRoofPermitsRoute
+  '/guides/roof-quote-review': typeof GuidesRoofQuoteReviewRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
+  '/guides/roof-replacement-cost-by-city': typeof GuidesRoofReplacementCostByCityRoute
+  '/guides/roof-replacement-cost-by-state': typeof GuidesRoofReplacementCostByStateRoute
+  '/guides/roof-replacement-timeline': typeof GuidesRoofReplacementTimelineRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
@@ -325,7 +385,14 @@ export interface FileRoutesById {
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
   '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
   '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
+  '/guides/roof-financing': typeof GuidesRoofFinancingRoute
+  '/guides/roof-insurance-claims': typeof GuidesRoofInsuranceClaimsRoute
+  '/guides/roof-permits': typeof GuidesRoofPermitsRoute
+  '/guides/roof-quote-review': typeof GuidesRoofQuoteReviewRoute
   '/guides/roof-replacement': typeof GuidesRoofReplacementRoute
+  '/guides/roof-replacement-cost-by-city': typeof GuidesRoofReplacementCostByCityRoute
+  '/guides/roof-replacement-cost-by-state': typeof GuidesRoofReplacementCostByStateRoute
+  '/guides/roof-replacement-timeline': typeof GuidesRoofReplacementTimelineRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
@@ -364,7 +431,14 @@ export interface FileRouteTypes {
     | '/guides/metal-vs-asphalt-roof'
     | '/guides/quartz-vs-granite-countertops'
     | '/guides/questions-before-signing'
+    | '/guides/roof-financing'
+    | '/guides/roof-insurance-claims'
+    | '/guides/roof-permits'
+    | '/guides/roof-quote-review'
     | '/guides/roof-replacement'
+    | '/guides/roof-replacement-cost-by-city'
+    | '/guides/roof-replacement-cost-by-state'
+    | '/guides/roof-replacement-timeline'
     | '/guides/window-replacement'
     | '/locations/$state'
     | '/r/$id'
@@ -401,7 +475,14 @@ export interface FileRouteTypes {
     | '/guides/metal-vs-asphalt-roof'
     | '/guides/quartz-vs-granite-countertops'
     | '/guides/questions-before-signing'
+    | '/guides/roof-financing'
+    | '/guides/roof-insurance-claims'
+    | '/guides/roof-permits'
+    | '/guides/roof-quote-review'
     | '/guides/roof-replacement'
+    | '/guides/roof-replacement-cost-by-city'
+    | '/guides/roof-replacement-cost-by-state'
+    | '/guides/roof-replacement-timeline'
     | '/guides/window-replacement'
     | '/locations/$state'
     | '/r/$id'
@@ -438,7 +519,14 @@ export interface FileRouteTypes {
     | '/guides/metal-vs-asphalt-roof'
     | '/guides/quartz-vs-granite-countertops'
     | '/guides/questions-before-signing'
+    | '/guides/roof-financing'
+    | '/guides/roof-insurance-claims'
+    | '/guides/roof-permits'
+    | '/guides/roof-quote-review'
     | '/guides/roof-replacement'
+    | '/guides/roof-replacement-cost-by-city'
+    | '/guides/roof-replacement-cost-by-state'
+    | '/guides/roof-replacement-timeline'
     | '/guides/window-replacement'
     | '/locations/$state'
     | '/r/$id'
@@ -476,7 +564,14 @@ export interface RootRouteChildren {
   GuidesMetalVsAsphaltRoofRoute: typeof GuidesMetalVsAsphaltRoofRoute
   GuidesQuartzVsGraniteCountertopsRoute: typeof GuidesQuartzVsGraniteCountertopsRoute
   GuidesQuestionsBeforeSigningRoute: typeof GuidesQuestionsBeforeSigningRoute
+  GuidesRoofFinancingRoute: typeof GuidesRoofFinancingRoute
+  GuidesRoofInsuranceClaimsRoute: typeof GuidesRoofInsuranceClaimsRoute
+  GuidesRoofPermitsRoute: typeof GuidesRoofPermitsRoute
+  GuidesRoofQuoteReviewRoute: typeof GuidesRoofQuoteReviewRoute
   GuidesRoofReplacementRoute: typeof GuidesRoofReplacementRoute
+  GuidesRoofReplacementCostByCityRoute: typeof GuidesRoofReplacementCostByCityRoute
+  GuidesRoofReplacementCostByStateRoute: typeof GuidesRoofReplacementCostByStateRoute
+  GuidesRoofReplacementTimelineRoute: typeof GuidesRoofReplacementTimelineRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
   LocationsStateRoute: typeof LocationsStateRoute
   RIdRoute: typeof RIdRoute
@@ -660,11 +755,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesWindowReplacementRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/roof-replacement-timeline': {
+      id: '/guides/roof-replacement-timeline'
+      path: '/guides/roof-replacement-timeline'
+      fullPath: '/guides/roof-replacement-timeline'
+      preLoaderRoute: typeof GuidesRoofReplacementTimelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/roof-replacement-cost-by-state': {
+      id: '/guides/roof-replacement-cost-by-state'
+      path: '/guides/roof-replacement-cost-by-state'
+      fullPath: '/guides/roof-replacement-cost-by-state'
+      preLoaderRoute: typeof GuidesRoofReplacementCostByStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/roof-replacement-cost-by-city': {
+      id: '/guides/roof-replacement-cost-by-city'
+      path: '/guides/roof-replacement-cost-by-city'
+      fullPath: '/guides/roof-replacement-cost-by-city'
+      preLoaderRoute: typeof GuidesRoofReplacementCostByCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/roof-replacement': {
       id: '/guides/roof-replacement'
       path: '/guides/roof-replacement'
       fullPath: '/guides/roof-replacement'
       preLoaderRoute: typeof GuidesRoofReplacementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/roof-quote-review': {
+      id: '/guides/roof-quote-review'
+      path: '/guides/roof-quote-review'
+      fullPath: '/guides/roof-quote-review'
+      preLoaderRoute: typeof GuidesRoofQuoteReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/roof-permits': {
+      id: '/guides/roof-permits'
+      path: '/guides/roof-permits'
+      fullPath: '/guides/roof-permits'
+      preLoaderRoute: typeof GuidesRoofPermitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/roof-insurance-claims': {
+      id: '/guides/roof-insurance-claims'
+      path: '/guides/roof-insurance-claims'
+      fullPath: '/guides/roof-insurance-claims'
+      preLoaderRoute: typeof GuidesRoofInsuranceClaimsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/roof-financing': {
+      id: '/guides/roof-financing'
+      path: '/guides/roof-financing'
+      fullPath: '/guides/roof-financing'
+      preLoaderRoute: typeof GuidesRoofFinancingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/questions-before-signing': {
@@ -764,7 +908,14 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesMetalVsAsphaltRoofRoute: GuidesMetalVsAsphaltRoofRoute,
   GuidesQuartzVsGraniteCountertopsRoute: GuidesQuartzVsGraniteCountertopsRoute,
   GuidesQuestionsBeforeSigningRoute: GuidesQuestionsBeforeSigningRoute,
+  GuidesRoofFinancingRoute: GuidesRoofFinancingRoute,
+  GuidesRoofInsuranceClaimsRoute: GuidesRoofInsuranceClaimsRoute,
+  GuidesRoofPermitsRoute: GuidesRoofPermitsRoute,
+  GuidesRoofQuoteReviewRoute: GuidesRoofQuoteReviewRoute,
   GuidesRoofReplacementRoute: GuidesRoofReplacementRoute,
+  GuidesRoofReplacementCostByCityRoute: GuidesRoofReplacementCostByCityRoute,
+  GuidesRoofReplacementCostByStateRoute: GuidesRoofReplacementCostByStateRoute,
+  GuidesRoofReplacementTimelineRoute: GuidesRoofReplacementTimelineRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
   LocationsStateRoute: LocationsStateRoute,
   RIdRoute: RIdRoute,

@@ -98,6 +98,48 @@ const GUIDES = [
     desc: "Cost, lifespan, and trade-offs to help you choose a roofing material.",
     tag: "Comparison",
   },
+  {
+    href: "/guides/roof-replacement-cost-by-state",
+    title: "Roof replacement cost by state",
+    desc: "Indicative ranges and labor context for every state we track.",
+    tag: "Roofing",
+  },
+  {
+    href: "/guides/roof-replacement-cost-by-city",
+    title: "Roof replacement cost by city",
+    desc: "Metro-level roof pricing pages with local factors and FAQs.",
+    tag: "Roofing",
+  },
+  {
+    href: "/guides/roof-replacement-timeline",
+    title: "Roof replacement timeline",
+    desc: "Typical phases from inspection through cleanup and final inspection.",
+    tag: "Roofing",
+  },
+  {
+    href: "/guides/roof-permits",
+    title: "Roof permits",
+    desc: "When permits are required, who pulls them, and what to verify on quotes.",
+    tag: "Roofing",
+  },
+  {
+    href: "/guides/roof-financing",
+    title: "Roof financing",
+    desc: "Compare savings, HELOCs, personal loans, and contractor financing.",
+    tag: "Roofing",
+  },
+  {
+    href: "/guides/roof-insurance-claims",
+    title: "Roof insurance claims",
+    desc: "Document storm damage, work with adjusters, and review settlement scope.",
+    tag: "Roofing",
+  },
+  {
+    href: "/guides/roof-quote-review",
+    title: "Roof quote review",
+    desc: "Line-item checklist for tear-off, materials, permits, and warranties.",
+    tag: "Roofing",
+  },
 ];
 
 export const Route = createFileRoute("/guides/")({

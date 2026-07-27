@@ -275,18 +275,21 @@ export const ALL_STEPS: StepDef[] = [
         id: "kitchenMethod",
         type: "select-grid",
         title: "How would you like to estimate?",
-        info: "Photo upload uses AI to detect cabinets, counters, and layout so you answer fewer questions. Manual mode works well if you prefer not to share photos or want to choose each detail yourself.",
+        info: "Photo upload uses AI to read your kitchen and prefill details like cabinet type, countertop material, and size. That reduces guesswork and usually produces a tighter cost range. Manual mode works well if you prefer not to share photos or already know your materials.",
+        subtitle:
+          "Upload photos when you can. Our AI uses them to prefill your kitchen details so you skip most manual questions and get a more accurate estimate.",
         choices: [
-          { value: "manual", icon: "📋", label: "Answer Questions", desc: "No photos needed" },
-          { value: "ai", icon: "📸", label: "Upload Photos (AI)", desc: "Fewer questions" },
+          { value: "manual", icon: "📋", label: "Answer questions", desc: "Step-by-step, no photos" },
+          { value: "ai", icon: "📸", label: "Upload photos (AI)", desc: "Prefills details from images" },
         ],
       },
       {
         id: "kitchenPhotos" as any,
         type: "photo-upload",
         title: "Upload 2-6 photos of your kitchen",
-        info: "Clear photos from a few angles help our AI identify your cabinets, counters, and overall layout. Photos are used only to build your estimate, not for marketing.",
-        subtitle: "Our AI will detect materials, size, and condition automatically.",
+        info: "Include wide shots plus closer views of cabinets and counters. The AI reads what is visible in your photos, prefills your answers, and you confirm or edit before we calculate. Photos are used only to build your estimate, not for marketing.",
+        subtitle:
+          "We detect cabinet type, countertops, flooring, backsplash, kitchen size, and overall condition, then prefill those fields for you.",
         showIf: (a: EstimatorAnswers) => (a as any).kitchenMethod === "ai",
       },
       {
