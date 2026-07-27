@@ -64,16 +64,16 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "CostReno | Know what your renovation should cost before you hire",
+        title: "CostReno | Home renovation cost estimates",
       },
       {
         name: "description",
         content:
-          "Free renovation cost estimates and AI contractor quote analysis. Spot missing scope, check pricing context, and plan roof, kitchen, bathroom, HVAC, windows, and flooring projects with clearer numbers.",
+          "Free renovation cost estimates and AI quote analysis for roof, kitchen, bathroom, HVAC, windows, and flooring. Plan with clearer local pricing before you hire.",
       },
       {
         property: "og:title",
-        content: "CostReno | Know what your renovation should cost before you hire",
+        content: "CostReno | Home renovation cost estimates",
       },
       {
         property: "og:description",

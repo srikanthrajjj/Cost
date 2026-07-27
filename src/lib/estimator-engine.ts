@@ -76,9 +76,17 @@ export interface EstimatorAnswers {
   // HVAC
   hvacAction?: "repair" | "replace";
   hvacType?: "central-air" | "heat-pump" | "furnace" | "mini-split";
-  hvacSize?: "small" | "medium" | "large";
   hvacDuctwork?: "good" | "repair" | "replace" | "none";
   hvacEfficiency?: "standard" | "high";
+  hvacIssue?:
+    | "not-cooling"
+    | "not-heating"
+    | "making-noise"
+    | "short-cycling"
+    | "not-sure";
+  hvacSystemAge?: "under-5" | "5-10" | "10-15" | "15-plus" | "not-sure";
+  hvacDiagnosed?: "yes" | "no";
+  hvacDiagnosisNotes?: string;
 
   // Windows
   windowCount?: number;
@@ -242,6 +250,21 @@ const PERMIT_REQUIRED: Record<ProjectType, boolean> = {
   plumbing: true,
   electrical: true,
 };
+
+function isHotSouthernClimate(state?: string): boolean {
+  return Boolean(
+    state &&
+      new Set(["AZ", "FL", "TX", "LA", "MS", "AL", "GA", "SC", "NC", "NV"]).has(
+        state.toUpperCase(),
+      ),
+  );
+}
+
+function estimateHvacTonnage(squareFootage: number, state?: string): number {
+  const sqftPerTon = isHotSouthernClimate(state) ? 450 : 550;
+  const rawTons = squareFootage / sqftPerTon;
+  return Math.max(1.5, Math.round(rawTons * 4) / 4);
+}
 
 export function resolveRegionalMultiplier(answers: {
   zipCode?: string;
@@ -646,15 +669,39 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
     high = Math.round(high * regionMult);
 
     if (answers.hvacAction === "repair") {
-      low = Math.round(300 * regionMult);
-      mid = Math.round(900 * regionMult);
-      high = Math.round(2800 * regionMult);
+      const repairBase =
+        answers.hvacIssue === "not-heating"
+          ? { low: 250, mid: 700, high: 2200 }
+          : answers.hvacIssue === "making-noise"
+            ? { low: 200, mid: 550, high: 1600 }
+            : answers.hvacIssue === "short-cycling"
+              ? { low: 300, mid: 850, high: 2400 }
+              : answers.hvacIssue === "not-sure"
+                ? { low: 250, mid: 650, high: 2600 }
+                : { low: 300, mid: 800, high: 2500 };
+      low = Math.round(repairBase.low * regionMult);
+      mid = Math.round(repairBase.mid * regionMult);
+      high = Math.round(repairBase.high * regionMult);
+
+      if (answers.hvacSystemAge === "10-15") {
+        low = Math.round(low * 1.08);
+        mid = Math.round(mid * 1.12);
+        high = Math.round(high * 1.18);
+      }
+      if (answers.hvacSystemAge === "15-plus") {
+        low = Math.round(low * 1.15);
+        mid = Math.round(mid * 1.25);
+        high = Math.round(high * 1.4);
+      }
+      if (answers.hvacDiagnosed === "no") {
+        high = Math.round(high * 1.12);
+      }
     } else {
-      const sizeMult =
-        answers.hvacSize === "small" ? 0.78 : answers.hvacSize === "large" ? 1.35 : 1;
-      low = Math.round(low * sizeMult);
-      mid = Math.round(mid * sizeMult);
-      high = Math.round(high * sizeMult);
+      const tons = estimateHvacTonnage(sqft, answers.state);
+      const tonFactor = tons / 3;
+      low = Math.round(low * tonFactor);
+      mid = Math.round(mid * tonFactor);
+      high = Math.round(high * tonFactor);
 
       if (answers.hvacType === "heat-pump") {
         mid += Math.round(1800 * regionMult);
@@ -675,23 +722,35 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
         mid = Math.round(mid * 1.18);
         high = Math.round(high * 1.25);
       }
-      if (answers.hvacDuctwork === "repair") {
+      if (answers.hvacType !== "mini-split" && answers.hvacDuctwork === "repair") {
         low += Math.round(1200 * regionMult);
         mid += Math.round(2200 * regionMult);
         high += Math.round(3500 * regionMult);
       }
-      if (answers.hvacDuctwork === "replace") {
+      if (answers.hvacType !== "mini-split" && answers.hvacDuctwork === "replace") {
         low += Math.round(3500 * regionMult);
         mid += Math.round(6000 * regionMult);
         high += Math.round(10000 * regionMult);
       }
+      if (answers.hvacType !== "mini-split" && answers.hvacDuctwork === "none") {
+        low += Math.round(2500 * regionMult);
+        mid += Math.round(4800 * regionMult);
+        high += Math.round(8500 * regionMult);
+      }
     }
 
     if (answers.hvacAction) confidence += 15;
-    if (answers.hvacType) confidence += 12;
-    if (answers.hvacSize) confidence += 10;
-    if (answers.hvacDuctwork) confidence += 8;
-    if (answers.hvacEfficiency) confidence += 5;
+    if (answers.hvacAction === "repair") {
+      if (answers.hvacIssue) confidence += 12;
+      if (answers.hvacSystemAge) confidence += 8;
+      if (answers.hvacDiagnosed) confidence += 8;
+      if (answers.hvacDiagnosisNotes?.trim()) confidence += 10;
+    } else {
+      if (answers.squareFootage) confidence += 12;
+      if (answers.hvacType) confidence += 12;
+      if (answers.hvacDuctwork) confidence += 8;
+      if (answers.hvacEfficiency) confidence += 5;
+    }
   } else if (project === "windows") {
     const count = answers.windowCount ?? 10;
     low = Math.round((low / 10) * count * regionMult);
@@ -853,18 +912,18 @@ export function calculateEstimate(answers: EstimatorAnswers): LiveEstimate {
   }
 
   // ── Condition adjustments
-  if (answers.currentCondition === "poor") {
+  if (project !== "hvac" && answers.currentCondition === "poor") {
     low *= 1.15;
     mid *= 1.2;
     high *= 1.3;
     confidence += 5;
   }
-  if (answers.currentCondition === "excellent") {
+  if (project !== "hvac" && answers.currentCondition === "excellent") {
     mid *= 0.9;
     high *= 0.9;
     confidence += 5;
   }
-  if (answers.currentCondition) confidence += 5;
+  if (project !== "hvac" && answers.currentCondition) confidence += 5;
 
   // ── Property details confidence
   if (answers.squareFootage && project !== "roof") confidence += 10;

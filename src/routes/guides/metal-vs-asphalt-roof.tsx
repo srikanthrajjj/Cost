@@ -22,20 +22,20 @@ export const Route = createFileRoute("/guides/metal-vs-asphalt-roof")({
   component: MetalVsAsphaltGuide,
   head: () => ({
     meta: [
-      { title: "Metal vs asphalt roof in 2026: cost, lifespan, pros & cons — CostReno" },
+      { title: "Metal vs asphalt roof cost guide | CostReno" },
       {
         name: "description",
         content:
-          "Metal vs asphalt roof: compare costs ($5,500–$28,000), lifespan, energy efficiency, ROI, and durability. Complete 2026 guide to help you choose the right roof.",
+          "Compare metal vs asphalt roofs for cost, lifespan, energy use, and ROI. A 2026 guide to help you choose the right roof.",
       },
       {
         property: "og:title",
-        content: "Metal vs asphalt roof in 2026: cost, lifespan, pros & cons — CostReno",
+        content: "Metal vs asphalt roof cost guide | CostReno",
       },
       {
         property: "og:description",
         content:
-          "Metal vs asphalt roof full comparison. Costs, lifespan, energy savings, resale value, and which is right for your home. Updated July 2026.",
+          "Metal vs asphalt roof comparison for cost, lifespan, energy savings, and resale value. Updated for 2026.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://www.costreno.com/guides/metal-vs-asphalt-roof" },

@@ -29,7 +29,7 @@ export const Route = createFileRoute("/guides/quartz-vs-granite-countertops")({
   component: QuartzVsGraniteGuide,
   head: () => ({
     meta: [
-      { title: "Quartz vs granite countertops: cost and durability | CostReno" },
+      { title: "Quartz vs granite countertops | CostReno" },
       {
         name: "description",
         content:
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/guides/quartz-vs-granite-countertops")({
       },
       {
         property: "og:title",
-        content: "Quartz vs granite countertops: cost and durability | CostReno",
+        content: "Quartz vs granite countertops | CostReno",
       },
       {
         property: "og:description",

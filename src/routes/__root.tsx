@@ -111,7 +111,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "canonical", href: "https://www.costreno.com/" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "alternate", type: "text/plain", href: "https://www.costreno.com/llms.txt", title: "llms.txt" },
     ],

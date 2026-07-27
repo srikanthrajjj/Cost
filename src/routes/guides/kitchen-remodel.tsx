@@ -23,21 +23,21 @@ export const Route = createFileRoute("/guides/kitchen-remodel")({
   head: () => ({
     meta: [
       {
-        title: "Kitchen remodel cost in 2026: complete pricing guide by size & ZIP code — CostReno",
+        title: "Kitchen remodel cost guide (2026) | CostReno",
       },
       {
         name: "description",
         content:
-          "How much does a kitchen remodel cost in 2026? Get pricing by project size, layout, and ZIP code. Compare cabinets, countertops, flooring, and labor costs with our complete guide.",
+          "Kitchen remodel costs in 2026 by size, layout, and ZIP code. Compare cabinets, countertops, flooring, and labor before you hire.",
       },
       {
         property: "og:title",
-        content: "Kitchen remodel cost in 2026: complete pricing guide — CostReno",
+        content: "Kitchen remodel cost guide (2026) | CostReno",
       },
       {
         property: "og:description",
         content:
-          "Complete 2026 kitchen remodel pricing guide. Costs by project scope, materials, and region. Learn about hidden fees, permits, and how to compare contractor quotes.",
+          "Kitchen remodel pricing by scope, materials, and region. Includes permits, hidden fees, and quote comparison tips.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://www.costreno.com/guides/kitchen-remodel" },
@@ -167,15 +167,11 @@ const FAQ_ITEMS = [
 ];
 
 const RELATED_GUIDES = [
-  { title: "Roof Replacement Guide", href: "/guides/roof-replacement", icon: "/House.svg" },
-  { title: "Bathroom Remodel Guide", href: "/guides/bathroom-remodel", icon: "/Bathtub.svg" },
-  {
-    title: "HVAC Installation Guide",
-    href: "/hvac-installation-cost",
-    icon: "/Air Conditioner.svg",
-  },
-  { title: "Window Replacement Guide", href: "/window-replacement-cost", icon: "/Window.svg" },
-  { title: "Flooring Guide", href: "/flooring-cost", icon: "/Floor Tiles.svg" },
+  { title: "Kitchen quote review", href: "/guides/kitchen-quote-review", icon: "/Kitchen.svg" },
+  { title: "Kitchen costs by city", href: "/topics/kitchen", icon: "/Kitchen.svg" },
+  { title: "Quartz vs granite", href: "/guides/quartz-vs-granite-countertops", icon: "/Kitchen.svg" },
+  { title: "Bathroom remodel guide", href: "/guides/bathroom-remodel", icon: "/Bathtub.svg" },
+  { title: "How to read a quote", href: "/guides/how-to-read-a-contractor-quote", icon: "/House.svg" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────

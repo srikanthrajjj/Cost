@@ -759,6 +759,514 @@ export const CITY_ENRICHMENTS: Record<string, CityEnrichment> = {
       "Permit and association approvals can extend timelines",
     ],
   },
+
+  // ── Expanded kitchen pages (46) ─────────────────────────
+  "san-antonio:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in San Antonio, Texas are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 5% below the national average. Housing stock (older central neighborhoods plus expanding suburban housing) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot summers, mild winters, and strong solar exposure year-round) also affects finish durability and mechanical load. Labor tends to run slightly below larger Texas metros, with steady remodel demand. CostReno helps San Antonio homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in San Antonio runs 5% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: older central neighborhoods plus expanding suburban housing",
+      "Climate factor: hot summers, mild winters, and strong solar exposure year-round",
+      "Permit starting point: City of San Antonio Development Services",
+    ],
+  },
+  "tucson:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Tucson, Arizona are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (mid-century homes mixed with desert contemporary builds) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot, dry climate with monsoon moisture spikes and high sun exposure) also affects finish durability and mechanical load. Cooling efficiency and sun-resistant exterior materials strongly affect project specs. CostReno helps Tucson homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Tucson runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: mid-century homes mixed with desert contemporary builds",
+      "Climate factor: hot, dry climate with monsoon moisture spikes and high sun exposure",
+      "Permit starting point: City of Tucson Planning and Development Services",
+    ],
+  },
+  "colorado-springs:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Colorado Springs, Colorado are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (1970s to 2000s suburban stock with mountain-adjacent newer builds) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (four-season climate with snow, freeze-thaw cycles, and hail risk) also affects finish durability and mechanical load. Roofing and HVAC projects often prioritize weather durability over cosmetic upgrades. CostReno helps Colorado Springs homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Colorado Springs runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: 1970s to 2000s suburban stock with mountain-adjacent newer builds",
+      "Climate factor: four-season climate with snow, freeze-thaw cycles, and hail risk",
+      "Permit starting point: Colorado Springs Land Use Review",
+    ],
+  },
+  "atlanta:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Atlanta, Georgia are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (early 20th-century intown homes plus large suburban inventory) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid subtropical weather with heavy rain, humidity, and storm seasons) also affects finish durability and mechanical load. Humidity and older plumbing or electrical systems frequently expand remodel scope. CostReno helps Atlanta homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Atlanta runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early 20th-century intown homes plus large suburban inventory",
+      "Climate factor: humid subtropical weather with heavy rain, humidity, and storm seasons",
+      "Permit starting point: City of Atlanta Office of Buildings",
+    ],
+  },
+  "charlotte:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Charlotte, North Carolina are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (rapid suburban growth with pockets of older urban housing) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot humid summers, mild winters, and thunderstorm activity) also affects finish durability and mechanical load. Strong in-migration supports active renovation markets and variable contractor pricing. CostReno helps Charlotte homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Charlotte runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: rapid suburban growth with pockets of older urban housing",
+      "Climate factor: hot humid summers, mild winters, and thunderstorm activity",
+      "Permit starting point: City of Charlotte Development Center",
+    ],
+  },
+  "raleigh:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Raleigh, North Carolina are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (newer suburban homes with growing intown renovation activity) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid summers, mild winters, and occasional severe storms) also affects finish durability and mechanical load. Tech-driven population growth keeps remodeling demand and labor markets competitive. CostReno helps Raleigh homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Raleigh runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: newer suburban homes with growing intown renovation activity",
+      "Climate factor: humid summers, mild winters, and occasional severe storms",
+      "Permit starting point: City of Raleigh Development Services",
+    ],
+  },
+  "miami:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Miami, Florida are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 15% above the national average. Housing stock (condo-heavy inventory plus older coastal and urban homes) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (tropical climate with hurricanes, salt air, and extreme humidity year-round) also affects finish durability and mechanical load. Wind codes, moisture control, and coastal material standards raise project complexity. CostReno helps Miami homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Miami runs 15% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: condo-heavy inventory plus older coastal and urban homes",
+      "Climate factor: tropical climate with hurricanes, salt air, and extreme humidity year-round",
+      "Permit starting point: Miami Building Department",
+    ],
+  },
+  "tampa:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Tampa, Florida are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (postwar homes and fast-growing suburban communities) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot humid weather, heavy rain, and hurricane exposure) also affects finish durability and mechanical load. Storm preparedness and mold-resistant detailing are common renovation requirements. CostReno helps Tampa homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Tampa runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar homes and fast-growing suburban communities",
+      "Climate factor: hot humid weather, heavy rain, and hurricane exposure",
+      "Permit starting point: City of Tampa Construction Services",
+    ],
+  },
+  "orlando:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Orlando, Florida are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (1980s to 2010s suburban housing dominant across the metro) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid subtropical climate with intense summer storms and heat) also affects finish durability and mechanical load. Tourism-driven growth sustains remodeling demand and seasonal contractor swings. CostReno helps Orlando homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Orlando runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: 1980s to 2010s suburban housing dominant across the metro",
+      "Climate factor: humid subtropical climate with intense summer storms and heat",
+      "Permit starting point: City of Orlando Permitting Services",
+    ],
+  },
+  "jacksonville:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Jacksonville, Florida are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (large suburban footprint with varied coastal and inland stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid climate with hurricane risk and high moisture year-round) also affects finish durability and mechanical load. Labor can run below South Florida pricing while storm codes still shape specs. CostReno helps Jacksonville homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Jacksonville runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: large suburban footprint with varied coastal and inland stock",
+      "Climate factor: humid climate with hurricane risk and high moisture year-round",
+      "Permit starting point: City of Jacksonville Building Inspection",
+    ],
+  },
+  "columbus:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Columbus, Ohio are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (mid-century suburbs with revitalizing urban neighborhoods) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (four-season midwest climate with snow, freeze-thaw, and humid summers) also affects finish durability and mechanical load. Generally moderate labor rates with steady demand from growing employment centers. CostReno helps Columbus homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Columbus runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: mid-century suburbs with revitalizing urban neighborhoods",
+      "Climate factor: four-season midwest climate with snow, freeze-thaw, and humid summers",
+      "Permit starting point: City of Columbus Building and Zoning Services",
+    ],
+  },
+  "indianapolis:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Indianapolis, Indiana are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 6% below the national average. Housing stock (postwar ranch homes and expanding suburban developments) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold winters, humid summers, and frequent freeze-thaw stress) also affects finish durability and mechanical load. Lower-than-coastal labor costs can improve value, but older systems may need upgrades. CostReno helps Indianapolis homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Indianapolis runs 6% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar ranch homes and expanding suburban developments",
+      "Climate factor: cold winters, humid summers, and frequent freeze-thaw stress",
+      "Permit starting point: City of Indianapolis Department of Business and Neighborhood Services",
+    ],
+  },
+  "nashville:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Nashville, Tennessee are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (older intown homes plus rapid suburban and infill construction) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid summers, mild winters, and severe thunderstorm seasons) also affects finish durability and mechanical load. High in-migration has tightened contractor calendars and lifted remodel pricing. CostReno helps Nashville homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Nashville runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: older intown homes plus rapid suburban and infill construction",
+      "Climate factor: humid summers, mild winters, and severe thunderstorm seasons",
+      "Permit starting point: Metropolitan Nashville Codes Department",
+    ],
+  },
+  "portland:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Portland, Oregon are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 16% above the national average. Housing stock (craftsman homes, mid-century stock, and compact urban lots) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (wet winters, mild summers, and persistent moisture exposure) also affects finish durability and mechanical load. Sustainability preferences and older housing details often expand project scope. CostReno helps Portland homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Portland runs 16% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: craftsman homes, mid-century stock, and compact urban lots",
+      "Climate factor: wet winters, mild summers, and persistent moisture exposure",
+      "Permit starting point: Portland Bureau of Development Services",
+    ],
+  },
+  "san-diego:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in San Diego, California are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 22% above the national average. Housing stock (postwar homes, coastal properties, and suburban ranch stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (mild coastal climate with salt air and strong sun exposure) also affects finish durability and mechanical load. Coastal corrosion, energy rules, and high labor push remodel costs above national norms. CostReno helps San Diego homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in San Diego runs 22% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar homes, coastal properties, and suburban ranch stock",
+      "Climate factor: mild coastal climate with salt air and strong sun exposure",
+      "Permit starting point: City of San Diego Development Services",
+    ],
+  },
+  "san-jose:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in San Jose, California are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 35% above the national average. Housing stock (postwar suburban homes with extensive remodel and adu activity) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (mild mediterranean climate with dry summers and wet winters) also affects finish durability and mechanical load. Bay Area labor scarcity and high home values keep renovation budgets elevated. CostReno helps San Jose homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in San Jose runs 35% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar suburban homes with extensive remodel and adu activity",
+      "Climate factor: mild mediterranean climate with dry summers and wet winters",
+      "Permit starting point: City of San Jose Planning, Building and Code Enforcement",
+    ],
+  },
+  "boston:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Boston, Massachusetts are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 30% above the national average. Housing stock (historic triple-deckers, brick homes, and compact urban lots) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold snowy winters, humid summers, and coastal weather exposure) also affects finish durability and mechanical load. Historic housing and high labor rates frequently increase remodel contingencies. CostReno helps Boston homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Boston runs 30% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: historic triple-deckers, brick homes, and compact urban lots",
+      "Climate factor: cold snowy winters, humid summers, and coastal weather exposure",
+      "Permit starting point: City of Boston Inspectional Services Department",
+    ],
+  },
+  "philadelphia:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Philadelphia, Pennsylvania are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (rowhomes and older masonry housing across many neighborhoods) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid summers, cold winters, and freeze-thaw exterior wear) also affects finish durability and mechanical load. Older building systems often surface unexpected costs during gut renovations. CostReno helps Philadelphia homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Philadelphia runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: rowhomes and older masonry housing across many neighborhoods",
+      "Climate factor: humid summers, cold winters, and freeze-thaw exterior wear",
+      "Permit starting point: Philadelphia Department of Licenses and Inspections",
+    ],
+  },
+  "washington:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Washington, District of Columbia are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 32% above the national average. Housing stock (historic rowhouses and dense urban housing with renovation overlays) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid subtropical weather with hot summers and occasional winter freezes) also affects finish durability and mechanical load. Historic district rules and high labor can extend timelines and raise budgets. CostReno helps Washington homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Washington runs 32% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: historic rowhouses and dense urban housing with renovation overlays",
+      "Climate factor: humid subtropical weather with hot summers and occasional winter freezes",
+      "Permit starting point: DC Department of Buildings",
+    ],
+  },
+  "minneapolis:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Minneapolis, Minnesota are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (early 20th-century homes and durable midwest housing stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (long cold winters, snow load, and freeze-thaw stress on exteriors) also affects finish durability and mechanical load. Insulation, ice damming prevention, and HVAC capacity are frequent upgrade drivers. CostReno helps Minneapolis homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Minneapolis runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early 20th-century homes and durable midwest housing stock",
+      "Climate factor: long cold winters, snow load, and freeze-thaw stress on exteriors",
+      "Permit starting point: City of Minneapolis Community Planning and Economic Development",
+    ],
+  },
+  "detroit:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Detroit, Michigan are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 8% below the national average. Housing stock (early to mid-20th-century homes with active neighborhood revitalization) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold winters, humid summers, and freeze-thaw cycles) also affects finish durability and mechanical load. Lower labor rates can improve value, while older systems often need modernization. CostReno helps Detroit homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Detroit runs 8% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early to mid-20th-century homes with active neighborhood revitalization",
+      "Climate factor: cold winters, humid summers, and freeze-thaw cycles",
+      "Permit starting point: City of Detroit Buildings, Safety Engineering and Environmental Department",
+    ],
+  },
+  "las-vegas:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Las Vegas, Nevada are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (1990s to 2010s suburban housing with tile roofs common) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (desert heat, intense sun, and monsoon storm bursts) also affects finish durability and mechanical load. Cooling loads, UV exposure, and tile roof systems shape many renovation choices. CostReno helps Las Vegas homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Las Vegas runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: 1990s to 2010s suburban housing with tile roofs common",
+      "Climate factor: desert heat, intense sun, and monsoon storm bursts",
+      "Permit starting point: City of Las Vegas Building and Safety",
+    ],
+  },
+  "pittsburgh:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Pittsburgh, Pennsylvania are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (older brick homes and postwar suburban stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (four-season climate with freeze-thaw cycles and humid summers) also affects finish durability and mechanical load. Steady remodel demand with older housing that often needs mechanical updates. CostReno helps Pittsburgh homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Pittsburgh runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: older brick homes and postwar suburban stock",
+      "Climate factor: four-season climate with freeze-thaw cycles and humid summers",
+      "Permit starting point: City of Pittsburgh Bureau of Building Inspection",
+    ],
+  },
+  "baltimore:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Baltimore, Maryland are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (rowhomes and mid-century neighborhoods mixed with newer suburbs) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid summers, cold winters, and coastal storm exposure nearby) also affects finish durability and mechanical load. Aging housing stock and above-average labor raise the cost of incomplete scopes. CostReno helps Baltimore homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Baltimore runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: rowhomes and mid-century neighborhoods mixed with newer suburbs",
+      "Climate factor: humid summers, cold winters, and coastal storm exposure nearby",
+      "Permit starting point: Baltimore City Department of Housing and Community Development",
+    ],
+  },
+  "cleveland:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Cleveland, Ohio are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 6% below the national average. Housing stock (early 20th-century housing with later suburban expansion) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (lake-effect snow, freeze-thaw cycles, and humid summers) also affects finish durability and mechanical load. Lower labor than coastal metros, but older homes often hide plumbing and electrical work. CostReno helps Cleveland homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Cleveland runs 6% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early 20th-century housing with later suburban expansion",
+      "Climate factor: lake-effect snow, freeze-thaw cycles, and humid summers",
+      "Permit starting point: City of Cleveland Building and Housing Department",
+    ],
+  },
+  "cincinnati:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Cincinnati, Ohio are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (victorian and postwar housing across hilly neighborhoods) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (four-season midwest climate with humidity and freeze-thaw stress) also affects finish durability and mechanical load. Hills and older homes affect access, layout changes, and mechanical upgrades. CostReno helps Cincinnati homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Cincinnati runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: victorian and postwar housing across hilly neighborhoods",
+      "Climate factor: four-season midwest climate with humidity and freeze-thaw stress",
+      "Permit starting point: City of Cincinnati Department of Buildings and Inspections",
+    ],
+  },
+  "kansas-city:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Kansas City, Missouri are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 5% below the national average. Housing stock (mix of prewar homes and expanding suburban builds) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot summers, cold winters, and severe thunderstorm risk) also affects finish durability and mechanical load. Competitive contractor market with wide quote ranges between local and regional firms. CostReno helps Kansas City homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Kansas City runs 5% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: mix of prewar homes and expanding suburban builds",
+      "Climate factor: hot summers, cold winters, and severe thunderstorm risk",
+      "Permit starting point: City of Kansas City Development Services",
+    ],
+  },
+  "st-louis:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in St. Louis, Missouri are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 6% below the national average. Housing stock (brick historic homes and mid-century suburban stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid summers, cold winters, and strong storm seasons) also affects finish durability and mechanical load. Older brick housing often needs electrical and plumbing modernization during remodels. CostReno helps St. Louis homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in St. Louis runs 6% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: brick historic homes and mid-century suburban stock",
+      "Climate factor: humid summers, cold winters, and strong storm seasons",
+      "Permit starting point: City of St. Louis Building Division",
+    ],
+  },
+  "milwaukee:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Milwaukee, Wisconsin are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (early 20th-century bungalows and postwar ranches) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold winters, freeze-thaw cycles, and humid summers near lake michigan) also affects finish durability and mechanical load. Seasonal contractor demand and older mechanical systems shape remodel timelines. CostReno helps Milwaukee homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Milwaukee runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early 20th-century bungalows and postwar ranches",
+      "Climate factor: cold winters, freeze-thaw cycles, and humid summers near lake michigan",
+      "Permit starting point: City of Milwaukee Development Center",
+    ],
+  },
+  "oklahoma-city:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Oklahoma City, Oklahoma are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 10% below the national average. Housing stock (postwar ranches plus rapid newer suburban growth) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot summers, severe storms, and hail risk) also affects finish durability and mechanical load. Lower labor costs can still hide incomplete storm-hardening or mechanical scope. CostReno helps Oklahoma City homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Oklahoma City runs 10% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar ranches plus rapid newer suburban growth",
+      "Climate factor: hot summers, severe storms, and hail risk",
+      "Permit starting point: Oklahoma City Development Services",
+    ],
+  },
+  "memphis:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Memphis, Tennessee are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 10% below the national average. Housing stock (mid-century homes mixed with older central neighborhoods) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot humid summers, mild winters, and heavy rain events) also affects finish durability and mechanical load. Humidity and older plumbing raise moisture and mechanical risks during remodels. CostReno helps Memphis homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Memphis runs 10% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: mid-century homes mixed with older central neighborhoods",
+      "Climate factor: hot humid summers, mild winters, and heavy rain events",
+      "Permit starting point: City of Memphis Division of Planning and Development",
+    ],
+  },
+  "louisville:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Louisville, Kentucky are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 8% below the national average. Housing stock (victorian corridors and postwar suburban housing) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid subtropical climate with freeze-thaw winters) also affects finish durability and mechanical load. Older homes and moderate labor create value if scope is fully itemized. CostReno helps Louisville homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Louisville runs 8% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: victorian corridors and postwar suburban housing",
+      "Climate factor: humid subtropical climate with freeze-thaw winters",
+      "Permit starting point: Louisville Metro Department of Codes and Regulations",
+    ],
+  },
+  "richmond:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Richmond, Virginia are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (historic urban homes and growing suburban stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid summers, mild winters, and occasional coastal storm effects) also affects finish durability and mechanical load. Historic districts and permit rules can extend kitchen and bath renovation timelines. CostReno helps Richmond homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Richmond runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: historic urban homes and growing suburban stock",
+      "Climate factor: humid summers, mild winters, and occasional coastal storm effects",
+      "Permit starting point: City of Richmond Department of Planning and Development Review",
+    ],
+  },
+  "virginia-beach:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Virginia Beach, Virginia are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (coastal postwar homes and newer suburban builds) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (humid coastal climate with salt air, storms, and high moisture) also affects finish durability and mechanical load. Coastal moisture and HOA rules often affect material and mechanical choices. CostReno helps Virginia Beach homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Virginia Beach runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: coastal postwar homes and newer suburban builds",
+      "Climate factor: humid coastal climate with salt air, storms, and high moisture",
+      "Permit starting point: City of Virginia Beach Planning and Community Development",
+    ],
+  },
+  "salt-lake-city:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Salt Lake City, Utah are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (early 20th-century bungalows and expanding valley suburbs) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (dry climate with hot summers, cold winters, and strong uv) also affects finish durability and mechanical load. Growth keeps contractor schedules tight across popular remodel seasons. CostReno helps Salt Lake City homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Salt Lake City runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early 20th-century bungalows and expanding valley suburbs",
+      "Climate factor: dry climate with hot summers, cold winters, and strong uv",
+      "Permit starting point: Salt Lake City Building Services",
+    ],
+  },
+  "albuquerque:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Albuquerque, New Mexico are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 5% below the national average. Housing stock (adobe-influenced and postwar southwestern housing) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (high desert climate with intense sun, low humidity, and monsoon bursts) also affects finish durability and mechanical load. Sun and monsoon moisture swings influence ventilation and finish durability. CostReno helps Albuquerque homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Albuquerque runs 5% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: adobe-influenced and postwar southwestern housing",
+      "Climate factor: high desert climate with intense sun, low humidity, and monsoon bursts",
+      "Permit starting point: City of Albuquerque Planning Department",
+    ],
+  },
+  "sacramento:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Sacramento, California are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 20% above the national average. Housing stock (mid-century homes and fast-growing suburban corridors) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot dry summers, mild winters, and strong solar exposure) also affects finish durability and mechanical load. Above-average California labor and permitting raise the cost of vague kitchen scopes. CostReno helps Sacramento homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Sacramento runs 20% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: mid-century homes and fast-growing suburban corridors",
+      "Climate factor: hot dry summers, mild winters, and strong solar exposure",
+      "Permit starting point: City of Sacramento Community Development Department",
+    ],
+  },
+  "fresno:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Fresno, California are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (postwar housing with newer suburban expansion) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot central valley summers, mild winters, and intense uv) also affects finish durability and mechanical load. Heat-aware materials and electrical capacity matter for kitchen appliance upgrades. CostReno helps Fresno homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Fresno runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar housing with newer suburban expansion",
+      "Climate factor: hot central valley summers, mild winters, and intense uv",
+      "Permit starting point: City of Fresno Planning and Development",
+    ],
+  },
+  "providence:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Providence, Rhode Island are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 18% above the national average. Housing stock (dense historic housing and triple-decker stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold winters, humid summers, and coastal storm exposure) also affects finish durability and mechanical load. Tight footprints and older mechanicals make kitchen layout changes expensive. CostReno helps Providence homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Providence runs 18% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: dense historic housing and triple-decker stock",
+      "Climate factor: cold winters, humid summers, and coastal storm exposure",
+      "Permit starting point: City of Providence Department of Inspections and Standards",
+    ],
+  },
+  "hartford:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Hartford, Connecticut are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 20% above the national average. Housing stock (older urban housing with surrounding suburban ranches) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold winters, humid summers, and freeze-thaw cycles) also affects finish durability and mechanical load. Above-average Northeast labor rewards clear itemization on remodel bids. CostReno helps Hartford homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Hartford runs 20% above the national average, so vague allowances get expensive quickly",
+      "Common housing stock: older urban housing with surrounding suburban ranches",
+      "Climate factor: cold winters, humid summers, and freeze-thaw cycles",
+      "Permit starting point: City of Hartford Department of Development Services",
+    ],
+  },
+  "new-orleans:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in New Orleans, Louisiana are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (historic cottages and elevated homes with aging systems) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot humid subtropical climate with heavy rain and storm risk) also affects finish durability and mechanical load. Moisture, elevations, and older plumbing heavily influence remodel scope. CostReno helps New Orleans homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in New Orleans runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: historic cottages and elevated homes with aging systems",
+      "Climate factor: hot humid subtropical climate with heavy rain and storm risk",
+      "Permit starting point: City of New Orleans Department of Safety and Permits",
+    ],
+  },
+  "birmingham:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Birmingham, Alabama are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 12% below the national average. Housing stock (mid-century homes and older urban neighborhoods) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot humid summers, mild winters, and heavy rainfall) also affects finish durability and mechanical load. Lower labor costs still require careful moisture and electrical scope on older homes. CostReno helps Birmingham homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Birmingham runs 12% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: mid-century homes and older urban neighborhoods",
+      "Climate factor: hot humid summers, mild winters, and heavy rainfall",
+      "Permit starting point: City of Birmingham Department of Planning, Engineering and Permits",
+    ],
+  },
+  "omaha:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Omaha, Nebraska are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs 5% below the national average. Housing stock (postwar ranches and growing suburban developments) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (hot summers, cold winters, and severe storm seasons) also affects finish durability and mechanical load. Competitive Midwest pricing with seasonal demand spikes for remodel crews. CostReno helps Omaha homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Omaha runs 5% below the national average, so vague allowances get expensive quickly",
+      "Common housing stock: postwar ranches and growing suburban developments",
+      "Climate factor: hot summers, cold winters, and severe storm seasons",
+      "Permit starting point: City of Omaha Planning Department",
+    ],
+  },
+  "boise:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Boise, Idaho are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (older central neighborhoods and fast-growing suburbs) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (semi-arid climate with hot summers, cold winters, and strong sun) also affects finish durability and mechanical load. Rapid growth keeps contractor demand high and schedules tight. CostReno helps Boise homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Boise runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: older central neighborhoods and fast-growing suburbs",
+      "Climate factor: semi-arid climate with hot summers, cold winters, and strong sun",
+      "Permit starting point: City of Boise Planning and Development Services",
+    ],
+  },
+  "buffalo:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Buffalo, New York are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (early 20th-century housing and dense urban stock) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (lake-effect snow, freeze-thaw cycles, and humid summers) also affects finish durability and mechanical load. Older mechanical systems and cold-climate detailing often expand remodel scope. CostReno helps Buffalo homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Buffalo runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: early 20th-century housing and dense urban stock",
+      "Climate factor: lake-effect snow, freeze-thaw cycles, and humid summers",
+      "Permit starting point: City of Buffalo Department of Permit and Inspection Services",
+    ],
+  },
+  "rochester:kitchen-remodel": {
+    lastReviewed: "2026-07-27",
+    intro:
+      "Kitchen remodel costs in Rochester, New York are shaped by cabinet and countertop choices, whether the layout stays put, and local labor that runs near the national average. Housing stock (prewar homes and postwar suburban corridors) often means electrical, plumbing, or ventilation updates once demolition starts. Climate context (cold snowy winters, freeze-thaw cycles, and humid summers) also affects finish durability and mechanical load. Older housing stock makes electrical and plumbing updates common in kitchen jobs. CostReno helps Rochester homeowners set a realistic kitchen budget and review contractor quotes with metro-level pricing context before they hire.",
+    localFactors: [
+      "Local labor in Rochester runs near the national average, so vague allowances get expensive quickly",
+      "Common housing stock: prewar homes and postwar suburban corridors",
+      "Climate factor: cold snowy winters, freeze-thaw cycles, and humid summers",
+      "Permit starting point: City of Rochester Bureau of Buildings and Zoning",
+    ],
+  },
 };
 
 export function getCityEnrichment(

@@ -22,17 +22,17 @@ export const Route = createFileRoute("/guides/roof-replacement")({
   component: RoofReplacementGuide,
   head: () => ({
     meta: [
-      { title: "Roof replacement cost in 2026: complete pricing guide — CostReno" },
+      { title: "Roof replacement cost guide (2026) | CostReno" },
       {
         name: "description",
         content:
-          "How much does roof replacement cost in 2026? Get pricing by roof type, size, and state. Compare asphalt, metal, tile, and slate costs with our complete guide.",
+          "Roof replacement costs in 2026 by material, size, and state. Compare asphalt, metal, tile, and slate ranges before you hire.",
       },
-      { property: "og:title", content: "Roof replacement cost in 2026: complete pricing guide — CostReno" },
+      { property: "og:title", content: "Roof replacement cost guide (2026) | CostReno" },
       {
         property: "og:description",
         content:
-          "Complete 2026 roof replacement pricing guide. Costs by material, size, and state. Learn about hidden fees, labor costs, and how to compare contractor quotes.",
+          "Roof replacement pricing by material, size, and state. Includes labor, hidden fees, and quote comparison tips.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://www.costreno.com/guides/roof-replacement" },

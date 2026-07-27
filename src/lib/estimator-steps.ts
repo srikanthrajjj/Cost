@@ -490,6 +490,7 @@ export const ALL_STEPS: StepDef[] = [
         type: "select-grid",
         title: "System type",
         info: "Central air uses ducts to cool the whole home. Heat pumps heat and cool efficiently. Mini-splits work room by room without ducts. Furnaces provide heat only.",
+        showIf: (a) => a.hvacAction === "replace",
         choices: [
           { value: "central-air", icon: "❄️", label: "Central air", desc: "Most common" },
           { value: "heat-pump", icon: "♻️", label: "Heat pump", desc: "Heat and cool" },
@@ -498,17 +499,50 @@ export const ALL_STEPS: StepDef[] = [
         ],
       },
       {
-        id: "hvacSize",
+        id: "hvacIssue",
         type: "select-grid",
-        title: "System size for your home",
-        info: "Larger homes need more capacity (tons). If unsure, match the size that best fits your finished living area. An HVAC pro will confirm exact sizing with a Manual J calculation.",
-        subtitle: "Rough guide by home size. A contractor confirms exact tonnage.",
+        title: "What is the system doing or not doing?",
+        info: "Pick the symptom that best matches the problem right now. This helps us estimate whether the repair is more likely a service call, a part replacement, or a more involved fix.",
         choices: [
-          { value: "small", icon: "🏠", label: "Small", desc: "Under 1,500 sq ft" },
-          { value: "medium", icon: "🏡", label: "Medium", desc: "1,500–2,500 sq ft" },
-          { value: "large", icon: "🏘️", label: "Large", desc: "Over 2,500 sq ft" },
+          { value: "not-cooling", icon: "❄️", label: "Not cooling", desc: "Air is warm or weak" },
+          { value: "not-heating", icon: "🔥", label: "Not heating", desc: "No heat or low heat" },
+          { value: "making-noise", icon: "🔊", label: "Making noise", desc: "Buzzing, rattling, squealing" },
+          { value: "short-cycling", icon: "🔁", label: "Short cycling", desc: "Turns on and off fast" },
+          { value: "not-sure", icon: "❓", label: "Not sure", desc: "Need a broad repair range" },
         ],
-        showIf: (a) => a.hvacAction !== "repair",
+        showIf: (a) => a.hvacAction === "repair",
+      },
+      {
+        id: "hvacSystemAge",
+        type: "select-grid",
+        title: "Approximate system age",
+        info: "If you know roughly when the current unit was installed, pick the closest range. Older systems are more likely to need major parts and can shift the repair range upward.",
+        choices: [
+          { value: "under-5", icon: "🆕", label: "Under 5 years", desc: "Newer system" },
+          { value: "5-10", icon: "📅", label: "5 to 10 years", desc: "Mid-life" },
+          { value: "10-15", icon: "⏳", label: "10 to 15 years", desc: "Older unit" },
+          { value: "15-plus", icon: "⚠️", label: "15+ years", desc: "Near replacement age" },
+          { value: "not-sure", icon: "❓", label: "Not sure", desc: "Age unknown" },
+        ],
+        showIf: (a) => a.hvacAction === "repair",
+      },
+      {
+        id: "hvacDiagnosed",
+        type: "select-grid",
+        title: "Has a technician already diagnosed it?",
+        info: "If a technician has already looked at the unit, tell us whether you have a diagnosis yet. That gives us a tighter repair estimate than a symptom alone.",
+        choices: [
+          { value: "yes", icon: "🧰", label: "Yes", desc: "I have a diagnosis" },
+          { value: "no", icon: "📞", label: "No", desc: "Only symptoms so far" },
+        ],
+        showIf: (a) => a.hvacAction === "repair",
+      },
+      {
+        id: "hvacDiagnosisNotes",
+        type: "text",
+        title: "What did the technician find?",
+        placeholder: "e.g. bad capacitor, refrigerant leak, blower motor issue",
+        showIf: (a) => a.hvacAction === "repair" && a.hvacDiagnosed === "yes",
       },
       {
         id: "hvacDuctwork",
@@ -521,7 +555,7 @@ export const ALL_STEPS: StepDef[] = [
           { value: "replace", icon: "🔄", label: "Replace ducts", desc: "Major duct work" },
           { value: "none", icon: "➖", label: "No ducts", desc: "Mini-split or new" },
         ],
-        showIf: (a) => a.hvacAction !== "repair" && a.hvacType !== "mini-split",
+        showIf: (a) => a.hvacAction === "replace" && a.hvacType !== "mini-split",
       },
       {
         id: "hvacEfficiency",
@@ -532,7 +566,7 @@ export const ALL_STEPS: StepDef[] = [
           { value: "standard", icon: "📊", label: "Standard", desc: "Code-minimum efficiency" },
           { value: "high", icon: "⚡", label: "High efficiency", desc: "Premium SEER / AFUE" },
         ],
-        showIf: (a) => a.hvacAction !== "repair",
+        showIf: (a) => a.hvacAction === "replace",
       },
     ],
   },
@@ -855,6 +889,7 @@ export const ALL_STEPS: StepDef[] = [
     id: "condition",
     title: "What's the current condition?",
     subtitle: "This helps us factor in any extra preparation work.",
+    showIf: (a) => a.projectType !== "hvac",
     questions: [
       {
         id: "currentCondition",
@@ -885,6 +920,7 @@ export const ALL_STEPS: StepDef[] = [
         min: 1000,
         max: 200000,
         step: 500,
+        showIf: (a) => a.projectType !== "hvac",
       },
       {
         id: "startTimeline",
@@ -907,6 +943,7 @@ export const ALL_STEPS: StepDef[] = [
     id: "insurance",
     title: "Insurance eligibility",
     subtitle: "This helps us check if you may be eligible for insurance coverage.",
+    showIf: (a) => a.projectType !== "hvac",
     questions: [
       {
         id: "causeOfProject",

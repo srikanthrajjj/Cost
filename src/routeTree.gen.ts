@@ -34,6 +34,7 @@ import { Route as TopicsFlooringRouteImport } from './routes/topics/flooring'
 import { Route as RIdRouteImport } from './routes/r/$id'
 import { Route as LocationsStateRouteImport } from './routes/locations/$state'
 import { Route as GuidesWindowReplacementRouteImport } from './routes/guides/window-replacement'
+import { Route as GuidesWhatToDoAfterGettingContractorQuotesRouteImport } from './routes/guides/what-to-do-after-getting-contractor-quotes'
 import { Route as GuidesRoofReplacementTimelineRouteImport } from './routes/guides/roof-replacement-timeline'
 import { Route as GuidesRoofReplacementCostByStateRouteImport } from './routes/guides/roof-replacement-cost-by-state'
 import { Route as GuidesRoofReplacementCostByCityRouteImport } from './routes/guides/roof-replacement-cost-by-city'
@@ -44,13 +45,20 @@ import { Route as GuidesRoofInsuranceClaimsRouteImport } from './routes/guides/r
 import { Route as GuidesRoofFinancingRouteImport } from './routes/guides/roof-financing'
 import { Route as GuidesQuestionsBeforeSigningRouteImport } from './routes/guides/questions-before-signing'
 import { Route as GuidesQuartzVsGraniteCountertopsRouteImport } from './routes/guides/quartz-vs-granite-countertops'
+import { Route as GuidesMissingScopeInContractorQuotesRouteImport } from './routes/guides/missing-scope-in-contractor-quotes'
 import { Route as GuidesMetalVsAsphaltRoofRouteImport } from './routes/guides/metal-vs-asphalt-roof'
 import { Route as GuidesKitchenRemodelRouteImport } from './routes/guides/kitchen-remodel'
+import { Route as GuidesKitchenQuoteReviewRouteImport } from './routes/guides/kitchen-quote-review'
+import { Route as GuidesIsContractorQuoteFairRouteImport } from './routes/guides/is-contractor-quote-fair'
 import { Route as GuidesInflatedQuoteSignsRouteImport } from './routes/guides/inflated-quote-signs'
 import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
 import { Route as GuidesHowToReadAContractorQuoteRouteImport } from './routes/guides/how-to-read-a-contractor-quote'
+import { Route as GuidesHowToCompareContractorQuotesRouteImport } from './routes/guides/how-to-compare-contractor-quotes'
 import { Route as GuidesFlooringRouteImport } from './routes/guides/flooring'
+import { Route as GuidesContractorQuoteTooHighRouteImport } from './routes/guides/contractor-quote-too-high'
+import { Route as GuidesContractorPaymentSchedulesRouteImport } from './routes/guides/contractor-payment-schedules'
 import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathroom-remodel'
+import { Route as GuidesAllowancesAndChangeOrdersRouteImport } from './routes/guides/allowances-and-change-orders'
 import { Route as StateCityCategoryRouteImport } from './routes/$state/$city/$category'
 
 const TermsRoute = TermsRouteImport.update({
@@ -178,6 +186,12 @@ const GuidesWindowReplacementRoute = GuidesWindowReplacementRouteImport.update({
   path: '/guides/window-replacement',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesWhatToDoAfterGettingContractorQuotesRoute =
+  GuidesWhatToDoAfterGettingContractorQuotesRouteImport.update({
+    id: '/guides/what-to-do-after-getting-contractor-quotes',
+    path: '/guides/what-to-do-after-getting-contractor-quotes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesRoofReplacementTimelineRoute =
   GuidesRoofReplacementTimelineRouteImport.update({
     id: '/guides/roof-replacement-timeline',
@@ -234,6 +248,12 @@ const GuidesQuartzVsGraniteCountertopsRoute =
     path: '/guides/quartz-vs-granite-countertops',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuidesMissingScopeInContractorQuotesRoute =
+  GuidesMissingScopeInContractorQuotesRouteImport.update({
+    id: '/guides/missing-scope-in-contractor-quotes',
+    path: '/guides/missing-scope-in-contractor-quotes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesMetalVsAsphaltRoofRoute =
   GuidesMetalVsAsphaltRoofRouteImport.update({
     id: '/guides/metal-vs-asphalt-roof',
@@ -245,6 +265,18 @@ const GuidesKitchenRemodelRoute = GuidesKitchenRemodelRouteImport.update({
   path: '/guides/kitchen-remodel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesKitchenQuoteReviewRoute =
+  GuidesKitchenQuoteReviewRouteImport.update({
+    id: '/guides/kitchen-quote-review',
+    path: '/guides/kitchen-quote-review',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesIsContractorQuoteFairRoute =
+  GuidesIsContractorQuoteFairRouteImport.update({
+    id: '/guides/is-contractor-quote-fair',
+    path: '/guides/is-contractor-quote-fair',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesInflatedQuoteSignsRoute =
   GuidesInflatedQuoteSignsRouteImport.update({
     id: '/guides/inflated-quote-signs',
@@ -262,16 +294,40 @@ const GuidesHowToReadAContractorQuoteRoute =
     path: '/guides/how-to-read-a-contractor-quote',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuidesHowToCompareContractorQuotesRoute =
+  GuidesHowToCompareContractorQuotesRouteImport.update({
+    id: '/guides/how-to-compare-contractor-quotes',
+    path: '/guides/how-to-compare-contractor-quotes',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesFlooringRoute = GuidesFlooringRouteImport.update({
   id: '/guides/flooring',
   path: '/guides/flooring',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesContractorQuoteTooHighRoute =
+  GuidesContractorQuoteTooHighRouteImport.update({
+    id: '/guides/contractor-quote-too-high',
+    path: '/guides/contractor-quote-too-high',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesContractorPaymentSchedulesRoute =
+  GuidesContractorPaymentSchedulesRouteImport.update({
+    id: '/guides/contractor-payment-schedules',
+    path: '/guides/contractor-payment-schedules',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesBathroomRemodelRoute = GuidesBathroomRemodelRouteImport.update({
   id: '/guides/bathroom-remodel',
   path: '/guides/bathroom-remodel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesAllowancesAndChangeOrdersRoute =
+  GuidesAllowancesAndChangeOrdersRouteImport.update({
+    id: '/guides/allowances-and-change-orders',
+    path: '/guides/allowances-and-change-orders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StateCityCategoryRoute = StateCityCategoryRouteImport.update({
   id: '/$state/$city/$category',
   path: '/$state/$city/$category',
@@ -293,13 +349,20 @@ export interface FileRoutesByFullPath {
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
+  '/guides/allowances-and-change-orders': typeof GuidesAllowancesAndChangeOrdersRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
+  '/guides/contractor-payment-schedules': typeof GuidesContractorPaymentSchedulesRoute
+  '/guides/contractor-quote-too-high': typeof GuidesContractorQuoteTooHighRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/how-to-compare-contractor-quotes': typeof GuidesHowToCompareContractorQuotesRoute
   '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
+  '/guides/is-contractor-quote-fair': typeof GuidesIsContractorQuoteFairRoute
+  '/guides/kitchen-quote-review': typeof GuidesKitchenQuoteReviewRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
+  '/guides/missing-scope-in-contractor-quotes': typeof GuidesMissingScopeInContractorQuotesRoute
   '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
   '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
   '/guides/roof-financing': typeof GuidesRoofFinancingRoute
@@ -310,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/guides/roof-replacement-cost-by-city': typeof GuidesRoofReplacementCostByCityRoute
   '/guides/roof-replacement-cost-by-state': typeof GuidesRoofReplacementCostByStateRoute
   '/guides/roof-replacement-timeline': typeof GuidesRoofReplacementTimelineRoute
+  '/guides/what-to-do-after-getting-contractor-quotes': typeof GuidesWhatToDoAfterGettingContractorQuotesRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
@@ -338,13 +402,20 @@ export interface FileRoutesByTo {
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
+  '/guides/allowances-and-change-orders': typeof GuidesAllowancesAndChangeOrdersRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
+  '/guides/contractor-payment-schedules': typeof GuidesContractorPaymentSchedulesRoute
+  '/guides/contractor-quote-too-high': typeof GuidesContractorQuoteTooHighRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/how-to-compare-contractor-quotes': typeof GuidesHowToCompareContractorQuotesRoute
   '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
+  '/guides/is-contractor-quote-fair': typeof GuidesIsContractorQuoteFairRoute
+  '/guides/kitchen-quote-review': typeof GuidesKitchenQuoteReviewRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
+  '/guides/missing-scope-in-contractor-quotes': typeof GuidesMissingScopeInContractorQuotesRoute
   '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
   '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
   '/guides/roof-financing': typeof GuidesRoofFinancingRoute
@@ -355,6 +426,7 @@ export interface FileRoutesByTo {
   '/guides/roof-replacement-cost-by-city': typeof GuidesRoofReplacementCostByCityRoute
   '/guides/roof-replacement-cost-by-state': typeof GuidesRoofReplacementCostByStateRoute
   '/guides/roof-replacement-timeline': typeof GuidesRoofReplacementTimelineRoute
+  '/guides/what-to-do-after-getting-contractor-quotes': typeof GuidesWhatToDoAfterGettingContractorQuotesRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
@@ -384,13 +456,20 @@ export interface FileRoutesById {
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
+  '/guides/allowances-and-change-orders': typeof GuidesAllowancesAndChangeOrdersRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
+  '/guides/contractor-payment-schedules': typeof GuidesContractorPaymentSchedulesRoute
+  '/guides/contractor-quote-too-high': typeof GuidesContractorQuoteTooHighRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/how-to-compare-contractor-quotes': typeof GuidesHowToCompareContractorQuotesRoute
   '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
   '/guides/inflated-quote-signs': typeof GuidesInflatedQuoteSignsRoute
+  '/guides/is-contractor-quote-fair': typeof GuidesIsContractorQuoteFairRoute
+  '/guides/kitchen-quote-review': typeof GuidesKitchenQuoteReviewRoute
   '/guides/kitchen-remodel': typeof GuidesKitchenRemodelRoute
   '/guides/metal-vs-asphalt-roof': typeof GuidesMetalVsAsphaltRoofRoute
+  '/guides/missing-scope-in-contractor-quotes': typeof GuidesMissingScopeInContractorQuotesRoute
   '/guides/quartz-vs-granite-countertops': typeof GuidesQuartzVsGraniteCountertopsRoute
   '/guides/questions-before-signing': typeof GuidesQuestionsBeforeSigningRoute
   '/guides/roof-financing': typeof GuidesRoofFinancingRoute
@@ -401,6 +480,7 @@ export interface FileRoutesById {
   '/guides/roof-replacement-cost-by-city': typeof GuidesRoofReplacementCostByCityRoute
   '/guides/roof-replacement-cost-by-state': typeof GuidesRoofReplacementCostByStateRoute
   '/guides/roof-replacement-timeline': typeof GuidesRoofReplacementTimelineRoute
+  '/guides/what-to-do-after-getting-contractor-quotes': typeof GuidesWhatToDoAfterGettingContractorQuotesRoute
   '/guides/window-replacement': typeof GuidesWindowReplacementRoute
   '/locations/$state': typeof LocationsStateRoute
   '/r/$id': typeof RIdRoute
@@ -431,13 +511,20 @@ export interface FileRouteTypes {
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
+    | '/guides/allowances-and-change-orders'
     | '/guides/bathroom-remodel'
+    | '/guides/contractor-payment-schedules'
+    | '/guides/contractor-quote-too-high'
     | '/guides/flooring'
+    | '/guides/how-to-compare-contractor-quotes'
     | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
+    | '/guides/is-contractor-quote-fair'
+    | '/guides/kitchen-quote-review'
     | '/guides/kitchen-remodel'
     | '/guides/metal-vs-asphalt-roof'
+    | '/guides/missing-scope-in-contractor-quotes'
     | '/guides/quartz-vs-granite-countertops'
     | '/guides/questions-before-signing'
     | '/guides/roof-financing'
@@ -448,6 +535,7 @@ export interface FileRouteTypes {
     | '/guides/roof-replacement-cost-by-city'
     | '/guides/roof-replacement-cost-by-state'
     | '/guides/roof-replacement-timeline'
+    | '/guides/what-to-do-after-getting-contractor-quotes'
     | '/guides/window-replacement'
     | '/locations/$state'
     | '/r/$id'
@@ -476,13 +564,20 @@ export interface FileRouteTypes {
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
+    | '/guides/allowances-and-change-orders'
     | '/guides/bathroom-remodel'
+    | '/guides/contractor-payment-schedules'
+    | '/guides/contractor-quote-too-high'
     | '/guides/flooring'
+    | '/guides/how-to-compare-contractor-quotes'
     | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
+    | '/guides/is-contractor-quote-fair'
+    | '/guides/kitchen-quote-review'
     | '/guides/kitchen-remodel'
     | '/guides/metal-vs-asphalt-roof'
+    | '/guides/missing-scope-in-contractor-quotes'
     | '/guides/quartz-vs-granite-countertops'
     | '/guides/questions-before-signing'
     | '/guides/roof-financing'
@@ -493,6 +588,7 @@ export interface FileRouteTypes {
     | '/guides/roof-replacement-cost-by-city'
     | '/guides/roof-replacement-cost-by-state'
     | '/guides/roof-replacement-timeline'
+    | '/guides/what-to-do-after-getting-contractor-quotes'
     | '/guides/window-replacement'
     | '/locations/$state'
     | '/r/$id'
@@ -521,13 +617,20 @@ export interface FileRouteTypes {
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
+    | '/guides/allowances-and-change-orders'
     | '/guides/bathroom-remodel'
+    | '/guides/contractor-payment-schedules'
+    | '/guides/contractor-quote-too-high'
     | '/guides/flooring'
+    | '/guides/how-to-compare-contractor-quotes'
     | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
     | '/guides/inflated-quote-signs'
+    | '/guides/is-contractor-quote-fair'
+    | '/guides/kitchen-quote-review'
     | '/guides/kitchen-remodel'
     | '/guides/metal-vs-asphalt-roof'
+    | '/guides/missing-scope-in-contractor-quotes'
     | '/guides/quartz-vs-granite-countertops'
     | '/guides/questions-before-signing'
     | '/guides/roof-financing'
@@ -538,6 +641,7 @@ export interface FileRouteTypes {
     | '/guides/roof-replacement-cost-by-city'
     | '/guides/roof-replacement-cost-by-state'
     | '/guides/roof-replacement-timeline'
+    | '/guides/what-to-do-after-getting-contractor-quotes'
     | '/guides/window-replacement'
     | '/locations/$state'
     | '/r/$id'
@@ -567,13 +671,20 @@ export interface RootRouteChildren {
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   TermsRoute: typeof TermsRoute
+  GuidesAllowancesAndChangeOrdersRoute: typeof GuidesAllowancesAndChangeOrdersRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
+  GuidesContractorPaymentSchedulesRoute: typeof GuidesContractorPaymentSchedulesRoute
+  GuidesContractorQuoteTooHighRoute: typeof GuidesContractorQuoteTooHighRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
+  GuidesHowToCompareContractorQuotesRoute: typeof GuidesHowToCompareContractorQuotesRoute
   GuidesHowToReadAContractorQuoteRoute: typeof GuidesHowToReadAContractorQuoteRoute
   GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
   GuidesInflatedQuoteSignsRoute: typeof GuidesInflatedQuoteSignsRoute
+  GuidesIsContractorQuoteFairRoute: typeof GuidesIsContractorQuoteFairRoute
+  GuidesKitchenQuoteReviewRoute: typeof GuidesKitchenQuoteReviewRoute
   GuidesKitchenRemodelRoute: typeof GuidesKitchenRemodelRoute
   GuidesMetalVsAsphaltRoofRoute: typeof GuidesMetalVsAsphaltRoofRoute
+  GuidesMissingScopeInContractorQuotesRoute: typeof GuidesMissingScopeInContractorQuotesRoute
   GuidesQuartzVsGraniteCountertopsRoute: typeof GuidesQuartzVsGraniteCountertopsRoute
   GuidesQuestionsBeforeSigningRoute: typeof GuidesQuestionsBeforeSigningRoute
   GuidesRoofFinancingRoute: typeof GuidesRoofFinancingRoute
@@ -584,6 +695,7 @@ export interface RootRouteChildren {
   GuidesRoofReplacementCostByCityRoute: typeof GuidesRoofReplacementCostByCityRoute
   GuidesRoofReplacementCostByStateRoute: typeof GuidesRoofReplacementCostByStateRoute
   GuidesRoofReplacementTimelineRoute: typeof GuidesRoofReplacementTimelineRoute
+  GuidesWhatToDoAfterGettingContractorQuotesRoute: typeof GuidesWhatToDoAfterGettingContractorQuotesRoute
   GuidesWindowReplacementRoute: typeof GuidesWindowReplacementRoute
   LocationsStateRoute: typeof LocationsStateRoute
   RIdRoute: typeof RIdRoute
@@ -775,6 +887,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesWindowReplacementRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/what-to-do-after-getting-contractor-quotes': {
+      id: '/guides/what-to-do-after-getting-contractor-quotes'
+      path: '/guides/what-to-do-after-getting-contractor-quotes'
+      fullPath: '/guides/what-to-do-after-getting-contractor-quotes'
+      preLoaderRoute: typeof GuidesWhatToDoAfterGettingContractorQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/roof-replacement-timeline': {
       id: '/guides/roof-replacement-timeline'
       path: '/guides/roof-replacement-timeline'
@@ -845,6 +964,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesQuartzVsGraniteCountertopsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/missing-scope-in-contractor-quotes': {
+      id: '/guides/missing-scope-in-contractor-quotes'
+      path: '/guides/missing-scope-in-contractor-quotes'
+      fullPath: '/guides/missing-scope-in-contractor-quotes'
+      preLoaderRoute: typeof GuidesMissingScopeInContractorQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/metal-vs-asphalt-roof': {
       id: '/guides/metal-vs-asphalt-roof'
       path: '/guides/metal-vs-asphalt-roof'
@@ -857,6 +983,20 @@ declare module '@tanstack/react-router' {
       path: '/guides/kitchen-remodel'
       fullPath: '/guides/kitchen-remodel'
       preLoaderRoute: typeof GuidesKitchenRemodelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/kitchen-quote-review': {
+      id: '/guides/kitchen-quote-review'
+      path: '/guides/kitchen-quote-review'
+      fullPath: '/guides/kitchen-quote-review'
+      preLoaderRoute: typeof GuidesKitchenQuoteReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/is-contractor-quote-fair': {
+      id: '/guides/is-contractor-quote-fair'
+      path: '/guides/is-contractor-quote-fair'
+      fullPath: '/guides/is-contractor-quote-fair'
+      preLoaderRoute: typeof GuidesIsContractorQuoteFairRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/inflated-quote-signs': {
@@ -880,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesHowToReadAContractorQuoteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/how-to-compare-contractor-quotes': {
+      id: '/guides/how-to-compare-contractor-quotes'
+      path: '/guides/how-to-compare-contractor-quotes'
+      fullPath: '/guides/how-to-compare-contractor-quotes'
+      preLoaderRoute: typeof GuidesHowToCompareContractorQuotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/flooring': {
       id: '/guides/flooring'
       path: '/guides/flooring'
@@ -887,11 +1034,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesFlooringRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/contractor-quote-too-high': {
+      id: '/guides/contractor-quote-too-high'
+      path: '/guides/contractor-quote-too-high'
+      fullPath: '/guides/contractor-quote-too-high'
+      preLoaderRoute: typeof GuidesContractorQuoteTooHighRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/contractor-payment-schedules': {
+      id: '/guides/contractor-payment-schedules'
+      path: '/guides/contractor-payment-schedules'
+      fullPath: '/guides/contractor-payment-schedules'
+      preLoaderRoute: typeof GuidesContractorPaymentSchedulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/bathroom-remodel': {
       id: '/guides/bathroom-remodel'
       path: '/guides/bathroom-remodel'
       fullPath: '/guides/bathroom-remodel'
       preLoaderRoute: typeof GuidesBathroomRemodelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/allowances-and-change-orders': {
+      id: '/guides/allowances-and-change-orders'
+      path: '/guides/allowances-and-change-orders'
+      fullPath: '/guides/allowances-and-change-orders'
+      preLoaderRoute: typeof GuidesAllowancesAndChangeOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$state/$city/$category': {
@@ -919,13 +1087,22 @@ const rootRouteChildren: RootRouteChildren = {
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   TermsRoute: TermsRoute,
+  GuidesAllowancesAndChangeOrdersRoute: GuidesAllowancesAndChangeOrdersRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
+  GuidesContractorPaymentSchedulesRoute: GuidesContractorPaymentSchedulesRoute,
+  GuidesContractorQuoteTooHighRoute: GuidesContractorQuoteTooHighRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
+  GuidesHowToCompareContractorQuotesRoute:
+    GuidesHowToCompareContractorQuotesRoute,
   GuidesHowToReadAContractorQuoteRoute: GuidesHowToReadAContractorQuoteRoute,
   GuidesHvacInstallationRoute: GuidesHvacInstallationRoute,
   GuidesInflatedQuoteSignsRoute: GuidesInflatedQuoteSignsRoute,
+  GuidesIsContractorQuoteFairRoute: GuidesIsContractorQuoteFairRoute,
+  GuidesKitchenQuoteReviewRoute: GuidesKitchenQuoteReviewRoute,
   GuidesKitchenRemodelRoute: GuidesKitchenRemodelRoute,
   GuidesMetalVsAsphaltRoofRoute: GuidesMetalVsAsphaltRoofRoute,
+  GuidesMissingScopeInContractorQuotesRoute:
+    GuidesMissingScopeInContractorQuotesRoute,
   GuidesQuartzVsGraniteCountertopsRoute: GuidesQuartzVsGraniteCountertopsRoute,
   GuidesQuestionsBeforeSigningRoute: GuidesQuestionsBeforeSigningRoute,
   GuidesRoofFinancingRoute: GuidesRoofFinancingRoute,
@@ -936,6 +1113,8 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesRoofReplacementCostByCityRoute: GuidesRoofReplacementCostByCityRoute,
   GuidesRoofReplacementCostByStateRoute: GuidesRoofReplacementCostByStateRoute,
   GuidesRoofReplacementTimelineRoute: GuidesRoofReplacementTimelineRoute,
+  GuidesWhatToDoAfterGettingContractorQuotesRoute:
+    GuidesWhatToDoAfterGettingContractorQuotesRoute,
   GuidesWindowReplacementRoute: GuidesWindowReplacementRoute,
   LocationsStateRoute: LocationsStateRoute,
   RIdRoute: RIdRoute,

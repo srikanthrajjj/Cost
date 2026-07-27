@@ -670,5 +670,461 @@
       "bathroom-remodel": "Bathroom remodel costs in Las Vegas, Nevada depend on fixtures, waterproofing, and whether the layout stays the same. Local labor runs near the national average, and older housing (1990s to 2010s suburban housing with tile roofs common) can hide plumbing issues. Cooling loads, UV exposure, and tile roof systems shape many renovation choices. CostReno helps Las Vegas homeowners estimate a fair range before hiring.",
       "hvac-installation": "HVAC installation costs in Las Vegas, Nevada track system size, efficiency, duct condition, and climate load (desert heat, intense sun, and monsoon storm bursts). Labor here is near the national average. Cooling loads, UV exposure, and tile roof systems shape many renovation choices. CostReno helps you estimate a fair HVAC budget for Las Vegas homes before you book an install."
     }
+  },
+  {
+    "city": "Pittsburgh",
+    "state": "Pennsylvania",
+    "stateAbbr": "PA",
+    "slug": "pittsburgh",
+    "stateSlug": "pennsylvania",
+    "zipPrefix": "15222",
+    "laborCostMultiplier": 1.02,
+    "typicalHomeAge": "Older brick homes and postwar suburban stock",
+    "climateNotes": "Four-season climate with freeze-thaw cycles and humid summers.",
+    "regionalNotes": "Steady remodel demand with older housing that often needs mechanical updates.",
+    "nearestPermitOffice": "City of Pittsburgh Bureau of Building Inspection",
+    "population": 302971,
+    "medianHomeValue": 245000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Pittsburgh, Pennsylvania is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are older brick homes and postwar suburban stock, which can mean electrical or plumbing updates mid-project. Steady remodel demand with older housing that often needs mechanical updates. Use CostReno to set a realistic Pittsburgh budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Pittsburgh, Pennsylvania face pricing shaped by local labor (near the national average), housing stock (older brick homes and postwar suburban stock), and climate (four-season climate with freeze-thaw cycles and humid summers.). Steady remodel demand with older housing that often needs mechanical updates. CostReno helps you estimate a fair range for Pittsburgh before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Baltimore",
+    "state": "Maryland",
+    "stateAbbr": "MD",
+    "slug": "baltimore",
+    "stateSlug": "maryland",
+    "zipPrefix": "21201",
+    "laborCostMultiplier": 1.12,
+    "typicalHomeAge": "Rowhomes and mid-century neighborhoods mixed with newer suburbs",
+    "climateNotes": "Humid summers, cold winters, and coastal storm exposure nearby.",
+    "regionalNotes": "Aging housing stock and above-average labor raise the cost of incomplete scopes.",
+    "nearestPermitOffice": "Baltimore City Department of Housing and Community Development",
+    "population": 576498,
+    "medianHomeValue": 220000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Baltimore, Maryland is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are rowhomes and mid-century neighborhoods mixed with newer suburbs, which can mean electrical or plumbing updates mid-project. Aging housing stock and above-average labor raise the cost of incomplete scopes. Use CostReno to set a realistic Baltimore budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Baltimore, Maryland face pricing shaped by local labor (near the national average), housing stock (rowhomes and mid-century neighborhoods mixed with newer suburbs), and climate (humid summers, cold winters, and coastal storm exposure nearby.). Aging housing stock and above-average labor raise the cost of incomplete scopes. CostReno helps you estimate a fair range for Baltimore before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Cleveland",
+    "state": "Ohio",
+    "stateAbbr": "OH",
+    "slug": "cleveland",
+    "stateSlug": "ohio",
+    "zipPrefix": "44114",
+    "laborCostMultiplier": 0.94,
+    "typicalHomeAge": "Early 20th-century housing with later suburban expansion",
+    "climateNotes": "Lake-effect snow, freeze-thaw cycles, and humid summers.",
+    "regionalNotes": "Lower labor than coastal metros, but older homes often hide plumbing and electrical work.",
+    "nearestPermitOffice": "City of Cleveland Building and Housing Department",
+    "population": 367991,
+    "medianHomeValue": 110000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Cleveland, Ohio is priced by cabinets, appliances, layout changes, and local labor (6% below the national average). Many homes here are early 20th-century housing with later suburban expansion, which can mean electrical or plumbing updates mid-project. Lower labor than coastal metros, but older homes often hide plumbing and electrical work. Use CostReno to set a realistic Cleveland budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Cleveland, Ohio face pricing shaped by local labor (6% below the national average), housing stock (early 20th-century housing with later suburban expansion), and climate (lake-effect snow, freeze-thaw cycles, and humid summers.). Lower labor than coastal metros, but older homes often hide plumbing and electrical work. CostReno helps you estimate a fair range for Cleveland before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Cincinnati",
+    "state": "Ohio",
+    "stateAbbr": "OH",
+    "slug": "cincinnati",
+    "stateSlug": "ohio",
+    "zipPrefix": "45202",
+    "laborCostMultiplier": 0.96,
+    "typicalHomeAge": "Victorian and postwar housing across hilly neighborhoods",
+    "climateNotes": "Four-season Midwest climate with humidity and freeze-thaw stress.",
+    "regionalNotes": "Hills and older homes affect access, layout changes, and mechanical upgrades.",
+    "nearestPermitOffice": "City of Cincinnati Department of Buildings and Inspections",
+    "population": 309317,
+    "medianHomeValue": 210000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Cincinnati, Ohio is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are victorian and postwar housing across hilly neighborhoods, which can mean electrical or plumbing updates mid-project. Hills and older homes affect access, layout changes, and mechanical upgrades. Use CostReno to set a realistic Cincinnati budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Cincinnati, Ohio face pricing shaped by local labor (near the national average), housing stock (victorian and postwar housing across hilly neighborhoods), and climate (four-season midwest climate with humidity and freeze-thaw stress.). Hills and older homes affect access, layout changes, and mechanical upgrades. CostReno helps you estimate a fair range for Cincinnati before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Kansas City",
+    "state": "Missouri",
+    "stateAbbr": "MO",
+    "slug": "kansas-city",
+    "stateSlug": "missouri",
+    "zipPrefix": "64106",
+    "laborCostMultiplier": 0.95,
+    "typicalHomeAge": "Mix of prewar homes and expanding suburban builds",
+    "climateNotes": "Hot summers, cold winters, and severe thunderstorm risk.",
+    "regionalNotes": "Competitive contractor market with wide quote ranges between local and regional firms.",
+    "nearestPermitOffice": "City of Kansas City Development Services",
+    "population": 508090,
+    "medianHomeValue": 235000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Kansas City, Missouri is priced by cabinets, appliances, layout changes, and local labor (5% below the national average). Many homes here are mix of prewar homes and expanding suburban builds, which can mean electrical or plumbing updates mid-project. Competitive contractor market with wide quote ranges between local and regional firms. Use CostReno to set a realistic Kansas City budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Kansas City, Missouri face pricing shaped by local labor (5% below the national average), housing stock (mix of prewar homes and expanding suburban builds), and climate (hot summers, cold winters, and severe thunderstorm risk.). Competitive contractor market with wide quote ranges between local and regional firms. CostReno helps you estimate a fair range for Kansas City before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "St. Louis",
+    "state": "Missouri",
+    "stateAbbr": "MO",
+    "slug": "st-louis",
+    "stateSlug": "missouri",
+    "zipPrefix": "63101",
+    "laborCostMultiplier": 0.94,
+    "typicalHomeAge": "Brick historic homes and mid-century suburban stock",
+    "climateNotes": "Humid summers, cold winters, and strong storm seasons.",
+    "regionalNotes": "Older brick housing often needs electrical and plumbing modernization during remodels.",
+    "nearestPermitOffice": "City of St. Louis Building Division",
+    "population": 286578,
+    "medianHomeValue": 185000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in St. Louis, Missouri is priced by cabinets, appliances, layout changes, and local labor (6% below the national average). Many homes here are brick historic homes and mid-century suburban stock, which can mean electrical or plumbing updates mid-project. Older brick housing often needs electrical and plumbing modernization during remodels. Use CostReno to set a realistic St. Louis budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in St. Louis, Missouri face pricing shaped by local labor (6% below the national average), housing stock (brick historic homes and mid-century suburban stock), and climate (humid summers, cold winters, and strong storm seasons.). Older brick housing often needs electrical and plumbing modernization during remodels. CostReno helps you estimate a fair range for St. Louis before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Milwaukee",
+    "state": "Wisconsin",
+    "stateAbbr": "WI",
+    "slug": "milwaukee",
+    "stateSlug": "wisconsin",
+    "zipPrefix": "53202",
+    "laborCostMultiplier": 1,
+    "typicalHomeAge": "Early 20th-century bungalows and postwar ranches",
+    "climateNotes": "Cold winters, freeze-thaw cycles, and humid summers near Lake Michigan.",
+    "regionalNotes": "Seasonal contractor demand and older mechanical systems shape remodel timelines.",
+    "nearestPermitOffice": "City of Milwaukee Development Center",
+    "population": 577222,
+    "medianHomeValue": 215000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Milwaukee, Wisconsin is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are early 20th-century bungalows and postwar ranches, which can mean electrical or plumbing updates mid-project. Seasonal contractor demand and older mechanical systems shape remodel timelines. Use CostReno to set a realistic Milwaukee budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Milwaukee, Wisconsin face pricing shaped by local labor (near the national average), housing stock (early 20th-century bungalows and postwar ranches), and climate (cold winters, freeze-thaw cycles, and humid summers near lake michigan.). Seasonal contractor demand and older mechanical systems shape remodel timelines. CostReno helps you estimate a fair range for Milwaukee before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Oklahoma City",
+    "state": "Oklahoma",
+    "stateAbbr": "OK",
+    "slug": "oklahoma-city",
+    "stateSlug": "oklahoma",
+    "zipPrefix": "73102",
+    "laborCostMultiplier": 0.9,
+    "typicalHomeAge": "Postwar ranches plus rapid newer suburban growth",
+    "climateNotes": "Hot summers, severe storms, and hail risk.",
+    "regionalNotes": "Lower labor costs can still hide incomplete storm-hardening or mechanical scope.",
+    "nearestPermitOffice": "Oklahoma City Development Services",
+    "population": 687725,
+    "medianHomeValue": 210000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Oklahoma City, Oklahoma is priced by cabinets, appliances, layout changes, and local labor (10% below the national average). Many homes here are postwar ranches plus rapid newer suburban growth, which can mean electrical or plumbing updates mid-project. Lower labor costs can still hide incomplete storm-hardening or mechanical scope. Use CostReno to set a realistic Oklahoma City budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Oklahoma City, Oklahoma face pricing shaped by local labor (10% below the national average), housing stock (postwar ranches plus rapid newer suburban growth), and climate (hot summers, severe storms, and hail risk.). Lower labor costs can still hide incomplete storm-hardening or mechanical scope. CostReno helps you estimate a fair range for Oklahoma City before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Memphis",
+    "state": "Tennessee",
+    "stateAbbr": "TN",
+    "slug": "memphis",
+    "stateSlug": "tennessee",
+    "zipPrefix": "38103",
+    "laborCostMultiplier": 0.9,
+    "typicalHomeAge": "Mid-century homes mixed with older central neighborhoods",
+    "climateNotes": "Hot humid summers, mild winters, and heavy rain events.",
+    "regionalNotes": "Humidity and older plumbing raise moisture and mechanical risks during remodels.",
+    "nearestPermitOffice": "City of Memphis Division of Planning and Development",
+    "population": 633104,
+    "medianHomeValue": 175000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Memphis, Tennessee is priced by cabinets, appliances, layout changes, and local labor (10% below the national average). Many homes here are mid-century homes mixed with older central neighborhoods, which can mean electrical or plumbing updates mid-project. Humidity and older plumbing raise moisture and mechanical risks during remodels. Use CostReno to set a realistic Memphis budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Memphis, Tennessee face pricing shaped by local labor (10% below the national average), housing stock (mid-century homes mixed with older central neighborhoods), and climate (hot humid summers, mild winters, and heavy rain events.). Humidity and older plumbing raise moisture and mechanical risks during remodels. CostReno helps you estimate a fair range for Memphis before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Louisville",
+    "state": "Kentucky",
+    "stateAbbr": "KY",
+    "slug": "louisville",
+    "stateSlug": "kentucky",
+    "zipPrefix": "40202",
+    "laborCostMultiplier": 0.92,
+    "typicalHomeAge": "Victorian corridors and postwar suburban housing",
+    "climateNotes": "Humid subtropical climate with freeze-thaw winters.",
+    "regionalNotes": "Older homes and moderate labor create value if scope is fully itemized.",
+    "nearestPermitOffice": "Louisville Metro Department of Codes and Regulations",
+    "population": 633045,
+    "medianHomeValue": 230000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Louisville, Kentucky is priced by cabinets, appliances, layout changes, and local labor (8% below the national average). Many homes here are victorian corridors and postwar suburban housing, which can mean electrical or plumbing updates mid-project. Older homes and moderate labor create value if scope is fully itemized. Use CostReno to set a realistic Louisville budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Louisville, Kentucky face pricing shaped by local labor (8% below the national average), housing stock (victorian corridors and postwar suburban housing), and climate (humid subtropical climate with freeze-thaw winters.). Older homes and moderate labor create value if scope is fully itemized. CostReno helps you estimate a fair range for Louisville before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Richmond",
+    "state": "Virginia",
+    "stateAbbr": "VA",
+    "slug": "richmond",
+    "stateSlug": "virginia",
+    "zipPrefix": "23219",
+    "laborCostMultiplier": 1.05,
+    "typicalHomeAge": "Historic urban homes and growing suburban stock",
+    "climateNotes": "Humid summers, mild winters, and occasional coastal storm effects.",
+    "regionalNotes": "Historic districts and permit rules can extend kitchen and bath renovation timelines.",
+    "nearestPermitOffice": "City of Richmond Department of Planning and Development Review",
+    "population": 226610,
+    "medianHomeValue": 320000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Richmond, Virginia is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are historic urban homes and growing suburban stock, which can mean electrical or plumbing updates mid-project. Historic districts and permit rules can extend kitchen and bath renovation timelines. Use CostReno to set a realistic Richmond budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Richmond, Virginia face pricing shaped by local labor (near the national average), housing stock (historic urban homes and growing suburban stock), and climate (humid summers, mild winters, and occasional coastal storm effects.). Historic districts and permit rules can extend kitchen and bath renovation timelines. CostReno helps you estimate a fair range for Richmond before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Virginia Beach",
+    "state": "Virginia",
+    "stateAbbr": "VA",
+    "slug": "virginia-beach",
+    "stateSlug": "virginia",
+    "zipPrefix": "23451",
+    "laborCostMultiplier": 1.04,
+    "typicalHomeAge": "Coastal postwar homes and newer suburban builds",
+    "climateNotes": "Humid coastal climate with salt air, storms, and high moisture.",
+    "regionalNotes": "Coastal moisture and HOA rules often affect material and mechanical choices.",
+    "nearestPermitOffice": "City of Virginia Beach Planning and Community Development",
+    "population": 459470,
+    "medianHomeValue": 360000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Virginia Beach, Virginia is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are coastal postwar homes and newer suburban builds, which can mean electrical or plumbing updates mid-project. Coastal moisture and HOA rules often affect material and mechanical choices. Use CostReno to set a realistic Virginia Beach budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Virginia Beach, Virginia face pricing shaped by local labor (near the national average), housing stock (coastal postwar homes and newer suburban builds), and climate (humid coastal climate with salt air, storms, and high moisture.). Coastal moisture and HOA rules often affect material and mechanical choices. CostReno helps you estimate a fair range for Virginia Beach before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Salt Lake City",
+    "state": "Utah",
+    "stateAbbr": "UT",
+    "slug": "salt-lake-city",
+    "stateSlug": "utah",
+    "zipPrefix": "84101",
+    "laborCostMultiplier": 1.08,
+    "typicalHomeAge": "Early 20th-century bungalows and expanding valley suburbs",
+    "climateNotes": "Dry climate with hot summers, cold winters, and strong UV.",
+    "regionalNotes": "Growth keeps contractor schedules tight across popular remodel seasons.",
+    "nearestPermitOffice": "Salt Lake City Building Services",
+    "population": 209593,
+    "medianHomeValue": 520000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Salt Lake City, Utah is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are early 20th-century bungalows and expanding valley suburbs, which can mean electrical or plumbing updates mid-project. Growth keeps contractor schedules tight across popular remodel seasons. Use CostReno to set a realistic Salt Lake City budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Salt Lake City, Utah face pricing shaped by local labor (near the national average), housing stock (early 20th-century bungalows and expanding valley suburbs), and climate (dry climate with hot summers, cold winters, and strong uv.). Growth keeps contractor schedules tight across popular remodel seasons. CostReno helps you estimate a fair range for Salt Lake City before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Albuquerque",
+    "state": "New Mexico",
+    "stateAbbr": "NM",
+    "slug": "albuquerque",
+    "stateSlug": "new-mexico",
+    "zipPrefix": "87102",
+    "laborCostMultiplier": 0.95,
+    "typicalHomeAge": "Adobe-influenced and postwar Southwestern housing",
+    "climateNotes": "High desert climate with intense sun, low humidity, and monsoon bursts.",
+    "regionalNotes": "Sun and monsoon moisture swings influence ventilation and finish durability.",
+    "nearestPermitOffice": "City of Albuquerque Planning Department",
+    "population": 564559,
+    "medianHomeValue": 310000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Albuquerque, New Mexico is priced by cabinets, appliances, layout changes, and local labor (5% below the national average). Many homes here are adobe-influenced and postwar southwestern housing, which can mean electrical or plumbing updates mid-project. Sun and monsoon moisture swings influence ventilation and finish durability. Use CostReno to set a realistic Albuquerque budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Albuquerque, New Mexico face pricing shaped by local labor (5% below the national average), housing stock (adobe-influenced and postwar southwestern housing), and climate (high desert climate with intense sun, low humidity, and monsoon bursts.). Sun and monsoon moisture swings influence ventilation and finish durability. CostReno helps you estimate a fair range for Albuquerque before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Sacramento",
+    "state": "California",
+    "stateAbbr": "CA",
+    "slug": "sacramento",
+    "stateSlug": "california",
+    "zipPrefix": "95814",
+    "laborCostMultiplier": 1.2,
+    "typicalHomeAge": "Mid-century homes and fast-growing suburban corridors",
+    "climateNotes": "Hot dry summers, mild winters, and strong solar exposure.",
+    "regionalNotes": "Above-average California labor and permitting raise the cost of vague kitchen scopes.",
+    "nearestPermitOffice": "City of Sacramento Community Development Department",
+    "population": 524943,
+    "medianHomeValue": 480000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Sacramento, California is priced by cabinets, appliances, layout changes, and local labor (20% above the national average). Many homes here are mid-century homes and fast-growing suburban corridors, which can mean electrical or plumbing updates mid-project. Above-average California labor and permitting raise the cost of vague kitchen scopes. Use CostReno to set a realistic Sacramento budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Sacramento, California face pricing shaped by local labor (20% above the national average), housing stock (mid-century homes and fast-growing suburban corridors), and climate (hot dry summers, mild winters, and strong solar exposure.). Above-average California labor and permitting raise the cost of vague kitchen scopes. CostReno helps you estimate a fair range for Sacramento before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Fresno",
+    "state": "California",
+    "stateAbbr": "CA",
+    "slug": "fresno",
+    "stateSlug": "california",
+    "zipPrefix": "93721",
+    "laborCostMultiplier": 1.1,
+    "typicalHomeAge": "Postwar housing with newer suburban expansion",
+    "climateNotes": "Hot Central Valley summers, mild winters, and intense UV.",
+    "regionalNotes": "Heat-aware materials and electrical capacity matter for kitchen appliance upgrades.",
+    "nearestPermitOffice": "City of Fresno Planning and Development",
+    "population": 542107,
+    "medianHomeValue": 370000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Fresno, California is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are postwar housing with newer suburban expansion, which can mean electrical or plumbing updates mid-project. Heat-aware materials and electrical capacity matter for kitchen appliance upgrades. Use CostReno to set a realistic Fresno budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Fresno, California face pricing shaped by local labor (near the national average), housing stock (postwar housing with newer suburban expansion), and climate (hot central valley summers, mild winters, and intense uv.). Heat-aware materials and electrical capacity matter for kitchen appliance upgrades. CostReno helps you estimate a fair range for Fresno before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Providence",
+    "state": "Rhode Island",
+    "stateAbbr": "RI",
+    "slug": "providence",
+    "stateSlug": "rhode-island",
+    "zipPrefix": "02903",
+    "laborCostMultiplier": 1.18,
+    "typicalHomeAge": "Dense historic housing and triple-decker stock",
+    "climateNotes": "Cold winters, humid summers, and coastal storm exposure.",
+    "regionalNotes": "Tight footprints and older mechanicals make kitchen layout changes expensive.",
+    "nearestPermitOffice": "City of Providence Department of Inspections and Standards",
+    "population": 190934,
+    "medianHomeValue": 340000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Providence, Rhode Island is priced by cabinets, appliances, layout changes, and local labor (18% above the national average). Many homes here are dense historic housing and triple-decker stock, which can mean electrical or plumbing updates mid-project. Tight footprints and older mechanicals make kitchen layout changes expensive. Use CostReno to set a realistic Providence budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Providence, Rhode Island face pricing shaped by local labor (18% above the national average), housing stock (dense historic housing and triple-decker stock), and climate (cold winters, humid summers, and coastal storm exposure.). Tight footprints and older mechanicals make kitchen layout changes expensive. CostReno helps you estimate a fair range for Providence before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Hartford",
+    "state": "Connecticut",
+    "stateAbbr": "CT",
+    "slug": "hartford",
+    "stateSlug": "connecticut",
+    "zipPrefix": "06103",
+    "laborCostMultiplier": 1.2,
+    "typicalHomeAge": "Older urban housing with surrounding suburban ranches",
+    "climateNotes": "Cold winters, humid summers, and freeze-thaw cycles.",
+    "regionalNotes": "Above-average Northeast labor rewards clear itemization on remodel bids.",
+    "nearestPermitOffice": "City of Hartford Department of Development Services",
+    "population": 121054,
+    "medianHomeValue": 230000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Hartford, Connecticut is priced by cabinets, appliances, layout changes, and local labor (20% above the national average). Many homes here are older urban housing with surrounding suburban ranches, which can mean electrical or plumbing updates mid-project. Above-average Northeast labor rewards clear itemization on remodel bids. Use CostReno to set a realistic Hartford budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Hartford, Connecticut face pricing shaped by local labor (20% above the national average), housing stock (older urban housing with surrounding suburban ranches), and climate (cold winters, humid summers, and freeze-thaw cycles.). Above-average Northeast labor rewards clear itemization on remodel bids. CostReno helps you estimate a fair range for Hartford before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "New Orleans",
+    "state": "Louisiana",
+    "stateAbbr": "LA",
+    "slug": "new-orleans",
+    "stateSlug": "louisiana",
+    "zipPrefix": "70112",
+    "laborCostMultiplier": 1,
+    "typicalHomeAge": "Historic cottages and elevated homes with aging systems",
+    "climateNotes": "Hot humid subtropical climate with heavy rain and storm risk.",
+    "regionalNotes": "Moisture, elevations, and older plumbing heavily influence remodel scope.",
+    "nearestPermitOffice": "City of New Orleans Department of Safety and Permits",
+    "population": 383997,
+    "medianHomeValue": 295000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in New Orleans, Louisiana is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are historic cottages and elevated homes with aging systems, which can mean electrical or plumbing updates mid-project. Moisture, elevations, and older plumbing heavily influence remodel scope. Use CostReno to set a realistic New Orleans budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in New Orleans, Louisiana face pricing shaped by local labor (near the national average), housing stock (historic cottages and elevated homes with aging systems), and climate (hot humid subtropical climate with heavy rain and storm risk.). Moisture, elevations, and older plumbing heavily influence remodel scope. CostReno helps you estimate a fair range for New Orleans before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Birmingham",
+    "state": "Alabama",
+    "stateAbbr": "AL",
+    "slug": "birmingham",
+    "stateSlug": "alabama",
+    "zipPrefix": "35203",
+    "laborCostMultiplier": 0.88,
+    "typicalHomeAge": "Mid-century homes and older urban neighborhoods",
+    "climateNotes": "Hot humid summers, mild winters, and heavy rainfall.",
+    "regionalNotes": "Lower labor costs still require careful moisture and electrical scope on older homes.",
+    "nearestPermitOffice": "City of Birmingham Department of Planning, Engineering and Permits",
+    "population": 200733,
+    "medianHomeValue": 165000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Birmingham, Alabama is priced by cabinets, appliances, layout changes, and local labor (12% below the national average). Many homes here are mid-century homes and older urban neighborhoods, which can mean electrical or plumbing updates mid-project. Lower labor costs still require careful moisture and electrical scope on older homes. Use CostReno to set a realistic Birmingham budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Birmingham, Alabama face pricing shaped by local labor (12% below the national average), housing stock (mid-century homes and older urban neighborhoods), and climate (hot humid summers, mild winters, and heavy rainfall.). Lower labor costs still require careful moisture and electrical scope on older homes. CostReno helps you estimate a fair range for Birmingham before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Omaha",
+    "state": "Nebraska",
+    "stateAbbr": "NE",
+    "slug": "omaha",
+    "stateSlug": "nebraska",
+    "zipPrefix": "68102",
+    "laborCostMultiplier": 0.95,
+    "typicalHomeAge": "Postwar ranches and growing suburban developments",
+    "climateNotes": "Hot summers, cold winters, and severe storm seasons.",
+    "regionalNotes": "Competitive Midwest pricing with seasonal demand spikes for remodel crews.",
+    "nearestPermitOffice": "City of Omaha Planning Department",
+    "population": 486051,
+    "medianHomeValue": 275000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Omaha, Nebraska is priced by cabinets, appliances, layout changes, and local labor (5% below the national average). Many homes here are postwar ranches and growing suburban developments, which can mean electrical or plumbing updates mid-project. Competitive Midwest pricing with seasonal demand spikes for remodel crews. Use CostReno to set a realistic Omaha budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Omaha, Nebraska face pricing shaped by local labor (5% below the national average), housing stock (postwar ranches and growing suburban developments), and climate (hot summers, cold winters, and severe storm seasons.). Competitive Midwest pricing with seasonal demand spikes for remodel crews. CostReno helps you estimate a fair range for Omaha before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Boise",
+    "state": "Idaho",
+    "stateAbbr": "ID",
+    "slug": "boise",
+    "stateSlug": "idaho",
+    "zipPrefix": "83702",
+    "laborCostMultiplier": 1.1,
+    "typicalHomeAge": "Older central neighborhoods and fast-growing suburbs",
+    "climateNotes": "Semi-arid climate with hot summers, cold winters, and strong sun.",
+    "regionalNotes": "Rapid growth keeps contractor demand high and schedules tight.",
+    "nearestPermitOffice": "City of Boise Planning and Development Services",
+    "population": 235684,
+    "medianHomeValue": 470000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Boise, Idaho is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are older central neighborhoods and fast-growing suburbs, which can mean electrical or plumbing updates mid-project. Rapid growth keeps contractor demand high and schedules tight. Use CostReno to set a realistic Boise budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Boise, Idaho face pricing shaped by local labor (near the national average), housing stock (older central neighborhoods and fast-growing suburbs), and climate (semi-arid climate with hot summers, cold winters, and strong sun.). Rapid growth keeps contractor demand high and schedules tight. CostReno helps you estimate a fair range for Boise before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Buffalo",
+    "state": "New York",
+    "stateAbbr": "NY",
+    "slug": "buffalo",
+    "stateSlug": "new-york",
+    "zipPrefix": "14202",
+    "laborCostMultiplier": 1.05,
+    "typicalHomeAge": "Early 20th-century housing and dense urban stock",
+    "climateNotes": "Lake-effect snow, freeze-thaw cycles, and humid summers.",
+    "regionalNotes": "Older mechanical systems and cold-climate detailing often expand remodel scope.",
+    "nearestPermitOffice": "City of Buffalo Department of Permit and Inspection Services",
+    "population": 278349,
+    "medianHomeValue": 195000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Buffalo, New York is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are early 20th-century housing and dense urban stock, which can mean electrical or plumbing updates mid-project. Older mechanical systems and cold-climate detailing often expand remodel scope. Use CostReno to set a realistic Buffalo budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Buffalo, New York face pricing shaped by local labor (near the national average), housing stock (early 20th-century housing and dense urban stock), and climate (lake-effect snow, freeze-thaw cycles, and humid summers.). Older mechanical systems and cold-climate detailing often expand remodel scope. CostReno helps you estimate a fair range for Buffalo before you compare contractor quotes."
+    }
+  },
+  {
+    "city": "Rochester",
+    "state": "New York",
+    "stateAbbr": "NY",
+    "slug": "rochester",
+    "stateSlug": "new-york",
+    "zipPrefix": "14604",
+    "laborCostMultiplier": 1.04,
+    "typicalHomeAge": "Prewar homes and postwar suburban corridors",
+    "climateNotes": "Cold snowy winters, freeze-thaw cycles, and humid summers.",
+    "regionalNotes": "Older housing stock makes electrical and plumbing updates common in kitchen jobs.",
+    "nearestPermitOffice": "City of Rochester Bureau of Buildings and Zoning",
+    "population": 211328,
+    "medianHomeValue": 175000,
+    "introParagraphs": {
+      "kitchen-remodel": "A kitchen remodel in Rochester, New York is priced by cabinets, appliances, layout changes, and local labor (near the national average). Many homes here are prewar homes and postwar suburban corridors, which can mean electrical or plumbing updates mid-project. Older housing stock makes electrical and plumbing updates common in kitchen jobs. Use CostReno to set a realistic Rochester budget before collecting bids.",
+      "roof-replacement": "Homeowners planning a roof replacement in Rochester, New York face pricing shaped by local labor (near the national average), housing stock (prewar homes and postwar suburban corridors), and climate (cold snowy winters, freeze-thaw cycles, and humid summers.). Older housing stock makes electrical and plumbing updates common in kitchen jobs. CostReno helps you estimate a fair range for Rochester before you compare contractor quotes."
+    }
   }
 ]

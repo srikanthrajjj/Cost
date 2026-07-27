@@ -202,8 +202,6 @@ const TIPS: Partial<Record<keyof EstimatorAnswers, string>> = {
     "Mid-range fixtures offer the best ROI. Luxury upgrades rarely return full cost at resale.",
   hvacType:
     "Heat pumps are up to 3× more efficient than traditional systems and may qualify for tax credits.",
-  hvacSize:
-    "Correct tonnage matters. An oversized unit short-cycles; undersized units run constantly and wear out faster.",
   hvacDuctwork:
     "Leaky ducts can waste 20–30% of heated or cooled air. Sealing or replacing ducts often improves comfort more than a bigger unit alone.",
   windowType:
@@ -1459,9 +1457,25 @@ function FinalReport({
         details["Existing layers"] = answers.roofLayers === "two-plus" ? "Two or more" : "One";
       if (answers.hvacAction) details["HVAC action"] = answers.hvacAction;
       if (answers.hvacType) details["System type"] = answers.hvacType.replace("-", " ");
-      if (answers.hvacSize) details["System size"] = answers.hvacSize;
       if (answers.hvacDuctwork) details["Ductwork"] = answers.hvacDuctwork;
       if (answers.hvacEfficiency) details["Efficiency"] = answers.hvacEfficiency;
+      if (answers.hvacIssue)
+        details["Repair symptom"] = answers.hvacIssue.replace("-", " ");
+      if (answers.hvacSystemAge)
+        details["System age"] =
+          answers.hvacSystemAge === "under-5"
+            ? "Under 5 years"
+            : answers.hvacSystemAge === "5-10"
+              ? "5 to 10 years"
+              : answers.hvacSystemAge === "10-15"
+                ? "10 to 15 years"
+                : answers.hvacSystemAge === "15-plus"
+                  ? "15+ years"
+                  : "Not sure";
+      if (answers.hvacDiagnosed)
+        details["Technician diagnosis"] = answers.hvacDiagnosed === "yes" ? "Yes" : "No";
+      if (answers.hvacDiagnosisNotes?.trim())
+        details["Diagnosis notes"] = answers.hvacDiagnosisNotes.trim();
       if (answers.windowCount) details["Windows"] = String(answers.windowCount);
       if (answers.windowType) details["Glazing"] = `${answers.windowType} pane`;
       if (answers.windowMaterial) details["Frame"] = answers.windowMaterial;
@@ -1480,7 +1494,8 @@ function FinalReport({
       if (answers.plumbingType) details["Plumbing work"] = answers.plumbingType;
       if (answers.electricalType)
         details["Electrical work"] = answers.electricalType.replace("-", " ");
-      if (answers.currentCondition) details["Current condition"] = answers.currentCondition;
+      if (answers.projectType !== "hvac" && answers.currentCondition)
+        details["Current condition"] = answers.currentCondition;
       if (answers.startTimeline) details["Timeline"] = answers.startTimeline.replace("-", " ");
 
       await submitEmailAndDownload({
@@ -1540,8 +1555,12 @@ function FinalReport({
           },
         ]
       : []),
-    { label: "Condition", val: answers.currentCondition ?? "-" },
-    { label: "Cause", val: answers.causeOfProject?.replace("-", " ") ?? "-" },
+    ...(answers.projectType !== "hvac"
+      ? [
+          { label: "Condition", val: answers.currentCondition ?? "-" },
+          { label: "Cause", val: answers.causeOfProject?.replace("-", " ") ?? "-" },
+        ]
+      : []),
   ];
 
   const metaPills = [

@@ -22,20 +22,20 @@ export const Route = createFileRoute("/guides/bathroom-remodel")({
   component: BathroomRemodelGuide,
   head: () => ({
     meta: [
-      { title: "Bathroom remodel cost in 2026: complete pricing guide by type & size — CostReno" },
+      { title: "Bathroom remodel cost guide (2026) | CostReno" },
       {
         name: "description",
         content:
-          "How much does a bathroom remodel cost in 2026? Get pricing by bathroom type, size, and materials. Compare full bath, half bath, and master bath costs with our complete guide.",
+          "Bathroom remodel costs in 2026 by type, size, and materials. Compare full bath, half bath, and master bath ranges before you hire.",
       },
       {
         property: "og:title",
-        content: "Bathroom remodel cost in 2026: complete pricing guide — CostReno",
+        content: "Bathroom remodel cost guide (2026) | CostReno",
       },
       {
         property: "og:description",
         content:
-          "Complete 2026 bathroom remodel pricing guide. Costs by project scope, materials, and region. Learn about permits, fixtures, and how to compare contractor quotes.",
+          "Bathroom remodel pricing by scope, materials, and region. Includes permits, fixtures, and quote comparison tips.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://www.costreno.com/guides/bathroom-remodel" },

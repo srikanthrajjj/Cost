@@ -93,6 +93,46 @@ function QuotesTopicPage() {
           desc: "Line-item checklist for scope, allowances, exclusions, and payment terms.",
         },
         {
+          title: "Is this contractor quote fair?",
+          href: "/guides/is-contractor-quote-fair",
+          desc: "Judge fairness by scope match, itemization, and local pricing context.",
+        },
+        {
+          title: "Contractor quote too high",
+          href: "/guides/contractor-quote-too-high",
+          desc: "Separate real cost drivers from padding before you negotiate.",
+        },
+        {
+          title: "How to compare contractor quotes",
+          href: "/guides/how-to-compare-contractor-quotes",
+          desc: "Align scope across bids before you compare totals.",
+        },
+        {
+          title: "Allowances and change orders",
+          href: "/guides/allowances-and-change-orders",
+          desc: "Read soft numbers and extras so surprise costs do not blow the budget.",
+        },
+        {
+          title: "Contractor payment schedules",
+          href: "/guides/contractor-payment-schedules",
+          desc: "Fair milestone payments and deposit terms to watch.",
+        },
+        {
+          title: "Missing scope in contractor quotes",
+          href: "/guides/missing-scope-in-contractor-quotes",
+          desc: "Common gaps that turn a cheap bid into expensive change orders.",
+        },
+        {
+          title: "Kitchen remodel quote review",
+          href: "/guides/kitchen-quote-review",
+          desc: "Cabinet, layout, allowance, and mechanical checks for kitchen bids.",
+        },
+        {
+          title: "What to do after getting quotes",
+          href: "/guides/what-to-do-after-getting-contractor-quotes",
+          desc: "A next-step checklist from bid review to hiring decision.",
+        },
+        {
           title: "Questions before signing",
           href: "/guides/questions-before-signing",
           desc: "Credential, insurance, change-order, and warranty questions to ask.",
@@ -101,6 +141,11 @@ function QuotesTopicPage() {
           title: "Signs a quote is inflated",
           href: "/guides/inflated-quote-signs",
           desc: "Common red flags in overpriced or incomplete renovation bids.",
+        },
+        {
+          title: "Roof quote review",
+          href: "/guides/roof-quote-review",
+          desc: "Line-item checklist for tear-off, materials, permits, and warranties.",
         },
         {
           title: "Quote analyzer",
