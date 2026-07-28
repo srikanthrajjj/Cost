@@ -40,6 +40,11 @@ const LINKS = [
     desc: "System sizing, labor factors, and what to check before you buy.",
   },
   {
+    title: "Smart thermostat installation cost",
+    href: "/guides/smart-thermostat-installation-cost",
+    desc: "Installed pricing, C-wire surprises, and DIY vs pro guidance.",
+  },
+  {
     title: "HVAC costs by city",
     href: "/locations",
     desc: "Browse locally reviewed HVAC pages across major U.S. markets.",

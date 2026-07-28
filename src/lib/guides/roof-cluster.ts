@@ -20,6 +20,7 @@ export const ROOF_CLUSTER_RELATED = [
   { title: "Roof permits", href: "/guides/roof-permits" },
   { title: "Roof financing", href: "/guides/roof-financing" },
   { title: "Roof insurance claims", href: "/guides/roof-insurance-claims" },
+  { title: "Can insurance cover roof replacement?", href: "/guides/can-insurance-cover-roof-replacement" },
   { title: "Roof quote review", href: "/guides/roof-quote-review" },
 ] as const;
 

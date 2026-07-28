@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
+import { SiteSearch } from "@/components/SiteSearch";
 import { cn } from "@/lib/utils";
 
 const GUIDE_LINKS = [
@@ -7,6 +8,7 @@ const GUIDE_LINKS = [
   { name: "Quote guides", href: "/topics/quotes" },
   { name: "Roof costs", href: "/topics/roof" },
   { name: "Kitchen costs", href: "/topics/kitchen" },
+  { name: "Energy costs", href: "/topics/energy" },
   { name: "Window costs", href: "/topics/windows" },
   { name: "Flooring costs", href: "/topics/flooring" },
   { name: "Roofing", href: "/guides/roof-replacement" },
@@ -103,7 +105,8 @@ export function SiteNav({ active }: SiteNavProps) {
           </div>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <SiteSearch />
           <a
             href="/estimate"
             className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"

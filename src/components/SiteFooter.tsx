@@ -109,6 +109,14 @@ export function SiteFooter() {
               </li>
               <li>
                 <a
+                  href="/topics/energy"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Energy costs
+                </a>
+              </li>
+              <li>
+                <a
                   href="/topics/windows"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >

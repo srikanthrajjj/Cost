@@ -45,6 +45,21 @@ const LINKS = [
     desc: "Line-item checklist for cabinets, layout work, and allowances.",
   },
   {
+    title: "Is $30,000 enough for a kitchen remodel?",
+    href: "/guides/is-30k-enough-for-kitchen-remodel",
+    desc: "Budget breakdown, scope options, and cost-saving strategies for a $30k kitchen.",
+  },
+  {
+    title: "How much should quartz countertops cost?",
+    href: "/guides/quartz-countertop-cost",
+    desc: "Installed pricing by brand tier, hidden fees, and quote comparison checklist.",
+  },
+  {
+    title: "How much does labor cost to install cabinets?",
+    href: "/guides/cabinet-install-labor-cost",
+    desc: "Per-box and per-linear-foot rates, RTA vs custom, hidden fees, and quote comparison.",
+  },
+  {
     title: "Quartz vs granite countertops",
     href: "/guides/quartz-vs-granite-countertops",
     desc: "Compare cost, maintenance, and durability for two popular surfaces.",

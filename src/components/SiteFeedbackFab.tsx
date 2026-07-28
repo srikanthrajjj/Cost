@@ -75,7 +75,8 @@ export function SiteFeedbackFab() {
     };
   }, [open]);
 
-  if (hideOnAdmin || dismissed) return null;
+  // Quote analyzer already has its own feedback UI; avoid stacking FABs.
+  if (hideOnAdmin || dismissed || isQuoteAnalyzer) return null;
 
   const canSubmit = Boolean(experience || useAgain || comment.trim());
 
@@ -121,13 +122,14 @@ export function SiteFeedbackFab() {
         }}
         className={cn(
           "fixed z-[70] inline-flex items-center gap-2 rounded-full border border-[#082A4B]/15 bg-[#082A4B] px-3.5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-[#082A4B]/20 hover:bg-[#0a355c] transition",
-          // Keep clear of the quote sidebar Ask AI card (left) and mobile Ask AI FAB (right)
-          isQuoteAnalyzer ? "bottom-24 right-4 lg:bottom-5" : "bottom-5 right-4",
+          // Left side so it stays clear of the site chatbot (bottom-right)
+          "bottom-5 left-4",
         )}
         aria-label="Leave feedback"
       >
         <MessageSquare className="h-4 w-4 shrink-0" aria-hidden />
-        <span>Leave feedback</span>
+        <span className="hidden sm:inline">Leave feedback</span>
+        <span className="sm:hidden">Feedback</span>
       </button>
 
       {open &&

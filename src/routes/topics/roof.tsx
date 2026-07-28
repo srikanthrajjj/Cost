@@ -82,6 +82,11 @@ const HIRE_LINKS = [
     desc: "Document storm damage, work with adjusters, and review settlement scope.",
   },
   {
+    title: "Can insurance cover roof replacement?",
+    href: "/guides/can-insurance-cover-roof-replacement",
+    desc: "Covered perils, ACV vs RCV, claim process, supplements, and contractor choice.",
+  },
+  {
     title: "Roof quote review",
     href: "/guides/roof-quote-review",
     desc: "Line-item checklist for tear-off, materials, permits, and warranties.",

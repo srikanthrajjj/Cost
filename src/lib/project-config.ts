@@ -455,6 +455,74 @@ export const PROJECT_CONFIGS: ProjectConfig[] = [
     ],
     relatedProjects: ["roof-replacement-cost", "window-replacement-cost", "bathroom-remodel-cost"],
   },
+  {
+    slug: "solar-panel-cost",
+    projectType: "solar",
+    name: "Solar Installation",
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&q=80",
+    seoTitle: "Solar panel cost in 2026 | Installation prices and estimates | CostReno",
+    seoDescription:
+      "How much do solar panels cost in 2026? Typical installs run about $2.60-$2.95 per watt. Get local estimates, compare quotes, and plan roof timing.",
+    h1: "How much does solar panel installation cost in 2026?",
+    intro:
+      "Solar pricing is easier to judge when you convert every bid to dollars per watt and separate incentives from cash price. CostReno helps you plan system size, battery add-ons, and local labor context before you compare installer quotes.",
+    avgCost: "$21,000",
+    costRange: "$18,000-$24,000",
+    timeline: "1-3 days on site",
+    roi: "Varies by rates",
+    costBreakdown: [
+      { item: "Panels and racking", pct: "40%" },
+      { item: "Inverter and electrical", pct: "20%" },
+      { item: "Labor and install", pct: "20%" },
+      { item: "Permits and interconnection", pct: "10%" },
+      { item: "Soft costs and margin", pct: "10%" },
+    ],
+    reviews: [
+      {
+        name: "Elena R.",
+        location: "San Diego, CA",
+        text: "Converting three solar bids to dollars per watt showed one quote was 30% higher for the same kW. We renegotiated.",
+        rating: 5,
+      },
+      {
+        name: "Marcus J.",
+        location: "Denver, CO",
+        text: "CostReno pushed me to check roof age first. We reroofed, then went solar, and avoided a remount later.",
+        rating: 5,
+      },
+      {
+        name: "Priya S.",
+        location: "Austin, TX",
+        text: "The estimate helped me size for EV charging. My first solar quote was undersized for evening loads.",
+        rating: 5,
+      },
+    ],
+    costFactors: [
+      "System size in kW and household usage",
+      "Roof condition, pitch, and shading",
+      "Panel and inverter equipment tier",
+      "Battery storage and backup needs",
+      "Local labor and permit fees",
+      "Utility interconnection rules",
+      "Remaining state or utility incentives",
+      "Panel upgrade or electrical extras",
+    ],
+    faqs: [
+      {
+        q: "How much do solar panels cost for an average home?",
+        a: "A typical 7-8 kW residential system often lands around $18,000-$24,000 before incentives, or about $2.60-$2.95 per watt installed. Your usage, roof, and battery choice change the total.",
+      },
+      {
+        q: "Is solar still worth it without older federal credits?",
+        a: "It depends on your utility rates, remaining state or utility incentives, and how long you will stay in the home. Compare cash payback and loan APR carefully. Do not rely on a salesperson's teaser monthly payment alone.",
+      },
+      {
+        q: "Should solar and a new roof be combined?",
+        a: "If shingles are near end of life, reroof before or with solar. Remounting panels later is expensive. Ask for a coordinated scope and clear waterproofing responsibility.",
+      },
+    ],
+    relatedProjects: ["roof-replacement-cost", "hvac-installation-cost", "window-replacement-cost"],
+  },
 ];
 
 export function getProjectBySlug(slug: string): ProjectConfig | undefined {
