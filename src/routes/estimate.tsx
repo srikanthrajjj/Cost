@@ -703,8 +703,21 @@ function BudgetQuestion({
 }
 
 // ─── Live Estimate Panel ──────────────────────────────────────────────────────
-function EstimatePanel({ estimate, prevMid }: { estimate: LiveEstimate; prevMid: number }) {
+function EstimatePanel({
+  estimate,
+  prevMid,
+  zipCode,
+  city,
+  state,
+}: {
+  estimate: LiveEstimate;
+  prevMid: number;
+  zipCode?: string;
+  city?: string;
+  state?: string;
+}) {
   const hasData = estimate.mid > 0;
+  const hasLocalZip = Boolean(zipCode && zipCode.length === 5 && city);
   const delta = hasData && prevMid > 0 ? estimate.mid - prevMid : 0;
   const [showDelta, setShowDelta] = useState(false);
   const [snapshotOpen, setSnapshotOpen] = useState(false);
@@ -766,6 +779,17 @@ function EstimatePanel({ estimate, prevMid }: { estimate: LiveEstimate; prevMid:
                 {fmt(estimate.low)} – {fmt(estimate.high)}
               </span>
             </div>
+
+            {hasLocalZip ? (
+              <p className="mt-1.5 text-[10px] font-medium text-ink/70 leading-snug">
+                Local rates for {city}
+                {state ? `, ${state}` : ""}
+              </p>
+            ) : (
+              <p className="mt-1.5 text-[10px] text-muted-foreground leading-snug">
+                National average. Enter ZIP for local rates.
+              </p>
+            )}
 
             {/* Confidence */}
             <div className="mt-2 space-y-0.5">
@@ -1933,10 +1957,11 @@ function EstimatorPage() {
                 Progress auto-saved
               </span>
               <button
+                type="button"
                 onClick={restart}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-ink transition"
+                className="inline-flex items-center gap-1.5 rounded-lg border-2 border-primary/25 bg-white px-3 py-1.5 text-xs font-semibold text-primary shadow-sm hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
-                <X className="h-3.5 w-3.5" /> Start over
+                <X className="h-3.5 w-3.5" aria-hidden /> Start over
               </button>
             </div>
             <div className="flex items-center gap-3">
@@ -2073,7 +2098,13 @@ function EstimatorPage() {
 
             {/* Right: live estimate sidebar */}
             <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-[4.25rem] lg:self-start lg:max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto lg:overscroll-y-contain [scrollbar-gutter:stable]">
-              <EstimatePanel estimate={estimate} prevMid={prevMidRef.current} />
+              <EstimatePanel
+                estimate={estimate}
+                prevMid={prevMidRef.current}
+                zipCode={answers.zipCode}
+                city={answers.city}
+                state={answers.state}
+              />
             </div>
           </div>
         )}
