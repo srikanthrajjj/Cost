@@ -3,46 +3,117 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
-  Bath,
   BookOpen,
+  CalendarDays,
+  Database,
   FileText,
-  Home,
   LayoutGrid,
   Layers,
-  Scale,
   Search,
-  Square,
-  Thermometer,
-  UtensilsCrossed,
+  ShieldCheck,
+  Sparkles,
   Wind,
+  Wrench,
   X,
   Zap,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { GUIDES, TOPIC_HUBS, type GuideEntry } from "@/lib/guides/catalog";
+import { absoluteUrl, buildBreadcrumbList, buildFaqSchema } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+
+const PATH = "/guides";
+
+const PAGE_FAQS = [
+  {
+    q: "What is included in the CostReno knowledge center?",
+    a: "You can browse renovation cost guides, contractor quote advice, topic hubs, and planning resources for projects like roofing, kitchens, bathrooms, HVAC, windows, flooring, and energy upgrades.",
+  },
+  {
+    q: "How often are guides and pricing references updated?",
+    a: "CostReno reviews this library monthly and refreshes pricing, planning guidance, and quote review content as new data and editorial updates are published.",
+  },
+  {
+    q: "Can I go from a guide to a planning tool?",
+    a: "Yes. The page links directly to CostReno tools for project cost estimates, AI quote analysis, quote comparison, and other planning resources so homeowners can move from research to action.",
+  },
+] as const;
 
 export const Route = createFileRoute("/guides/")({
   component: GuidesIndexPage,
   head: () => ({
     meta: [
-      { title: "Home renovation guides | CostReno" },
+      { title: "Home renovation knowledge center | CostReno" },
       {
         name: "description",
         content:
-          "Practical guides on renovation costs, contractor quotes, and project planning for roof, kitchen, bathroom, HVAC, windows, and flooring.",
+          "Expert renovation cost guides, contractor advice, quote reviews, and planning resources.",
       },
-      { property: "og:title", content: "Home renovation guides | CostReno" },
+      { property: "og:title", content: "Home renovation knowledge center | CostReno" },
       {
         property: "og:description",
         content:
-          "Browse CostReno guides on renovation costs, quote red flags, and project planning.",
+          "Browse expert renovation cost guides, AI quote review resources, and planning tools for homeowners.",
       },
-      { property: "og:url", content: "https://www.costreno.com/guides" },
+      { property: "og:url", content: absoluteUrl(PATH) },
       { name: "robots", content: "index, follow" },
     ],
-    links: [{ rel: "canonical", href: "https://www.costreno.com/guides" }],
+    links: [{ rel: "canonical", href: absoluteUrl(PATH) }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Home Renovation Knowledge Center",
+          description:
+            "Expert renovation cost guides, contractor advice, quote reviews, and planning resources.",
+          url: absoluteUrl(PATH),
+          isPartOf: {
+            "@type": "WebSite",
+            name: "CostReno",
+            url: absoluteUrl("/"),
+          },
+          about: {
+            "@type": "Thing",
+            name: "Home renovation costs and contractor quote planning",
+          },
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: GUIDES.length,
+            itemListElement: GUIDES.map((guide, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: absoluteUrl(guide.href),
+              name: guide.title,
+              description: guide.desc,
+            })),
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(buildFaqSchema([...PAGE_FAQS])),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(
+          buildBreadcrumbList([
+            { name: "Home", path: "/" },
+            { name: "Guides", path: PATH },
+          ]),
+        ),
+      },
+    ],
   }),
 });
 
@@ -62,14 +133,14 @@ type GuideTag = (typeof TAG_ORDER)[number];
 
 const TAG_ICONS: Record<GuideTag, LucideIcon> = {
   Quotes: FileText,
-  Roofing: Home,
-  Kitchen: UtensilsCrossed,
-  Bathroom: Bath,
-  HVAC: Thermometer,
-  Windows: Square,
+  Roofing: Layers,
+  Kitchen: Layers,
+  Bathroom: Layers,
+  HVAC: Wind,
+  Windows: Layers,
   Flooring: Layers,
   Energy: Zap,
-  Comparison: Scale,
+  Comparison: Sparkles,
 };
 
 /** Soft, brand-safe tints for unselected chips (no purple, no accent green). */
@@ -141,9 +212,9 @@ const TAG_TINTS: Record<
 
 const HUB_ICONS: Record<string, LucideIcon> = {
   "/topics/quotes": FileText,
-  "/topics/roof": Home,
-  "/topics/kitchen": UtensilsCrossed,
-  "/topics/windows": Square,
+  "/topics/roof": Layers,
+  "/topics/kitchen": Layers,
+  "/topics/windows": Layers,
   "/topics/hvac": Wind,
   "/topics/energy": Zap,
   "/topics/flooring": Layers,
@@ -153,7 +224,92 @@ const FEATURED_HREFS = [
   "/guides/how-to-read-a-contractor-quote",
   "/guides/is-contractor-quote-fair",
   "/guides/roof-replacement",
+  "/guides/kitchen-remodel",
 ] as const;
+
+const RECENTLY_UPDATED_HREFS = [
+  "/guides/2026-kitchen-remodeling-cost-report",
+  "/guides/roof-insurance-claims",
+  "/guides/how-to-read-a-contractor-quote",
+] as const;
+
+const HERO_TRUST_METRICS = [
+  "34 Expert Guides",
+  "Updated Monthly",
+  "AI Quote Reviews",
+  "Cost Estimators",
+] as const;
+
+const TRUST_BAR_ITEMS = [
+  { label: "Monthly Pricing Updates", icon: CalendarDays },
+  { label: "U.S. Cost Database", icon: Database },
+  { label: "AI Quote Analysis", icon: Sparkles },
+  { label: "Built for Homeowners", icon: ShieldCheck },
+] as const;
+
+const TRENDING_TOPICS = [
+  "Roof Replacement",
+  "Kitchen Remodel",
+  "Insurance Claims",
+  "Quartz Countertops",
+  "HVAC Costs",
+] as const;
+
+const TOOL_CARDS = [
+  {
+    title: "Kitchen cost estimator",
+    desc: "Plan a kitchen budget range before you request bids.",
+    href: "/estimate?project=kitchen",
+    icon: LayoutGrid,
+  },
+  {
+    title: "Bathroom estimator",
+    desc: "Check likely bathroom remodel costs by project scope.",
+    href: "/estimate?project=bathroom",
+    icon: LayoutGrid,
+  },
+  {
+    title: "Roof cost calculator",
+    desc: "Estimate roof replacement costs with local pricing context.",
+    href: "/estimate?project=roof",
+    icon: Layers,
+  },
+  {
+    title: "AI quote review",
+    desc: "Upload one contractor quote for line-item analysis.",
+    href: "/quote-analyzer",
+    icon: Sparkles,
+  },
+  {
+    title: "ROI calculator",
+    desc: "Review remodeling return guidance in our 2026 kitchen report.",
+    href: "/guides/2026-kitchen-remodeling-cost-report",
+    icon: Database,
+  },
+  {
+    title: "Project timeline planner",
+    desc: "See the major phases homeowners should plan around.",
+    href: "/guides/roof-replacement-timeline",
+    icon: Wrench,
+  },
+] as const;
+
+const HUB_GUIDE_MATCHERS: Record<string, (guide: GuideEntry) => boolean> = {
+  "/topics/quotes": (guide) => guide.tag === "Quotes",
+  "/topics/roof": (guide) =>
+    guide.tag === "Roofing" || guide.href === "/guides/metal-vs-asphalt-roof",
+  "/topics/kitchen": (guide) =>
+    guide.tag === "Kitchen" || guide.href === "/guides/quartz-vs-granite-countertops",
+  "/topics/windows": (guide) => guide.tag === "Windows",
+  "/topics/hvac": (guide) => guide.tag === "HVAC",
+  "/topics/energy": (guide) => guide.tag === "Energy",
+  "/topics/flooring": (guide) => guide.tag === "Flooring",
+};
+
+function getHubGuideCount(hubHref: string) {
+  const matcher = HUB_GUIDE_MATCHERS[hubHref];
+  return matcher ? GUIDES.filter(matcher).length : 0;
+}
 
 function isGuideTag(tag: string): tag is GuideTag {
   return (TAG_ORDER as readonly string[]).includes(tag);
@@ -171,6 +327,14 @@ function GuidesIndexPage() {
   const featuredGuides = useMemo(
     () =>
       FEATURED_HREFS.map((href) => GUIDES.find((g) => g.href === href)).filter(
+        (g): g is GuideEntry => Boolean(g),
+      ),
+    [],
+  );
+
+  const recentlyUpdatedGuides = useMemo(
+    () =>
+      RECENTLY_UPDATED_HREFS.map((href) => GUIDES.find((g) => g.href === href)).filter(
         (g): g is GuideEntry => Boolean(g),
       ),
     [],
@@ -198,22 +362,21 @@ function GuidesIndexPage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav active="guides" />
       <main>
-        {/* Hero: light cream/cool wash, soft navy + warm blobs (no blueprint grid) */}
-        <section className="relative overflow-hidden border-b border-border/60 bg-[#F7F5F1]">
+        <header className="relative overflow-hidden border-b border-primary/10 bg-background">
           <div
-            className="absolute inset-0 bg-[linear-gradient(165deg,#F7F5F1_0%,#EEF2F6_42%,#F4F7FA_72%,#F8F6F2_100%)]"
+            className="absolute inset-0 bg-[linear-gradient(180deg,#EDF4FB_0%,#F6FAFD_40%,#FFFFFF_100%)]"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute -top-28 right-[-12%] h-[22rem] w-[22rem] rounded-full bg-[#082A4B]/[0.07] blur-3xl motion-reduce:hidden"
+            className="pointer-events-none absolute -top-28 right-[-12%] h-[24rem] w-[24rem] rounded-full bg-[#082A4B]/[0.12] blur-3xl motion-reduce:hidden"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute top-[18%] left-[-10%] h-64 w-64 rounded-full bg-[#C4A574]/[0.14] blur-3xl motion-reduce:hidden"
+            className="pointer-events-none absolute top-[14%] left-[-8%] h-72 w-72 rounded-full bg-[#082A4B]/[0.08] blur-3xl motion-reduce:hidden"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute bottom-[-30%] right-[18%] h-72 w-72 rounded-full bg-[#082A4B]/[0.05] blur-3xl motion-reduce:hidden"
+            className="pointer-events-none absolute bottom-[-34%] left-[24%] h-72 w-72 rounded-full bg-[#082A4B]/[0.06] blur-3xl motion-reduce:hidden"
             aria-hidden="true"
           />
           <div
@@ -221,80 +384,150 @@ function GuidesIndexPage() {
             aria-hidden="true"
           />
 
-          <div className="relative container-x max-w-5xl pt-14 pb-12 md:pt-20 md:pb-16">
-            <div className="max-w-2xl">
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-3 py-1 text-sm text-primary shadow-sm">
-                <BookOpen className="h-4 w-4" aria-hidden="true" />
-                {GUIDES.length} guides across {availableTags.length} topics
+          <div className="relative container-x max-w-5xl pt-14 pb-16 md:pt-20 md:pb-24">
+            <Breadcrumb className="mb-8 flex justify-center">
+              <BreadcrumbList className="text-xs text-primary/70">
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Guides</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+              <p className="mb-5 inline-flex items-center rounded-full border border-primary/10 bg-white/90 px-3 py-1 text-sm text-primary shadow-sm">
+                Reviewed by CostReno editorial team
               </p>
-              <h1 className="font-display text-3xl md:text-5xl font-bold text-ink mb-4 tracking-tight">
-                Home renovation guides
+              <h1 className="mb-5 font-display text-4xl font-bold tracking-tight text-ink md:text-6xl">
+                Home Renovation Knowledge Center
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
-                Clear explanations of project costs, quote red flags, and material trade-offs so you
-                can plan with better information before you hire.
+              <p className="max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl">
+                Expert renovation cost guides, contractor advice, quote reviews, and planning
+                resources.
               </p>
-              <div className="mt-7 flex flex-wrap gap-3">
+              <ul className="mt-7 flex flex-wrap justify-center gap-2.5 text-sm text-muted-foreground">
+                {HERO_TRUST_METRICS.map((metric) => (
+                  <li
+                    key={metric}
+                    className="inline-flex items-center rounded-full border border-primary/10 bg-white/90 px-3 py-1 shadow-sm"
+                  >
+                    {metric}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-9 flex flex-wrap justify-center gap-3">
                 <a
                   href="#browse-guides"
-                  className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent/90 transition-colors duration-200"
+                  className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Browse guides
                 </a>
                 <a
-                  href="#topic-hubs"
-                  className="inline-flex items-center justify-center rounded-lg border border-primary/20 bg-white px-5 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors duration-200"
+                  href="/estimate"
+                  className="inline-flex items-center justify-center rounded-lg border border-primary/20 bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-[transform,background-color,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-primary/5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  Explore topics
+                  Estimate project cost
+                </a>
+                <a
+                  href="/quote-analyzer"
+                  className="inline-flex items-center justify-center rounded-lg border border-primary/20 bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-[transform,background-color,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-primary/5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Analyze a quote
                 </a>
               </div>
             </div>
           </div>
+        </header>
+
+        <section
+          aria-labelledby="guides-trust-bar"
+          className="border-b border-border/60 bg-[#F7F8FA] py-7"
+        >
+          <div className="container-x max-w-5xl">
+            <h2 id="guides-trust-bar" className="sr-only">
+              Knowledge center trust signals
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {TRUST_BAR_ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-3 rounded-xl border border-white/80 bg-white/90 px-4 py-3 shadow-sm"
+                  >
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold leading-5 text-ink">{item.label}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
-        {/* Start here */}
-        <section className="py-10 md:py-12 border-b border-border/60 bg-surface/60">
+        <section
+          aria-labelledby="most-popular-guides"
+          className="border-b border-border/60 bg-white py-12 md:py-14"
+        >
           <div className="container-x max-w-5xl">
             <div className="flex items-end justify-between gap-4 mb-5">
               <div>
-                <h2 className="font-display text-xl font-bold text-ink">Start here</h2>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Expert guides
+                </p>
+                <h2 id="most-popular-guides" className="font-display text-2xl font-bold text-ink">
+                  Most popular guides
+                </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  High-intent reads most homeowners open first.
+                  High-intent reads homeowners use first when planning scope, pricing, and quote
+                  review.
                 </p>
               </div>
             </div>
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid gap-5 md:grid-cols-2">
               {featuredGuides.map((guide, i) => {
-                const Icon = isGuideTag(guide.tag) ? TAG_ICONS[guide.tag] : BookOpen;
                 return (
                   <a
                     key={guide.href}
                     href={guide.href}
                     className={cn(
-                      "group relative rounded-xl border border-border/60 bg-white p-5",
+                      "group relative rounded-2xl border border-border/40 bg-[#FBFBFC] p-7 shadow-sm",
                       "transition-[transform,box-shadow,border-color] duration-200 ease-out",
-                      "hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md",
+                      "hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5",
                       "motion-reduce:hover:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     )}
                   >
-                    <span className="absolute top-4 right-4 text-[10px] font-semibold tabular-nums text-muted-foreground/70">
+                    <span className="absolute top-5 right-5 text-[10px] font-semibold tabular-nums text-muted-foreground/55">
                       0{i + 1}
                     </span>
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/8 text-primary mb-3 transition-transform duration-200 group-hover:scale-105 motion-reduce:group-hover:scale-100">
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                      {guide.tag}
-                    </p>
-                    <h3 className="font-display text-base font-bold text-ink group-hover:text-primary transition-colors duration-200 pr-6">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                        Popular
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                        {guide.tag}
+                      </span>
+                    </div>
+                    <h3 className="pr-6 font-display text-xl font-bold leading-7 text-ink group-hover:text-primary transition-colors duration-200">
                       {guide.title}
                     </h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="mt-3 text-sm leading-7 text-muted-foreground line-clamp-2">
                       {guide.desc}
                     </p>
+                    <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground/80">
+                      <span>{guide.readingTime}</span>
+                      <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
+                      <span>Updated {guide.lastUpdated}</span>
+                    </div>
                     <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
                       Read guide
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0" />
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0" />
                     </span>
                   </a>
                 );
@@ -303,35 +536,51 @@ function GuidesIndexPage() {
           </div>
         </section>
 
-        {/* Topic hubs */}
-        <section id="topic-hubs" className="py-10 md:py-12 border-b border-border/60 scroll-mt-28">
+        <section
+          id="topic-hubs"
+          aria-labelledby="topic-hubs-heading"
+          className="scroll-mt-28 border-b border-border/60 bg-[#FAFBFC] py-12 md:py-14"
+        >
           <div className="container-x max-w-5xl">
-            <h2 className="font-display text-xl font-bold text-ink mb-1">Topic hubs</h2>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Pricing database
+            </p>
+            <h2 id="topic-hubs-heading" className="mb-1 font-display text-2xl font-bold text-ink">
+              Topic hubs
+            </h2>
             <p className="text-sm text-muted-foreground mb-5">
               Jump into a project area, then dig into the guides below.
             </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {TOPIC_HUBS.map((hub) => {
                 const Icon = HUB_ICONS[hub.href] ?? BookOpen;
+                const guideCount = getHubGuideCount(hub.href);
                 return (
                   <a
                     key={hub.href}
                     href={hub.href}
                     className={cn(
-                      "group flex gap-3.5 rounded-xl border border-border/60 bg-white p-4",
+                      "group flex gap-3.5 rounded-xl border border-border/40 bg-white p-5 shadow-sm",
                       "transition-[transform,box-shadow,border-color] duration-200 ease-out",
-                      "hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md",
+                      "hover:-translate-y-1 hover:border-primary/20 hover:shadow-md",
                       "motion-reduce:hover:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     )}
                   >
-                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-white">
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary transition-colors duration-200 group-hover:bg-primary/12">
                       <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                     </span>
                     <span className="min-w-0">
-                      <h3 className="font-display text-base font-bold text-ink group-hover:text-primary transition-colors duration-200">
+                      <h3 className="font-display text-lg font-bold text-ink group-hover:text-primary transition-colors duration-200">
                         {hub.title}
                       </h3>
-                      <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{hub.desc}</p>
+                      <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{hub.desc}</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground/80">
+                        <span>{guideCount} Guides</span>
+                        <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
+                        <span>{hub.readingTime}</span>
+                        <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
+                        <span>Updated {hub.lastUpdated}</span>
+                      </div>
                     </span>
                   </a>
                 );
@@ -340,11 +589,65 @@ function GuidesIndexPage() {
           </div>
         </section>
 
-        {/* Sticky filters + guide grid */}
-        <section id="browse-guides" className="scroll-mt-28">
+        <section
+          aria-labelledby="popular-tools-heading"
+          className="border-b border-border/60 bg-[#F4F8FB] py-12 md:py-14"
+        >
+          <div className="container-x max-w-5xl">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Planning tools
+            </p>
+            <h2 id="popular-tools-heading" className="mb-1 font-display text-2xl font-bold text-ink">
+              Popular tools
+            </h2>
+            <p className="mb-5 text-sm text-muted-foreground">
+              Move from research to action with estimators, quote review, and planning resources.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {TOOL_CARDS.map((tool) => {
+                const Icon = tool.icon;
+                return (
+                  <a
+                    key={tool.title}
+                    href={tool.href}
+                    className={cn(
+                      "group rounded-xl border border-border/30 bg-white/95 p-5 shadow-sm",
+                      "transition-[transform,box-shadow,border-color] duration-200 ease-out",
+                      "hover:-translate-y-1 hover:border-primary/20 hover:shadow-md",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    )}
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/8 text-primary">
+                        <Icon className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                        Tool
+                      </span>
+                    </div>
+                    <h3 className="font-display text-lg font-bold text-ink transition-colors duration-200 group-hover:text-primary">
+                      {tool.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{tool.desc}</p>
+                    <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                      Open tool
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0" />
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="browse-guides"
+          aria-labelledby="browse-guides-heading"
+          className="scroll-mt-28 bg-white"
+        >
           <div className="sticky top-16 z-30 border-b border-border/60 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/85">
             <div className="container-x max-w-5xl py-3.5 space-y-3">
-              <div className="relative max-w-md">
+              <div className="relative max-w-xl">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
@@ -353,13 +656,13 @@ function GuidesIndexPage() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search guides…"
+                  placeholder="Search guides, costs, contractors, permits, or quote reviews..."
                   aria-label="Search guides"
                   className={cn(
-                    "flex h-10 w-full rounded-lg border border-border bg-white pl-9 pr-9 text-sm text-ink",
-                    "placeholder:text-muted-foreground shadow-sm",
+                    "flex h-11 w-full rounded-xl border border-border/70 bg-white pl-9 pr-9 text-sm text-ink",
+                    "placeholder:text-muted-foreground/80 shadow-sm",
                     "transition-[border-color,box-shadow] duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary/40",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/35 focus-visible:shadow-md",
                   )}
                 />
                 {query ? (
@@ -402,8 +705,83 @@ function GuidesIndexPage() {
             </div>
           </div>
 
-          <div className="container-x max-w-5xl py-10 md:py-12">
-            <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="container-x max-w-5xl py-12 md:py-14">
+            <div className="mb-10">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Updated monthly
+              </p>
+              <h2 id="browse-guides-heading" className="font-display text-2xl font-bold text-ink">
+                Browse all guides
+              </h2>
+            </div>
+
+            <section aria-labelledby="recently-updated-heading" className="mb-10">
+              <div className="mb-4">
+                <h3 id="recently-updated-heading" className="font-display text-xl font-bold text-ink">
+                  Recently updated
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Fresh planning reads reviewed by the CostReno editorial team.
+                </p>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-3">
+                {recentlyUpdatedGuides.map((guide) => (
+                  <a
+                    key={guide.href}
+                    href={guide.href}
+                    className={cn(
+                      "group rounded-xl border border-border/40 bg-white px-5 py-4 shadow-sm",
+                      "transition-[transform,box-shadow,border-color] duration-200 ease-out",
+                      "hover:-translate-y-1 hover:border-primary/20 hover:shadow-md",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800">
+                            Recently updated
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                            {guide.tag}
+                          </span>
+                        </div>
+                        <h4 className="font-display text-base font-bold text-ink transition-colors duration-200 group-hover:text-primary">
+                          {guide.title}
+                        </h4>
+                        <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                          {guide.desc}
+                        </p>
+                      </div>
+                      <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-primary transition-transform duration-200 group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0" />
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground/80">
+                      <span>{guide.readingTime}</span>
+                      <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
+                      <span>Updated {guide.lastUpdated}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+
+            <section aria-labelledby="trending-guides-heading" className="mb-10">
+              <h3 id="trending-guides-heading" className="font-display text-xl font-bold text-ink">
+                Trending This Month
+              </h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {TRENDING_TOPICS.map((topic) => (
+                  <span
+                    key={topic}
+                    className="inline-flex items-center rounded-full border border-border/70 bg-muted/35 px-3 py-1 text-sm text-ink"
+                  >
+                    {topic}
+                  </span>
+                ))}
+              </div>
+            </section>
+
+            <div className="mb-6 flex items-center justify-between gap-3">
               <p className="text-sm text-muted-foreground" aria-live="polite">
                 {filteredGuides.length === 0
                   ? "No guides match"
@@ -449,38 +827,51 @@ function GuidesIndexPage() {
             ) : (
               <div
                 key={`${activeTag}-${query}`}
-                className="grid sm:grid-cols-2 gap-4 animate-in fade-in duration-200 motion-reduce:animate-none"
+                className="grid gap-5 sm:grid-cols-2 animate-in fade-in duration-200 motion-reduce:animate-none"
               >
                 {filteredGuides.map((guide) => {
-                  const Icon = isGuideTag(guide.tag) ? TAG_ICONS[guide.tag] : BookOpen;
                   return (
                     <a
                       key={guide.href}
                       href={guide.href}
                       className={cn(
-                        "group flex flex-col rounded-xl border border-border/60 bg-white p-5",
+                        "group flex flex-col rounded-xl border border-border/35 bg-white p-6 shadow-sm",
                         "transition-[transform,box-shadow,border-color] duration-200 ease-out",
-                        "hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md",
+                        "hover:-translate-y-1 hover:border-primary/20 hover:shadow-md hover:shadow-primary/5",
                         "motion-reduce:hover:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       )}
                     >
-                      <div className="flex items-start gap-3 mb-3">
-                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary transition-transform duration-200 group-hover:scale-105 motion-reduce:group-hover:scale-100">
-                          <Icon className="h-4 w-4" aria-hidden="true" />
-                        </span>
-                        <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                          {guide.tag}
-                        </span>
+                      <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                            {guide.tag}
+                          </span>
+                          {guide.popular ? (
+                            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                              Popular
+                            </span>
+                          ) : null}
+                          {guide.recentlyUpdated ? (
+                            <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800">
+                              Recently updated
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
-                      <h2 className="font-display text-lg font-bold text-ink group-hover:text-primary transition-colors duration-200">
+                      <h3 className="font-display text-xl font-bold leading-7 text-ink group-hover:text-primary transition-colors duration-200">
                         {guide.title}
-                      </h2>
-                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed flex-1">
+                      </h3>
+                      <p className="mt-3 flex-1 text-sm leading-7 text-muted-foreground">
                         {guide.desc}
                       </p>
+                      <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground/80">
+                        <span>{guide.readingTime}</span>
+                        <span className="h-1 w-1 rounded-full bg-border" aria-hidden="true" />
+                        <span>Updated {guide.lastUpdated}</span>
+                      </div>
                       <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary">
                         Read guide
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0" />
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0" />
                       </span>
                     </a>
                   );
@@ -490,27 +881,36 @@ function GuidesIndexPage() {
           </div>
         </section>
 
-        <section className="py-12 bg-muted/20 border-y border-border/60">
-          <div className="container-x max-w-4xl flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-display text-xl font-bold text-ink">Ready to check a quote?</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Analyze one bid, or compare two side by side.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="/quote-analyzer"
-                className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent/90 transition-colors"
-              >
-                Analyze a quote
-              </a>
-              <a
-                href="/compare-quotes"
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-white px-5 py-2.5 text-sm font-semibold text-ink hover:bg-muted transition-colors"
-              >
-                Compare quotes
-              </a>
+        <section className="border-y border-border/60 bg-[#F8FAFC] py-14">
+          <div className="container-x max-w-5xl">
+            <div className="rounded-3xl border border-border/40 bg-white px-7 py-10 shadow-sm md:px-10 md:py-12">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="max-w-2xl">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    U.S. cost data
+                  </p>
+                  <h2 className="font-display text-3xl font-bold text-ink">
+                    Ready to plan your renovation?
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Move from reading to action with CostReno pricing tools and AI quote review.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    href="/estimate"
+                    className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Estimate My Project
+                  </a>
+                  <a
+                    href="/quote-analyzer"
+                    className="inline-flex items-center justify-center rounded-lg border border-border bg-white px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    Upload Contractor Quote
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -556,8 +956,9 @@ function FilterChip({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium",
+        "inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium",
         "transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out",
+        "hover:-translate-y-0.5",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
         active
           ? "border-primary bg-primary text-white shadow-sm ring-2 ring-primary/25 ring-offset-1 ring-offset-background"
