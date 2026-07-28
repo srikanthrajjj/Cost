@@ -30,6 +30,11 @@ export const Route = createFileRoute("/topics/kitchen")({
 
 const LINKS = [
   {
+    title: "2026 kitchen remodeling cost report",
+    href: "/guides/2026-kitchen-remodeling-cost-report",
+    desc: "What Americans are really paying: averages, tiers, ROI, and 2026 cost drivers.",
+  },
+  {
     title: "Kitchen remodel cost landing",
     href: "/kitchen-remodel-cost",
     desc: "National kitchen remodel ranges, breakdowns, and FAQs.",

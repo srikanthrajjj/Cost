@@ -126,6 +126,17 @@
   padding-inline: clamp(1.25rem, 3vw, 4rem);
 }
 
+@utility hide-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  &::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;

@@ -1,3 +1,4 @@
+import { TOPIC_HUBS } from "@/lib/guides/catalog";
 import { NewsletterSignup } from "./NewsletterSignup";
 
 export function SiteFooter() {
@@ -78,91 +79,16 @@ export function SiteFooter() {
                   All guides
                 </a>
               </li>
-              <li>
-                <a
-                  href="/topics/quotes"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Contractor quotes
-                </a>
-              </li>
-              <li>
-                <a href="/topics/roof" className="text-sm text-white/70 hover:text-accent transition">
-                  Roof costs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/topics/kitchen"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Kitchen costs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/topics/hvac"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  HVAC costs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/topics/energy"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Energy costs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/topics/windows"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Window costs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/topics/flooring"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Flooring costs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/how-to-read-a-contractor-quote"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  How to read a quote
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/roof-replacement"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Roof replacement
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/kitchen-remodel"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Kitchen remodel
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/guides/bathroom-remodel"
-                  className="text-sm text-white/70 hover:text-accent transition"
-                >
-                  Bathroom remodel
-                </a>
-              </li>
+              {TOPIC_HUBS.map((hub) => (
+                <li key={hub.href}>
+                  <a
+                    href={hub.href}
+                    className="text-sm text-white/70 hover:text-accent transition"
+                  >
+                    {hub.title}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

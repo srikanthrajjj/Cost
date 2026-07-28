@@ -15,6 +15,7 @@ import { DEFAULT_OG_IMAGE } from "../lib/seo";
 import { VisitorTracker } from "../components/VisitorTracker";
 import { SiteFeedbackFab } from "../components/SiteFeedbackFab";
 import { SiteChatbot } from "../components/SiteChatbot";
+import { SiteAnnouncement } from "../components/SiteAnnouncement";
 
 function NotFoundComponent() {
   return (
@@ -212,6 +213,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <VisitorTracker />
+      <SiteAnnouncement />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <SiteChatbot />

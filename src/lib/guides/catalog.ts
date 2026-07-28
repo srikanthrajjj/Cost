@@ -135,6 +135,12 @@ export const GUIDES: GuideEntry[] = [
     tag: "Kitchen",
   },
   {
+    href: "/guides/2026-kitchen-remodeling-cost-report",
+    title: "2026 kitchen remodeling cost report",
+    desc: "What Americans are really paying: national averages, tiers, ROI, and 2026 cost drivers.",
+    tag: "Kitchen",
+  },
+  {
     href: "/guides/bathroom-remodel",
     title: "Bathroom remodel cost guide",
     desc: "Typical ranges for refreshes and full gut renovations.",

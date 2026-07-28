@@ -15,6 +15,11 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
+import {
+  contactSchema,
+  getContactClientErrorMessage,
+  submitContactMessage,
+} from "@/lib/email/submit-contact";
 
 export const Route = createFileRoute("/contact")({
   component: ContactPage,
@@ -41,25 +46,54 @@ export const Route = createFileRoute("/contact")({
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
+const SUBJECT_OPTIONS = [
+  { value: "general", label: "General inquiry" },
+  { value: "support", label: "Technical support" },
+  { value: "estimate", label: "Question about an estimate" },
+  { value: "quote", label: "Quote analyzer help" },
+  { value: "feedback", label: "Feedback or suggestion" },
+  { value: "partnership", label: "Partnership / business" },
+] as const;
+
 function ContactPage() {
   const [formState, setFormState] = useState<FormState>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "general",
+    subject: "general" as (typeof SUBJECT_OPTIONS)[number]["value"],
     message: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormState("submitting");
+    if (formState === "submitting") return;
 
-    // Simulate form submission (replace with actual API endpoint)
+    const parsed = contactSchema.safeParse(formData);
+    if (!parsed.success) {
+      setErrorMessage(parsed.error.issues[0]?.message || "Please check the form and try again.");
+      setFormState("error");
+      return;
+    }
+
+    setFormState("submitting");
+    setErrorMessage("");
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setFormState("success");
-      setFormData({ name: "", email: "", subject: "general", message: "" });
-    } catch {
+      const result = await submitContactMessage({
+        data: parsed.data,
+      });
+
+      if (result.success) {
+        setFormState("success");
+        setFormData({ name: "", email: "", subject: "general", message: "" });
+        return;
+      }
+
+      setErrorMessage(result.message || "Something went wrong. Please try again.");
+      setFormState("error");
+    } catch (error) {
+      setErrorMessage(getContactClientErrorMessage(error));
       setFormState("error");
     }
   };
@@ -67,7 +101,12 @@ function ContactPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (formState === "error") {
+      setFormState("idle");
+      setErrorMessage("");
+    }
   };
 
   return (
@@ -80,10 +119,10 @@ function ContactPage() {
         <div className="container-x relative py-16 md:py-24">
           <div className="max-w-2xl mx-auto text-center">
             <Badge variant="secondary" className="mb-5 px-3 py-1 text-xs font-medium">
-              Get in Touch
+              Get in touch
             </Badge>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-ink leading-[1.1] tracking-tight">
-              Contact Us
+              Contact us
             </h1>
             <p className="mt-4 text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
               Have a question, feedback, or need help with your estimate? We'd love to hear from
@@ -101,27 +140,27 @@ function ContactPage() {
             <Card className="border-border/60">
               <CardContent className="p-6 md:p-8">
                 {formState === "success" ? (
-                  <div className="text-center py-10">
+                  <div className="text-center py-10" role="status" aria-live="polite">
                     <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-5">
                       <CheckCircle2 className="h-7 w-7 text-accent" />
                     </div>
-                    <h3 className="font-display text-xl font-bold text-ink mb-2">Message Sent</h3>
+                    <h3 className="font-display text-xl font-bold text-ink mb-2">Message sent</h3>
                     <p className="text-muted-foreground mb-6">
-                      Thanks for reaching out. We'll get back to you within 24–48 hours.
+                      Thanks for reaching out. We'll get back to you within 24 to 48 hours.
                     </p>
                     <button
                       type="button"
                       onClick={() => setFormState("idle")}
                       className="inline-flex items-center rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition"
                     >
-                      Send Another Message
+                      Send another message
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-5">
+                  <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                     <div>
                       <h2 className="font-display text-xl font-bold text-ink mb-1">
-                        Send Us a Message
+                        Send us a message
                       </h2>
                       <p className="text-sm text-muted-foreground">
                         Fill out the form below and we'll respond as soon as we can.
@@ -129,96 +168,113 @@ function ContactPage() {
                     </div>
 
                     {formState === "error" && (
-                      <div className="flex items-center gap-2 rounded-lg bg-destructive/5 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+                      <div
+                        className="flex items-center gap-2 rounded-lg bg-destructive/5 border border-destructive/20 px-4 py-3 text-sm text-destructive"
+                        role="alert"
+                      >
                         <AlertCircle className="h-4 w-4 shrink-0" />
-                        Something went wrong. Please try again.
+                        {errorMessage || "Something went wrong. Please try again."}
                       </div>
                     )}
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <label
-                          htmlFor="name"
+                          htmlFor="contact-name"
                           className="block text-sm font-medium text-foreground mb-1.5"
                         >
                           Name <span className="text-destructive">*</span>
                         </label>
                         <input
                           type="text"
-                          id="name"
+                          id="contact-name"
                           name="name"
                           required
+                          autoComplete="name"
+                          maxLength={120}
                           value={formData.name}
                           onChange={handleChange}
                           placeholder="Your name"
-                          className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
+                          disabled={formState === "submitting"}
+                          className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition disabled:opacity-60"
                         />
                       </div>
                       <div>
                         <label
-                          htmlFor="email"
+                          htmlFor="contact-email"
                           className="block text-sm font-medium text-foreground mb-1.5"
                         >
                           Email <span className="text-destructive">*</span>
                         </label>
                         <input
                           type="email"
-                          id="email"
+                          id="contact-email"
                           name="email"
                           required
+                          autoComplete="email"
+                          maxLength={254}
                           value={formData.email}
                           onChange={handleChange}
                           placeholder="you@example.com"
-                          className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
+                          disabled={formState === "submitting"}
+                          className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition disabled:opacity-60"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label
-                        htmlFor="subject"
+                        htmlFor="contact-subject"
                         className="block text-sm font-medium text-foreground mb-1.5"
                       >
                         Subject
                       </label>
                       <select
-                        id="subject"
+                        id="contact-subject"
                         name="subject"
                         value={formData.subject}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
+                        disabled={formState === "submitting"}
+                        className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition disabled:opacity-60"
                       >
-                        <option value="general">General Inquiry</option>
-                        <option value="support">Technical Support</option>
-                        <option value="estimate">Question About an Estimate</option>
-                        <option value="quote">Quote Analyzer Help</option>
-                        <option value="feedback">Feedback or Suggestion</option>
-                        <option value="partnership">Partnership / Business</option>
+                        {SUBJECT_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
                     <div>
                       <label
-                        htmlFor="message"
+                        htmlFor="contact-message"
                         className="block text-sm font-medium text-foreground mb-1.5"
                       >
                         Message <span className="text-destructive">*</span>
                       </label>
                       <textarea
-                        id="message"
+                        id="contact-message"
                         name="message"
                         required
                         rows={5}
+                        minLength={10}
+                        maxLength={5000}
                         value={formData.message}
                         onChange={handleChange}
                         placeholder="How can we help you?"
-                        className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition resize-none"
+                        disabled={formState === "submitting"}
+                        aria-describedby="contact-message-hint"
+                        className="w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition resize-none disabled:opacity-60"
                       />
+                      <p id="contact-message-hint" className="mt-1.5 text-xs text-muted-foreground">
+                        At least 10 characters.
+                      </p>
                     </div>
 
                     <button
                       type="submit"
                       disabled={formState === "submitting"}
+                      aria-busy={formState === "submitting"}
                       className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
                     >
                       {formState === "submitting" ? (
@@ -229,7 +285,7 @@ function ContactPage() {
                       ) : (
                         <>
                           <Send className="h-4 w-4" />
-                          Send Message
+                          Send message
                         </>
                       )}
                     </button>
@@ -248,13 +304,10 @@ function ContactPage() {
                     <Mail className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-ink">Email</h3>
-                    <a
-                      href="mailto:support@costreno.com"
-                      className="text-sm text-muted-foreground hover:text-accent transition"
-                    >
-                      support@costreno.com
-                    </a>
+                    <h3 className="text-sm font-semibold text-ink">Reach us</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Use the contact form and we'll reply to the email you provide.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -267,9 +320,9 @@ function ContactPage() {
                     <Clock className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-ink">Response Time</h3>
+                    <h3 className="text-sm font-semibold text-ink">Response time</h3>
                     <p className="text-sm text-muted-foreground">
-                      We typically respond within 24–48 hours on business days.
+                      We typically respond within 24 to 48 hours on business days.
                     </p>
                   </div>
                 </div>
@@ -294,7 +347,7 @@ function ContactPage() {
 
             {/* Common Topics */}
             <div className="pt-2">
-              <h3 className="text-sm font-semibold text-ink mb-3">Common Topics</h3>
+              <h3 className="text-sm font-semibold text-ink mb-3">Common topics</h3>
               <ul className="space-y-2.5">
                 {[
                   { icon: HelpCircle, label: "How estimates are calculated" },

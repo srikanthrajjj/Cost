@@ -1,18 +1,12 @@
 import { useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { SiteSearch } from "@/components/SiteSearch";
+import { TOPIC_HUBS } from "@/lib/guides/catalog";
 import { cn } from "@/lib/utils";
 
 const GUIDE_LINKS = [
   { name: "All guides", href: "/guides" },
-  { name: "Quote guides", href: "/topics/quotes" },
-  { name: "Roof costs", href: "/topics/roof" },
-  { name: "Kitchen costs", href: "/topics/kitchen" },
-  { name: "Energy costs", href: "/topics/energy" },
-  { name: "Window costs", href: "/topics/windows" },
-  { name: "Flooring costs", href: "/topics/flooring" },
-  { name: "Roofing", href: "/guides/roof-replacement" },
-  { name: "Kitchen", href: "/guides/kitchen-remodel" },
+  ...TOPIC_HUBS.map((hub) => ({ name: hub.title, href: hub.href })),
 ];
 
 const QUOTE_LINKS = [
@@ -30,7 +24,7 @@ export function SiteNav({ active }: SiteNavProps) {
   const [quoteOpen, setQuoteOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+    <header className="sticky top-[var(--site-announce-offset,0px)] z-40 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="container-x flex h-16 items-center justify-between">
         <a href="/" className="shrink-0">
           <img src="/logo.svg" alt="CostReno" style={{ height: "32px", width: "auto" }} />

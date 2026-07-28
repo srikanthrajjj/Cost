@@ -35,6 +35,7 @@ const STATIC_PATHS: { path: string; priority: string }[] = [
   { path: "/guides/quartz-vs-granite-countertops", priority: "0.8" },
   { path: "/guides/roof-replacement", priority: "0.8" },
   { path: "/guides/kitchen-remodel", priority: "0.8" },
+  { path: "/guides/2026-kitchen-remodeling-cost-report", priority: "0.85" },
   { path: "/guides/bathroom-remodel", priority: "0.8" },
   { path: "/guides/hvac-installation", priority: "0.8" },
   { path: "/guides/window-replacement", priority: "0.7" },

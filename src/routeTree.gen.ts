@@ -67,6 +67,7 @@ import { Route as GuidesCanInsuranceCoverRoofReplacementRouteImport } from './ro
 import { Route as GuidesCabinetInstallLaborCostRouteImport } from './routes/guides/cabinet-install-labor-cost'
 import { Route as GuidesBathroomRemodelRouteImport } from './routes/guides/bathroom-remodel'
 import { Route as GuidesAllowancesAndChangeOrdersRouteImport } from './routes/guides/allowances-and-change-orders'
+import { Route as Guides2026KitchenRemodelingCostReportRouteImport } from './routes/guides/2026-kitchen-remodeling-cost-report'
 import { Route as StateCityCategoryRouteImport } from './routes/$state/$city/$category'
 
 const TermsRoute = TermsRouteImport.update({
@@ -382,6 +383,12 @@ const GuidesAllowancesAndChangeOrdersRoute =
     path: '/guides/allowances-and-change-orders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const Guides2026KitchenRemodelingCostReportRoute =
+  Guides2026KitchenRemodelingCostReportRouteImport.update({
+    id: '/guides/2026-kitchen-remodeling-cost-report',
+    path: '/guides/2026-kitchen-remodeling-cost-report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StateCityCategoryRoute = StateCityCategoryRouteImport.update({
   id: '/$state/$city/$category',
   path: '/$state/$city/$category',
@@ -403,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
+  '/guides/2026-kitchen-remodeling-cost-report': typeof Guides2026KitchenRemodelingCostReportRoute
   '/guides/allowances-and-change-orders': typeof GuidesAllowancesAndChangeOrdersRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/cabinet-install-labor-cost': typeof GuidesCabinetInstallLaborCostRoute
@@ -464,6 +472,7 @@ export interface FileRoutesByTo {
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
+  '/guides/2026-kitchen-remodeling-cost-report': typeof Guides2026KitchenRemodelingCostReportRoute
   '/guides/allowances-and-change-orders': typeof GuidesAllowancesAndChangeOrdersRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/cabinet-install-labor-cost': typeof GuidesCabinetInstallLaborCostRoute
@@ -526,6 +535,7 @@ export interface FileRoutesById {
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
+  '/guides/2026-kitchen-remodeling-cost-report': typeof Guides2026KitchenRemodelingCostReportRoute
   '/guides/allowances-and-change-orders': typeof GuidesAllowancesAndChangeOrdersRoute
   '/guides/bathroom-remodel': typeof GuidesBathroomRemodelRoute
   '/guides/cabinet-install-labor-cost': typeof GuidesCabinetInstallLaborCostRoute
@@ -589,6 +599,7 @@ export interface FileRouteTypes {
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
+    | '/guides/2026-kitchen-remodeling-cost-report'
     | '/guides/allowances-and-change-orders'
     | '/guides/bathroom-remodel'
     | '/guides/cabinet-install-labor-cost'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
+    | '/guides/2026-kitchen-remodeling-cost-report'
     | '/guides/allowances-and-change-orders'
     | '/guides/bathroom-remodel'
     | '/guides/cabinet-install-labor-cost'
@@ -711,6 +723,7 @@ export interface FileRouteTypes {
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
+    | '/guides/2026-kitchen-remodeling-cost-report'
     | '/guides/allowances-and-change-orders'
     | '/guides/bathroom-remodel'
     | '/guides/cabinet-install-labor-cost'
@@ -773,6 +786,7 @@ export interface RootRouteChildren {
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   TermsRoute: typeof TermsRoute
+  Guides2026KitchenRemodelingCostReportRoute: typeof Guides2026KitchenRemodelingCostReportRoute
   GuidesAllowancesAndChangeOrdersRoute: typeof GuidesAllowancesAndChangeOrdersRoute
   GuidesBathroomRemodelRoute: typeof GuidesBathroomRemodelRoute
   GuidesCabinetInstallLaborCostRoute: typeof GuidesCabinetInstallLaborCostRoute
@@ -1228,6 +1242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesAllowancesAndChangeOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/2026-kitchen-remodeling-cost-report': {
+      id: '/guides/2026-kitchen-remodeling-cost-report'
+      path: '/guides/2026-kitchen-remodeling-cost-report'
+      fullPath: '/guides/2026-kitchen-remodeling-cost-report'
+      preLoaderRoute: typeof Guides2026KitchenRemodelingCostReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$state/$city/$category': {
       id: '/$state/$city/$category'
       path: '/$state/$city/$category'
@@ -1253,6 +1274,8 @@ const rootRouteChildren: RootRouteChildren = {
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   TermsRoute: TermsRoute,
+  Guides2026KitchenRemodelingCostReportRoute:
+    Guides2026KitchenRemodelingCostReportRoute,
   GuidesAllowancesAndChangeOrdersRoute: GuidesAllowancesAndChangeOrdersRoute,
   GuidesBathroomRemodelRoute: GuidesBathroomRemodelRoute,
   GuidesCabinetInstallLaborCostRoute: GuidesCabinetInstallLaborCostRoute,
