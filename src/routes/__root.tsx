@@ -16,6 +16,7 @@ import { VisitorTracker } from "../components/VisitorTracker";
 import { SiteFeedbackFab } from "../components/SiteFeedbackFab";
 import { SiteChatbot } from "../components/SiteChatbot";
 import { SiteAnnouncement } from "../components/SiteAnnouncement";
+import { GuideArticleActions } from "../components/GuideArticleActions";
 
 function NotFoundComponent() {
   return (
@@ -216,6 +217,7 @@ function RootComponent() {
       <SiteAnnouncement />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <GuideArticleActions />
       <SiteChatbot />
       <SiteFeedbackFab />
     </QueryClientProvider>
