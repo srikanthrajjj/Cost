@@ -71,6 +71,16 @@ export const TOPIC_HUBS: TopicHub[] = [
 
 export const GUIDES: GuideEntry[] = [
   {
+    href: "/guides/home-renovation-project-planner",
+    title: "Home renovation project planner",
+    desc: "Order of work, planning budgets, and a free interactive planner for any remodel.",
+    tag: "Planning",
+    readingTime: "8 min read",
+    lastUpdated: "August 2026",
+    popular: true,
+    recentlyUpdated: true,
+  },
+  {
     href: "/guides/how-to-read-a-contractor-quote",
     title: "How to read a contractor quote",
     desc: "Line-item checklist for scope, allowances, exclusions, and payment terms.",

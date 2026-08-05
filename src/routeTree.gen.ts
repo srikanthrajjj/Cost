@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as QuoteAnalyzerRouteImport } from './routes/quote-analyzer'
+import { Route as ProjectPlannerRouteImport } from './routes/project-planner'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as InsuranceClaimsRouteImport } from './routes/insurance-claims'
@@ -59,6 +60,7 @@ import { Route as GuidesInflatedQuoteSignsRouteImport } from './routes/guides/in
 import { Route as GuidesHvacInstallationRouteImport } from './routes/guides/hvac-installation'
 import { Route as GuidesHowToReadAContractorQuoteRouteImport } from './routes/guides/how-to-read-a-contractor-quote'
 import { Route as GuidesHowToCompareContractorQuotesRouteImport } from './routes/guides/how-to-compare-contractor-quotes'
+import { Route as GuidesHomeRenovationProjectPlannerRouteImport } from './routes/guides/home-renovation-project-planner'
 import { Route as GuidesFlooringRouteImport } from './routes/guides/flooring'
 import { Route as GuidesEvChargerInstallationCostRouteImport } from './routes/guides/ev-charger-installation-cost'
 import { Route as GuidesContractorQuoteTooHighRouteImport } from './routes/guides/contractor-quote-too-high'
@@ -83,6 +85,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const QuoteAnalyzerRoute = QuoteAnalyzerRouteImport.update({
   id: '/quote-analyzer',
   path: '/quote-analyzer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectPlannerRoute = ProjectPlannerRouteImport.update({
+  id: '/project-planner',
+  path: '/project-planner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -337,6 +344,12 @@ const GuidesHowToCompareContractorQuotesRoute =
     path: '/guides/how-to-compare-contractor-quotes',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuidesHomeRenovationProjectPlannerRoute =
+  GuidesHomeRenovationProjectPlannerRouteImport.update({
+    id: '/guides/home-renovation-project-planner',
+    path: '/guides/home-renovation-project-planner',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const GuidesFlooringRoute = GuidesFlooringRouteImport.update({
   id: '/guides/flooring',
   path: '/guides/flooring',
@@ -407,6 +420,7 @@ export interface FileRoutesByFullPath {
   '/insurance-claims': typeof InsuranceClaimsRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
+  '/project-planner': typeof ProjectPlannerRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
@@ -419,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/guides/contractor-quote-too-high': typeof GuidesContractorQuoteTooHighRoute
   '/guides/ev-charger-installation-cost': typeof GuidesEvChargerInstallationCostRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/home-renovation-project-planner': typeof GuidesHomeRenovationProjectPlannerRoute
   '/guides/how-to-compare-contractor-quotes': typeof GuidesHowToCompareContractorQuotesRoute
   '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
@@ -469,6 +484,7 @@ export interface FileRoutesByTo {
   '/insurance-claims': typeof InsuranceClaimsRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
+  '/project-planner': typeof ProjectPlannerRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
@@ -481,6 +497,7 @@ export interface FileRoutesByTo {
   '/guides/contractor-quote-too-high': typeof GuidesContractorQuoteTooHighRoute
   '/guides/ev-charger-installation-cost': typeof GuidesEvChargerInstallationCostRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/home-renovation-project-planner': typeof GuidesHomeRenovationProjectPlannerRoute
   '/guides/how-to-compare-contractor-quotes': typeof GuidesHowToCompareContractorQuotesRoute
   '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
@@ -532,6 +549,7 @@ export interface FileRoutesById {
   '/insurance-claims': typeof InsuranceClaimsRoute
   '/methodology': typeof MethodologyRoute
   '/privacy': typeof PrivacyRoute
+  '/project-planner': typeof ProjectPlannerRoute
   '/quote-analyzer': typeof QuoteAnalyzerRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/terms': typeof TermsRoute
@@ -544,6 +562,7 @@ export interface FileRoutesById {
   '/guides/contractor-quote-too-high': typeof GuidesContractorQuoteTooHighRoute
   '/guides/ev-charger-installation-cost': typeof GuidesEvChargerInstallationCostRoute
   '/guides/flooring': typeof GuidesFlooringRoute
+  '/guides/home-renovation-project-planner': typeof GuidesHomeRenovationProjectPlannerRoute
   '/guides/how-to-compare-contractor-quotes': typeof GuidesHowToCompareContractorQuotesRoute
   '/guides/how-to-read-a-contractor-quote': typeof GuidesHowToReadAContractorQuoteRoute
   '/guides/hvac-installation': typeof GuidesHvacInstallationRoute
@@ -596,6 +615,7 @@ export interface FileRouteTypes {
     | '/insurance-claims'
     | '/methodology'
     | '/privacy'
+    | '/project-planner'
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
@@ -608,6 +628,7 @@ export interface FileRouteTypes {
     | '/guides/contractor-quote-too-high'
     | '/guides/ev-charger-installation-cost'
     | '/guides/flooring'
+    | '/guides/home-renovation-project-planner'
     | '/guides/how-to-compare-contractor-quotes'
     | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
@@ -658,6 +679,7 @@ export interface FileRouteTypes {
     | '/insurance-claims'
     | '/methodology'
     | '/privacy'
+    | '/project-planner'
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
@@ -670,6 +692,7 @@ export interface FileRouteTypes {
     | '/guides/contractor-quote-too-high'
     | '/guides/ev-charger-installation-cost'
     | '/guides/flooring'
+    | '/guides/home-renovation-project-planner'
     | '/guides/how-to-compare-contractor-quotes'
     | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
@@ -720,6 +743,7 @@ export interface FileRouteTypes {
     | '/insurance-claims'
     | '/methodology'
     | '/privacy'
+    | '/project-planner'
     | '/quote-analyzer'
     | '/robots.txt'
     | '/terms'
@@ -732,6 +756,7 @@ export interface FileRouteTypes {
     | '/guides/contractor-quote-too-high'
     | '/guides/ev-charger-installation-cost'
     | '/guides/flooring'
+    | '/guides/home-renovation-project-planner'
     | '/guides/how-to-compare-contractor-quotes'
     | '/guides/how-to-read-a-contractor-quote'
     | '/guides/hvac-installation'
@@ -783,6 +808,7 @@ export interface RootRouteChildren {
   InsuranceClaimsRoute: typeof InsuranceClaimsRoute
   MethodologyRoute: typeof MethodologyRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProjectPlannerRoute: typeof ProjectPlannerRoute
   QuoteAnalyzerRoute: typeof QuoteAnalyzerRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   TermsRoute: typeof TermsRoute
@@ -795,6 +821,7 @@ export interface RootRouteChildren {
   GuidesContractorQuoteTooHighRoute: typeof GuidesContractorQuoteTooHighRoute
   GuidesEvChargerInstallationCostRoute: typeof GuidesEvChargerInstallationCostRoute
   GuidesFlooringRoute: typeof GuidesFlooringRoute
+  GuidesHomeRenovationProjectPlannerRoute: typeof GuidesHomeRenovationProjectPlannerRoute
   GuidesHowToCompareContractorQuotesRoute: typeof GuidesHowToCompareContractorQuotesRoute
   GuidesHowToReadAContractorQuoteRoute: typeof GuidesHowToReadAContractorQuoteRoute
   GuidesHvacInstallationRoute: typeof GuidesHvacInstallationRoute
@@ -855,6 +882,13 @@ declare module '@tanstack/react-router' {
       path: '/quote-analyzer'
       fullPath: '/quote-analyzer'
       preLoaderRoute: typeof QuoteAnalyzerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/project-planner': {
+      id: '/project-planner'
+      path: '/project-planner'
+      fullPath: '/project-planner'
+      preLoaderRoute: typeof ProjectPlannerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1186,6 +1220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesHowToCompareContractorQuotesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/home-renovation-project-planner': {
+      id: '/guides/home-renovation-project-planner'
+      path: '/guides/home-renovation-project-planner'
+      fullPath: '/guides/home-renovation-project-planner'
+      preLoaderRoute: typeof GuidesHomeRenovationProjectPlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/flooring': {
       id: '/guides/flooring'
       path: '/guides/flooring'
@@ -1271,6 +1312,7 @@ const rootRouteChildren: RootRouteChildren = {
   InsuranceClaimsRoute: InsuranceClaimsRoute,
   MethodologyRoute: MethodologyRoute,
   PrivacyRoute: PrivacyRoute,
+  ProjectPlannerRoute: ProjectPlannerRoute,
   QuoteAnalyzerRoute: QuoteAnalyzerRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   TermsRoute: TermsRoute,
@@ -1285,6 +1327,8 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesContractorQuoteTooHighRoute: GuidesContractorQuoteTooHighRoute,
   GuidesEvChargerInstallationCostRoute: GuidesEvChargerInstallationCostRoute,
   GuidesFlooringRoute: GuidesFlooringRoute,
+  GuidesHomeRenovationProjectPlannerRoute:
+    GuidesHomeRenovationProjectPlannerRoute,
   GuidesHowToCompareContractorQuotesRoute:
     GuidesHowToCompareContractorQuotesRoute,
   GuidesHowToReadAContractorQuoteRoute: GuidesHowToReadAContractorQuoteRoute,

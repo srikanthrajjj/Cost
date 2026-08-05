@@ -34,6 +34,8 @@ export const ESTIMATOR_FAQS = [
 ] as const;
 
 const DEFAULT_GUIDE_LINKS = [
+  { href: "/project-planner", label: "Home renovation project planner" },
+  { href: "/guides/home-renovation-project-planner", label: "Renovation planning guide" },
   { href: "/guides/roof-replacement", label: "Roof replacement cost guide" },
   { href: "/guides/kitchen-remodel", label: "Kitchen remodel cost guide" },
   { href: "/guides/bathroom-remodel", label: "Bathroom remodel cost guide" },
@@ -48,6 +50,7 @@ const PROJECT_GUIDE_LINKS: Partial<
   Record<ProjectType, { href: string; label: string }[]>
 > = {
   roof: [
+    { href: "/project-planner?project=roof", label: "Plan a roof project" },
     { href: "/guides/roof-replacement", label: "Roof replacement cost guide" },
     { href: "/topics/roof", label: "Roof costs topic hub" },
     { href: "/guides/roof-replacement-cost-by-city", label: "Roof cost by city" },
@@ -56,6 +59,7 @@ const PROJECT_GUIDE_LINKS: Partial<
     { href: "/methodology", label: "How we calculate estimates" },
   ],
   kitchen: [
+    { href: "/project-planner?project=kitchen", label: "Plan a kitchen remodel" },
     { href: "/guides/kitchen-remodel", label: "Kitchen remodel cost guide" },
     { href: "/topics/kitchen", label: "Kitchen costs topic hub" },
     { href: "/guides/quartz-vs-granite-countertops", label: "Quartz vs granite" },
@@ -63,11 +67,13 @@ const PROJECT_GUIDE_LINKS: Partial<
     { href: "/methodology", label: "How we calculate estimates" },
   ],
   bathroom: [
+    { href: "/project-planner?project=bathroom", label: "Plan a bathroom remodel" },
     { href: "/guides/bathroom-remodel", label: "Bathroom remodel cost guide" },
     { href: "/quote-analyzer", label: "Quote analyzer" },
     { href: "/methodology", label: "How we calculate estimates" },
   ],
   hvac: [
+    { href: "/project-planner?project=hvac", label: "Plan an HVAC project" },
     { href: "/guides/hvac-installation", label: "HVAC installation cost guide" },
     { href: "/topics/hvac", label: "HVAC costs topic hub" },
     { href: "/hvac-installation-cost", label: "HVAC cost overview" },
@@ -75,6 +81,7 @@ const PROJECT_GUIDE_LINKS: Partial<
     { href: "/methodology", label: "How we calculate estimates" },
   ],
   windows: [
+    { href: "/project-planner?project=windows", label: "Plan window replacement" },
     { href: "/guides/window-replacement", label: "Window replacement cost guide" },
     { href: "/topics/windows", label: "Window costs topic hub" },
     { href: "/window-replacement-cost", label: "Window cost overview" },
@@ -82,6 +89,7 @@ const PROJECT_GUIDE_LINKS: Partial<
     { href: "/methodology", label: "How we calculate estimates" },
   ],
   flooring: [
+    { href: "/project-planner?project=flooring", label: "Plan a flooring project" },
     { href: "/guides/flooring", label: "Flooring cost guide" },
     { href: "/topics/flooring", label: "Flooring costs topic hub" },
     { href: "/flooring-cost", label: "Flooring cost overview" },

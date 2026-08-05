@@ -59,6 +59,14 @@ export function SiteFooter() {
               </li>
               <li>
                 <a
+                  href="/project-planner"
+                  className="text-sm text-white/70 hover:text-accent transition"
+                >
+                  Project planner
+                </a>
+              </li>
+              <li>
+                <a
                   href="/quote-analyzer"
                   className="text-sm text-white/70 hover:text-accent transition"
                 >

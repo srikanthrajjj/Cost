@@ -15,7 +15,7 @@ const QUOTE_LINKS = [
 ];
 
 interface SiteNavProps {
-  active?: "estimator" | "quote" | "guides" | "locations";
+  active?: "estimator" | "quote" | "guides" | "locations" | "planner";
 }
 
 export function SiteNav({ active }: SiteNavProps) {
@@ -39,6 +39,15 @@ export function SiteNav({ active }: SiteNavProps) {
             )}
           >
             Cost estimator
+          </a>
+          <a
+            href="/project-planner"
+            className={cn(
+              "hover:text-foreground transition-colors whitespace-nowrap",
+              active === "planner" && "text-accent",
+            )}
+          >
+            Project planner
           </a>
           <div className="relative group">
             <button
@@ -122,6 +131,9 @@ export function SiteNav({ active }: SiteNavProps) {
         <div className="lg:hidden border-t border-border bg-background px-4 py-4 space-y-3">
           <a href="/estimate" className="block text-sm font-semibold text-ink">
             Cost estimator
+          </a>
+          <a href="/project-planner" className="block text-sm font-semibold text-ink">
+            Project planner
           </a>
           <button
             type="button"

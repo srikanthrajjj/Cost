@@ -8,6 +8,7 @@ import { absoluteUrl } from "@/lib/seo";
 const STATIC_PATHS: { path: string; priority: string }[] = [
   { path: "/", priority: "1.0" },
   { path: "/estimate", priority: "0.9" },
+  { path: "/project-planner", priority: "0.9" },
   { path: "/quote-analyzer", priority: "0.9" },
   { path: "/compare-quotes", priority: "0.9" },
   { path: "/methodology", priority: "0.6" },
@@ -22,6 +23,7 @@ const STATIC_PATHS: { path: string; priority: string }[] = [
   { path: "/topics/flooring", priority: "0.75" },
   { path: "/topics/hvac", priority: "0.75" },
   { path: "/topics/energy", priority: "0.75" },
+  { path: "/guides/home-renovation-project-planner", priority: "0.85" },
   { path: "/guides/how-to-read-a-contractor-quote", priority: "0.85" },
   { path: "/guides/is-contractor-quote-fair", priority: "0.85" },
   { path: "/guides/contractor-quote-too-high", priority: "0.85" },

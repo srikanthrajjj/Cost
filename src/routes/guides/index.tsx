@@ -287,9 +287,9 @@ const TOOL_CARDS = [
     icon: Database,
   },
   {
-    title: "Project timeline planner",
-    desc: "See the major phases homeowners should plan around.",
-    href: "/guides/roof-replacement-timeline",
+    title: "Project planner",
+    desc: "Plan any renovation mix with budget order and next steps.",
+    href: "/project-planner",
     icon: Wrench,
   },
 ] as const;

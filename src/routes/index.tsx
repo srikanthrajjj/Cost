@@ -3465,17 +3465,23 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
-                Coming soon
+                New tool
               </p>
               <p className="text-sm font-semibold text-ink">
-                Whole-home planner, budget tracker, and scope tools
+                Home renovation project planner
               </p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Get notified when multi-project renovation tools launch. Live tools above work today.
+                Pick any renovation mix, get a planning budget and suggested order, then move into
+                estimates and quote checks.
               </p>
             </div>
-            <div className="w-full md:w-auto md:min-w-[300px] shrink-0">
-              <NewsletterSignup source="whole-home-tools-waitlist" compact />
+            <div className="shrink-0">
+              <a
+                href="/project-planner"
+                className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition"
+              >
+                Open project planner
+              </a>
             </div>
           </div>
         </div>
