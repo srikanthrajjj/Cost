@@ -174,10 +174,10 @@ export const GUIDES: GuideEntry[] = [
   {
     href: "/guides/roof-replacement",
     title: "Roof replacement cost guide",
-    desc: "Pricing by material, size, and region, plus what quotes often miss.",
+    desc: "Pricing by material, size, pitch, stories, tear-off, and region.",
     tag: "Roofing",
     readingTime: "15 min read",
-    lastUpdated: "July 2026",
+    lastUpdated: "August 2026",
     popular: true,
   },
   {

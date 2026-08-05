@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { RoofMiniCalculator } from "@/components/guides/RoofMiniCalculator";
 import projRoof from "@/assets/proj-roof.jpg";
 
 export const Route = createFileRoute("/guides/roof-replacement")({
@@ -26,13 +27,13 @@ export const Route = createFileRoute("/guides/roof-replacement")({
       {
         name: "description",
         content:
-          "Roof replacement costs in 2026 by material, size, and state. Compare asphalt, metal, tile, and slate ranges before you hire.",
+          "Roof replacement costs in 2026 by material, size, pitch, stories, and state. Compare labor, tear-off, and add-on ranges before you hire.",
       },
       { property: "og:title", content: "Roof replacement cost guide (2026) | CostReno" },
       {
         property: "og:description",
         content:
-          "Roof replacement pricing by material, size, and state. Includes labor, hidden fees, and quote comparison tips.",
+          "Roof replacement pricing by material, size, pitch, and state. Includes labor share, tear-off, add-ons, and quote comparison tips.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "https://www.costreno.com/guides/roof-replacement" },
@@ -45,8 +46,14 @@ export const Route = createFileRoute("/guides/roof-replacement")({
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const TABLE_OF_CONTENTS = [
   { id: "average-cost", label: "Average roof replacement cost" },
+  { id: "roof-calculator", label: "Instant roof cost calculator" },
   { id: "cost-by-material", label: "Cost by roofing material" },
   { id: "cost-by-size", label: "Cost by roof size" },
+  { id: "cost-by-pitch", label: "Cost by roof pitch" },
+  { id: "cost-by-stories", label: "Cost by stories" },
+  { id: "labor-vs-materials", label: "Labor vs materials" },
+  { id: "tear-off-costs", label: "Tear-off and removal" },
+  { id: "addon-costs", label: "Common add-on costs" },
   { id: "cost-by-state", label: "Cost by state" },
   { id: "labor-costs", label: "Labor costs explained" },
   { id: "hidden-costs", label: "Hidden costs homeowners miss" },
@@ -54,6 +61,118 @@ const TABLE_OF_CONTENTS = [
   { id: "compare-quotes", label: "How to compare contractor quotes" },
   { id: "costreno-ai", label: "How CostReno AI helps" },
   { id: "faq", label: "Frequently asked questions" },
+];
+
+const PITCH_COSTS = [
+  {
+    pitch: "Flat / low (0–3/12)",
+    multiplier: "1.03× footprint",
+    impact: "Baseline labor",
+    range: "$8,000–$14,500",
+  },
+  {
+    pitch: "Standard (4–6/12)",
+    multiplier: "1.10× footprint",
+    impact: "Typical install",
+    range: "$8,600–$16,000",
+  },
+  {
+    pitch: "Steep (7–9/12)",
+    multiplier: "1.20× footprint",
+    impact: "More surface + staging",
+    range: "$10,000–$19,000",
+  },
+  {
+    pitch: "Very steep (10/12+)",
+    multiplier: "1.36× footprint",
+    impact: "+20% to +40% labor",
+    range: "$11,500–$22,000",
+  },
+];
+
+const STORIES_COSTS = [
+  {
+    stories: "1 story",
+    uplift: "Baseline",
+    note: "Ground-level staging and access",
+  },
+  {
+    stories: "2 stories",
+    uplift: "+4% to +8%",
+    note: "Scaffolding and material haul add cost",
+  },
+  {
+    stories: "3+ stories",
+    uplift: "+8% to +15%",
+    note: "Lift equipment and safety requirements are common",
+  },
+];
+
+const LABOR_MATERIALS_SPLIT = [
+  {
+    category: "Materials",
+    share: "30–40%",
+    notes: "Shingles, underlayment, flashing, vents",
+  },
+  {
+    category: "Labor",
+    share: "40–60%",
+    notes: "Tear-off, install, detailing, cleanup",
+  },
+  {
+    category: "Disposal",
+    share: "3–6%",
+    notes: "Dumpster rental and haul-away",
+  },
+  {
+    category: "Permits",
+    share: "1–3%",
+    notes: "City or county fees and inspections",
+  },
+  {
+    category: "Contingency",
+    share: "8–15%",
+    notes: "Decking or framing found after tear-off",
+  },
+];
+
+const TEAR_OFF_COSTS = [
+  {
+    material: "Asphalt shingles (1 layer)",
+    perSqFt: "$1–$3 / sq ft",
+    typical: "$1,000–$3,000",
+  },
+  {
+    material: "Asphalt (2+ layers)",
+    perSqFt: "$2–$5 / sq ft",
+    typical: "$2,000–$5,000",
+  },
+  {
+    material: "Wood shakes",
+    perSqFt: "$2–$4 / sq ft",
+    typical: "$2,000–$4,500",
+  },
+  {
+    material: "Tile or slate",
+    perSqFt: "$3–$6 / sq ft",
+    typical: "$3,500–$8,000",
+  },
+  {
+    material: "Metal",
+    perSqFt: "$2–$4 / sq ft",
+    typical: "$2,000–$5,000",
+  },
+];
+
+const ADDON_COSTS = [
+  { item: "Plywood decking replacement", range: "$50–$100 per 4×8 sheet" },
+  { item: "Ice and water shield", range: "$1–$2 / sq ft at eaves and valleys" },
+  { item: "Synthetic underlayment upgrade", range: "$0.50–$1.50 / sq ft" },
+  { item: "Chimney flashing", range: "$200–$500 per chimney" },
+  { item: "Skylight re-flashing", range: "$300–$800 each" },
+  { item: "Ridge vent installation", range: "$300–$800" },
+  { item: "Fascia / soffit repair", range: "$8–$20 / linear ft" },
+  { item: "Gutter replacement", range: "$1,000–$2,500" },
 ];
 
 const MATERIAL_COSTS = [
@@ -237,7 +356,7 @@ function RoofReplacementGuide() {
               logo: { "@type": "ImageObject", url: "https://www.costreno.com/logo.svg" },
             },
             datePublished: "2026-07-01",
-            dateModified: "2026-07-21",
+            dateModified: "2026-08-05",
             mainEntityOfPage: "https://www.costreno.com/guides/roof-replacement",
           }),
         }}
@@ -316,20 +435,34 @@ function RoofReplacementGuide() {
               Roof replacement cost in 2026: complete pricing guide by roof type, size & state
             </h1>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed max-w-lg">
-              Most homeowners overpay for roof replacement because they don't know what a fair price
-              looks like in their area. This guide breaks down real costs by material, roof size, and
-              state so you can budget accurately, compare quotes confidently, and avoid overpaying.
+              Short answer: most U.S. homeowners pay <strong className="text-ink">$8,600 to $24,700</strong> for
+              a full roof replacement in 2026 (about <strong className="text-ink">$4 to $12 per sq ft</strong>{" "}
+              installed for asphalt). Material, pitch, stories, tear-off, and local labor move that range.
             </p>
             <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
               <span>15 min read</span>
               <span>·</span>
-              <span>Updated July 2026</span>
+              <span>Updated August 2026</span>
             </div>
             <div className="mt-4 flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
-                <Shield className="h-3.5 w-3.5 text-accent" />
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                <Shield className="h-3.5 w-3.5 text-primary" />
               </div>
-              <span className="text-xs font-medium text-ink">Reviewed by Roofing Experts</span>
+              <span className="text-xs font-medium text-ink">Reviewed by roofing experts</span>
+            </div>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <a
+                href="/estimate?project=roof"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition"
+              >
+                Get a ZIP-based roof estimate <ArrowRight className="h-4 w-4" />
+              </a>
+              <a
+                href="/quote-analyzer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-5 py-3 text-sm font-semibold text-ink hover:bg-muted/40 transition"
+              >
+                Analyze a roofing quote
+              </a>
             </div>
           </div>
           {/* Right Image */}
@@ -355,19 +488,19 @@ function RoofReplacementGuide() {
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <DollarSign className="h-4 w-4 text-accent" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase">
-                  Average Cost
+                  Average cost
                 </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">
                 $8,600–$24,700
               </div>
-              <p className="text-xs text-muted-foreground mt-1">National Average</p>
+              <p className="text-xs text-muted-foreground mt-1">National average</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Clock className="h-4 w-4 text-accent" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase">
-                  Typical Timeline
+                  Typical timeline
                 </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">3–5 days</div>
@@ -377,7 +510,7 @@ function RoofReplacementGuide() {
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <Shield className="h-4 w-4 text-accent" />
                 <span className="text-xs font-semibold text-muted-foreground uppercase">
-                  Roof Lifespan
+                  Roof lifespan
                 </span>
               </div>
               <div className="font-display text-xl md:text-2xl font-bold text-ink">20–50 years</div>
@@ -449,8 +582,23 @@ function RoofReplacementGuide() {
                 </table>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                These are approximate averages based on regional data. Your actual cost depends on your specific location, roof complexity, chosen materials, and contractor.
+                These are approximate averages based on regional data. Your actual cost depends on your
+                specific location, roof complexity, chosen materials, and contractor. For local planning
+                ranges, see{" "}
+                <a href="/guides/roof-replacement-cost-by-state" className="text-primary underline-offset-2 hover:underline">
+                  cost by state
+                </a>{" "}
+                and{" "}
+                <a href="/guides/roof-replacement-cost-by-city" className="text-primary underline-offset-2 hover:underline">
+                  cost by city
+                </a>
+                .
               </p>
+            </section>
+
+            {/* Instant calculator */}
+            <section className="mb-12">
+              <RoofMiniCalculator />
             </section>
 
             {/* Section 2: Cost by roofing material */}
@@ -459,7 +607,11 @@ function RoofReplacementGuide() {
                 Roof replacement cost by material
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Your choice of roofing material is the single biggest factor in total project cost. Below is a comparison for a typical 1,700 square foot roof including labor and materials:
+                Your choice of roofing material is the single biggest factor in total project cost. Below is a comparison for a typical 1,700 square foot roof including labor and materials. Compare asphalt and metal in more depth in our{" "}
+                <a href="/guides/metal-vs-asphalt-roof" className="text-primary underline-offset-2 hover:underline">
+                  metal vs asphalt guide
+                </a>
+                .
               </p>
               <div className="rounded-xl border border-border bg-white overflow-hidden">
                 <table className="w-full">
@@ -522,8 +674,260 @@ function RoofReplacementGuide() {
                 </table>
               </div>
               <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-                Note that roof square footage is typically 1.2x to 1.5x your home's floor square footage due to pitch and overhangs.
+                Note that roof square footage is typically 1.2x to 1.5x your home&apos;s floor square footage due to pitch and overhangs.
               </p>
+            </section>
+
+            {/* Cost by pitch */}
+            <section id="cost-by-pitch" className="mb-12">
+              <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                Roof replacement cost by pitch
+              </h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                Steeper roofs have more surface area than the footprint below them and need extra safety
+                gear. CostReno&apos;s estimator uses these pitch multipliers against building footprint
+                (planning ranges for a typical architectural asphalt roof on a ~2,000 sq ft home):
+              </p>
+              <div className="rounded-xl border border-border bg-white overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Pitch
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Area factor
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Labor impact
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Typical range
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {PITCH_COSTS.map((row, i) => (
+                      <tr
+                        key={row.pitch}
+                        className={i < PITCH_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
+                        <td className="px-5 py-3 text-sm font-medium text-ink">{row.pitch}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground">{row.multiplier}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.impact}
+                        </td>
+                        <td className="px-5 py-3 text-sm font-semibold text-ink">{row.range}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+                Use the{" "}
+                <a href="#roof-calculator" className="text-primary underline-offset-2 hover:underline">
+                  calculator above
+                </a>{" "}
+                or the{" "}
+                <a href="/estimate?project=roof" className="text-primary underline-offset-2 hover:underline">
+                  full roof estimate
+                </a>{" "}
+                to apply pitch to your footprint and ZIP.
+              </p>
+            </section>
+
+            {/* Cost by stories */}
+            <section id="cost-by-stories" className="mb-12">
+              <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                Roof replacement cost by stories
+              </h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                Height mainly affects labor and access, not material unit pricing. Approximate uplift on
+                total project cost:
+              </p>
+              <div className="rounded-xl border border-border bg-white overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Stories
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Cost uplift
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Why
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {STORIES_COSTS.map((row, i) => (
+                      <tr
+                        key={row.stories}
+                        className={i < STORIES_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
+                        <td className="px-5 py-3 text-sm font-medium text-ink">{row.stories}</td>
+                        <td className="px-5 py-3 text-sm font-semibold text-ink">{row.uplift}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.note}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* Labor vs materials */}
+            <section id="labor-vs-materials" className="mb-12">
+              <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                Labor vs materials cost split
+              </h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                On a typical asphalt replacement, labor is often the largest share. CostReno&apos;s roof
+                estimate breakdown uses roughly 35% materials and 40% labor, with the rest in prep,
+                disposal, permits, and contingency:
+              </p>
+              <div className="rounded-xl border border-border bg-white overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Category
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Share of total
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Includes
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {LABOR_MATERIALS_SPLIT.map((row, i) => (
+                      <tr
+                        key={row.category}
+                        className={
+                          i < LABOR_MATERIALS_SPLIT.length - 1 ? "border-b border-border/50" : ""
+                        }
+                      >
+                        <td className="px-5 py-3 text-sm font-medium text-ink">{row.category}</td>
+                        <td className="px-5 py-3 text-sm font-semibold text-ink">{row.share}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.notes}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* Tear-off */}
+            <section id="tear-off-costs" className="mb-12">
+              <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                Tear-off and removal costs
+              </h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                Removing the old roof is usually priced per square foot or as a line item. Multiple
+                layers and heavy materials raise disposal fees. Planning ranges for a typical home:
+              </p>
+              <div className="rounded-xl border border-border bg-white overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Existing roof
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Per sq ft
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3 hidden sm:table-cell">
+                        Typical total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TEAR_OFF_COSTS.map((row, i) => (
+                      <tr
+                        key={row.material}
+                        className={i < TEAR_OFF_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
+                        <td className="px-5 py-3 text-sm font-medium text-ink">{row.material}</td>
+                        <td className="px-5 py-3 text-sm font-semibold text-ink">{row.perSqFt}</td>
+                        <td className="px-5 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                          {row.typical}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+                Overlay (installing over one existing layer) can lower upfront cost but is restricted by
+                code in many areas and can hide deck damage. Ask what tear-off includes before you compare
+                bids.
+              </p>
+            </section>
+
+            {/* Add-ons */}
+            <section id="addon-costs" className="mb-12">
+              <h2 className="font-display text-2xl font-bold text-ink mb-4">
+                Common roof add-on costs
+              </h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                These line items often appear after inspection or during tear-off. Treat them as planning
+                estimates, not fixed prices:
+              </p>
+              <div className="rounded-xl border border-border bg-white overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Add-on
+                      </th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground uppercase px-5 py-3">
+                        Typical range
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ADDON_COSTS.map((row, i) => (
+                      <tr
+                        key={row.item}
+                        className={i < ADDON_COSTS.length - 1 ? "border-b border-border/50" : ""}
+                      >
+                        <td className="px-5 py-3 text-sm font-medium text-ink">{row.item}</td>
+                        <td className="px-5 py-3 text-sm font-semibold text-ink">{row.range}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-6 rounded-xl border border-border bg-white p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-ink mb-1">
+                    Ready for a local planning number?
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Run a ZIP-based estimate, or upload a contractor quote to check missing line items.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                  <a
+                    href="/estimate?project=roof"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition"
+                  >
+                    Calculate my estimate
+                  </a>
+                  <a
+                    href="/guides/roof-quote-review"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-ink hover:bg-muted/40 transition"
+                  >
+                    Roof quote review tips
+                  </a>
+                </div>
+              </div>
             </section>
 
             {/* Section 4: Cost by state */}
@@ -532,7 +936,15 @@ function RoofReplacementGuide() {
                 Roof replacement cost by state
               </h2>
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Where you live significantly impacts roof replacement cost. Labor rates, building codes, climate requirements, and material availability all vary by region:
+                Where you live significantly impacts roof replacement cost. Labor rates, building codes, climate requirements, and material availability all vary by region. Browse the full{" "}
+                <a href="/guides/roof-replacement-cost-by-state" className="text-primary underline-offset-2 hover:underline">
+                  state cost guide
+                </a>{" "}
+                or{" "}
+                <a href="/topics/roof" className="text-primary underline-offset-2 hover:underline">
+                  roof topic hub
+                </a>{" "}
+                for more local pages:
               </p>
               <div className="rounded-xl border border-border bg-white overflow-hidden">
                 <table className="w-full">
@@ -794,7 +1206,7 @@ function RoofReplacementGuide() {
                   href="/estimate?project=roof"
                   className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg bg-accent text-white text-sm font-bold hover:bg-accent/90 transition shadow-sm"
                 >
-                  Get My Estimate <ArrowRight className="h-4 w-4" />
+                  Get my estimate <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
 
@@ -831,7 +1243,7 @@ function RoofReplacementGuide() {
                   href="/quote-analyzer"
                   className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg border-2 border-accent text-accent text-sm font-bold hover:bg-accent/5 transition"
                 >
-                  Review My Quote <ArrowRight className="h-4 w-4" />
+                  Review my quote <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
 
@@ -844,7 +1256,7 @@ function RoofReplacementGuide() {
                     className="flex items-center gap-3 text-sm text-muted-foreground hover:text-accent transition"
                   >
                     <DollarSign className="h-4 w-4 text-accent shrink-0" />
-                    <span>Roofing Cost Calculator</span>
+                    <span>Roofing cost calculator</span>
                   </a>
                   <a
                     href="/quote-analyzer"

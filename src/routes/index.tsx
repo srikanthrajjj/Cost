@@ -36,7 +36,8 @@ import {
   ChevronDown,
   ChevronDownIcon,
 } from "lucide-react";
-import { calculateEstimate } from "@/lib/estimator-engine";
+import { calculateEstimate, resolveRoofArea } from "@/lib/estimator-engine";
+import { calculateRoofCost } from "@/lib/roof/roof-cost-engine";
 import { getActiveSteps } from "@/lib/estimator-steps";
 import type { EstimatorAnswers, ProjectType } from "@/lib/estimator-engine";
 import type { Question } from "@/lib/estimator-steps";
@@ -247,13 +248,19 @@ function Logo() {
 }
 
 function QuickEstimate() {
+  const navigate = useNavigate();
   const [projectType, setProjectType] = useState("roof");
   const [zipCode, setZipCode] = useState("");
   const [houseSize, setHouseSize] = useState("");
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [loadingText, setLoadingText] = useState("");
-  const [estimate, setEstimate] = useState({ cost: 0, range: "", confidence: 0 });
+  const [estimate, setEstimate] = useState<{
+    cost: number;
+    range: string;
+    confidence: number;
+    breakdown: { label: string; amount: number; pct: number }[];
+    roofSquares?: number;
+  }>({ cost: 0, range: "", confidence: 0, breakdown: [] });
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const projectTypes = [
@@ -292,8 +299,11 @@ function QuickEstimate() {
     "Estimating permits",
   ];
 
-  const calculateEstimate = () => {
+  const runQuickEstimate = () => {
     if (!zipCode || !houseSize) return;
+    const sqft = parseInt(houseSize.replace(/,/g, ""), 10);
+    if (!Number.isFinite(sqft) || sqft <= 0) return;
+
     setIsCalculating(true);
     setShowResult(false);
     setCompletedSteps([]);
@@ -301,32 +311,48 @@ function QuickEstimate() {
     let step = 0;
     const interval = setInterval(() => {
       if (step < loadingSteps.length) {
-        setLoadingText(loadingSteps[step]);
         setCompletedSteps((prev) => [...prev, step]);
         step++;
       } else {
         clearInterval(interval);
         setCompletedSteps((prev) => [...prev, step]);
         setTimeout(() => {
-          const baseCost =
+          const answers: EstimatorAnswers = {
+            projectType: projectType as ProjectType,
+            zipCode: zipCode.trim(),
+            squareFootage: sqft,
+          };
+
+          if (projectType === "roof") {
+            answers.roofAction = "replace";
+            answers.roofMaterial = "asphalt";
+            answers.roofPitch = "standard";
+            answers.roofComplexity = "moderate";
+            answers.roofLayers = "one";
+            answers.stories = 1;
+            const roofArea = resolveRoofArea(answers);
+            answers.roofSize = roofArea.sqFt;
+            answers.roofSizeSource = "manual";
+          }
+
+          const result = calculateEstimate(answers);
+          const roofSquares =
             projectType === "roof"
-              ? 8
-              : projectType === "kitchen"
-                ? 25
-                : projectType === "bathroom"
-                  ? 8
-                  : projectType === "windows"
-                    ? 6
-                    : projectType === "flooring"
-                      ? 4
-                      : 4;
-          const sizeMultiplier = parseInt(houseSize) / 2000;
-          const randomVariance = 0.9 + Math.random() * 0.2;
-          const cost = Math.round(baseCost * 1000 * sizeMultiplier * randomVariance);
+              ? calculateRoofCost({
+                  mode: "manual",
+                  footprintSqFt: sqft,
+                  pitch: "standard",
+                  complexity: "moderate",
+                  material: "architectural",
+                }).roofingSquares
+              : undefined;
+
           setEstimate({
-            cost,
-            range: `$${Math.round(cost * 0.9).toLocaleString()} – $${Math.round(cost * 1.1).toLocaleString()}`,
-            confidence: Math.round(85 + Math.random() * 10),
+            cost: result.mid,
+            range: `$${result.low.toLocaleString()} – $${result.high.toLocaleString()}`,
+            confidence: result.confidence,
+            breakdown: result.breakdown,
+            roofSquares,
           });
           setIsCalculating(false);
           setShowResult(true);
@@ -342,7 +368,7 @@ function QuickEstimate() {
           <>
             <div className="text-center mb-8">
               <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
-                Get Your Instant Estimate
+                Get your instant estimate
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Answer 3 quick questions. No signup required.
@@ -351,7 +377,7 @@ function QuickEstimate() {
 
             {/* Project Type Selector */}
             <div>
-              <label className="text-xs font-medium text-ink mb-2 block">Project Type</label>
+              <label className="text-xs font-medium text-ink mb-2 block">Project type</label>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {projectTypes.map((p) => (
                   <button
@@ -442,11 +468,11 @@ function QuickEstimate() {
               ) : (
                 <>
                   <button
-                    onClick={calculateEstimate}
+                    onClick={runQuickEstimate}
                     disabled={!zipCode || !houseSize}
                     className="w-full rounded-lg bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Get My Free Estimate
+                    Get my free estimate
                   </button>
                   <div className="mt-3 flex items-center justify-center gap-3 text-[10px] text-muted-foreground">
                     <span>No signup</span>
@@ -464,155 +490,115 @@ function QuickEstimate() {
           <div className="animate-in fade-in duration-500">
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium mb-3">
-                <Check className="h-3 w-3" /> {estimate.confidence}% Confidence
+                <Check className="h-3 w-3" /> {estimate.confidence}% confidence
               </div>
               <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
-                Your Estimate
+                Your estimate
               </h2>
             </div>
 
             {/* Main Estimate */}
             <div className="text-center py-6">
               <div className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-                Estimated Cost
+                Estimated cost
               </div>
               <div className="font-display text-6xl md:text-7xl font-bold text-ink">
                 ${estimate.cost.toLocaleString()}
               </div>
               <div className="mt-2 text-sm text-muted-foreground">
-                Typical Range: {estimate.range}
+                Typical range: {estimate.range}
               </div>
-              <div className="mt-1 text-[10px] text-muted-foreground">Updated July 2026</div>
+              <div className="mt-1 text-[10px] text-muted-foreground">
+                From CostReno&apos;s estimate engine · August 2026
+              </div>
             </div>
 
             {/* Cost Breakdown */}
             <div className="mt-6 space-y-2">
-              {[
-                {
-                  name: "Materials",
-                  amount: Math.round(estimate.cost * 0.44),
-                  desc: "Quality materials at competitive regional pricing",
-                },
-                {
-                  name: "Labor",
-                  amount: Math.round(estimate.cost * 0.34),
-                  desc: "Licensed contractors in your area",
-                },
-                {
-                  name: "Permits",
-                  amount: Math.round(estimate.cost * 0.03),
-                  desc: "Required local building permits",
-                },
-                {
-                  name: "Waste",
-                  amount: Math.round(estimate.cost * 0.03),
-                  desc: "Debris removal and disposal",
-                },
-                {
-                  name: "Other",
-                  amount: Math.round(estimate.cost * 0.16),
-                  desc: "Additional costs and contingencies",
-                },
-              ].map((item) => (
+              {(estimate.breakdown.length > 0
+                ? estimate.breakdown
+                : [
+                    { label: "Materials", amount: Math.round(estimate.cost * 0.44), pct: 44 },
+                    { label: "Labor", amount: Math.round(estimate.cost * 0.34), pct: 34 },
+                    { label: "Permits", amount: Math.round(estimate.cost * 0.03), pct: 3 },
+                    { label: "Disposal", amount: Math.round(estimate.cost * 0.03), pct: 3 },
+                    { label: "Contingency", amount: Math.round(estimate.cost * 0.16), pct: 16 },
+                  ]
+              ).map((item) => (
                 <details
-                  key={item.name}
+                  key={item.label}
                   className="group rounded-lg border border-border bg-background overflow-hidden"
                 >
                   <summary className="flex items-center justify-between px-4 py-3 cursor-pointer text-xs hover:bg-muted/30 transition">
-                    <span className="text-muted-foreground">{item.name}</span>
+                    <span className="text-muted-foreground">
+                      {item.label}
+                      {"pct" in item ? ` (${item.pct}%)` : ""}
+                    </span>
                     <span className="font-medium text-ink">${item.amount.toLocaleString()}</span>
                   </summary>
-                  <div className="px-4 pb-3 text-[10px] text-muted-foreground">{item.desc}</div>
+                  <div className="px-4 pb-3 text-[10px] text-muted-foreground">
+                    Share of the midpoint estimate for your inputs
+                  </div>
                 </details>
               ))}
             </div>
 
             {/* Roofing Materials Breakdown */}
-            {projectType === "roof" && (
+            {projectType === "roof" && estimate.roofSquares != null && (
               <div className="mt-6 rounded-xl border border-border p-5 bg-background">
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-3">
-                  Materials Required
+                  Roof area estimate
                 </div>
                 <div className="text-xs text-ink mb-3">
-                  To have 10% buffer would require{" "}
-                  <span className="font-semibold">
-                    {Math.ceil(((parseInt(houseSize) / 100) * 1.1) / 100)} roof squares
-                  </span>
-                  .
-                </div>
-                <div className="text-xs font-medium text-ink mb-2">
-                  By United States standard, your roof will need:
+                  With standard pitch and waste, this footprint is about{" "}
+                  <span className="font-semibold">{estimate.roofSquares} roofing squares</span>{" "}
+                  (100 sq ft each).
                 </div>
                 <div className="space-y-1.5 text-xs text-muted-foreground">
                   <div className="flex items-start gap-2">
                     <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
                     <span>
+                      Rough shingle bundles:{" "}
                       <span className="font-medium text-ink">
-                        {Math.ceil(parseInt(houseSize) * 0.11)} bundles
+                        {Math.ceil(estimate.roofSquares * 3)}
                       </span>{" "}
-                      of composition shingles (each bundle covers ~33 ft²)
+                      (about 3 bundles per square)
                     </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
                     <span>
-                      <span className="font-medium text-ink">
-                        {Math.ceil(parseInt(houseSize) * 0.037)} rolls
-                      </span>{" "}
-                      of roll roofing (36 in × 36 ft each)
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
-                    <span>
-                      <span className="font-medium text-ink">
-                        {Math.ceil(parseInt(houseSize) * 0.01)} rolls
-                      </span>{" "}
-                      of #15 felt (36 in × 144 ft each)
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
-                    <span>
-                      <span className="font-medium text-ink">
-                        {Math.ceil(parseInt(houseSize) * 0.018)} rolls
-                      </span>{" "}
-                      of #30 felt (36 in × 72 ft each)
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">
-                      Roofing ceramic tiles do not have a standard size. Consult contractors to
-                      determine the amount needed.
+                      Pitch, stories, and second-layer tear-off can change both squares and price.
+                      Refine those in the full estimator.
                     </span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Recommendation Card */}
-            <div className="mt-6 rounded-xl border border-border p-5 bg-background">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
-                Recommended Material
+            {projectType === "roof" && (
+              <div className="mt-6 rounded-xl border border-border p-5 bg-background">
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
+                  Common starting material
+                </div>
+                <div className="font-display text-lg font-bold text-ink">Architectural asphalt</div>
+                <div className="mt-3 text-xs font-medium text-ink mb-2">Why homeowners often choose it</div>
+                <div className="space-y-1.5">
+                  {[
+                    "Strong value for most climates",
+                    "Wide contractor availability",
+                    "25–30 year typical lifespan",
+                  ].map((reason) => (
+                    <div
+                      key={reason}
+                      className="flex items-center gap-2 text-xs text-muted-foreground"
+                    >
+                      <Check className="h-3 w-3 text-accent shrink-0" /> {reason}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="font-display text-lg font-bold text-ink">Architectural Shingles</div>
-              <div className="mt-3 text-xs font-medium text-ink mb-2">Why we recommend this:</div>
-              <div className="space-y-1.5">
-                {[
-                  "Best ROI for your area",
-                  "Lowest long-term maintenance",
-                  "Ideal for your climate",
-                ].map((reason) => (
-                  <div
-                    key={reason}
-                    className="flex items-center gap-2 text-xs text-muted-foreground"
-                  >
-                    <Check className="h-3 w-3 text-accent shrink-0" /> {reason}
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
 
             {/* How We Calculated - Collapsible */}
             <details className="mt-4 rounded-xl border border-border overflow-hidden">
@@ -620,27 +606,28 @@ function QuickEstimate() {
                 How we calculated this
               </summary>
               <div className="px-4 pb-3 text-[10px] text-muted-foreground space-y-1">
-                <p>Local labor rates for {zipCode}</p>
-                <p>Current material pricing data</p>
-                <p>Permit costs by jurisdiction</p>
-                <p>Based on {houseSize} sq ft</p>
-                <p>Updated monthly</p>
+                <p>Regional labor and material multipliers for ZIP {zipCode}</p>
+                <p>CostReno estimate engine (same logic as /estimate)</p>
+                <p>Based on {houseSize} sq ft home size</p>
+                {projectType === "roof" && (
+                  <p>Assumes replace, architectural asphalt, standard pitch, 1 story</p>
+                )}
               </div>
             </details>
 
             {/* Full Report Preview */}
             <div className="mt-6 rounded-xl border border-border p-4 bg-background">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
-                Your Full Report Includes
+                Your full report includes
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {[
-                  "Detailed Cost Breakdown",
-                  "Material Comparison",
-                  "ROI Analysis",
+                  "Detailed cost breakdown",
+                  "Material comparison",
+                  "ROI analysis",
                   "Timeline",
                   "Recommendation",
-                  "Contractor Checklist",
+                  "Contractor checklist",
                 ].map((item) => (
                   <div
                     key={item}
@@ -654,8 +641,16 @@ function QuickEstimate() {
 
             {/* CTAs */}
             <div className="mt-8 space-y-3">
-              <button className="w-full rounded-lg bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition">
-                View Full Report →
+              <button
+                onClick={() =>
+                  navigate({
+                    to: "/estimate",
+                    search: { project: projectType },
+                  })
+                }
+                className="w-full rounded-lg bg-accent py-4 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition"
+              >
+                Continue in full estimator →
               </button>
               <button
                 onClick={() => {
@@ -665,7 +660,7 @@ function QuickEstimate() {
                 }}
                 className="w-full rounded-lg border border-border py-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
               >
-                Start New Estimate
+                Start new estimate
               </button>
             </div>
 

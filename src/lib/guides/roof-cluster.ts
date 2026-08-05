@@ -13,6 +13,8 @@ export const ROOF_TOPIC = { label: "Roof costs", href: "/topics/roof" };
 
 export const ROOF_CLUSTER_RELATED = [
   { title: "Roof replacement cost guide", href: "/guides/roof-replacement" },
+  { title: "Cost by roof pitch", href: "/guides/roof-replacement#cost-by-pitch" },
+  { title: "Labor vs materials", href: "/guides/roof-replacement#labor-vs-materials" },
   { title: "Roof replacement cost by state", href: "/guides/roof-replacement-cost-by-state" },
   { title: "Roof replacement cost by city", href: "/guides/roof-replacement-cost-by-city" },
   { title: "Metal vs asphalt roof", href: "/guides/metal-vs-asphalt-roof" },

@@ -38,7 +38,17 @@ const PLANNING_LINKS = [
   {
     title: "Roof replacement guide",
     href: "/guides/roof-replacement",
-    desc: "Deep guide on materials, hidden costs, and planning a replacement.",
+    desc: "Material, size, pitch, stories, tear-off, add-ons, and quote tips.",
+  },
+  {
+    title: "Cost by roof pitch",
+    href: "/guides/roof-replacement#cost-by-pitch",
+    desc: "How flat, standard, steep, and very steep roofs change total cost.",
+  },
+  {
+    title: "Labor vs materials",
+    href: "/guides/roof-replacement#labor-vs-materials",
+    desc: "Typical share of materials, labor, disposal, permits, and contingency.",
   },
   {
     title: "Roof replacement cost by state",
