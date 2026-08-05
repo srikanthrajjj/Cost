@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { savePageVisit } from "@/lib/db/store";
+import { isExcludedVisitGeo } from "@/lib/analytics/visit-geo";
 
 export const recordPageVisit = createServerFn({ method: "POST" })
   .validator(
@@ -17,6 +18,10 @@ export const recordPageVisit = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Skip admin/internal noise
     if (data.path.startsWith("/admin")) {
+      return { ok: true as const, skipped: true as const };
+    }
+
+    if (isExcludedVisitGeo(data.country, data.countryCode)) {
       return { ok: true as const, skipped: true as const };
     }
 

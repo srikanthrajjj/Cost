@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { recordPageVisit } from "@/lib/analytics/record-page-visit";
+import { isExcludedVisitGeo } from "@/lib/analytics/visit-geo";
 
 const SESSION_KEY = "costreno_visitor_id";
 const GEO_KEY = "costreno_visitor_geo";
@@ -72,6 +73,7 @@ export function VisitorTracker() {
       const sessionId = getOrCreateSessionId();
       const geo = await resolveGeo();
       if (cancelled) return;
+      if (isExcludedVisitGeo(geo.country, geo.countryCode)) return;
 
       try {
         await recordPageVisit({

@@ -6,16 +6,22 @@ import {
   countStoredQuoteFeedback,
   countStoredQuoteUploads,
   countStoredUniqueVisitors,
+  countStoredVisitorsLastDays,
   getStorageMode,
   getStoredAverageSessionMs,
+  getStoredBounceRatePercent,
   listStoredPageVisits,
   listStoredQuoteFeedback,
   listStoredQuoteUploads,
+  topStoredReferrers,
   topStoredSearchedArticles,
+  topStoredSearchQueries,
   topStoredVisitLocations,
   topStoredVisitedArticles,
+  topStoredVisitedPages,
 } from "@/lib/db/store";
 import { GUIDES } from "@/lib/guides/catalog";
+import { GOOGLE_TRENDS_WATCHLIST } from "@/lib/analytics/google-trends-watchlist";
 import { getAudienceId, getResendClient } from "@/lib/email/resend";
 
 /** Fallback so /admin works before ADMIN_SECRET is set in env. Override in production. */
@@ -209,6 +215,12 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       avgSessionMs,
       searchedArticles,
       visitedArticles,
+      visitors7d,
+      bounceRate,
+      topPages,
+      topReferrers,
+      topQueries,
+      topGuides,
     ] = await Promise.all([
       safe(() => countStoredQuoteUploads(), 0),
       safe(() => countStoredQuoteFeedback(), 0),
@@ -223,6 +235,12 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       safe(() => getStoredAverageSessionMs(), null),
       safe(() => topStoredSearchedArticles(1), []),
       safe(() => topStoredVisitedArticles(1), []),
+      safe(() => countStoredVisitorsLastDays(7), 0),
+      safe(() => getStoredBounceRatePercent(), null),
+      safe(() => topStoredVisitedPages(8), []),
+      safe(() => topStoredReferrers(8), []),
+      safe(() => topStoredSearchQueries(8), []),
+      safe(() => topStoredVisitedArticles(8), []),
     ]);
 
     const storage = getStorageMode();
@@ -250,6 +268,9 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
           }
         : null;
 
+    const quoteConversionRate =
+      uniqueVisitors > 0 ? Math.round((quotesProcessed / uniqueVisitors) * 1000) / 10 : null;
+
     return {
       storage,
       storageWarning,
@@ -260,6 +281,9 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       pageViews,
       uniqueVisitors,
       dailyVisitors,
+      visitors7d,
+      bounceRate,
+      quoteConversionRate,
       avgSessionMs,
       avgSessionLabel: formatSessionDuration(avgSessionMs),
       mostVisitedCity: topCity
@@ -267,6 +291,15 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
         : null,
       mostSearchedArticle,
       topLocations,
+      topPages,
+      topReferrers,
+      topQueries,
+      topGuides: topGuides.map((g) => ({
+        path: g.path,
+        label: articleLabelFromPath(g.path),
+        count: g.count,
+      })),
+      googleTrendsWatchlist: GOOGLE_TRENDS_WATCHLIST,
       recentVisits,
       recentQuotes: recentQuotes.map(({ rawText, analysisSummary, ...rest }) => ({
         ...rest,

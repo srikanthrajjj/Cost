@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { isExcludedVisitGeo } from "@/lib/analytics/visit-geo";
 
 export interface StoredQuoteUpload {
   id: string;
@@ -250,17 +251,24 @@ export async function fileSavePageVisit(row: StoredPageVisit): Promise<StoredPag
 
 export async function fileListPageVisits(limit = 50): Promise<StoredPageVisit[]> {
   const store = await ensureStore();
-  return store.pageVisits.slice(0, limit);
+  return store.pageVisits
+    .filter((v) => !isExcludedVisitGeo(v.country, v.countryCode))
+    .slice(0, limit);
 }
 
 export async function fileCountPageVisits(): Promise<number> {
   const store = await ensureStore();
-  return store.pageVisits.length;
+  return store.pageVisits.filter((v) => !isExcludedVisitGeo(v.country, v.countryCode)).length;
 }
 
 export async function fileCountUniqueVisitors(): Promise<number> {
   const store = await ensureStore();
-  return new Set(store.pageVisits.map((v) => v.sessionId).filter(Boolean)).size;
+  return new Set(
+    store.pageVisits
+      .filter((v) => !isExcludedVisitGeo(v.country, v.countryCode))
+      .map((v) => v.sessionId)
+      .filter(Boolean),
+  ).size;
 }
 
 export async function fileTopVisitLocations(limit = 8): Promise<
@@ -269,6 +277,7 @@ export async function fileTopVisitLocations(limit = 8): Promise<
   const store = await ensureStore();
   const counts = new Map<string, number>();
   for (const visit of store.pageVisits) {
+    if (isExcludedVisitGeo(visit.country, visit.countryCode)) continue;
     const city = visit.city?.trim();
     const country = visit.country?.trim();
     const label = city && country ? `${city}, ${country}` : country || city || "Unknown";
@@ -284,6 +293,7 @@ export async function fileCountDailyVisitors(dayIso = new Date().toISOString().s
   const store = await ensureStore();
   const sessions = new Set<string>();
   for (const visit of store.pageVisits) {
+    if (isExcludedVisitGeo(visit.country, visit.countryCode)) continue;
     if (visit.createdAt.slice(0, 10) === dayIso && visit.sessionId) {
       sessions.add(visit.sessionId);
     }
@@ -295,6 +305,7 @@ export async function fileAverageSessionMs(): Promise<number | null> {
   const store = await ensureStore();
   const bySession = new Map<string, { min: number; max: number; count: number }>();
   for (const visit of store.pageVisits) {
+    if (isExcludedVisitGeo(visit.country, visit.countryCode)) continue;
     const ts = Date.parse(visit.createdAt);
     if (!Number.isFinite(ts) || !visit.sessionId) continue;
     const existing = bySession.get(visit.sessionId);
@@ -323,6 +334,7 @@ export async function fileTopVisitedArticles(limit = 5): Promise<{ path: string;
   const store = await ensureStore();
   const counts = new Map<string, number>();
   for (const visit of store.pageVisits) {
+    if (isExcludedVisitGeo(visit.country, visit.countryCode)) continue;
     if (!visit.path.startsWith("/guides/") || visit.path === "/guides/") continue;
     counts.set(visit.path, (counts.get(visit.path) ?? 0) + 1);
   }
@@ -330,6 +342,85 @@ export async function fileTopVisitedArticles(limit = 5): Promise<{ path: string;
     .map(([path, count]) => ({ path, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
+}
+
+function includedVisits(store: Awaited<ReturnType<typeof ensureStore>>) {
+  return store.pageVisits.filter((v) => !isExcludedVisitGeo(v.country, v.countryCode));
+}
+
+export async function fileTopVisitedPages(limit = 8): Promise<{ path: string; count: number }[]> {
+  const store = await ensureStore();
+  const counts = new Map<string, number>();
+  for (const visit of includedVisits(store)) {
+    if (!visit.path || visit.path.startsWith("/admin")) continue;
+    counts.set(visit.path, (counts.get(visit.path) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([path, count]) => ({ path, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export async function fileTopReferrers(limit = 8): Promise<{ label: string; count: number }[]> {
+  const store = await ensureStore();
+  const counts = new Map<string, number>();
+  for (const visit of includedVisits(store)) {
+    const raw = visit.referrer?.trim();
+    let label = "Direct / unknown";
+    if (raw) {
+      try {
+        label = new URL(raw).hostname.replace(/^www\./, "") || raw;
+      } catch {
+        label = raw.slice(0, 80);
+      }
+    }
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export async function fileTopSearchQueries(limit = 8): Promise<{ query: string; count: number }[]> {
+  const store = await ensureStore();
+  const counts = new Map<string, number>();
+  for (const event of store.searchEvents) {
+    const q = event.query.trim().toLowerCase();
+    if (!q) continue;
+    counts.set(q, (counts.get(q) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([query, count]) => ({ query, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export async function fileVisitorsLastDays(days = 7): Promise<number> {
+  const store = await ensureStore();
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  const sessions = new Set<string>();
+  for (const visit of includedVisits(store)) {
+    const ts = Date.parse(visit.createdAt);
+    if (!Number.isFinite(ts) || ts < cutoff || !visit.sessionId) continue;
+    sessions.add(visit.sessionId);
+  }
+  return sessions.size;
+}
+
+export async function fileBounceRatePercent(): Promise<number | null> {
+  const store = await ensureStore();
+  const bySession = new Map<string, number>();
+  for (const visit of includedVisits(store)) {
+    if (!visit.sessionId) continue;
+    bySession.set(visit.sessionId, (bySession.get(visit.sessionId) ?? 0) + 1);
+  }
+  if (bySession.size === 0) return null;
+  let bounced = 0;
+  for (const count of bySession.values()) {
+    if (count === 1) bounced += 1;
+  }
+  return Math.round((bounced / bySession.size) * 100);
 }
 
 export async function fileSaveSearchEvent(row: StoredSearchEvent): Promise<StoredSearchEvent> {

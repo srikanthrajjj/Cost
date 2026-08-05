@@ -1,6 +1,7 @@
-import { count, desc, sql } from "drizzle-orm";
+import { and, count, desc, sql } from "drizzle-orm";
 import { getDb, getStorageMode } from "./client";
 import { comparisonReports, pageVisits, quoteFeedback, quoteUploads, searchEvents } from "./schema";
+import { isExcludedVisitGeo } from "@/lib/analytics/visit-geo";
 import {
   fileAverageSessionMs,
   fileCountDailyVisitors,
@@ -18,8 +19,13 @@ import {
   fileSaveQuoteUpload,
   fileSaveSearchEvent,
   fileTopSearchedArticles,
+  fileTopSearchQueries,
+  fileTopReferrers,
   fileTopVisitLocations,
   fileTopVisitedArticles,
+  fileTopVisitedPages,
+  fileBounceRatePercent,
+  fileVisitorsLastDays,
   fileUpdateQuoteUpload,
   type StoredComparisonReport,
   type StoredPageVisit,
@@ -29,6 +35,12 @@ import {
 } from "./file-store";
 
 const MAX_RAW_TEXT_CHARS = 100_000;
+
+/** Exclude India (and future excluded geos) from analytics reads. */
+const nonExcludedVisitSql = sql`
+  lower(coalesce(${pageVisits.country}, '')) <> 'india'
+  AND upper(coalesce(${pageVisits.countryCode}, '')) <> 'IN'
+`;
 
 export type SaveQuoteUploadInput = {
   fileName?: string;
@@ -348,7 +360,12 @@ export type SavePageVisitInput = {
 export async function savePageVisit(input: SavePageVisitInput): Promise<{
   id: string;
   storage: "postgres" | "file";
+  skipped?: boolean;
 }> {
+  if (isExcludedVisitGeo(input.country, input.countryCode)) {
+    return { id: "skipped", storage: getStorageMode(), skipped: true };
+  }
+
   const id = newId("visit");
   const createdAt = new Date();
   const row: StoredPageVisit = {
@@ -386,7 +403,12 @@ export async function savePageVisit(input: SavePageVisitInput): Promise<{
 export async function listStoredPageVisits(limit = 50): Promise<StoredPageVisit[]> {
   const db = getDb();
   if (db) {
-    const rows = await db.select().from(pageVisits).orderBy(desc(pageVisits.createdAt)).limit(limit);
+    const rows = await db
+      .select()
+      .from(pageVisits)
+      .where(nonExcludedVisitSql)
+      .orderBy(desc(pageVisits.createdAt))
+      .limit(limit);
     return rows.map((r) => ({
       id: r.id,
       createdAt: r.createdAt.toISOString(),
@@ -405,7 +427,7 @@ export async function listStoredPageVisits(limit = 50): Promise<StoredPageVisit[
 export async function countStoredPageVisits(): Promise<number> {
   const db = getDb();
   if (db) {
-    const rows = await db.select({ value: count() }).from(pageVisits);
+    const rows = await db.select({ value: count() }).from(pageVisits).where(nonExcludedVisitSql);
     return Number(rows[0]?.value ?? 0);
   }
   return fileCountPageVisits();
@@ -416,7 +438,8 @@ export async function countStoredUniqueVisitors(): Promise<number> {
   if (db) {
     const rows = await db
       .select({ value: sql<number>`count(distinct ${pageVisits.sessionId})` })
-      .from(pageVisits);
+      .from(pageVisits)
+      .where(nonExcludedVisitSql);
     return Number(rows[0]?.value ?? 0);
   }
   return fileCountUniqueVisitors();
@@ -432,6 +455,7 @@ export async function topStoredVisitLocations(limit = 8): Promise<{ label: strin
         value: count(),
       })
       .from(pageVisits)
+      .where(nonExcludedVisitSql)
       .groupBy(pageVisits.city, pageVisits.country)
       .orderBy(desc(count()))
       .limit(limit);
@@ -454,7 +478,7 @@ export async function countStoredDailyVisitors(
     const rows = await db
       .select({ value: sql<number>`count(distinct ${pageVisits.sessionId})` })
       .from(pageVisits)
-      .where(sql`(${pageVisits.createdAt})::date = ${dayIso}::date`);
+      .where(and(sql`(${pageVisits.createdAt})::date = ${dayIso}::date`, nonExcludedVisitSql));
     return Number(rows[0]?.value ?? 0);
   }
   return fileCountDailyVisitors(dayIso);
@@ -471,6 +495,7 @@ export async function getStoredAverageSessionMs(): Promise<number | null> {
         pageCount: count(),
       })
       .from(pageVisits)
+      .where(nonExcludedVisitSql)
       .groupBy(pageVisits.sessionId);
 
     const durations: number[] = [];
@@ -501,13 +526,133 @@ export async function topStoredVisitedArticles(
         value: count(),
       })
       .from(pageVisits)
-      .where(sql`${pageVisits.path} LIKE '/guides/%' AND ${pageVisits.path} <> '/guides/'`)
+      .where(
+        and(
+          sql`${pageVisits.path} LIKE '/guides/%' AND ${pageVisits.path} <> '/guides/'`,
+          nonExcludedVisitSql,
+        ),
+      )
       .groupBy(pageVisits.path)
       .orderBy(desc(count()))
       .limit(limit);
     return rows.map((r) => ({ path: r.path, count: Number(r.value ?? 0) }));
   }
   return fileTopVisitedArticles(limit);
+}
+
+export async function topStoredVisitedPages(
+  limit = 8,
+): Promise<{ path: string; count: number }[]> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({
+        path: pageVisits.path,
+        value: count(),
+      })
+      .from(pageVisits)
+      .where(and(sql`${pageVisits.path} NOT LIKE '/admin%'`, nonExcludedVisitSql))
+      .groupBy(pageVisits.path)
+      .orderBy(desc(count()))
+      .limit(limit);
+    return rows.map((r) => ({ path: r.path, count: Number(r.value ?? 0) }));
+  }
+  return fileTopVisitedPages(limit);
+}
+
+export async function topStoredReferrers(limit = 8): Promise<{ label: string; count: number }[]> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({
+        referrer: pageVisits.referrer,
+        value: count(),
+      })
+      .from(pageVisits)
+      .where(nonExcludedVisitSql)
+      .groupBy(pageVisits.referrer)
+      .orderBy(desc(count()))
+      .limit(Math.max(limit * 3, 24));
+
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const raw = row.referrer?.trim();
+      let label = "Direct / unknown";
+      if (raw) {
+        try {
+          label = new URL(raw).hostname.replace(/^www\./, "") || raw;
+        } catch {
+          label = raw.slice(0, 80);
+        }
+      }
+      counts.set(label, (counts.get(label) ?? 0) + Number(row.value ?? 0));
+    }
+    return [...counts.entries()]
+      .map(([label, value]) => ({ label, count: value }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+  return fileTopReferrers(limit);
+}
+
+export async function topStoredSearchQueries(
+  limit = 8,
+): Promise<{ query: string; count: number }[]> {
+  const db = getDb();
+  if (db) {
+    try {
+      const rows = await db
+        .select({
+          query: sql<string>`lower(${searchEvents.query})`,
+          value: count(),
+        })
+        .from(searchEvents)
+        .groupBy(sql`lower(${searchEvents.query})`)
+        .orderBy(desc(count()))
+        .limit(limit);
+      return rows
+        .map((r) => ({ query: r.query, count: Number(r.value ?? 0) }))
+        .filter((r) => r.query.trim().length > 0);
+    } catch (error) {
+      console.error("[search-events] top queries failed, falling back to file", error);
+    }
+  }
+  return fileTopSearchQueries(limit);
+}
+
+export async function countStoredVisitorsLastDays(days = 7): Promise<number> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({ value: sql<number>`count(distinct ${pageVisits.sessionId})` })
+      .from(pageVisits)
+      .where(
+        and(
+          sql`${pageVisits.createdAt} >= now() - (${days}::int * interval '1 day')`,
+          nonExcludedVisitSql,
+        ),
+      );
+    return Number(rows[0]?.value ?? 0);
+  }
+  return fileVisitorsLastDays(days);
+}
+
+export async function getStoredBounceRatePercent(): Promise<number | null> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({
+        sessionId: pageVisits.sessionId,
+        pageCount: count(),
+      })
+      .from(pageVisits)
+      .where(nonExcludedVisitSql)
+      .groupBy(pageVisits.sessionId);
+    if (rows.length === 0) return null;
+    const bounced = rows.filter((r) => Number(r.pageCount) === 1).length;
+    return Math.round((bounced / rows.length) * 100);
+  }
+  return fileBounceRatePercent();
 }
 
 export type SaveSearchEventInput = {

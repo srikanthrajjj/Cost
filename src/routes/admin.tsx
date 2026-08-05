@@ -5,6 +5,7 @@ import {
   BookOpen,
   Clock3,
   Eye,
+  ExternalLink,
   FileText,
   Loader2,
   Lock,
@@ -12,8 +13,11 @@ import {
   Mail,
   MapPin,
   MessageSquare,
+  Percent,
   RefreshCw,
+  Search,
   Shield,
+  TrendingUp,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -220,12 +224,29 @@ function AdminPage() {
             footnote="Unique visitors today"
           />
           <MetricCard
+            icon={Users}
+            label="Visitors (7 days)"
+            value={stats?.visitors7d}
+            loading={isLoadingStats && !stats}
+            footnote="Unique visitors last 7 days"
+          />
+          <MetricCard
             icon={Clock3}
             label="Avg session"
             value={stats?.avgSessionLabel}
             loading={isLoadingStats && !stats}
             footnote="Based on multi-page visits"
           />
+          <MetricCard
+            icon={Percent}
+            label="Bounce rate"
+            value={stats?.bounceRate == null ? null : `${stats.bounceRate}%`}
+            loading={isLoadingStats && !stats}
+            footnote="Single-page sessions"
+          />
+        </section>
+
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             icon={MapPin}
             label="Most visited city"
@@ -248,6 +269,24 @@ function AdminPage() {
                     stats.mostSearchedArticle.source === "search" ? "searches" : "visits"
                   }`
                 : "No article data yet"
+            }
+          />
+          <MetricCard
+            icon={TrendingUp}
+            label="Quote conversion"
+            value={stats?.quoteConversionRate == null ? null : `${stats.quoteConversionRate}%`}
+            loading={isLoadingStats && !stats}
+            footnote="Quotes / unique visitors"
+          />
+          <MetricCard
+            icon={Search}
+            label="Top search query"
+            value={stats?.topQueries?.[0]?.query}
+            loading={isLoadingStats && !stats}
+            footnote={
+              stats?.topQueries?.[0]
+                ? `${stats.topQueries[0].count.toLocaleString()} site searches`
+                : "No site searches yet"
             }
           />
         </section>
@@ -285,6 +324,62 @@ function AdminPage() {
             footnote={stats?.waitlistError ?? undefined}
             footnoteTone="warning"
           />
+        </section>
+
+        <section className="rounded-2xl border border-border bg-white p-5">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold text-ink flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-accent" />
+                Google Trends watchlist (U.S.)
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground max-w-2xl">
+                Editorial demand signals for renovation search interest. Not live Google Trends API
+                values. Open Trends to verify current interest.
+              </p>
+            </div>
+          </div>
+          {!stats?.googleTrendsWatchlist?.length ? (
+            <p className="text-sm text-muted-foreground">No Trends watchlist configured.</p>
+          ) : (
+            <ul className="grid gap-3 md:grid-cols-2">
+              {stats.googleTrendsWatchlist.map((item) => (
+                <li
+                  key={item.term}
+                  className="rounded-xl border border-border/70 px-3 py-3 text-sm"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ink">{item.term}</p>
+                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        {item.why}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[11px] font-semibold text-ink">
+                          {item.signal}
+                        </span>
+                        <a
+                          href={item.costrenoHref}
+                          className="text-[11px] font-semibold text-primary hover:underline"
+                        >
+                          CostReno coverage
+                        </a>
+                      </div>
+                    </div>
+                    <a
+                      href={item.trendsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 shrink-0 text-[11px] font-semibold text-muted-foreground hover:text-ink"
+                    >
+                      Trends
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -344,6 +439,53 @@ function AdminPage() {
                 })}
               </ul>
             )}
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <RankList
+            title="Top pages"
+            empty="No page data yet."
+            items={(stats?.topPages ?? []).map((p) => ({
+              label: p.path,
+              count: p.count,
+            }))}
+          />
+          <RankList
+            title="Top guides"
+            empty="No guide visits yet."
+            items={(stats?.topGuides ?? []).map((g) => ({
+              label: g.label,
+              count: g.count,
+            }))}
+          />
+          <RankList
+            title="Top referrers"
+            empty="No referrer data yet."
+            items={(stats?.topReferrers ?? []).map((r) => ({
+              label: r.label,
+              count: r.count,
+            }))}
+          />
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <RankList
+            title="Top site search queries"
+            empty="No site searches recorded yet."
+            items={(stats?.topQueries ?? []).map((q) => ({
+              label: q.query,
+              count: q.count,
+            }))}
+          />
+          <div className="rounded-2xl border border-border bg-white p-5">
+            <h2 className="text-sm font-bold text-ink mb-2">More analytics ideas</h2>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>Google Search Console queries that send traffic to CostReno</li>
+              <li>Estimate starts vs quote uploads (tool funnel)</li>
+              <li>Guide → estimator click-through rate</li>
+              <li>City-level quote demand vs page demand</li>
+            </ul>
           </div>
         </section>
 
@@ -422,6 +564,41 @@ function AdminPage() {
           </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function RankList({
+  title,
+  empty,
+  items,
+}: {
+  title: string;
+  empty: string;
+  items: { label: string; count: number }[];
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-white p-5">
+      <h2 className="text-sm font-bold text-ink mb-4">{title}</h2>
+      {!items.length ? (
+        <p className="text-sm text-muted-foreground">{empty}</p>
+      ) : (
+        <ul className="space-y-2">
+          {items.map((item) => (
+            <li
+              key={`${title}-${item.label}`}
+              className="flex items-center justify-between gap-3 rounded-xl border border-border/70 px-3 py-2 text-sm"
+            >
+              <span className="font-medium text-ink truncate" title={item.label}>
+                {item.label}
+              </span>
+              <span className="text-xs font-semibold text-muted-foreground shrink-0">
+                {item.count.toLocaleString()}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
