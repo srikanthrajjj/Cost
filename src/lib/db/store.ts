@@ -1,7 +1,9 @@
-import { count, desc, eq, sql } from "drizzle-orm";
+import { count, desc, sql } from "drizzle-orm";
 import { getDb, getStorageMode } from "./client";
-import { comparisonReports, pageVisits, quoteFeedback, quoteUploads } from "./schema";
+import { comparisonReports, pageVisits, quoteFeedback, quoteUploads, searchEvents } from "./schema";
 import {
+  fileAverageSessionMs,
+  fileCountDailyVisitors,
   fileCountPageVisits,
   fileCountQuoteFeedback,
   fileCountQuoteUploads,
@@ -14,12 +16,16 @@ import {
   fileSavePageVisit,
   fileSaveQuoteFeedback,
   fileSaveQuoteUpload,
+  fileSaveSearchEvent,
+  fileTopSearchedArticles,
   fileTopVisitLocations,
+  fileTopVisitedArticles,
   fileUpdateQuoteUpload,
   type StoredComparisonReport,
   type StoredPageVisit,
   type StoredQuoteFeedback,
   type StoredQuoteUpload,
+  type StoredSearchEvent,
 } from "./file-store";
 
 const MAX_RAW_TEXT_CHARS = 100_000;
@@ -438,6 +444,148 @@ export async function topStoredVisitLocations(limit = 8): Promise<{ label: strin
     });
   }
   return fileTopVisitLocations(limit);
+}
+
+export async function countStoredDailyVisitors(
+  dayIso = new Date().toISOString().slice(0, 10),
+): Promise<number> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({ value: sql<number>`count(distinct ${pageVisits.sessionId})` })
+      .from(pageVisits)
+      .where(sql`(${pageVisits.createdAt})::date = ${dayIso}::date`);
+    return Number(rows[0]?.value ?? 0);
+  }
+  return fileCountDailyVisitors(dayIso);
+}
+
+export async function getStoredAverageSessionMs(): Promise<number | null> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({
+        sessionId: pageVisits.sessionId,
+        minAt: sql<string>`min(${pageVisits.createdAt})`,
+        maxAt: sql<string>`max(${pageVisits.createdAt})`,
+        pageCount: count(),
+      })
+      .from(pageVisits)
+      .groupBy(pageVisits.sessionId);
+
+    const durations: number[] = [];
+    for (const row of rows) {
+      if (Number(row.pageCount) < 2) continue;
+      const min = Date.parse(String(row.minAt));
+      const max = Date.parse(String(row.maxAt));
+      if (!Number.isFinite(min) || !Number.isFinite(max)) continue;
+      const duration = max - min;
+      if (duration > 0 && duration < 1000 * 60 * 60 * 4) {
+        durations.push(duration);
+      }
+    }
+    if (durations.length === 0) return null;
+    return Math.round(durations.reduce((sum, n) => sum + n, 0) / durations.length);
+  }
+  return fileAverageSessionMs();
+}
+
+export async function topStoredVisitedArticles(
+  limit = 5,
+): Promise<{ path: string; count: number }[]> {
+  const db = getDb();
+  if (db) {
+    const rows = await db
+      .select({
+        path: pageVisits.path,
+        value: count(),
+      })
+      .from(pageVisits)
+      .where(sql`${pageVisits.path} LIKE '/guides/%' AND ${pageVisits.path} <> '/guides/'`)
+      .groupBy(pageVisits.path)
+      .orderBy(desc(count()))
+      .limit(limit);
+    return rows.map((r) => ({ path: r.path, count: Number(r.value ?? 0) }));
+  }
+  return fileTopVisitedArticles(limit);
+}
+
+export type SaveSearchEventInput = {
+  query: string;
+  resultHref: string;
+  resultTitle?: string;
+  resultGroup?: string;
+  sessionId?: string;
+};
+
+export async function saveSearchEvent(input: SaveSearchEventInput): Promise<{
+  id: string;
+  storage: "postgres" | "file";
+}> {
+  const id = newId("search");
+  const createdAt = new Date();
+  const row: StoredSearchEvent = {
+    id,
+    createdAt: createdAt.toISOString(),
+    query: input.query.slice(0, 200),
+    resultHref: input.resultHref.slice(0, 300),
+    resultTitle: input.resultTitle?.slice(0, 200) || null,
+    resultGroup: input.resultGroup?.slice(0, 80) || null,
+    sessionId: input.sessionId?.slice(0, 80) || null,
+  };
+
+  const db = getDb();
+  if (db) {
+    try {
+      await db.insert(searchEvents).values({
+        id: row.id,
+        createdAt,
+        query: row.query,
+        resultHref: row.resultHref,
+        resultTitle: row.resultTitle,
+        resultGroup: row.resultGroup,
+        sessionId: row.sessionId,
+      });
+      return { id, storage: "postgres" };
+    } catch (error) {
+      console.error("[search-events] postgres insert failed, falling back to file", error);
+    }
+  }
+
+  await fileSaveSearchEvent(row);
+  return { id, storage: "file" };
+}
+
+export async function topStoredSearchedArticles(limit = 5): Promise<
+  { href: string; title: string; count: number }[]
+> {
+  const db = getDb();
+  if (db) {
+    try {
+      const rows = await db
+        .select({
+          href: searchEvents.resultHref,
+          title: sql<string>`coalesce(max(${searchEvents.resultTitle}), ${searchEvents.resultHref})`,
+          value: count(),
+        })
+        .from(searchEvents)
+        .where(
+          sql`${searchEvents.resultHref} LIKE '/guides/%' AND ${searchEvents.resultHref} <> '/guides/'`,
+        )
+        .groupBy(searchEvents.resultHref)
+        .orderBy(desc(count()))
+        .limit(limit);
+
+      return rows.map((r) => ({
+        href: r.href,
+        title: r.title || r.href,
+        count: Number(r.value ?? 0),
+      }));
+    } catch (error) {
+      console.error("[search-events] top query failed, falling back to file", error);
+    }
+  }
+  return fileTopSearchedArticles(limit);
 }
 
 export { getStorageMode };

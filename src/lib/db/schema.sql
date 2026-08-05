@@ -68,4 +68,18 @@ CREATE TABLE IF NOT EXISTS page_visits (
 
 CREATE INDEX IF NOT EXISTS page_visits_created_at_idx ON page_visits (created_at DESC);
 CREATE INDEX IF NOT EXISTS page_visits_session_id_idx ON page_visits (session_id);
+CREATE INDEX IF NOT EXISTS page_visits_path_idx ON page_visits (path);
+
+CREATE TABLE IF NOT EXISTS search_events (
+  id TEXT PRIMARY KEY,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  query TEXT NOT NULL,
+  result_href TEXT NOT NULL,
+  result_title TEXT,
+  result_group TEXT,
+  session_id TEXT
+);
+
+CREATE INDEX IF NOT EXISTS search_events_created_at_idx ON search_events (created_at DESC);
+CREATE INDEX IF NOT EXISTS search_events_result_href_idx ON search_events (result_href);
 

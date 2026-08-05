@@ -19,6 +19,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { POPULAR_SEARCHES, SEARCH_GROUPS, type SearchGroup } from "@/lib/search-catalog";
 import { groupRankedResults, rankSearchResults, rankSuggestions } from "@/lib/smart-search";
+import { recordSearchEvent } from "@/lib/analytics/record-search-event";
 import { cn } from "@/lib/utils";
 
 const GROUP_ICON: Record<SearchGroup, typeof Search> = {
@@ -69,6 +70,35 @@ function highlightMatch(text: string, query: string) {
 
 function goTo(href: string) {
   window.location.href = href;
+}
+
+function getVisitorSessionId() {
+  try {
+    return localStorage.getItem("costreno_visitor_id") || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function trackSearchSelection(input: {
+  query: string;
+  resultHref: string;
+  resultTitle: string;
+  resultGroup: string;
+}) {
+  const q = input.query.trim();
+  if (!q) return;
+  void recordSearchEvent({
+    data: {
+      query: q,
+      resultHref: input.resultHref,
+      resultTitle: input.resultTitle,
+      resultGroup: input.resultGroup,
+      sessionId: getVisitorSessionId(),
+    },
+  }).catch(() => {
+    /* analytics should never block navigation */
+  });
 }
 
 type SiteSearchProps = {
@@ -190,6 +220,12 @@ export function SiteSearch({ className }: SiteSearchProps) {
                             value={`${item.score} ${item.href} ${item.title}`}
                             onSelect={() => {
                               setOpen(false);
+                              trackSearchSelection({
+                                query,
+                                resultHref: item.href,
+                                resultTitle: item.title,
+                                resultGroup: item.group,
+                              });
                               goTo(item.href);
                             }}
                             className="cursor-pointer items-start gap-3 py-2.5 data-[selected=true]:bg-muted data-[selected=true]:text-ink"

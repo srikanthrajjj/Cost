@@ -61,7 +61,19 @@ export const pageVisits = pgTable("page_visits", {
   referrer: text("referrer"),
 });
 
+/** Site search result clicks for admin "most searched" KPIs */
+export const searchEvents = pgTable("search_events", {
+  id: text("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  query: text("query").notNull(),
+  resultHref: text("result_href").notNull(),
+  resultTitle: text("result_title"),
+  resultGroup: text("result_group"),
+  sessionId: text("session_id"),
+});
+
 export type QuoteUploadRow = typeof quoteUploads.$inferSelect;
 export type QuoteFeedbackRow = typeof quoteFeedback.$inferSelect;
 export type ComparisonReportRow = typeof comparisonReports.$inferSelect;
 export type PageVisitRow = typeof pageVisits.$inferSelect;
+export type SearchEventRow = typeof searchEvents.$inferSelect;

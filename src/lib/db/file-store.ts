@@ -58,11 +58,22 @@ export interface StoredPageVisit {
   referrer?: string | null;
 }
 
+export interface StoredSearchEvent {
+  id: string;
+  createdAt: string;
+  query: string;
+  resultHref: string;
+  resultTitle?: string | null;
+  resultGroup?: string | null;
+  sessionId?: string | null;
+}
+
 interface FileStoreShape {
   quoteUploads: StoredQuoteUpload[];
   quoteFeedback: StoredQuoteFeedback[];
   comparisonReports: StoredComparisonReport[];
   pageVisits: StoredPageVisit[];
+  searchEvents: StoredSearchEvent[];
 }
 
 const EMPTY_STORE: FileStoreShape = {
@@ -70,6 +81,7 @@ const EMPTY_STORE: FileStoreShape = {
   quoteFeedback: [],
   comparisonReports: [],
   pageVisits: [],
+  searchEvents: [],
 };
 
 /** In-memory fallback when the filesystem is read-only (e.g. Vercel /var/task). */
@@ -99,6 +111,7 @@ function cloneEmptyStore(): FileStoreShape {
     quoteFeedback: [],
     comparisonReports: [],
     pageVisits: [],
+    searchEvents: [],
   };
 }
 
@@ -118,6 +131,7 @@ async function ensureStore(): Promise<FileStoreShape> {
         quoteFeedback: Array.isArray(parsed.quoteFeedback) ? parsed.quoteFeedback : [],
         comparisonReports: Array.isArray(parsed.comparisonReports) ? parsed.comparisonReports : [],
         pageVisits: Array.isArray(parsed.pageVisits) ? parsed.pageVisits : [],
+        searchEvents: Array.isArray(parsed.searchEvents) ? parsed.searchEvents : [],
       };
       memoryStore = store;
       return store;
@@ -262,6 +276,90 @@ export async function fileTopVisitLocations(limit = 8): Promise<
   }
   return [...counts.entries()]
     .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export async function fileCountDailyVisitors(dayIso = new Date().toISOString().slice(0, 10)): Promise<number> {
+  const store = await ensureStore();
+  const sessions = new Set<string>();
+  for (const visit of store.pageVisits) {
+    if (visit.createdAt.slice(0, 10) === dayIso && visit.sessionId) {
+      sessions.add(visit.sessionId);
+    }
+  }
+  return sessions.size;
+}
+
+export async function fileAverageSessionMs(): Promise<number | null> {
+  const store = await ensureStore();
+  const bySession = new Map<string, { min: number; max: number; count: number }>();
+  for (const visit of store.pageVisits) {
+    const ts = Date.parse(visit.createdAt);
+    if (!Number.isFinite(ts) || !visit.sessionId) continue;
+    const existing = bySession.get(visit.sessionId);
+    if (!existing) {
+      bySession.set(visit.sessionId, { min: ts, max: ts, count: 1 });
+    } else {
+      existing.min = Math.min(existing.min, ts);
+      existing.max = Math.max(existing.max, ts);
+      existing.count += 1;
+    }
+  }
+
+  const durations: number[] = [];
+  for (const session of bySession.values()) {
+    if (session.count < 2) continue;
+    const duration = session.max - session.min;
+    if (duration > 0 && duration < 1000 * 60 * 60 * 4) {
+      durations.push(duration);
+    }
+  }
+  if (durations.length === 0) return null;
+  return Math.round(durations.reduce((sum, n) => sum + n, 0) / durations.length);
+}
+
+export async function fileTopVisitedArticles(limit = 5): Promise<{ path: string; count: number }[]> {
+  const store = await ensureStore();
+  const counts = new Map<string, number>();
+  for (const visit of store.pageVisits) {
+    if (!visit.path.startsWith("/guides/") || visit.path === "/guides/") continue;
+    counts.set(visit.path, (counts.get(visit.path) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([path, count]) => ({ path, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+}
+
+export async function fileSaveSearchEvent(row: StoredSearchEvent): Promise<StoredSearchEvent> {
+  const store = await ensureStore();
+  store.searchEvents.unshift(row);
+  store.searchEvents = store.searchEvents.slice(0, 5000);
+  await writeStore(store);
+  return row;
+}
+
+export async function fileTopSearchedArticles(limit = 5): Promise<
+  { href: string; title: string; count: number }[]
+> {
+  const store = await ensureStore();
+  const counts = new Map<string, { title: string; count: number }>();
+  for (const event of store.searchEvents) {
+    if (!event.resultHref.startsWith("/guides/") || event.resultHref === "/guides/") continue;
+    const existing = counts.get(event.resultHref);
+    if (existing) {
+      existing.count += 1;
+      if (!existing.title && event.resultTitle) existing.title = event.resultTitle;
+    } else {
+      counts.set(event.resultHref, {
+        title: event.resultTitle?.trim() || event.resultHref,
+        count: 1,
+      });
+    }
+  }
+  return [...counts.entries()]
+    .map(([href, value]) => ({ href, title: value.title, count: value.count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
 }

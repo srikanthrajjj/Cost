@@ -1,16 +1,21 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
+  countStoredDailyVisitors,
   countStoredPageVisits,
   countStoredQuoteFeedback,
   countStoredQuoteUploads,
   countStoredUniqueVisitors,
   getStorageMode,
+  getStoredAverageSessionMs,
   listStoredPageVisits,
   listStoredQuoteFeedback,
   listStoredQuoteUploads,
+  topStoredSearchedArticles,
   topStoredVisitLocations,
+  topStoredVisitedArticles,
 } from "@/lib/db/store";
+import { GUIDES } from "@/lib/guides/catalog";
 import { getAudienceId, getResendClient } from "@/lib/email/resend";
 
 /** Fallback so /admin works before ADMIN_SECRET is set in env. Override in production. */
@@ -146,6 +151,30 @@ export const verifyAdminPassword = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+function formatSessionDuration(ms: number | null): string {
+  if (ms == null || !Number.isFinite(ms) || ms <= 0) return "—";
+  const totalSeconds = Math.round(ms / 1000);
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes < 60) return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remMinutes = minutes % 60;
+  return remMinutes > 0 ? `${hours}h ${remMinutes}m` : `${hours}h`;
+}
+
+function articleLabelFromPath(path: string, fallbackTitle?: string | null) {
+  const guide = GUIDES.find((g) => g.href === path);
+  if (guide) return guide.title;
+  if (fallbackTitle?.trim()) return fallbackTitle.trim();
+  return path
+    .replace(/^\/guides\//, "")
+    .split("-")
+    .filter(Boolean)
+    .map((part, index) => (index === 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part))
+    .join(" ");
+}
+
 export const getAdminDashboardStats = createServerFn({ method: "POST" })
   .validator(
     z.object({
@@ -176,6 +205,10 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       uniqueVisitors,
       topLocations,
       recentVisits,
+      dailyVisitors,
+      avgSessionMs,
+      searchedArticles,
+      visitedArticles,
     ] = await Promise.all([
       safe(() => countStoredQuoteUploads(), 0),
       safe(() => countStoredQuoteFeedback(), 0),
@@ -186,12 +219,35 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       safe(() => countStoredUniqueVisitors(), 0),
       safe(() => topStoredVisitLocations(8), []),
       safe(() => listStoredPageVisits(recentLimit), []),
+      safe(() => countStoredDailyVisitors(), 0),
+      safe(() => getStoredAverageSessionMs(), null),
+      safe(() => topStoredSearchedArticles(1), []),
+      safe(() => topStoredVisitedArticles(1), []),
     ]);
 
     const storage = getStorageMode();
     const storageWarning =
       storage === "file"
         ? "No DATABASE_URL configured. On Vercel, set Neon DATABASE_URL and run schema.sql so stats persist."
+        : null;
+
+    const topCity = topLocations[0] ?? null;
+    const topSearched = searchedArticles[0] ?? null;
+    const topVisited = visitedArticles[0] ?? null;
+    const mostSearchedArticle = topSearched
+      ? {
+          label: articleLabelFromPath(topSearched.href, topSearched.title),
+          href: topSearched.href,
+          count: topSearched.count,
+          source: "search" as const,
+        }
+      : topVisited
+        ? {
+            label: articleLabelFromPath(topVisited.path),
+            href: topVisited.path,
+            count: topVisited.count,
+            source: "visits" as const,
+          }
         : null;
 
     return {
@@ -203,6 +259,13 @@ export const getAdminDashboardStats = createServerFn({ method: "POST" })
       waitlistError: waitlist.error,
       pageViews,
       uniqueVisitors,
+      dailyVisitors,
+      avgSessionMs,
+      avgSessionLabel: formatSessionDuration(avgSessionMs),
+      mostVisitedCity: topCity
+        ? { label: topCity.label, count: topCity.count }
+        : null,
+      mostSearchedArticle,
       topLocations,
       recentVisits,
       recentQuotes: recentQuotes.map(({ rawText, analysisSummary, ...rest }) => ({

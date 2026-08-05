@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   BarChart3,
+  BookOpen,
+  Clock3,
   Eye,
   FileText,
   Loader2,
@@ -12,6 +14,7 @@ import {
   MessageSquare,
   RefreshCw,
   Shield,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { getAdminDashboardStats, verifyAdminPassword } from "@/lib/db/admin";
@@ -208,6 +211,47 @@ function AdminPage() {
           </p>
         )}
 
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            icon={UserPlus}
+            label="Daily visitors"
+            value={stats?.dailyVisitors}
+            loading={isLoadingStats && !stats}
+            footnote="Unique visitors today"
+          />
+          <MetricCard
+            icon={Clock3}
+            label="Avg session"
+            value={stats?.avgSessionLabel}
+            loading={isLoadingStats && !stats}
+            footnote="Based on multi-page visits"
+          />
+          <MetricCard
+            icon={MapPin}
+            label="Most visited city"
+            value={stats?.mostVisitedCity?.label}
+            loading={isLoadingStats && !stats}
+            footnote={
+              stats?.mostVisitedCity
+                ? `${stats.mostVisitedCity.count.toLocaleString()} visits`
+                : "No city data yet"
+            }
+          />
+          <MetricCard
+            icon={BookOpen}
+            label="Most searched article"
+            value={stats?.mostSearchedArticle?.label}
+            loading={isLoadingStats && !stats}
+            footnote={
+              stats?.mostSearchedArticle
+                ? `${stats.mostSearchedArticle.count.toLocaleString()} ${
+                    stats.mostSearchedArticle.source === "search" ? "searches" : "visits"
+                  }`
+                : "No article data yet"
+            }
+          />
+        </section>
+
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <MetricCard
             icon={Users}
@@ -239,6 +283,7 @@ function AdminPage() {
             value={stats?.waitlistEmails}
             loading={isLoadingStats && !stats}
             footnote={stats?.waitlistError ?? undefined}
+            footnoteTone="warning"
           />
         </section>
 
@@ -387,13 +432,24 @@ function MetricCard({
   value,
   loading,
   footnote,
+  footnoteTone = "muted",
 }: {
   icon: typeof FileText;
   label: string;
-  value: number | null | undefined;
+  value: number | string | null | undefined;
   loading?: boolean;
   footnote?: string;
+  footnoteTone?: "muted" | "warning";
 }) {
+  const display =
+    loading
+      ? "…"
+      : value == null || value === ""
+        ? "—"
+        : typeof value === "number"
+          ? value.toLocaleString()
+          : value;
+
   return (
     <div className="rounded-2xl border border-border bg-white p-5">
       <div className="flex items-center gap-2 mb-3">
@@ -404,10 +460,27 @@ function MetricCard({
           {label}
         </p>
       </div>
-      <p className="font-display text-3xl font-bold text-ink">
-        {loading ? "…" : value == null ? "—" : value.toLocaleString()}
+      <p
+        className={
+          typeof value === "string" && value.length > 18
+            ? "font-display text-xl font-bold text-ink leading-snug line-clamp-2"
+            : "font-display text-3xl font-bold text-ink"
+        }
+        title={typeof value === "string" ? value : undefined}
+      >
+        {display}
       </p>
-      {footnote && <p className="mt-2 text-[11px] text-amber-700 leading-snug">{footnote}</p>}
+      {footnote && (
+        <p
+          className={
+            footnoteTone === "warning"
+              ? "mt-2 text-[11px] text-amber-700 leading-snug"
+              : "mt-2 text-[11px] text-muted-foreground leading-snug"
+          }
+        >
+          {footnote}
+        </p>
+      )}
     </div>
   );
 }
