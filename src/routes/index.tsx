@@ -2086,6 +2086,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       localStorage.setItem("costreno_location_confirmed", "1");
       localStorage.removeItem("costreno_location_dismissed");
       setShowLocationPrompt(false);
+      window.dispatchEvent(new Event("costreno:location-done"));
     } catch {
       setZipPromptError("Could not verify that ZIP. Try again.");
     } finally {
@@ -2917,12 +2918,13 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             onClick={() => {
               localStorage.setItem("costreno_location_dismissed", "1");
               setShowLocationPrompt(false);
+              window.dispatchEvent(new Event("costreno:location-done"));
             }}
           />
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
-              <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                <MapPin className="h-7 w-7 text-accent" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+                <MapPin className="h-7 w-7 text-primary" />
               </div>
               <h2 className="font-display text-xl font-bold text-ink text-center">
                 Set your location
@@ -2999,6 +3001,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                   onClick={() => {
                     localStorage.setItem("costreno_location_dismissed", "1");
                     setShowLocationPrompt(false);
+                    window.dispatchEvent(new Event("costreno:location-done"));
                   }}
                   className="w-full h-11 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
                 >
