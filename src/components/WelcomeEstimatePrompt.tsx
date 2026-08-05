@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Component, useEffect, useState, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { ArrowRight, Calculator, ShieldCheck, X } from "lucide-react";
 
 const STORAGE_KEY = "costreno_welcome_seen";
@@ -26,8 +26,24 @@ function shouldSkipPath(pathname: string) {
   );
 }
 
-export function WelcomeEstimatePrompt() {
-  const navigate = useNavigate();
+class WelcomeBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("WelcomeEstimatePrompt failed:", error);
+  }
+
+  render() {
+    if (this.state.failed) return null;
+    return this.props.children;
+  }
+}
+
+function WelcomeEstimatePromptInner() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
@@ -42,27 +58,31 @@ export function WelcomeEstimatePrompt() {
 
     let cancelled = false;
     let scheduled = false;
+    let intervalId: number | undefined;
+    let openTimer: number | undefined;
 
     const tryOpen = () => {
       if (cancelled || scheduled) return;
       if (localStorage.getItem(STORAGE_KEY) === "1") return;
       if (shouldSkipPath(window.location.pathname)) return;
       if (locationFlowPending(window.location.pathname)) return;
+
       scheduled = true;
-      window.clearInterval(interval);
-      window.setTimeout(() => {
+      if (intervalId !== undefined) window.clearInterval(intervalId);
+      openTimer = window.setTimeout(() => {
         if (!cancelled) setOpen(true);
       }, 350);
     };
 
     tryOpen();
-    const interval = window.setInterval(tryOpen, 700);
+    intervalId = window.setInterval(tryOpen, 700);
     const onLocationDone = () => tryOpen();
     window.addEventListener("costreno:location-done", onLocationDone);
 
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+      if (intervalId !== undefined) window.clearInterval(intervalId);
+      if (openTimer !== undefined) window.clearTimeout(openTimer);
       window.removeEventListener("costreno:location-done", onLocationDone);
     };
   }, [pathname]);
@@ -90,14 +110,17 @@ export function WelcomeEstimatePrompt() {
   }, [open]);
 
   const dismiss = () => {
-    localStorage.setItem(STORAGE_KEY, "1");
+    try {
+      localStorage.setItem(STORAGE_KEY, "1");
+    } catch {
+      // ignore storage failures
+    }
     setOpen(false);
   };
 
   const startEstimate = () => {
-    localStorage.setItem(STORAGE_KEY, "1");
-    setOpen(false);
-    void navigate({ to: "/estimate", search: {} });
+    dismiss();
+    window.location.assign("/estimate");
   };
 
   if (!open) return null;
@@ -181,5 +204,13 @@ export function WelcomeEstimatePrompt() {
         </div>
       </div>
     </div>
+  );
+}
+
+export function WelcomeEstimatePrompt() {
+  return (
+    <WelcomeBoundary>
+      <WelcomeEstimatePromptInner />
+    </WelcomeBoundary>
   );
 }
