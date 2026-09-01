@@ -200,6 +200,11 @@ function RootShell({ children }: { children: ReactNode }) {
           data-key="sg65jtLW+crSSgZNiA1uzQ"
           async
         />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8595196455736696"
+          crossorigin="anonymous"
+        />
       </head>
       <body>
         {children}
