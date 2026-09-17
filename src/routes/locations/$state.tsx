@@ -124,17 +124,24 @@ function StateLocationsPage() {
                     const reviewed = isCityPageIndexable(city.slug, category.id);
                     return (
                       <li key={category.id}>
-                        <a
-                          href={getCityCategoryUrl(city, category.id)}
-                          className="text-sm text-primary hover:underline inline-flex items-center gap-2"
-                        >
-                          {category.name} cost in {city.city}
-                          {reviewed && (
+                        {reviewed ? (
+                          <a
+                            href={getCityCategoryUrl(city, category.id)}
+                            className="text-sm text-primary hover:underline inline-flex items-center gap-2"
+                          >
+                            {category.name} cost in {city.city}
                             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                               Reviewed
                             </span>
-                          )}
-                        </a>
+                          </a>
+                        ) : (
+                          <span className="text-sm text-muted-foreground inline-flex items-center gap-2">
+                            {category.name} cost in {city.city}
+                            <span className="text-[10px] uppercase tracking-wide">
+                              Coming soon
+                            </span>
+                          </span>
+                        )}
                       </li>
                     );
                   })}

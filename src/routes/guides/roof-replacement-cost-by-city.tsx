@@ -101,9 +101,13 @@ function RoofCostByCityGuide() {
             {cities.map((row) => (
               <tr key={row.href} className="border-b border-border/60 last:border-0">
                 <td className="px-4 py-3">
-                  <a href={row.href} className="font-medium text-primary hover:underline">
-                    {row.label}
-                  </a>
+                  {row.reviewed ? (
+                    <a href={row.href} className="font-medium text-primary hover:underline">
+                      {row.label}
+                    </a>
+                  ) : (
+                    <span className="font-medium text-ink">{row.label}</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-ink whitespace-nowrap">{row.range}</td>
                 <td className="px-4 py-3 text-muted-foreground">

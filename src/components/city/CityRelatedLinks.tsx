@@ -18,9 +18,11 @@ export function CityRelatedLinks({
       <div className="container-x">
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
           <div>
-            <h2 className="font-display text-xl font-bold text-ink mb-4">
-              More projects in {city.city}
-            </h2>
+            {relatedCategories.length > 0 && (
+              <h2 className="font-display text-xl font-bold text-ink mb-4">
+                More projects in {city.city}
+              </h2>
+            )}
             <ul className="space-y-2">
               {relatedCategories.map((item) => (
                 <li key={item.id}>
@@ -43,9 +45,11 @@ export function CityRelatedLinks({
             </ul>
           </div>
           <div>
-            <h2 className="font-display text-xl font-bold text-ink mb-4">
-              Nearby and similar cities
-            </h2>
+            {relatedCities.length > 0 && (
+              <h2 className="font-display text-xl font-bold text-ink mb-4">
+                Nearby and similar cities
+              </h2>
+            )}
             <ul className="space-y-2">
               {relatedCities.map((item) => (
                 <li key={`${item.stateSlug}-${item.slug}`}>

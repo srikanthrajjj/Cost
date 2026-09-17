@@ -290,34 +290,34 @@ export function getIndexableCityCategoryPairs(): {
   );
 }
 
+/**
+ * Only surfaces cities whose page for this category is hand-enriched (indexable).
+ * Linking to noindexed thin pages from real content pages defeats the noindex
+ * and creates the scaled-content interlinking pattern AdSense flags.
+ */
 export function getRelatedCities(city: City, categoryId?: string, limit = 4): City[] {
-  const preferIndexable = (candidates: City[]) => {
-    if (!categoryId) return candidates;
-    const enriched = candidates.filter((c) => isCityPageIndexable(c.slug, categoryId));
-    const rest = candidates.filter((c) => !isCityPageIndexable(c.slug, categoryId));
-    return [...enriched, ...rest];
-  };
+  const restrictToIndexable = (candidates: City[]) =>
+    categoryId ? candidates.filter((c) => isCityPageIndexable(c.slug, categoryId)) : candidates;
 
-  const sameState = getAllCities().filter(
-    (c) => c.stateSlug === city.stateSlug && c.slug !== city.slug,
+  const sameState = restrictToIndexable(
+    getAllCities().filter((c) => c.stateSlug === city.stateSlug && c.slug !== city.slug),
   );
   if (sameState.length >= limit) {
-    return preferIndexable(sameState).slice(0, limit);
+    return sameState.slice(0, limit);
   }
-  const others = getAllCities()
-    .filter((c) => c.slug !== city.slug && c.stateSlug !== city.stateSlug)
-    .sort(
-      (a, b) =>
-        Math.abs(a.laborCostMultiplier - city.laborCostMultiplier) -
-        Math.abs(b.laborCostMultiplier - city.laborCostMultiplier),
-    );
-  return preferIndexable([...sameState, ...others]).slice(0, limit);
+  const others = restrictToIndexable(
+    getAllCities().filter((c) => c.slug !== city.slug && c.stateSlug !== city.stateSlug),
+  ).sort(
+    (a, b) =>
+      Math.abs(a.laborCostMultiplier - city.laborCostMultiplier) -
+      Math.abs(b.laborCostMultiplier - city.laborCostMultiplier),
+  );
+  return [...sameState, ...others].slice(0, limit);
 }
 
+/** Only surfaces categories that are hand-enriched (indexable) for this city; see getRelatedCities. */
 export function getRelatedCategories(categoryId: string, citySlug?: string): Category[] {
   const categories = getAllCategories().filter((c) => c.id !== categoryId);
   if (!citySlug) return categories;
-  const enriched = categories.filter((c) => isCityPageIndexable(citySlug, c.id));
-  const rest = categories.filter((c) => !isCityPageIndexable(citySlug, c.id));
-  return [...enriched, ...rest];
+  return categories.filter((c) => isCityPageIndexable(citySlug, c.id));
 }
