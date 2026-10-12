@@ -1,4 +1,14 @@
-import { MapPin, Receipt, FileStack, TrendingUp, X, Database, RefreshCw, Shield, Brain } from "lucide-react";
+import {
+  MapPin,
+  Receipt,
+  FileStack,
+  TrendingUp,
+  X,
+  Database,
+  RefreshCw,
+  Shield,
+  Brain,
+} from "lucide-react";
 import { useState } from "react";
 
 interface TrustBarProps {
@@ -9,26 +19,26 @@ const TRUST_CARDS = [
   {
     icon: MapPin,
     title: "Regional labor cost index",
-    body: "Our labor estimates are anchored to BLS metro-level wage data for construction occupations, not a single national average.",
-    badge: "Updated monthly",
+    body: "BLS publishes metro-level wage estimates periodically. This describes BLS source availability, not CostReno's internal refresh schedule.",
+    badge: "Periodic BLS publication",
   },
   {
     icon: Receipt,
     title: "Material cost benchmarks",
-    body: "Material pricing uses published supplier and industry indices, refreshed periodically to reflect market movement in your region.",
-    badge: "Updated regularly",
+    body: "Material pricing references published supplier and industry indices; publication schedules vary by source.",
+    badge: "Source updates vary",
   },
   {
     icon: FileStack,
-    title: "Growing from real quotes",
-    body: "Every user-shared quote improves our models. More quotes means tighter, more reliable ranges.",
-    badge: "Continuously learning",
+    title: "Quote review checks",
+    body: "Quote analysis checks submitted line items against available market references and flags items for review. A flag is not confirmation of an error.",
+    badge: "Review support",
   },
   {
     icon: TrendingUp,
     title: "Local market factors",
-    body: "We factor in regional demand, permitting costs, seasonality, and project complexity to personalize every estimate.",
-    badge: "Regionally adjusted",
+    body: "Estimates use built-in regional multipliers and the project details supplied in the form.",
+    badge: "Regional factors",
   },
 ] as const;
 
@@ -40,11 +50,16 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
       <div className="container-x py-14 md:py-20">
         <div className="text-center mb-12 md:mb-16">
           <h2 className="font-display text-3xl md:text-4xl lg:text-[44px] font-bold text-ink max-w-2xl mx-auto leading-[1.15]">
-            Regionally adjusted,<br />
-            <span className="underline decoration-accent/60 decoration-[3px] underline-offset-[6px]">not</span> a flat national number
+            Regionally adjusted,
+            <br />
+            <span className="underline decoration-accent/60 decoration-[3px] underline-offset-[6px]">
+              not
+            </span>{" "}
+            a flat national number
           </h2>
           <p className="mt-4 text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            We combine trusted data sources and real market insights to deliver accurate, up-to-date estimates for {region}.
+            Planning ranges use published references and project details for {region}; source data
+            and limitations vary.
           </p>
         </div>
 
@@ -66,10 +81,37 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
             preserveAspectRatio="xMidYMid meet"
             aria-hidden
           >
-            <path d="M 230 100 C 320 100, 380 180, 440 195" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" />
-            <path d="M 230 300 C 320 300, 380 220, 440 205" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{ animationDelay: "0.3s" }} />
-            <path d="M 770 100 C 680 100, 620 180, 560 195" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{ animationDelay: "0.5s" }} />
-            <path d="M 770 300 C 680 300, 620 220, 560 205" stroke="rgba(3,164,77,0.3)" strokeWidth="2" fill="none" className="trust-dash" style={{ animationDelay: "0.7s" }} />
+            <path
+              d="M 230 100 C 320 100, 380 180, 440 195"
+              stroke="rgba(3,164,77,0.3)"
+              strokeWidth="2"
+              fill="none"
+              className="trust-dash"
+            />
+            <path
+              d="M 230 300 C 320 300, 380 220, 440 205"
+              stroke="rgba(3,164,77,0.3)"
+              strokeWidth="2"
+              fill="none"
+              className="trust-dash"
+              style={{ animationDelay: "0.3s" }}
+            />
+            <path
+              d="M 770 100 C 680 100, 620 180, 560 195"
+              stroke="rgba(3,164,77,0.3)"
+              strokeWidth="2"
+              fill="none"
+              className="trust-dash"
+              style={{ animationDelay: "0.5s" }}
+            />
+            <path
+              d="M 770 300 C 680 300, 620 220, 560 205"
+              stroke="rgba(3,164,77,0.3)"
+              strokeWidth="2"
+              fill="none"
+              className="trust-dash"
+              style={{ animationDelay: "0.7s" }}
+            />
             <circle cx="230" cy="100" r="4" fill="rgba(3,164,77,0.5)" />
             <circle cx="230" cy="300" r="4" fill="rgba(3,164,77,0.5)" />
             <circle cx="770" cy="100" r="4" fill="rgba(3,164,77,0.5)" />
@@ -86,16 +128,29 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
 
             <div className="hidden lg:flex lg:col-start-2 lg:row-start-1 lg:row-span-2 flex-col items-center justify-center py-8">
               <div className="w-[120px] h-[120px] rounded-full border border-black/50 bg-white flex flex-col items-center justify-center">
-                <svg className="w-10 h-10 text-[#082A4B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <svg
+                  className="w-10 h-10 text-[#082A4B]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
                   <path d="M9.5 2a3.5 3.5 0 0 0-3.4 4.4A3.5 3.5 0 0 0 4 10a3.5 3.5 0 0 0 1.8 3.1A3.5 3.5 0 0 0 8 17h1v4h6v-4h1a3.5 3.5 0 0 0 2.2-3.9A3.5 3.5 0 0 0 20 10a3.5 3.5 0 0 0-2.1-3.6A3.5 3.5 0 0 0 14.5 2a3.5 3.5 0 0 0-2.5 1 3.5 3.5 0 0 0-2.5-1z" />
                   <path d="M12 2v8" />
                   <path d="M8 10h8" />
                 </svg>
               </div>
               <span className="mt-3 text-[10px] font-bold text-ink uppercase tracking-wider text-center leading-tight">
-                AI Pricing<br />Engine
+                Pricing
+                <br />
+                calculator
               </span>
-              <span className="mt-1.5 text-[11px] text-muted-foreground font-medium italic">Analyzes & learns</span>
+              <span className="mt-1.5 text-[11px] text-muted-foreground font-medium italic">
+                Applies project inputs
+              </span>
             </div>
 
             <div className="lg:col-start-3 lg:row-start-1">
@@ -111,7 +166,7 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
           <div>
             <p className="text-sm font-semibold text-ink">Want the full breakdown?</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              We document every data source, refresh cadence, and methodology decision.
+              We document our data references, source publication notes, and methodology decisions.
             </p>
           </div>
           <button
@@ -124,7 +179,10 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
       </div>
 
       {showMethodology && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowMethodology(false)}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowMethodology(false)}
+        >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
             className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto"
@@ -143,7 +201,8 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
 
             <div className="px-6 py-6 space-y-8">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Transparency matters. Here's exactly how CostReno calculates renovation cost estimates, what data we use, and how we keep it accurate.
+                Transparency matters. Here's how CostReno calculates renovation cost estimates, what
+                data we use, and how to interpret the results.
               </p>
 
               <div>
@@ -152,11 +211,35 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                   <h3 className="text-sm font-bold text-ink">Data sources</h3>
                 </div>
                 <ul className="text-xs text-muted-foreground leading-relaxed space-y-2 pl-6 list-disc">
-                  <li><strong className="text-ink">Bureau of Labor Statistics (BLS)</strong> metro-level wage data for construction occupations, updated monthly.</li>
-                  <li><strong className="text-ink">Published supplier indices</strong> for materials like lumber, roofing, concrete, copper, and other commodities.</li>
-                  <li><strong className="text-ink">Industry cost databases</strong> from construction research organizations that track regional pricing.</li>
-                  <li><strong className="text-ink">User-submitted contractor quotes</strong> that help validate and refine pricing in specific markets.</li>
-                  <li><strong className="text-ink">Permit fee schedules</strong> from local municipalities across the US.</li>
+                  <li>
+                    <strong className="text-ink">Bureau of Labor Statistics (BLS)</strong>{" "}
+                    metro-level wage data for construction occupations, published periodically. This
+                    is the source publication cadence, not a claim about monthly CostReno refreshes.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Published supplier indices</strong> for materials
+                    like lumber, roofing, concrete, copper, and other commodities; publication
+                    schedules vary by source.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Industry cost databases</strong> from construction
+                    research organizations that track regional pricing.
+                  </li>
+                  <li>
+                    <strong className="text-ink">User-submitted contractor quotes</strong> that may
+                    be used to help train and improve estimation models, as described in our{" "}
+                    <a
+                      href="/privacy"
+                      className="text-primary underline underline-offset-2 hover:no-underline"
+                    >
+                      privacy policy
+                    </a>
+                    .
+                  </li>
+                  <li>
+                    <strong className="text-ink">Permit fee schedules</strong> from local
+                    municipalities across the US.
+                  </li>
                 </ul>
               </div>
 
@@ -166,46 +249,105 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                   <h3 className="text-sm font-bold text-ink">Regional adjustments</h3>
                 </div>
                 <ul className="text-xs text-muted-foreground leading-relaxed space-y-2 pl-6 list-disc">
-                  <li><strong className="text-ink">Labor cost index</strong> based on local construction wages relative to the national median.</li>
-                  <li><strong className="text-ink">Material availability</strong> and regional supplier pricing differences.</li>
-                  <li><strong className="text-ink">Permit and code requirements</strong> that vary by state and municipality.</li>
-                  <li><strong className="text-ink">Seasonal demand</strong> patterns affecting contractor availability and pricing.</li>
-                  <li><strong className="text-ink">Market competitiveness</strong> since areas with more contractors tend to have better pricing.</li>
+                  <li>
+                    <strong className="text-ink">Labor cost index</strong> based on local
+                    construction wages relative to the national median.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Material availability</strong> and regional
+                    supplier pricing differences.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Permit and code requirements</strong> that vary by
+                    state and municipality.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Seasonal demand</strong> patterns affecting
+                    contractor availability and pricing.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Market competitiveness</strong> since areas with
+                    more contractors tend to have better pricing.
+                  </li>
                 </ul>
               </div>
 
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <Brain className="h-4 w-4 text-accent" />
-                  <h3 className="text-sm font-bold text-ink">AI pricing engine</h3>
+                  <h3 className="text-sm font-bold text-ink">Cost calculator and quote analysis</h3>
                 </div>
                 <ul className="text-xs text-muted-foreground leading-relaxed space-y-2 pl-6 list-disc">
-                  <li><strong className="text-ink">Cost estimation</strong> uses weighted models factoring property size, materials, complexity, and regional pricing.</li>
-                  <li><strong className="text-ink">Quote analysis</strong> reads contractor bids line-by-line, benchmarks against market rates, and flags anomalies.</li>
-                  <li><strong className="text-ink">Continuous learning</strong> from every quote uploaded improves accuracy over time.</li>
-                  <li><strong className="text-ink">Confidence scoring</strong> communicates reliability based on data density for that project type and location.</li>
+                  <li>
+                    <strong className="text-ink">Cost estimation</strong> applies project-specific
+                    rules to the details provided and built-in regional multipliers.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Quote analysis</strong> uses AI-assisted processing
+                    to organize contractor bid line items.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Structured checks</strong> compare item details
+                    with available market references when a comparison is available and flag items
+                    for review. A flag is not independent validation or confirmation of an error.
+                  </li>
+                  <li>
+                    <strong className="text-ink">Detail score</strong> reflects the project
+                    information supplied. It is not a measure of historical estimate accuracy or a
+                    guarantee of the final price.
+                  </li>
                 </ul>
               </div>
 
               <div>
                 <div className="flex items-center gap-2.5 mb-3">
                   <RefreshCw className="h-4 w-4 text-accent" />
-                  <h3 className="text-sm font-bold text-ink">Refresh cadence</h3>
+                  <h3 className="text-sm font-bold text-ink">Source publication and timing</h3>
                 </div>
                 <div className="rounded-lg border border-border overflow-hidden">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left text-[10px] font-semibold text-muted-foreground uppercase px-4 py-2">Source</th>
-                        <th className="text-left text-[10px] font-semibold text-muted-foreground uppercase px-4 py-2">Frequency</th>
+                        <th className="text-left text-[10px] font-semibold text-muted-foreground uppercase px-4 py-2">
+                          Source
+                        </th>
+                        <th className="text-left text-[10px] font-semibold text-muted-foreground uppercase px-4 py-2">
+                          Publication or availability
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="text-xs">
-                      <tr className="border-b border-border/50"><td className="px-4 py-2 text-ink">BLS labor data</td><td className="px-4 py-2 text-muted-foreground">Monthly</td></tr>
-                      <tr className="border-b border-border/50"><td className="px-4 py-2 text-ink">Material indices</td><td className="px-4 py-2 text-muted-foreground">Weekly to monthly</td></tr>
-                      <tr className="border-b border-border/50"><td className="px-4 py-2 text-ink">User-submitted quotes</td><td className="px-4 py-2 text-muted-foreground">Continuous</td></tr>
-                      <tr className="border-b border-border/50"><td className="px-4 py-2 text-ink">Permit fee schedules</td><td className="px-4 py-2 text-muted-foreground">Quarterly</td></tr>
-                      <tr><td className="px-4 py-2 text-ink">Regional demand factors</td><td className="px-4 py-2 text-muted-foreground">Monthly</td></tr>
+                      <tr className="border-b border-border/50">
+                        <td className="px-4 py-2 text-ink">BLS labor data</td>
+                        <td className="px-4 py-2 text-muted-foreground">
+                          Published periodically by BLS; this does not specify CostReno refresh
+                          timing
+                        </td>
+                      </tr>
+                      <tr className="border-b border-border/50">
+                        <td className="px-4 py-2 text-ink">Material indices</td>
+                        <td className="px-4 py-2 text-muted-foreground">
+                          Publication schedules vary by source
+                        </td>
+                      </tr>
+                      <tr className="border-b border-border/50">
+                        <td className="px-4 py-2 text-ink">User-submitted quotes</td>
+                        <td className="px-4 py-2 text-muted-foreground">
+                          Submitted by users; use is described in our privacy policy
+                        </td>
+                      </tr>
+                      <tr className="border-b border-border/50">
+                        <td className="px-4 py-2 text-ink">Permit fee schedules</td>
+                        <td className="px-4 py-2 text-muted-foreground">
+                          Schedules vary by municipality
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 text-ink">Regional demand factors</td>
+                        <td className="px-4 py-2 text-muted-foreground">
+                          Methodology input; refresh timing is not specified
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -218,15 +360,34 @@ export function TrustBar({ region = "your area" }: TrustBarProps) {
                 </div>
                 <ul className="text-xs text-muted-foreground leading-relaxed space-y-2 pl-6 list-disc">
                   <li>We do not fabricate pricing data or invent statistics.</li>
-                  <li>We do not guarantee any specific price. Estimates are ranges for planning.</li>
-                  <li>We do not replace professional contractor quotes for purchasing decisions.</li>
-                  <li>We clearly label when data is limited for a specific project type or location.</li>
-                  <li>We never sell user data or share uploaded quotes with third parties.</li>
+                  <li>
+                    We do not guarantee any specific price. Estimates are ranges for planning.
+                  </li>
+                  <li>
+                    We do not replace professional contractor quotes for purchasing decisions.
+                  </li>
+                  <li>
+                    We clearly label when data is limited for a specific project type or location.
+                  </li>
+                  <li>
+                    Third-party AI providers process photos and documents to provide requested
+                    analyses. Submitted information may also be used to help train and improve
+                    estimation models. We do not sell personal information to marketing companies.
+                    See our{" "}
+                    <a
+                      href="/privacy"
+                      className="text-primary underline underline-offset-2 hover:no-underline"
+                    >
+                      privacy policy
+                    </a>{" "}
+                    for details about data use, retention, and sharing.
+                  </li>
                 </ul>
               </div>
 
               <p className="text-[10px] text-muted-foreground/60 text-center pt-4 border-t border-border">
-                Last updated: July 2026. This reflects our current methodology and will be updated as our models evolve.
+                Last updated: July 2026. This reflects our current methodology and will be updated
+                as data sources and estimation rules change.
               </p>
             </div>
           </div>
@@ -257,7 +418,16 @@ function TrustCard({
           <h3 className="text-[13px] font-bold text-ink mb-1">{title}</h3>
           <p className="text-[11px] text-muted-foreground leading-relaxed">{body}</p>
           <div className="mt-2.5 flex items-center gap-1.5">
-            <svg className="w-3 h-3 text-accent shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              className="w-3 h-3 text-accent shrink-0"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <polyline points="2 6 5 9 10 3" />
             </svg>
             <span className="text-[10px] font-semibold text-accent">{badge}</span>

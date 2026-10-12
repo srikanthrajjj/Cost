@@ -34,6 +34,7 @@ import { RoofMeasureStep } from "@/components/estimate/RoofMeasureStep";
 import { EstimateSeoSection, ESTIMATOR_FAQS } from "@/components/estimate/EstimateSeoSection";
 import { QuestionInfo } from "@/components/estimate/QuestionInfo";
 import { buildFaqSchema } from "@/lib/seo";
+import { trackToolEvent } from "@/lib/analytics/tool-events";
 import { subscribeToNewsletter } from "@/lib/email/subscribe";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -455,7 +456,9 @@ function SelectGridQuestion({
                   >
                     {c.label}
                   </div>
-                  {c.desc && <div className="text-[11px] text-muted-foreground mt-0.5">{c.desc}</div>}
+                  {c.desc && (
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{c.desc}</div>
+                  )}
                 </div>
                 {isSelected && (
                   <Check className="h-4 w-4 text-accent shrink-0 animate-in zoom-in duration-150" />
@@ -730,7 +733,6 @@ function EstimatePanel({
     }
   }, [estimate.mid]);
 
-  const stepsLeft = Math.max(0, Math.ceil((95 - estimate.confidence) / 10));
   const insuranceStatus = estimate.insuranceEligible
     ? { label: "Likely covered", color: "text-accent", bg: "bg-accent/10", dot: "bg-accent" }
     : {
@@ -791,11 +793,13 @@ function EstimatePanel({
               </p>
             )}
 
-            {/* Confidence */}
-            <div className="mt-2 space-y-0.5">
+            {/* Estimate detail */}
+            <div className="mt-2 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-muted-foreground">Accuracy</span>
-                <span className="text-[11px] font-bold text-ink">{estimate.confidence}%</span>
+                <span className="text-[11px] text-muted-foreground">Estimate detail</span>
+                <span className="text-[11px] font-bold text-ink">
+                  Detail score: {estimate.confidence}%
+                </span>
               </div>
               <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                 <div
@@ -804,9 +808,8 @@ function EstimatePanel({
                 />
               </div>
               <p className="text-[10px] text-muted-foreground leading-snug">
-                {stepsLeft > 0
-                  ? `${stepsLeft} more question${stepsLeft > 1 ? "s" : ""} to reach 95% accuracy.`
-                  : "High confidence estimate."}
+                This percentage reflects the project information you supplied. It does not measure
+                estimate accuracy or guarantee the final price.
               </p>
             </div>
           </>
@@ -1367,7 +1370,6 @@ function PhotoUploadQuestion({
   );
 }
 
-
 // ─── Question Renderer ────────────────────────────────────────────────────────
 function QuestionRenderer({
   question,
@@ -1483,8 +1485,7 @@ function FinalReport({
       if (answers.hvacType) details["System type"] = answers.hvacType.replace("-", " ");
       if (answers.hvacDuctwork) details["Ductwork"] = answers.hvacDuctwork;
       if (answers.hvacEfficiency) details["Efficiency"] = answers.hvacEfficiency;
-      if (answers.hvacIssue)
-        details["Repair symptom"] = answers.hvacIssue.replace("-", " ");
+      if (answers.hvacIssue) details["Repair symptom"] = answers.hvacIssue.replace("-", " ");
       if (answers.hvacSystemAge)
         details["System age"] =
           answers.hvacSystemAge === "under-5"
@@ -1611,7 +1612,7 @@ function FinalReport({
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-bold">
                 <CheckCircle2 className="h-3 w-3" aria-hidden />
-                {estimate.confidence}% confidence
+                Detail score: {estimate.confidence}%
               </span>
             </div>
             <h1 className="font-display text-4xl lg:text-[2.75rem] font-bold leading-none tabular-nums">
@@ -1673,7 +1674,8 @@ function FinalReport({
       <p className="text-xs text-muted-foreground leading-relaxed">
         This is a planning estimate based on your answers and local labor rates, not a contractor
         bid. Final pricing depends on site access, material choices, and what crews find once work
-        starts.
+        starts. The detail score reflects information supplied, not measured estimate accuracy or a
+        guaranteed final price.
         {roofArea?.source === "estimated" &&
           " Adding your measured roof footprint improves the range."}
       </p>
@@ -1753,6 +1755,20 @@ function EstimatorPage() {
   const { project: urlProject } = Route.useSearch();
   const [answers, setAnswers] = useState<EstimatorAnswers>({});
   const answersRef = useRef<EstimatorAnswers>({});
+  const startedEventRef = useRef(false);
+  const completedEventRef = useRef(false);
+
+  useEffect(() => {
+    const project = answers.projectType;
+    if (
+      project &&
+      Object.prototype.hasOwnProperty.call(PROJECT_NAMES, project) &&
+      !startedEventRef.current
+    ) {
+      startedEventRef.current = true;
+      trackToolEvent("estimate_started");
+    }
+  }, [answers.projectType]);
   const [stepIdx, setStepIdx] = useState(0);
   const [questionIdx, setQuestionIdx] = useState(0);
   const [done, setDone] = useState(false);
@@ -1841,11 +1857,7 @@ function EstimatorPage() {
 
   const isAnswered = (q: Question) => {
     if (q.type === "roof-measure") {
-      return (
-        hasRoofArea(answers) &&
-        Boolean(answers.roofPitch) &&
-        Boolean(answers.roofComplexity)
-      );
+      return hasRoofArea(answers) && Boolean(answers.roofPitch) && Boolean(answers.roofComplexity);
     }
     if (q.optional) return true;
     const v = answers[q.id];
@@ -1884,7 +1896,13 @@ function EstimatorPage() {
     if (nextS < newSteps.length) {
       setStepIdx(nextS);
       setQuestionIdx(0);
-    } else setDone(true);
+    } else {
+      if (!completedEventRef.current) {
+        completedEventRef.current = true;
+        trackToolEvent("estimate_completed");
+      }
+      setDone(true);
+    }
   }, [questionIdx, questions, stepIdx]);
 
   const back = () => {
@@ -1916,6 +1934,8 @@ function EstimatorPage() {
   };
 
   const restart = () => {
+    startedEventRef.current = false;
+    completedEventRef.current = false;
     setAnswers({});
     setStepIdx(0);
     setQuestionIdx(0);
@@ -1945,9 +1965,7 @@ function EstimatorPage() {
           done ? "pt-2 pb-6 md:pt-3 md:pb-8" : "pt-4 pb-8 md:pt-5 md:pb-10",
         )}
       >
-        {!done && (
-          <h1 className="sr-only">Home renovation cost estimator</h1>
-        )}
+        {!done && <h1 className="sr-only">Home renovation cost estimator</h1>}
 
         {/* Progress bar + Start over */}
         {!done && (
@@ -2011,7 +2029,9 @@ function EstimatorPage() {
                   {/* Question header */}
                   <div className="mb-5">
                     <div className="flex items-center justify-between gap-4 mb-2">
-                      <span className="text-xs font-semibold text-accent">{currentStep?.title}</span>
+                      <span className="text-xs font-semibold text-accent">
+                        {currentStep?.title}
+                      </span>
                       {currentQuestion.optional && (
                         <span className="px-2.5 py-1 rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                           Optional

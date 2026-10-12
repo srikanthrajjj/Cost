@@ -23,7 +23,12 @@ import {
   Download,
   Bookmark,
 } from "lucide-react";
-import { type QuoteAnalysisResult, type QuotePipelineStage, buildQuoteAnalysisFromExtraction, detectInstantQuoteFlags } from "@/lib/quote";
+import {
+  type QuoteAnalysisResult,
+  type QuotePipelineStage,
+  buildQuoteAnalysisFromExtraction,
+  detectInstantQuoteFlags,
+} from "@/lib/quote";
 import type { QuoteExtraction } from "@/lib/quote/types";
 import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
 import { serverExtractQuoteDetails } from "@/lib/quote/quote-server";
@@ -40,10 +45,7 @@ import {
 import { looksLikeMisparsedLineTotal } from "@/lib/quote/extractor";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import {
-  addComparisonQuote,
-  clearComparisonQuotes,
-} from "@/lib/quote/comparison-store";
+import { addComparisonQuote, clearComparisonQuotes } from "@/lib/quote/comparison-store";
 import {
   clearSavedQuoteProgress,
   getQuoteFollowUpAction,
@@ -53,6 +55,10 @@ import {
 } from "@/lib/quote/progress-store";
 import { QuoteFeedbackCard } from "@/components/quote/QuoteFeedbackCard";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { QuoteReviewSample } from "@/components/quote/QuoteReviewSample";
+import { trackToolEvent } from "@/lib/analytics/tool-events";
+import { subscribeToNewsletter } from "@/lib/email/subscribe";
+import { submitEmailAndDownload } from "@/lib/download-utils";
 
 const QuoteComparisonView = lazy(() =>
   import("@/components/quote/QuoteComparisonView").then((m) => ({
@@ -99,8 +105,7 @@ export const Route = createFileRoute("/quote-analyzer")({
       },
       {
         name: "twitter:description",
-        content:
-          "Upload up to 3 bids and see which quote looks strongest before you hire.",
+        content: "Upload up to 3 bids and see which quote looks strongest before you hire.",
       },
       { name: "robots", content: "index, follow" },
     ],
@@ -149,7 +154,7 @@ export const Route = createFileRoute("/quote-analyzer")({
               name: "Is my contractor quote kept private?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "Your files are processed for analysis and are not shared with contractors. Use CostReno only for quotes you are authorized to review.",
+                text: "Your files are not shared with contractors. AI processing providers may process documents for your analysis. Uploads may be retained for up to six months and used to improve models under our privacy policy. Only upload quotes you are authorized to review.",
               },
             },
             {
@@ -228,11 +233,7 @@ const STAGE_PROGRESS_CEILING: Record<string, number> = {
 };
 
 /** Map a 0-100 stage percent into overall progress across N quotes. */
-function mapStageToOverall(
-  stagePercent: number,
-  batchCurrent: number,
-  batchTotal: number,
-): number {
+function mapStageToOverall(stagePercent: number, batchCurrent: number, batchTotal: number): number {
   const total = Math.max(1, batchTotal);
   const current = Math.min(Math.max(1, batchCurrent), total);
   const span = 100 / total;
@@ -250,9 +251,9 @@ function QuoteAnalyzerPage() {
   const [tipIdx, setTipIdx] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "explorer" | "questions" | "timeline"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "explorer" | "questions" | "timeline">(
+    "overview",
+  );
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -323,37 +324,34 @@ function QuoteAnalyzerPage() {
     setError("");
   }, []);
 
-  const addFilesToSlots = useCallback(
-    (incoming: FileList | File[], startSlot?: number) => {
-      const allowed = Array.from(incoming).filter(isAllowedFile);
-      if (allowed.length === 0) {
-        setError("Please choose PDF, JPG, or PNG files under 15MB.");
-        return;
+  const addFilesToSlots = useCallback((incoming: FileList | File[], startSlot?: number) => {
+    const allowed = Array.from(incoming).filter(isAllowedFile);
+    if (allowed.length === 0) {
+      setError("Please choose PDF, JPG, or PNG files under 15MB.");
+      return;
+    }
+
+    setQuoteSlots((prev) => {
+      const next = [...prev];
+      let fileIdx = 0;
+
+      if (typeof startSlot === "number" && startSlot >= 0 && startSlot < MAX_QUOTE_SLOTS) {
+        if (!next[startSlot] && allowed[fileIdx]) {
+          next[startSlot] = allowed[fileIdx++];
+        } else if (allowed[fileIdx]) {
+          next[startSlot] = allowed[fileIdx++];
+        }
       }
 
-      setQuoteSlots((prev) => {
-        const next = [...prev];
-        let fileIdx = 0;
-
-        if (typeof startSlot === "number" && startSlot >= 0 && startSlot < MAX_QUOTE_SLOTS) {
-          if (!next[startSlot] && allowed[fileIdx]) {
-            next[startSlot] = allowed[fileIdx++];
-          } else if (allowed[fileIdx]) {
-            next[startSlot] = allowed[fileIdx++];
-          }
+      for (let slot = 0; slot < MAX_QUOTE_SLOTS && fileIdx < allowed.length; slot++) {
+        if (!next[slot]) {
+          next[slot] = allowed[fileIdx++];
         }
-
-        for (let slot = 0; slot < MAX_QUOTE_SLOTS && fileIdx < allowed.length; slot++) {
-          if (!next[slot]) {
-            next[slot] = allowed[fileIdx++];
-          }
-        }
-        return next;
-      });
-      setError("");
-    },
-    [],
-  );
+      }
+      return next;
+    });
+    setError("");
+  }, []);
 
   const openSlotPicker = (slotIndex: number) => {
     setActiveSlot(slotIndex);
@@ -416,6 +414,8 @@ function QuoteAnalyzerPage() {
         setSavedProgress(lastSaved);
       }
 
+      // A deliberate sample visit should not be replaced by a previously saved analysis.
+      if (window.location.hash === "#sample-review") return;
       const stored = sessionStorage.getItem("costreno_quote_analysis");
       if (stored) {
         const parsed = JSON.parse(stored) as QuoteAnalysisResult;
@@ -506,12 +506,7 @@ function QuoteAnalyzerPage() {
 
   /** Start advanced report in the background while the user reads basic details. */
   const startAdvancedPrefetch = useCallback(
-    (
-      extraction: QuoteExtraction,
-      rawText: string,
-      fileName: string,
-      source: "local" | "ai",
-    ) => {
+    (extraction: QuoteExtraction, rawText: string, fileName: string, source: "local" | "ai") => {
       const gate = canRunAdvancedReportClient();
       if (!gate.ok) {
         clearAdvancedPrefetch();
@@ -600,6 +595,7 @@ function QuoteAnalyzerPage() {
 
   const handleAnalyzeSelected = async () => {
     if (selectedFiles.length === 0) return;
+    trackToolEvent("quote_review_started");
 
     clearStageTimers();
     setState("processing");
@@ -633,6 +629,8 @@ function QuoteAnalyzerPage() {
         setBatchProgress(null);
         detailsOnlyRef.current = false;
         setState("details");
+        trackToolEvent("quote_details_ready");
+        trackToolEvent("quote_review_completed");
         // Prefetch advanced report while they read the basic details
         startAdvancedPrefetch(extraction, rawText, selectedFiles[0].name, "local");
         return;
@@ -677,12 +675,14 @@ function QuoteAnalyzerPage() {
       setCompareIds(savedIds);
       setShowCompare(true);
       setState("complete");
+      trackToolEvent("quote_review_completed");
     } catch (err) {
       clearStageTimers();
       detailsOnlyRef.current = false;
       setBatchProgress(null);
       setError(friendlyOpenRouterMessage(err));
       setState("error");
+      trackToolEvent("quote_review_failed");
     } finally {
       abortRef.current = null;
       detailsOnlyRef.current = false;
@@ -768,17 +768,14 @@ function QuoteAnalyzerPage() {
       setPendingRawText("");
       clearAdvancedPrefetch();
       setState("complete");
+      trackToolEvent("quote_report_ready");
     } catch (err) {
       setError(friendlyOpenRouterMessage(err));
       setState("details");
+      trackToolEvent("quote_report_failed");
       // Retry background prep so the next click can still be fast
       if (pendingExtraction) {
-        startAdvancedPrefetch(
-          pendingExtraction,
-          pendingRawText,
-          pendingFileName,
-          detailsSource,
-        );
+        startAdvancedPrefetch(pendingExtraction, pendingRawText, pendingFileName, detailsSource);
       } else {
         clearAdvancedPrefetch();
       }
@@ -920,7 +917,9 @@ function QuoteAnalyzerPage() {
                     <Clock className="h-3.5 w-3.5 text-primary" />
                     <span className="text-[11px] font-semibold text-primary">Welcome back</span>
                   </div>
-                  <h2 className="mt-3 text-xl font-bold text-ink">Your last quote analysis is saved</h2>
+                  <h2 className="mt-3 text-xl font-bold text-ink">
+                    Your last quote analysis is saved
+                  </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {lastExtraction.contractor || "Your contractor quote"} ·{" "}
                     {lastExtraction.projectType || "Project quote"} · Score{" "}
@@ -954,10 +953,14 @@ function QuoteAnalyzerPage() {
               <div className="mt-4 grid gap-3 sm:grid-cols-4">
                 <div className="rounded-xl border border-border bg-muted/20 p-3">
                   <p className="text-[10px] font-medium text-muted-foreground">Missing items</p>
-                  <p className="mt-1 text-lg font-bold text-ink">{lastAnalysis.missingScope.length}</p>
+                  <p className="mt-1 text-lg font-bold text-ink">
+                    {lastAnalysis.missingScope.length}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-border bg-muted/20 p-3">
-                  <p className="text-[10px] font-medium text-muted-foreground">Needs clarification</p>
+                  <p className="text-[10px] font-medium text-muted-foreground">
+                    Needs clarification
+                  </p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {lastAnalysis.needsClarification.length}
                   </p>
@@ -1015,8 +1018,8 @@ function QuoteAnalyzerPage() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-5">
               {[
-                { icon: Zap, label: "About 30 seconds per quote" },
-                { icon: Lock, label: "Private and secure" },
+                { icon: Zap, label: "Free standard review" },
+                { icon: Lock, label: "Not shared with contractors" },
                 { icon: CheckCircle2, label: "No signup required" },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
@@ -1027,6 +1030,13 @@ function QuoteAnalyzerPage() {
                 </div>
               ))}
             </div>
+            <a
+              href="#sample-review"
+              onClick={() => trackToolEvent("sample_review_opened")}
+              className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              See a sample review before uploading <ArrowRight className="h-4 w-4" aria-hidden />
+            </a>
           </div>
 
           {/* 3-slot uploader */}
@@ -1067,7 +1077,11 @@ function QuoteAnalyzerPage() {
               {quoteSlots.map((file, index) => {
                 const label = `Quote ${index + 1}`;
                 const hint =
-                  index === 0 ? "Required to start" : index === 1 ? "Add to compare" : "Best practice";
+                  index === 0
+                    ? "Required to start"
+                    : index === 1
+                      ? "Add to compare"
+                      : "Best practice";
                 return (
                   <div
                     key={label}
@@ -1149,6 +1163,30 @@ function QuoteAnalyzerPage() {
               })}
             </div>
 
+            <div className="mt-5 rounded-xl border border-border bg-muted/20 p-4 text-xs leading-relaxed text-muted-foreground">
+              <p className="font-semibold text-ink">Before you upload</p>
+              <p className="mt-1">
+                Only upload quotes you are authorized to review. Remove names, addresses,
+                signatures, and other personal details you do not want processed. AI providers may
+                process your document for analysis. Uploads may be retained for up to six months and
+                used to improve our models, as described in our{" "}
+                <a
+                  href="/privacy"
+                  className="font-semibold text-primary underline underline-offset-2"
+                >
+                  privacy policy
+                </a>
+                . You can request earlier deletion at{" "}
+                <a
+                  href="mailto:privacy@costreno.com"
+                  className="font-semibold text-primary underline underline-offset-2"
+                >
+                  privacy@costreno.com
+                </a>
+                .
+              </p>
+            </div>
+
             <div className="mt-6 space-y-3">
               <button
                 type="button"
@@ -1160,7 +1198,7 @@ function QuoteAnalyzerPage() {
                 {filledCount === 0
                   ? "Add at least one quote"
                   : filledCount === 1
-                    ? "Fetch quote details"
+                    ? "Review my quote"
                     : `Compare my ${filledCount} quotes`}
               </button>
               <p className="text-xs text-muted-foreground text-center leading-relaxed">
@@ -1174,6 +1212,14 @@ function QuoteAnalyzerPage() {
               </p>
             </div>
           </div>
+
+          <section
+            id="sample-review"
+            tabIndex={-1}
+            className="mt-10 scroll-mt-[calc(var(--site-announce-offset,0px)+5rem)] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <QuoteReviewSample />
+          </section>
 
           {/* How compare works */}
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1249,10 +1295,10 @@ function QuoteAnalyzerPage() {
           {/* CostReno vs others */}
           <div id="vs-ai" className="mt-16 pt-12 border-t border-border scroll-mt-24">
             <h2 className="font-display text-2xl font-bold text-ink text-center mb-3">
-              Why CostReno vs generic AI?
+              What the review checks
             </h2>
             <p className="text-sm text-muted-foreground text-center mb-8 max-w-md mx-auto">
-              Built specifically for contractor quotes. Not general chat.
+              A structured starting point for your next conversation with a contractor.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto">
               {/* CostReno */}
@@ -1260,16 +1306,16 @@ function QuoteAnalyzerPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <img src="/logo.svg" alt="CostReno" style={{ height: "20px" }} />
                   <span className="px-2 py-0.5 rounded-full bg-accent text-white text-[9px] font-bold uppercase">
-                    Best
+                    Quote-focused
                   </span>
                 </div>
                 <div className="space-y-3">
                   {[
-                    "Trained on thousands of real quotes",
-                    "Understands building codes & best practices",
-                    "Detects overpriced line items",
-                    "Gives negotiation points & next steps",
-                    "Built for homeowners, not developers",
+                    "Structured scope and line-item checks",
+                    "Highlights permit and warranty questions",
+                    "Shows price context and unclear charges",
+                    "Gives questions to ask your contractor",
+                    "Purpose-built for homeowners",
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-accent shrink-0 mt-0.5" />
@@ -1282,15 +1328,15 @@ function QuoteAnalyzerPage() {
               {/* Others */}
               <div className="rounded-2xl border border-border bg-white/60 p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-sm font-bold text-ink">ChatGPT & Others</span>
+                  <span className="text-sm font-bold text-ink">Before you decide</span>
                 </div>
                 <div className="space-y-3">
                   {[
-                    "General knowledge, not quote-specific",
-                    "May miss code requirements",
-                    "No pricing intelligence",
-                    "Generic suggestions only",
-                    "You have to ask the right questions",
+                    "Confirm the scope matches your project",
+                    "Check local permit requirements",
+                    "Request multiple written bids",
+                    "Verify material and warranty details",
+                    "Use the review as guidance, not a guarantee",
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-2">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0 mt-0.5" />
@@ -1429,7 +1475,7 @@ function QuoteAnalyzerPage() {
               Frequently Asked Questions
             </h2>
             <p className="text-xs text-muted-foreground text-center mb-8">
-              Last updated: July 2026 · Pricing data refreshed monthly
+              Planning context, not a guaranteed contractor price.
             </p>
             <div className="max-w-2xl mx-auto space-y-3">
               {[
@@ -1451,7 +1497,7 @@ function QuoteAnalyzerPage() {
                 },
                 {
                   q: "Is my contractor quote kept private?",
-                  a: "Your files are processed for analysis and are not shared with contractors. Only upload quotes you are authorized to review.",
+                  a: "Your files are not shared with contractors. AI processing providers may process documents for your analysis. Uploads may be retained for up to six months and used to improve models under our privacy policy. Only upload quotes you are authorized to review.",
                 },
                 {
                   q: "What if I only have one quote?",
@@ -1494,11 +1540,11 @@ function QuoteAnalyzerPage() {
                 },
                 {
                   q: "How much does a kitchen remodel cost?",
-                  a: "A kitchen remodel typically costs between $25,000 and $75,000 in 2026, with the national average around $50,000. Minor cosmetic updates may cost $10,000–$15,000, while a full gut renovation with custom cabinets and appliances can exceed $100,000. The biggest cost drivers are cabinets (30-40%), labor (20-30%), and countertops (10-15%).",
+                  a: "A kitchen remodel typically costs between $25,000 and $75,000 in 2026, with $50,000 as the midpoint of this planning range, not a measured national average. Minor cosmetic updates may cost $10,000–$15,000, while a full gut renovation with custom cabinets and appliances can exceed $100,000. The biggest cost drivers are cabinets (30-40%), labor (20-30%), and countertops (10-15%).",
                 },
                 {
                   q: "How do I know if my contractor quote is too high?",
-                  a: "Compare your quote against the typical range for your project type and location. Get at least 3 quotes to establish a baseline. Watch for vague line items, unusually high markups on materials, or labor rates significantly above the local average. CostReno's AI analyzer can identify overpriced items instantly.",
+                  a: "Compare your quote against the typical range for your project type and location. Get at least 3 quotes to establish a baseline. Watch for vague line items, unusually high markups on materials, or labor rates significantly above the local average. CostReno highlights price differences and questions to investigate; it cannot prove a contractor is overcharging.",
                 },
                 {
                   q: "What should a contractor quote include?",
@@ -1541,10 +1587,10 @@ function QuoteAnalyzerPage() {
           <section className="mt-16 pt-12 border-t border-border">
             <div className="max-w-2xl mx-auto text-center">
               <h2 className="font-display text-2xl font-bold text-ink mb-4">
-                The Smartest Way to Review Contractor Quotes
+                Understand your contractor quote before signing
               </h2>
               <p className="text-xs text-muted-foreground mb-6">
-                Updated July 2026 · Based on 10,000+ analyzed quotes
+                Structured checks for scope, price context, and next steps.
               </p>
               <div className="text-sm text-muted-foreground leading-relaxed space-y-4 text-left">
                 <p>
@@ -1554,11 +1600,10 @@ function QuoteAnalyzerPage() {
                   thousands of dollars.
                 </p>
                 <p>
-                  CostReno's AI Quote Analyzer is purpose-built for homeowners who want to make
-                  informed decisions. Unlike generic AI tools, our system is trained specifically on
-                  contractor quotes, building codes, and regional pricing data. It understands the
-                  difference between a fair price and an inflated one, between complete scope and
-                  missing critical items.
+                  CostReno combines quote extraction with structured checks for common scope gaps
+                  and unclear terms. Price comparisons provide planning context, not a verified bid
+                  or a guarantee that a contractor is overcharging. Confirm important findings with
+                  your contractor and local permit office.
                 </p>
                 <p>
                   Our analyzer checks for common issues like missing permits, vague material
@@ -1567,8 +1612,8 @@ function QuoteAnalyzerPage() {
                   to ask your contractor and negotiation points based on local market rates.
                 </p>
                 <p>
-                  Whether you've received one quote or five, upload them all and compare. Make
-                  confident decisions about the biggest investment in your home.
+                  Review one quote or compare up to three bids. Use the findings to ask clearer
+                  questions before choosing a contractor.
                 </p>
               </div>
             </div>
@@ -1586,7 +1631,7 @@ function QuoteAnalyzerPage() {
               <Upload className="h-4 w-4" /> Analyze your quote. Free
             </button>
             <p className="mt-3 text-xs text-muted-foreground">
-              Trusted by thousands of homeowners. One quote or several.
+              No signup required. Review one quote or compare up to three.
             </p>
           </div>
         </div>
@@ -2022,9 +2067,7 @@ function QuoteAnalyzerPage() {
               </p>
             )}
             {isRunningAdvanced && (
-              <p className="text-xs text-muted-foreground mt-2">
-                This usually takes a few seconds
-              </p>
+              <p className="text-xs text-muted-foreground mt-2">This usually takes a few seconds</p>
             )}
           </div>
 

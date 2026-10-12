@@ -17,7 +17,6 @@ import { SiteFeedbackFab } from "../components/SiteFeedbackFab";
 import { SiteChatbot } from "../components/SiteChatbot";
 import { SiteAnnouncement } from "../components/SiteAnnouncement";
 import { GuideArticleActions } from "../components/GuideArticleActions";
-import { WelcomeEstimatePrompt } from "../components/WelcomeEstimatePrompt";
 
 function NotFoundComponent() {
   return (
@@ -116,7 +115,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "alternate", type: "text/plain", href: "https://www.costreno.com/llms.txt", title: "llms.txt" },
+      {
+        rel: "alternate",
+        type: "text/plain",
+        href: "https://www.costreno.com/llms.txt",
+        title: "llms.txt",
+      },
     ],
     scripts: [
       {
@@ -203,7 +207,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8595196455736696"
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
         />
       </head>
       <body>
@@ -224,7 +228,6 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <GuideArticleActions />
-      <WelcomeEstimatePrompt />
       <SiteChatbot />
       <SiteFeedbackFab />
     </QueryClientProvider>

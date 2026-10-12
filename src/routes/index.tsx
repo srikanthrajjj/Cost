@@ -14,10 +14,6 @@ import {
   ArrowRight,
   Check,
   TrendingUp,
-  Facebook,
-  Instagram,
-  Youtube,
-  Linkedin,
   Fan,
   Sun,
   Square,
@@ -46,12 +42,13 @@ import type { ChatMessage } from "@/lib/chat-with-knowledge";
 import { serverAnalyzeQuoteFull } from "@/lib/quote/quote-server";
 import { serverChatWithKnowledge } from "@/lib/chat-server";
 import { type QuoteAnalysisResult, type QuotePipelineStage } from "@/lib/quote";
-import { friendlyOpenRouterMessage } from "@/lib/quote/openrouter-client";
+import { friendlyOpenRouterMessage, OpenRouterError } from "@/lib/quote/openrouter-client";
 import { SiteNav } from "@/components/SiteNav";
 import { TrustBar } from "@/components/TrustBar";
+import { QuoteReviewSample } from "@/components/quote/QuoteReviewSample";
+import { trackToolEvent } from "@/lib/analytics/tool-events";
+import { getAllCities } from "@/lib/city-data";
 import { SiteFooter } from "@/components/SiteFooter";
-import { NewsletterSignup } from "@/components/NewsletterSignup";
-import heroHome from "@/assets/hero-home.jpg";
 import projRoof from "@/assets/proj-roof.jpg";
 import projKitchen from "@/assets/proj-kitchen.jpg";
 import projBathroom from "@/assets/proj-bathroom.jpg";
@@ -65,21 +62,21 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "CostReno | Home renovation cost estimates",
+        title: "CostReno | Check contractor quotes before you sign",
       },
       {
         name: "description",
         content:
-          "Free renovation cost estimates and AI quote analysis for roof, kitchen, bathroom, HVAC, windows, and flooring. Plan with clearer local pricing before you hire.",
+          "Understand your contractor quote before you sign. Review missing scope, unclear charges, and price context, or get a free local renovation estimate. No signup required.",
       },
       {
         property: "og:title",
-        content: "CostReno | Home renovation cost estimates",
+        content: "CostReno | Check contractor quotes before you sign",
       },
       {
         property: "og:description",
         content:
-          "Estimate renovation costs, analyze contractor quotes, and compare bids with tools built for homeowners.",
+          "Review a contractor quote, compare bids, or estimate your renovation budget before you commit. Free tools built for homeowners.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://www.costreno.com/" },
@@ -188,7 +185,7 @@ const trust = [
   {
     icon: MapPin,
     title: "Clear & local data",
-    desc: "Real pricing from thousands of projects in your area.",
+    desc: "Local planning ranges that depend on project scope and location.",
   },
   {
     icon: Sparkles,
@@ -490,7 +487,7 @@ function QuickEstimate() {
           <div className="animate-in fade-in duration-500">
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium mb-3">
-                <Check className="h-3 w-3" /> {estimate.confidence}% confidence
+                <Check className="h-3 w-3" /> {estimate.confidence}% estimate detail
               </div>
               <h2 className="font-display text-2xl md:text-3xl font-bold text-ink">
                 Your estimate
@@ -551,8 +548,8 @@ function QuickEstimate() {
                 </div>
                 <div className="text-xs text-ink mb-3">
                   With standard pitch and waste, this footprint is about{" "}
-                  <span className="font-semibold">{estimate.roofSquares} roofing squares</span>{" "}
-                  (100 sq ft each).
+                  <span className="font-semibold">{estimate.roofSquares} roofing squares</span> (100
+                  sq ft each).
                 </div>
                 <div className="space-y-1.5 text-xs text-muted-foreground">
                   <div className="flex items-start gap-2">
@@ -582,7 +579,9 @@ function QuickEstimate() {
                   Common starting material
                 </div>
                 <div className="font-display text-lg font-bold text-ink">Architectural asphalt</div>
-                <div className="mt-3 text-xs font-medium text-ink mb-2">Why homeowners often choose it</div>
+                <div className="mt-3 text-xs font-medium text-ink mb-2">
+                  Why homeowners often choose it
+                </div>
                 <div className="space-y-1.5">
                   {[
                     "Strong value for most climates",
@@ -725,7 +724,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
       // Store the selected project in sessionStorage or navigate with state
       sessionStorage.setItem("costreno_preselected_project", projectValue);
       setTimeout(() => {
-        navigate({ to: "/estimate" });
+        navigate({ to: "/estimate", search: { project: undefined } });
       }, 200);
     } else {
       setTimeout(advance, 200);
@@ -737,7 +736,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
       const breakdown = estimate.breakdown
         .map((b) => `${b.label}: $${b.amount.toLocaleString()}`)
         .join(" · ");
-      const summary = `Here's your estimate summary:\n\n**Estimated Cost: $${estimate.mid.toLocaleString()}**\nRange: $${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}\nConfidence: ${estimate.confidence}%\nTimeline: ${estimate.timeline}\nPermit required: ${estimate.permitRequired ? "Yes" : "No"}\nInsurance eligible: ${estimate.insuranceEligible ? "Possibly. Check your policy." : "Not typically"}\n\n${breakdown}\n\nWant me to help you analyze a contractor quote, check insurance coverage, or compare materials?`;
+      const summary = `Here's your estimate summary:\n\n**Estimated Cost: $${estimate.mid.toLocaleString()}**\nRange: $${estimate.low.toLocaleString()} – $${estimate.high.toLocaleString()}\nEstimate detail: ${estimate.confidence}% (based on supplied inputs, not measured accuracy)\nTimeline: ${estimate.timeline}\nPermit required: ${estimate.permitRequired ? "Yes" : "No"}\nInsurance eligible: ${estimate.insuranceEligible ? "Possibly. Check your policy." : "Not typically"}\n\n${breakdown}\n\nWant me to help you analyze a contractor quote, check insurance coverage, or compare materials?`;
       onComplete(summary);
     }
   }, [finished]);
@@ -890,7 +889,7 @@ function ChatEstimator({ onComplete }: { onComplete: (summary: string) => void }
           {hasEstimate && (
             <div className="ml-auto text-[11px] text-muted-foreground">
               Est. <span className="font-bold text-accent">${estimate.mid.toLocaleString()}</span>
-              <span className="ml-1 opacity-60">({estimate.confidence}% conf.)</span>
+              <span className="ml-1 opacity-60">({estimate.confidence}% detail)</span>
             </div>
           )}
         </div>
@@ -944,173 +943,11 @@ function ThinkingIndicator() {
   );
 }
 
-function QuoteAnalysisSection() {
-  return (
-    <section className="container-x py-20">
-      {/* Header */}
-      <div className="text-center mb-14">
-        <h2 className="font-display text-3xl md:text-4xl lg:text-[42px] font-bold text-ink leading-tight max-w-3xl mx-auto">
-          Everything your contractor quote isn't telling you
-        </h2>
-        <p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Our AI analyzes every line item, uncovers hidden costs, flags risks, compares market
-          pricing, and helps you negotiate with confidence before spending thousands.
-        </p>
-      </div>
-
-      {/* 6-column responsive grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Card 1 - AI-Powered Quote Analysis */}
-        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-          <div className="h-[200px] flex items-center justify-center mb-5">
-            <img
-              src="/quote-ai.png"
-              alt="Contractor quote with line items connected to AI analysis engine"
-              className="w-full max-w-[360px] h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="mt-auto">
-            <h3 className="font-display text-base font-bold text-ink mb-2">
-              AI-powered quote analysis
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Upload any contractor quote, and our AI instantly reads every line item, categorizes
-              costs, identifies hidden details, and transforms complex estimates into clear,
-              actionable insights.
-            </p>
-          </div>
-        </div>
-
-        {/* Card 2 - Detect Red Flags */}
-        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-          <div className="h-[200px] flex items-center justify-center mb-5">
-            <img
-              src="/red-flag.png"
-              alt="AI detecting red flags in a contractor quote"
-              className="w-full max-w-[280px] h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="mt-auto">
-            <h3 className="font-display text-base font-bold text-ink mb-2">
-              Detect red flags before they cost you
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Our AI scans every contractor quote to identify overpriced items, missing scope, vague
-              descriptions, hidden fees, permit omissions, and other costly risks.
-            </p>
-          </div>
-        </div>
-
-        {/* Card 3 - Save More. Spend Smarter. */}
-        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-          <div className="h-[200px] flex items-center justify-center mb-5">
-            <img
-              src="/savings.png"
-              alt="AI identifying cost savings opportunities in a contractor quote"
-              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="mt-auto">
-            <h3 className="font-display text-base font-bold text-ink mb-2">
-              Save more. Spend smarter.
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Our AI identifies overpriced items, unnecessary add-ons, and optimization
-              opportunities, showing exactly where you can reduce costs and maximize your renovation
-              budget before signing.
-            </p>
-          </div>
-        </div>
-
-        {/* Card 4 - Contractor Quotes Are Hard to Understand */}
-        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-          <div className="h-[200px] flex items-center justify-center mb-5">
-            <img
-              src="/why.png"
-              alt="Complex contractor quote with confusing jargon and hidden fees"
-              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="mt-auto">
-            <h3 className="font-display text-base font-bold text-ink mb-2">
-              Contractor quotes are hard to understand
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Technical jargon, hidden fees, vague descriptions, and inconsistent pricing make it
-              difficult to know what's included, what's missing, and whether you're getting a fair
-              deal.
-            </p>
-          </div>
-        </div>
-
-        {/* Card 5 - Compare Prices with Market Rates */}
-        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-          <div className="h-[200px] flex items-center justify-center mb-5">
-            <img
-              src="/comparision.png"
-              alt="AI comparing contractor quote line items against market rates"
-              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="mt-auto">
-            <h3 className="font-display text-base font-bold text-ink mb-2">
-              Compare prices with market rates
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              See how every line item compares against current market pricing. Our AI benchmarks
-              your quote, highlights overpriced work, and shows where you have room to negotiate
-              with confidence.
-            </p>
-          </div>
-        </div>
-
-        {/* Card 6 - Download & Share Your AI Report */}
-        <div className="group rounded-2xl border border-border bg-[#fafbfd] p-6 flex flex-col min-h-[320px] overflow-hidden hover:border-accent/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-          <div className="h-[200px] flex items-center justify-center mb-5">
-            <img
-              src="/share.png"
-              alt="Downloadable AI-generated quote analysis report"
-              className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-          <div className="mt-auto">
-            <h3 className="font-display text-base font-bold text-ink mb-2">
-              Download & share your AI report
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Receive a comprehensive AI-generated report with actionable recommendations, cost
-              insights, and red flags. Share it with your family, contractor, or insurance provider
-              to make renovation decisions with confidence.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Landing() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [projectIdx, setProjectIdx] = useState(0);
-  const heroProjects = [
-    "kitchen remodel",
-    "roof replacement",
-    "bathroom renovation",
-    "HVAC installation",
-    "window replacement",
-  ];
-  const displayProject = heroProjects[projectIdx];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProjectIdx((prev) => (prev + 1) % heroProjects.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<
@@ -1138,12 +975,6 @@ function Landing() {
   const [quoteDebugInfo, setQuoteDebugInfo] = useState<QuoteAnalysisResult | null>(null);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
   const [userLocation, setUserLocation] = useState<string | null>(null);
-  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
-  const [manualZip, setManualZip] = useState("");
-  const [resolvedPlace, setResolvedPlace] = useState<string | null>(null);
-  const [zipPromptError, setZipPromptError] = useState<string | null>(null);
-  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-  const [isSavingLocation, setIsSavingLocation] = useState(false);
 
   // Abort any in-flight quote analysis if the component unmounts (e.g. user
   // navigates away) so we don't keep retrying/updating state on a dead widget.
@@ -1962,205 +1793,14 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
     setTimeout(scrollToBottom, 50);
   };
 
-  const searchTerms = [
-    "How much should a roof replacement cost?",
-    "Can you review my contractor quote?",
-    "Do I need a permit for my project?",
-    "How much does flooring cost?",
-    "Is this quote overpriced?",
-  ];
-  const [termIdx, setTermIdx] = useState(0);
-  const [displayTerm, setDisplayTerm] = useState("");
-  const phaseRef = useRef<"typing" | "pause" | "erasing">("typing");
-  const charIdxRef = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
   useEffect(() => {
-    if (searchQuery.length > 0) return;
-    const full = searchTerms[termIdx];
-
-    const tick = () => {
-      if (phaseRef.current === "typing") {
-        charIdxRef.current++;
-        setDisplayTerm(full.slice(0, charIdxRef.current));
-        if (charIdxRef.current === full.length) {
-          phaseRef.current = "pause";
-          timerRef.current = setTimeout(tick, 2000);
-          return;
-        }
-        timerRef.current = setTimeout(tick, 55);
-      } else if (phaseRef.current === "pause") {
-        phaseRef.current = "erasing";
-        timerRef.current = setTimeout(tick, 55);
-      } else {
-        charIdxRef.current--;
-        setDisplayTerm(full.slice(0, charIdxRef.current));
-        if (charIdxRef.current === 0) {
-          phaseRef.current = "typing";
-          setTermIdx((prev) => (prev + 1) % searchTerms.length);
-          timerRef.current = setTimeout(tick, 400);
-          return;
-        }
-        timerRef.current = setTimeout(tick, 35);
-      }
-    };
-
-    timerRef.current = setTimeout(tick, 400);
-    return () => clearTimeout(timerRef.current);
-  }, [searchQuery, termIdx]);
-
-  const applyDetectedGeo = (data: {
-    city?: string;
-    region_code?: string;
-    region?: string;
-    postal?: string;
-  }) => {
-    if (data.city) {
-      const label = [data.city, data.region_code || data.region].filter(Boolean).join(", ");
-      setUserLocation(label);
-      setResolvedPlace(label);
-      localStorage.setItem("costreno_city", label);
-    }
-    const postal =
-      typeof data.postal === "string" ? data.postal.replace(/\D/g, "").slice(0, 5) : "";
-    if (postal.length === 5) {
-      setManualZip(postal);
-      setZipPromptError(null);
-    }
-  };
-
-  const detectLocationFromIp = async (opts?: { autoSave?: boolean }) => {
-    setIsDetectingLocation(true);
-    setZipPromptError(null);
     try {
-      const res = await fetch("https://ipapi.co/json/");
-      if (!res.ok) throw new Error("detect failed");
-      const data = await res.json();
-      if (!data?.city && !data?.postal) throw new Error("no location");
-      applyDetectedGeo(data);
-      const postal =
-        typeof data.postal === "string" ? data.postal.replace(/\D/g, "").slice(0, 5) : "";
-      if (opts?.autoSave && postal.length === 5) {
-        setIsDetectingLocation(false);
-        await saveLocationFromZip(postal);
-        return;
-      }
-      if (opts?.autoSave && postal.length !== 5) {
-        setZipPromptError("We found your area, but not a ZIP. Enter your ZIP code to continue.");
-      }
+      const savedCity = localStorage.getItem("costreno_city");
+      if (savedCity) setUserLocation(savedCity);
     } catch {
-      setZipPromptError("Could not detect your location. Enter your ZIP code instead.");
-    } finally {
-      setIsDetectingLocation(false);
+      // The homepage works even when browser storage is unavailable.
     }
-  };
-
-  const resolveZipToPlace = async (zip: string): Promise<string | null> => {
-    const res = await fetch(`https://api.zippopotam.us/us/${zip}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const place = data?.places?.[0];
-    if (!place) return null;
-    return `${place["place name"]}, ${place["state abbreviation"]}`;
-  };
-
-  const saveLocationFromZip = async (zipRaw: string) => {
-    const zip = zipRaw.replace(/\D/g, "").slice(0, 5);
-    if (zip.length !== 5) {
-      setZipPromptError("Enter a valid 5-digit ZIP code");
-      return;
-    }
-    setIsSavingLocation(true);
-    setZipPromptError(null);
-    try {
-      const label = await resolveZipToPlace(zip);
-      if (!label) {
-        setZipPromptError("ZIP code not found. Please enter a valid US ZIP code.");
-        setResolvedPlace(null);
-        return;
-      }
-      setResolvedPlace(label);
-      setUserLocation(label);
-      localStorage.setItem("costreno_city", label);
-      localStorage.setItem("costreno_zip", zip);
-      localStorage.setItem("costreno_location_confirmed", "1");
-      localStorage.removeItem("costreno_location_dismissed");
-      setShowLocationPrompt(false);
-      window.dispatchEvent(new Event("costreno:location-done"));
-    } catch {
-      setZipPromptError("Could not verify that ZIP. Try again.");
-    } finally {
-      setIsSavingLocation(false);
-    }
-  };
-
-  useEffect(() => {
-    const savedCity = localStorage.getItem("costreno_city");
-    const savedZip = localStorage.getItem("costreno_zip");
-    const confirmed = localStorage.getItem("costreno_location_confirmed") === "1";
-    const dismissed = localStorage.getItem("costreno_location_dismissed") === "1";
-
-    if (savedCity) setUserLocation(savedCity);
-    if (savedZip) setManualZip(savedZip);
-
-    if (confirmed || dismissed) return;
-
-    let cancelled = false;
-    void (async () => {
-      setIsDetectingLocation(true);
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        if (!res.ok) throw new Error("detect failed");
-        const data = await res.json();
-        if (cancelled) return;
-        applyDetectedGeo(data);
-      } catch {
-        // Modal still opens so the user can enter a ZIP manually.
-      } finally {
-        if (!cancelled) {
-          setIsDetectingLocation(false);
-          setShowLocationPrompt(true);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
-
-  useEffect(() => {
-    if (!showLocationPrompt) return;
-    const zip = manualZip.replace(/\D/g, "").slice(0, 5);
-    if (zip.length !== 5) {
-      if (manualZip.length > 0 && zip.length < 5) setResolvedPlace(null);
-      return;
-    }
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      void resolveZipToPlace(zip)
-        .then((label) => {
-          if (cancelled) return;
-          if (label) {
-            setResolvedPlace(label);
-            setZipPromptError(null);
-          } else {
-            setResolvedPlace(null);
-            setZipPromptError("ZIP code not found. Please enter a valid US ZIP code.");
-          }
-        })
-        .catch(() => {
-          if (!cancelled) {
-            setResolvedPlace(null);
-            setZipPromptError("Could not verify that ZIP. Try again.");
-          }
-        });
-    }, 250);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [manualZip, showLocationPrompt]);
 
   const projectData = [
     {
@@ -2273,126 +1913,72 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
       {/* NAV */}
       <SiteNav />
 
-      {/* HERO — NerdWallet-inspired */}
-      <section className="relative bg-white overflow-hidden">
-        <div className="container-x relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-8 md:py-10">
+      <section className="bg-white border-b border-border/60">
+        <div className="container-x grid gap-10 py-10 md:py-16 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div>
-            {/* H1 */}
-            <h1 className="font-display text-4xl sm:text-5xl md:text-[56px] font-extrabold tracking-tight text-ink leading-[1.08]">
-              Know what your{" "}
-              <span className="text-accent inline-block min-w-[200px]">{displayProject}</span>{" "}
-              should actually cost.
-            </h1>
-
-            {/* Subtitle */}
-            <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              <strong className="text-ink">Stop guessing on contractor pricing.</strong> CostReno
-              helps you estimate local renovation costs, analyze quotes for missing scope, and plan
-              with clearer numbers before you hire.
+            <p className="mb-4 text-sm font-semibold text-primary">
+              A second look before a big decision
             </p>
-
-            {/* AI Chat Input - Inside hero left column */}
-            <div className="mt-4 max-w-xl">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded bg-accent flex items-center justify-center">
-                  <Sparkles className="h-3 w-3 text-white" />
-                </div>
-                <span className="text-xs font-bold text-ink">Ask CostReno AI</span>
-              </div>
-              <div className="relative rounded-xl bg-white border-2 border-accent/30 shadow-lg shadow-accent/5 overflow-hidden hover:border-accent/50 transition-colors">
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <MessageCircle className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden />
-                  <div className="relative flex-1 min-w-0">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setShowSuggestions(true);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          openChat({ send: Boolean(searchQuery.trim()) });
-                        }
-                      }}
-                      aria-label="Ask CostReno AI about renovation costs"
-                      className="w-full bg-transparent text-sm outline-none text-ink"
-                    />
-                    {searchQuery.length === 0 && (
-                      <span
-                        className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-muted-foreground whitespace-nowrap overflow-hidden max-w-full"
-                        aria-hidden
-                      >
-                        {displayTerm || "Ask about costs, quotes, or materials..."}
-                        <span className="animate-pulse">|</span>
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => openChat({ send: Boolean(searchQuery.trim()) })}
-                    aria-label={searchQuery.trim() ? "Send message" : "Open chat"}
-                    className="flex items-center justify-center w-9 h-9 rounded-lg bg-accent text-white hover:bg-accent/90 transition shrink-0"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-              {/* Trust stats - inside input container */}
-              <div className="grid grid-cols-3 gap-2 mt-2.5 text-xs text-center">
-                <span>
-                  <strong className="text-ink font-bold">ZIP</strong>{" "}
-                  <span className="text-muted-foreground">pricing</span>
-                </span>
-                <span>
-                  <strong className="text-ink font-bold">AI</strong>{" "}
-                  <span className="text-muted-foreground">quote checks</span>
-                </span>
-                <span>
-                  <strong className="text-ink font-bold">Free</strong>{" "}
-                  <span className="text-muted-foreground">to start</span>
-                </span>
-              </div>
+            <h1 className="font-display text-4xl font-bold tracking-tight text-ink leading-[1.12] sm:text-5xl lg:text-[54px]">
+              Before you sign, understand your contractor quote.
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Check for missing scope, unclear charges, and pricing that needs a second look. Get
+              local cost context before you commit.
+            </p>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <a
+                href="/quote-analyzer"
+                onClick={() => trackToolEvent("homepage_quote_clicked")}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                Review my quote, free <ArrowRight className="h-4 w-4" aria-hidden />
+              </a>
+              <a
+                href="/estimate"
+                onClick={() => trackToolEvent("homepage_estimate_clicked")}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-primary/25 bg-white px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                Estimate my project
+              </a>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              Free standard review. No signup required. One quote or up to three bids.
+            </p>
+            <a
+              href="/quote-analyzer#sample-review"
+              onClick={() => trackToolEvent("sample_review_opened")}
+              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              See a sample review <ArrowRight className="h-4 w-4" aria-hidden />
+            </a>
+            <div className="mt-6 border-t border-border/70 pt-4">
+              <button
+                type="button"
+                onClick={() => openChat({ send: false })}
+                className="inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden /> Have a question? Ask CostReno
+              </button>
             </div>
           </div>
-          <div className="hidden lg:block">
-            <img
-              src="/home.png"
-              alt="Home renovation cost breakdown showing roof, windows, kitchen, siding, deck, and garage door estimates"
-              className="w-full h-auto max-w-2xl ml-auto scale-110"
-            />
-          </div>
+          <QuoteReviewSample compact />
         </div>
       </section>
 
-      {/* Trust differentiator */}
-      <div className="border-y border-primary/15 bg-[#082A4B]/[0.06]">
-        <div className="container-x flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-4 text-center sm:flex-nowrap sm:whitespace-nowrap">
-          <Shield className="hidden h-5 w-5 shrink-0 text-primary sm:block" aria-hidden />
-          <p className="text-base font-semibold text-ink sm:text-lg">
-            <span className="font-bold text-primary">Not a single AI guess.</span> Built on
-            regional cost data and real submitted quotes.
-          </p>
-          <a
-            href="/methodology"
-            className="text-base font-bold text-primary underline underline-offset-4 transition hover:text-primary/80 sm:text-lg"
-          >
-            How it works
-          </a>
-          <span className="hidden text-primary/40 sm:inline" aria-hidden>
-            ·
+      <div className="border-b border-border bg-primary/[0.03]">
+        <div className="container-x flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-4 text-center text-sm text-primary">
+          <span className="inline-flex items-center gap-2">
+            <Shield className="h-4 w-4" aria-hidden /> Planning guidance, not a contractor bid
           </span>
-          <a
-            href="/quote-analyzer#vs-ai"
-            className="text-base font-bold text-primary underline underline-offset-4 transition hover:text-primary/80 sm:text-lg"
-          >
-            vs ChatGPT
+          <a href="/methodology" className="font-semibold underline underline-offset-4">
+            How the estimates work
+          </a>
+          <a href="/privacy" className="font-semibold underline underline-offset-4">
+            How uploads are handled
           </a>
         </div>
       </div>
-
-      <TrustBar region={userLocation ?? "your area"} />
 
       {/* Chat Interface Modal */}
       {chatOpen && (
@@ -2910,109 +2496,6 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       )}
 
-      {/* Location Prompt Modal */}
-      {showLocationPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => {
-              localStorage.setItem("costreno_location_dismissed", "1");
-              setShowLocationPrompt(false);
-              window.dispatchEvent(new Event("costreno:location-done"));
-            }}
-          />
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
-                <MapPin className="h-7 w-7 text-primary" />
-              </div>
-              <h2 className="font-display text-xl font-bold text-ink text-center">
-                Set your location
-              </h2>
-              <p className="text-sm text-muted-foreground text-center mt-2 leading-relaxed">
-                Your ZIP helps us provide{" "}
-                <span className="font-semibold text-ink">clear, local cost estimates</span> for your
-                home projects. Construction costs vary by region due to labor rates, material
-                availability, and local regulations.
-              </p>
-              <div className="mt-5 space-y-3">
-                {(isDetectingLocation || resolvedPlace) && (
-                  <div className="rounded-xl border border-border bg-muted/40 px-3 py-2.5 text-sm text-ink">
-                    {isDetectingLocation
-                      ? "Detecting your location…"
-                      : `Detected: ${resolvedPlace}`}
-                  </div>
-                )}
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    maxLength={5}
-                    value={manualZip}
-                    onChange={(e) => {
-                      const next = e.target.value.replace(/\D/g, "").slice(0, 5);
-                      setManualZip(next);
-                      setZipPromptError(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && manualZip.trim().length === 5 && !isSavingLocation) {
-                        void saveLocationFromZip(manualZip);
-                      }
-                    }}
-                    placeholder="Enter ZIP code"
-                    aria-label="ZIP code"
-                    className="w-full h-11 rounded-xl border border-border bg-background pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-accent/30 transition"
-                  />
-                </div>
-                {zipPromptError && (
-                  <p className="text-xs text-red-600" role="alert">
-                    {zipPromptError}
-                  </p>
-                )}
-                <button
-                  type="button"
-                  onClick={() => void saveLocationFromZip(manualZip)}
-                  disabled={manualZip.replace(/\D/g, "").length !== 5 || isSavingLocation}
-                  className="w-full h-11 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition disabled:opacity-50"
-                >
-                  {isSavingLocation ? "Saving…" : "Save location"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const zip = manualZip.replace(/\D/g, "").slice(0, 5);
-                    if (zip.length === 5) {
-                      void saveLocationFromZip(zip);
-                      return;
-                    }
-                    void detectLocationFromIp({ autoSave: true });
-                  }}
-                  disabled={isDetectingLocation || isSavingLocation}
-                  className="w-full h-11 rounded-lg border border-border text-sm font-medium text-ink hover:bg-muted/50 transition disabled:opacity-50"
-                >
-                  {isDetectingLocation || isSavingLocation
-                    ? "Detecting…"
-                    : "Use my detected location"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    localStorage.setItem("costreno_location_dismissed", "1");
-                    setShowLocationPrompt(false);
-                    window.dispatchEvent(new Event("costreno:location-done"));
-                  }}
-                  className="w-full h-11 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted/50 transition"
-                >
-                  Maybe later
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* POPULAR PROJECTS */}
       <section className="container-x py-20 overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
@@ -3032,12 +2515,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 return (
                   <a
                     key={p.name}
-                    href="/estimate"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      sessionStorage.setItem("costreno_preselected_project", p.projectType);
-                      window.location.href = "/estimate";
-                    }}
+                    href={`/estimate?project=${p.projectType}`}
                     className="group relative min-w-[280px] md:min-w-auto flex flex-col rounded-[18px] border border-[#E7EAF0] bg-white overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover:border-accent/30 cursor-pointer"
                   >
                     <div className="relative aspect-[16/10] overflow-hidden rounded-t-[18px]">
@@ -3063,26 +2541,14 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                             {p.price}
                           </div>
                           <div className="text-[11px] text-muted-foreground mt-1">
-                            Typical average: {p.avgCost}
+                            Range midpoint: {p.avgCost}. Planning only.
                           </div>
                         </div>
 
                         <div className="pt-3 border-t border-border/30">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              sessionStorage.setItem(
-                                "costreno_preselected_project",
-                                p.projectType,
-                              );
-                              window.location.href = "/estimate";
-                            }}
-                            className="w-full rounded-md border-2 border-accent px-4 py-2.5 text-xs font-semibold text-accent hover:bg-accent hover:text-white hover:border-accent transition-colors cursor-pointer"
-                          >
+                          <span className="flex w-full items-center justify-center rounded-md border border-primary/25 px-4 py-2.5 text-xs font-semibold text-primary transition-colors group-hover:bg-primary/5">
                             Estimate my {p.projectType}
-                          </button>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -3104,18 +2570,18 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </span>
           </div>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-ink leading-tight max-w-3xl mx-auto">
-            Built for renovation decisions, not chat prompts
+            Start with the question you have
           </h2>
           <p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            ChatGPT can guess a number. CostReno runs structured checks against regional cost data
-            and real quote patterns, then shows what looks high, missing, or risky.
+            Still planning? Start with a local cost range. Have a bid in hand? Review the scope and
+            compare what each contractor includes before choosing.
           </p>
           <p className="mt-3 text-sm font-semibold text-primary">
             <a
               href="/quote-analyzer#vs-ai"
               className="underline underline-offset-4 hover:text-primary/80 transition"
             >
-              See how we differ from ChatGPT
+              See the quote review checklist
             </a>
             <span className="mx-2 text-primary/30">·</span>
             <a
@@ -3136,18 +2602,18 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 <Calculator className="w-6 h-6 text-primary" />
               </div>
               <span className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
-                Not ChatGPT
+                Planning range
               </span>
             </div>
             <h3 className="font-display text-lg font-bold text-ink mb-2">Cost estimator</h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              ZIP-based ranges from regional labor and material data, not a one-off AI number.
+              ZIP-based planning ranges that you can refine with your project details.
             </p>
             <ul className="mb-5 space-y-2 flex-1">
               {[
                 "Uses your ZIP for local pricing context",
-                "Shows ranges, not a fake exact bid",
-                "Labels confidence based on your inputs",
+                "Shows a planning range, not a fixed bid",
+                "Explains how much project detail you supplied",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-ink">
                   <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
@@ -3176,12 +2642,12 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
             </div>
             <h3 className="font-display text-lg font-bold text-ink mb-2">Quote review</h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Reads contractor quotes line by line and flags what a chat reply usually misses.
+              Organizes quote details and highlights gaps that need a follow-up question.
             </p>
             <ul className="mb-5 space-y-2 flex-1">
               {[
                 "Breaks quotes into line items",
-                "Flags overpriced or vague items",
+                "Highlights unclear items and price context",
                 "Spots missing scope before you sign",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-sm text-ink">
@@ -3209,7 +2675,9 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
                 Side by side
               </span>
             </div>
-            <h3 className="font-display text-lg font-bold text-ink mb-2">Compare multiple quotes</h3>
+            <h3 className="font-display text-lg font-bold text-ink mb-2">
+              Compare multiple quotes
+            </h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Same checklist across every bid, so you compare scope and risk, not just the bottom
               line.
@@ -3236,65 +2704,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
         </div>
       </section>
 
-      {/* QUOTE ANALYSIS SECTION */}
-      <QuoteAnalysisSection />
-
-      {/* PLAN YOUR RENOVATION */}
-      <section className="container-x py-20">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink">
-            Plan your home renovation in 4 simple steps
-          </h2>
-          <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto">
-            Whether you're replacing a roof, remodeling a kitchen, or renovating a bathroom,
-            CostReno helps you plan with confidence from start to finish.
-          </p>
-        </div>
-
-        {/* Steps - Horizontal on desktop, stacked on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-          {[
-            {
-              num: "1",
-              title: "Select your project",
-              desc: "Choose from roofing, kitchen, and bathroom home improvement projects.",
-            },
-            {
-              num: "2",
-              title: "Get a local cost estimate",
-              desc: "Get clear renovation cost ranges based on your ZIP code, property size, and current regional labor and material pricing.",
-            },
-            {
-              num: "3",
-              title: "Review your contractor quote",
-              desc: "Upload your contractor bid and let AI find missing scope, overpriced line items, and red flags before you sign.",
-            },
-            {
-              num: "4",
-              title: "Make a confident decision",
-              desc: "Use clear cost ranges, quote findings, and practical next steps to choose what fits your home and budget.",
-            },
-          ].map((step, i) => (
-            <div
-              key={step.num}
-              className="relative flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-white"
-            >
-              {/* Connector line (hidden on mobile) */}
-              {i < 3 && (
-                <div className="hidden lg:block absolute top-10 -right-3 w-6 border-t-2 border-dashed border-border z-10" />
-              )}
-              <div className="w-11 h-11 rounded-full bg-accent/10 border-2 border-accent/30 flex items-center justify-center mb-4">
-                <span className="text-sm font-bold text-accent">{step.num}</span>
-              </div>
-              <h3 className="font-display text-base font-bold text-ink mb-2">{step.title}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Popular Projects */}
-      </section>
+      <TrustBar region={userLocation ?? "your area"} />
 
       <section className="container-x py-20">
         <div className="flex items-end justify-between mb-6">
@@ -3393,7 +2803,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { value: "32", label: "U.S. cities covered" },
+            { value: String(getAllCities().length), label: "Cities in our directory" },
             { value: "Free", label: "Core tools" },
             { value: "ZIP", label: "Local pricing context" },
             { value: "AI", label: "Quote review tools" },
@@ -3467,9 +2877,7 @@ Flooring ($3,000–$10,000), Deck/Patio ($6,000–$20,000), Garage Door ($1,500�
               <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
                 New tool
               </p>
-              <p className="text-sm font-semibold text-ink">
-                Home renovation project planner
-              </p>
+              <p className="text-sm font-semibold text-ink">Home renovation project planner</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 Pick any renovation mix, get a planning budget and suggested order, then move into
                 estimates and quote checks.
