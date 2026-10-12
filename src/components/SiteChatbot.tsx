@@ -126,10 +126,12 @@ export function SiteChatbot() {
   /** Homepage already has the full AI hero chat (estimate + quotes). Avoid two bots. */
   const hideOnHome = pathname === "/";
   const isQuoteAnalyzer = pathname.startsWith("/quote-analyzer");
+  const isFocusedTool =
+    isQuoteAnalyzer || pathname.startsWith("/compare-quotes") || pathname.startsWith("/estimate");
   const invite = CHAT_INVITES[inviteIndex % CHAT_INVITES.length];
 
   useEffect(() => {
-    if (open || inviteDismissed || hideOnHome) return;
+    if (open || inviteDismissed || hideOnHome || isFocusedTool) return;
     const reduceMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -145,7 +147,7 @@ export function SiteChatbot() {
       );
     }, rotateMs);
     return () => window.clearInterval(timer);
-  }, [open, inviteDismissed, hideOnHome]);
+  }, [open, inviteDismissed, hideOnHome, isFocusedTool]);
 
   useEffect(() => {
     if (!open) return;
@@ -394,7 +396,7 @@ export function SiteChatbot() {
 
   return (
     <>
-      {!open && !inviteDismissed && (
+      {!open && !inviteDismissed && !isFocusedTool && (
         <div
           className={cn(
             "fixed z-[70] max-w-[14.5rem]",

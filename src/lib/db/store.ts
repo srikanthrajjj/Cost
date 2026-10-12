@@ -1,4 +1,4 @@
-import { and, count, desc, sql } from "drizzle-orm";
+import { and, count, desc, eq, sql } from "drizzle-orm";
 import { getDb, getStorageMode } from "./client";
 import { comparisonReports, pageVisits, quoteFeedback, quoteUploads, searchEvents } from "./schema";
 import { isExcludedVisitGeo } from "@/lib/analytics/visit-geo";

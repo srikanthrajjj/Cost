@@ -3,6 +3,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { SiteSearch } from "@/components/SiteSearch";
 import { TOPIC_HUBS } from "@/lib/guides/catalog";
 import { cn } from "@/lib/utils";
+import { trackToolEvent } from "@/lib/analytics/tool-events";
 
 const GUIDE_LINKS = [
   { name: "All guides", href: "/guides" },
@@ -111,10 +112,11 @@ export function SiteNav({ active }: SiteNavProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           <SiteSearch />
           <a
-            href="/estimate"
-            className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition"
+            href="/quote-analyzer"
+            onClick={() => trackToolEvent("nav_quote_clicked")}
+            className="inline-flex items-center rounded-lg bg-accent px-3 py-2 text-xs sm:px-4 sm:text-sm font-bold text-accent-foreground shadow-sm hover:bg-accent/90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
-            Start free
+            Review my quote
           </a>
           <button
             type="button"

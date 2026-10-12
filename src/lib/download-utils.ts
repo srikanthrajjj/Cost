@@ -194,7 +194,7 @@ function generateEstimateReportHtml(data: Record<string, any>, date: string, rep
           <div class="cover-stat-value">${range}</div>
         </div>
         <div class="cover-stat">
-          <div class="cover-stat-label">Confidence</div>
+          <div class="cover-stat-label">Estimate detail</div>
           <div class="cover-stat-value">${confidence}%</div>
         </div>
         <div class="cover-stat">
@@ -239,6 +239,7 @@ function generateEstimateReportHtml(data: Record<string, any>, date: string, rep
 
     <div class="footer">
       <p><strong>Disclaimer:</strong> This estimate is for planning purposes only. Actual costs may vary based on local conditions, materials, and contractor pricing. Verify important details before hiring.</p>
+      <p style="margin-top:8px;">The detail score reflects supplied project information, not measured accuracy or a guaranteed final price.</p>
       <p style="margin-top:8px;">© ${new Date().getFullYear()} CostReno. All rights reserved.</p>
     </div>
   </div>

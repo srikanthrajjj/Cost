@@ -112,7 +112,7 @@ function FeatureCard({
 }: {
   icon: React.ElementType;
   title: string;
-  description: string;
+  description: React.ReactNode;
 }) {
   return (
     <Card className="group relative overflow-hidden border-border/60 hover:border-primary/20 hover:shadow-lg transition-all duration-300">
@@ -186,7 +186,10 @@ function AboutPage() {
           <ul className="space-y-2 text-sm text-muted-foreground leading-relaxed list-disc pl-5">
             <li>
               Cost ranges are estimates based on our{" "}
-              <a href="/methodology" className="text-primary underline underline-offset-2 hover:no-underline">
+              <a
+                href="/methodology"
+                className="text-primary underline underline-offset-2 hover:no-underline"
+              >
                 methodology
               </a>
               , not contractor bids or guarantees.
@@ -268,7 +271,7 @@ function AboutPage() {
                     "AI flags missing scope items",
                     "Regional pricing data for your area",
                     "Side-by-side quote comparison",
-                    "Confidence score for every estimate",
+                    "Detail score reflects the project information supplied",
                   ].map((q) => (
                     <li key={q} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 text-accent shrink-0" />
@@ -290,8 +293,8 @@ function AboutPage() {
               What We Do
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-              CostReno combines AI with construction pricing data to provide tools that empower
-              homeowners at every stage.
+              CostReno pairs rules-based cost estimates with AI-assisted quote analysis, photo
+              detection, and planning resources.
             </p>
           </div>
 
@@ -323,9 +326,8 @@ function AboutPage() {
                         Cost Estimation
                       </h3>
                       <p className="text-muted-foreground leading-relaxed mb-4">
-                        Get instant, data-driven cost estimates for any renovation project. Our AI
-                        analyzes regional pricing, material costs, and labor rates to give you an
-                        accurate range before you talk to a contractor.
+                        Get a planning range for a renovation project using your project details and
+                        regional pricing context before you talk to a contractor.
                       </p>
                       <div className="space-y-3">
                         <div>
@@ -444,13 +446,13 @@ function AboutPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
             <FeatureCard
               icon={Brain}
-              title="AI-Powered Analysis"
-              description="Machine learning models trained on real construction data to deliver accurate pricing insights."
+              title="Project-based cost estimates"
+              description="The estimator applies project-specific rules and built-in regional multipliers to the details you provide."
             />
             <FeatureCard
               icon={Eye}
               title="Transparent Pricing"
-              description="Clear cost breakdowns so you understand exactly where your money goes."
+              description="Clear cost breakdowns show how the planning range is organized."
             />
             <FeatureCard
               icon={Lightbulb}
@@ -464,13 +466,27 @@ function AboutPage() {
             />
             <FeatureCard
               icon={Lock}
-              title="Privacy-First Handling"
-              description="Your documents and data are processed securely and never shared with third parties."
+              title="Privacy and data use"
+              description={
+                <>
+                  Photos and documents you submit may be processed by third-party AI providers to
+                  provide requested analyses. Submitted information may also be used to help train
+                  and improve our estimation models. We do not sell personal information to
+                  marketing companies. See our{" "}
+                  <a
+                    href="/privacy"
+                    className="text-primary underline underline-offset-2 hover:no-underline"
+                  >
+                    privacy policy
+                  </a>{" "}
+                  for details about data use, retention, and sharing.
+                </>
+              }
             />
             <FeatureCard
               icon={Target}
-              title="Continual Improvement"
-              description="Our pricing models evolve with the market to keep estimates current and reliable."
+              title="Input-sensitive estimates"
+              description="The planning range and detail score change as you add or revise project information."
             />
           </div>
         </div>
@@ -488,7 +504,7 @@ function AboutPage() {
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-            <ValuePill icon={Target} label="Accurate & Improving" />
+            <ValuePill icon={Target} label="Useful planning ranges" />
             <ValuePill icon={Zap} label="Easy to Use" />
             <ValuePill icon={Eye} label="Transparent About Limitations" />
             <ValuePill icon={Lock} label="Respectful of Privacy" />

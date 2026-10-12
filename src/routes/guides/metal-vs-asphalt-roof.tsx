@@ -271,7 +271,9 @@ function MetalVsAsphaltGuide() {
               <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center">
                 <Shield className="h-3.5 w-3.5 text-accent" />
               </div>
-              <span className="text-xs font-medium text-ink">Based on 10,000+ analyzed quotes</span>
+              <span className="text-xs font-medium text-ink">
+                Scope checks and practical questions before you sign
+              </span>
             </div>
           </div>
           <div className="rounded-2xl overflow-hidden aspect-[4/3]">

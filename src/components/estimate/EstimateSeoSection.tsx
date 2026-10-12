@@ -8,12 +8,12 @@ import type { ProjectType } from "@/lib/estimator-engine";
 
 export const ESTIMATOR_FAQS = [
   {
-    q: "How accurate is this renovation cost estimate?",
-    a: "This tool gives planning ranges based on your project type, ZIP code, property details, and regional labor and material data. It is useful for budgeting and comparing quotes, but it is not a contractor bid or a guaranteed price.",
+    q: "What does the detail score mean?",
+    a: "The detail score reflects the project information you supplied. It does not measure estimate accuracy or predict a guaranteed final price. Use the planning range for budgeting and comparison, then get contractor bids for your actual scope.",
   },
   {
     q: "Why do you ask for my ZIP code?",
-    a: "Renovation costs vary by metro area. Your ZIP helps us apply local labor rates, permit patterns, and regional pricing instead of a single national average.",
+    a: "Your ZIP helps select a built-in regional multiplier when a metro entry is available. If it is not, the estimator falls back to a state or national multiplier.",
   },
   {
     q: "Is this the same as a contractor quote?",
@@ -46,9 +46,7 @@ const DEFAULT_GUIDE_LINKS = [
   { href: "/methodology", label: "How we calculate estimates" },
 ] as const;
 
-const PROJECT_GUIDE_LINKS: Partial<
-  Record<ProjectType, { href: string; label: string }[]>
-> = {
+const PROJECT_GUIDE_LINKS: Partial<Record<ProjectType, { href: string; label: string }[]>> = {
   roof: [
     { href: "/project-planner?project=roof", label: "Plan a roof project" },
     { href: "/guides/roof-replacement", label: "Roof replacement cost guide" },
@@ -103,8 +101,7 @@ interface EstimateSeoSectionProps {
 }
 
 export function EstimateSeoSection({ projectType }: EstimateSeoSectionProps) {
-  const guideLinks =
-    (projectType && PROJECT_GUIDE_LINKS[projectType]) || DEFAULT_GUIDE_LINKS;
+  const guideLinks = (projectType && PROJECT_GUIDE_LINKS[projectType]) || DEFAULT_GUIDE_LINKS;
 
   return (
     <section
